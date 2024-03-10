@@ -22,6 +22,8 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(glfw)
 
+# External dependencies
+add_subdirectory(extern)
 
 # The compiled library code is here
 add_subdirectory(src)
