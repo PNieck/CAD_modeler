@@ -30,3 +30,6 @@ add_subdirectory(src)
 
 # The executable code is here
 add_subdirectory(app)
+
+# Copy shaders to binary directory
+file(COPY shaders DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
