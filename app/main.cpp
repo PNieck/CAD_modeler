@@ -83,17 +83,28 @@ int main()
 #endif
     ImGui_ImplOpenGL3_Init(glsl_version);
 
+    glEnable(GL_PRIMITIVE_RESTART);
+    //glEnable(GL_PRIMITIVE_RESTART_FIXED_INDEX);
+    glPrimitiveRestartIndex(std::numeric_limits<GLuint>::max());
+
     Shader shader("../../shaders/vertexShader.vert", "../../shaders/fragmentShader.frag");
 
-    auto vertices = torus.generate_vertices(4, 5);
+    auto vertices = torus.generate_vertices(4, 2);
+    auto indices = torus.generate_edges(4, 2);
 
-    unsigned int VBO, VAO;
+    unsigned int VBO, VAO, EBO;
+
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
+
     glBindVertexArray(VAO);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(int) * vertices.size(), indices.data(), GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
@@ -109,7 +120,7 @@ int main()
 
     int small_circs = 4;
     int old_small_circs = 0;
-    int big_circs = 4;
+    int big_circs = 2;
     int old_big_circs = 0;
 
     // render loop
@@ -134,9 +145,15 @@ int main()
         ImGui::InputInt("Big circles", &big_circs);
 
         if (old_small_circs != small_circs || old_big_circs != big_circs) {
+            glBindVertexArray(VAO);
+
             vertices = torus.generate_vertices(small_circs, big_circs);
             glBindBuffer(GL_ARRAY_BUFFER, VBO);
             glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
+
+            indices = torus.generate_edges(small_circs, big_circs);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * indices.size(), indices.data(), GL_STATIC_DRAW);
 
             old_small_circs = small_circs;
             old_big_circs = big_circs;
@@ -155,8 +172,8 @@ int main()
         // draw our first triangle
         shader.use();
         glBindVertexArray(VAO);
-        //glDrawElements(GL_POINTS, 6, GL_UNSIGNED_INT, 0);
-        glDrawArrays(GL_POINTS, 0, vertices.size()/3);
+        glDrawElements(GL_LINE_LOOP, indices.size(), GL_UNSIGNED_INT, 0);
+        //glDrawArrays(GL_POINTS, 0, vertices.size()/3);
         glBindVertexArray(0);
  
         ImGui::Render();

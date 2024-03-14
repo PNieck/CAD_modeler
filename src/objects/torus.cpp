@@ -33,6 +33,37 @@ std::vector<float> Torus::generate_vertices(int pts_in_circ, int circ_cnt) const
 }
 
 
+std::vector<GLuint> Torus::generate_edges(int points_in_circ, int circ_cnt) const
+{
+    std::vector<GLuint> result(points_in_circ*circ_cnt + circ_cnt + points_in_circ*circ_cnt + points_in_circ);
+
+    for (int i = 0; i < circ_cnt; i++) {
+        for (int j=0; j < points_in_circ; j++) {
+            result[i*points_in_circ + j + i] = j + i*points_in_circ;
+        }
+
+        result[points_in_circ * (i+1) + i] = std::numeric_limits<GLuint>::max();
+    }
+
+    GLuint index = points_in_circ * circ_cnt + circ_cnt;
+
+    for (int i = 0; i < points_in_circ; i++) {
+        for (int j=0; j < circ_cnt; j++) {
+            result[index + j + i*circ_cnt + i] = j * points_in_circ + i;
+        }
+
+        result[index + circ_cnt*(i+1) + i] = std::numeric_limits<GLuint>::max();
+    }
+
+
+    for (int i=0; i < circ_cnt; i++) {
+        
+    }
+
+    return result;
+}
+
+
 float Torus::vertex_x(float alpha, float beta) const
 {
     return (R + r * std::cosf(alpha)) * std::cos(beta);
