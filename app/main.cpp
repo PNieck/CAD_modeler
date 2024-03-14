@@ -1,12 +1,13 @@
 #include <iostream>
 #include <vector>
 
-#define GLM_ENABLE_EXPERIMENTAL
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
-#include <glm/gtx/string_cast.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
 
 #include <CAD_modeler/shader.hpp>
 #include <CAD_modeler/objects/torus.hpp>
@@ -70,9 +71,22 @@ int main()
         return -1;
     }
 
-    Shader shader("../../shaders/vertexShader.vert", "../../shaders/fragmentShader.frag");
+    // Imgui
+    const char* glsl_version = "#version 330";
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 
-    
+    ImGui::StyleColorsDark();
+
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+#ifdef __EMSCRIPTEN__
+    ImGui_ImplGlfw_InstallEmscriptenCanvasResizeCallback("#canvas");
+#endif
+    ImGui_ImplOpenGL3_Init(glsl_version);
+
+    Shader shader("../../shaders/vertexShader.vert", "../../shaders/fragmentShader.frag");
 
     auto vertices = torus.generate_vertices(4, 5);
 
@@ -100,9 +114,21 @@ int main()
     // -----------
     while (!glfwWindowShouldClose(window))
     {
+        glfwPollEvents();
+
         // input
         // -----
         processInput(window);
+
+        // gui
+        // -----
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
+        ImGui::Begin("Hello, world!");
+        ImGui::Text("This is some useful text.");
+        ImGui::End();
 
         // render
         // ------
@@ -119,16 +145,23 @@ int main()
         glDrawArrays(GL_POINTS, 0, vertices.size()/3);
         glBindVertexArray(0);
  
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
         glfwSwapBuffers(window);
-        glfwPollEvents();
+        
     }
 
     // optional: de-allocate all resources once they've outlived their purpose:
     // ------------------------------------------------------------------------
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
+
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
 
     // glfw: terminate, clearing all previously allocated GLFW resources.
     // ------------------------------------------------------------------
