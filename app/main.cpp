@@ -14,11 +14,23 @@
 
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
 void processInput(GLFWwindow *window);
 
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
+
+Camera camera(glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f, 0.0f, 0.0f), (float)SCR_WIDTH/(float)SCR_HEIGHT);
+Torus torus(0.2f, 0.5f);
+
+float lastX = SCR_WIDTH / 2.0f;
+float lastY = SCR_HEIGHT / 2.0f;
+bool firstMouse = true;
+bool shift_clicked;
+bool left_mouse_button_clicked = false;
+bool middle_mouse_button_clicked = false;
 
 
 int main()
@@ -45,6 +57,8 @@ int main()
     }
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetMouseButtonCallback(window, mouse_button_callback);
 
     // glad: load all OpenGL function pointers
     // ---------------------------------------
@@ -56,8 +70,7 @@ int main()
 
     Shader shader("../../shaders/vertexShader.vert", "../../shaders/fragmentShader.frag");
 
-    Torus torus(0.2f, 0.5f);
-    Camera camera(glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f, 0.0f, 0.0f), (float)SCR_WIDTH/(float)SCR_HEIGHT);
+    
 
     auto vertices = torus.generate_vertices(4, 5);
 
@@ -138,3 +151,56 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     glViewport(0, 0, width, height);
 }
 
+
+void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
+{
+    float xpos = static_cast<float>(xposIn);
+    float ypos = static_cast<float>(yposIn);
+
+    if (firstMouse)
+    {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
+
+    float xoffset = xpos - lastX;
+    float yoffset = ypos - lastY;
+
+    lastX = xpos;
+    lastY = ypos;
+
+    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) && left_mouse_button_clicked) {
+        camera.target.x += xoffset * 0.1;
+        camera.target.y += yoffset * 0.1;
+    }
+    else if (middle_mouse_button_clicked) {
+        torus.MoveX(xoffset * 0.01);
+        torus.MoveY(-yoffset * 0.01);
+    }
+    else if (left_mouse_button_clicked) {
+        torus.rotate_x(yoffset * 0.02);
+        torus.rotate_y(xoffset * 0.02);
+    }
+}
+
+
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+{
+    if (button == GLFW_MOUSE_BUTTON_LEFT) {
+        if (action == GLFW_PRESS) {
+            left_mouse_button_clicked = true;
+        }
+        else if (action == GLFW_RELEASE) {
+            left_mouse_button_clicked = false;
+        }
+    }
+    else if (button == GLFW_MOUSE_BUTTON_MIDDLE) {
+        if (action == GLFW_PRESS) {
+            middle_mouse_button_clicked = true;
+        }
+        else if (action == GLFW_RELEASE) {
+            middle_mouse_button_clicked = false;
+        }
+    }
+}

@@ -8,6 +8,16 @@ public:
 
     glm::mat4x4 model_matrix() const;
 
+    void rotate_x(float angle) { rotation.x += angle; }
+    void rotate_y(float angle) { rotation.y += angle; }
+    void rotate_z(float angle) { rotation.z += angle; }
+
+    void SetScale(float scale) { this->scale = scale; }
+
+    void MoveX(float x) { position.x += x; }
+    void MoveY(float y) { position.y += y; }
+    void MoveZ(float z) { position.z += z; }
+
 protected:
     glm::vec3 position;
     glm::vec3 rotation;

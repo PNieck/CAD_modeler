@@ -33,52 +33,52 @@ glm::mat4x4 Object::rotation_matrix() const
 
 glm::mat4x4 Object::translation_matrix() const
 {
-    return glm::mat4x4(
+    return glm::transpose(glm::mat4x4(
          1.0f,  0.0f,  0.0f,  position.x,
          0.0f,  1.0f,  0.0f,  position.y,
          0.0f,  0.0f,  1.0f,  position.z,
          0.0f,  0.0f,  0.0f,  1.0f
-    );
+    ));
 }
 
 
 glm::mat4x4 Object::rotation_x_matrix() const
 {
-    float cos_a = std::cosf(position.x);
-    float sin_a = std::sinf(position.x);
+    float cos_a = std::cosf(rotation.x);
+    float sin_a = std::sinf(rotation.x);
 
-    return glm::mat4x4(
+    return glm::transpose(glm::mat4x4(
         1.0f,  0.0f,   0.0f,  0.0f,
         0.0f, cos_a, -sin_a,  0.0f,
         0.0f, sin_a,  cos_a,  0.0f,
         0.0f,  0.0f,   0.0f,  1.0f
-    );
+    ));
 }
 
 
 glm::mat4x4 Object::rotation_y_matrix() const
 {
-    float cos_a = std::cosf(position.y);
-    float sin_a = std::sinf(position.y);
+    float cos_a = std::cosf(rotation.y);
+    float sin_a = std::sinf(rotation.y);
 
-    return glm::mat4x4(
+    return glm::transpose(glm::mat4x4(
         cos_a,  0.0f, sin_a,  0.0f,
          0.0f,  1.0f,  0.0f,  0.0f,
         -sin_a, 0.0f,  cos_a, 0.0f,
          0.0f,  0.0f,  0.0f,  1.0f
-    );
+    ));
 }
 
 
 glm::mat4x4 Object::rotation_z_matrix() const
 {
-    float cos_a = std::cosf(position.y);
-    float sin_a = std::sinf(position.y);
+    float cos_a = std::cosf(rotation.z);
+    float sin_a = std::sinf(rotation.z);
 
-    return glm::mat4x4(
+    return glm::transpose(glm::mat4x4(
         cos_a,  -sin_a, 0.0f,  0.0f,
          sin_a,  cos_a,  0.0f,  0.0f,
          0.0f, 0.0f,  1.0f, 0.0f,
          0.0f,  0.0f,  0.0f,  1.0f
-    );
+    ));
 }
