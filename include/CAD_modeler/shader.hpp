@@ -2,6 +2,7 @@
 #define SHADER_H
 
 #include <glad/glad.h>
+#include <glm/mat4x4.hpp>
 
 #include <string>
 
@@ -18,6 +19,7 @@ public:
     void setBool(const std::string &name, bool value) const;
     void setInt(const std::string &name, int value) const;
     void setFloat(const std::string &name, float value) const;
+    void setMatrix4(const std::string &name, const glm::mat4x4 &matrix);
 };
 
 

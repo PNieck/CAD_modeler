@@ -19,7 +19,7 @@ std::vector<float> Torus::generate_vertices(int pts_in_circ, int circ_cnt) const
         float beta = delta_beta * act_circ;
 
         for (int act_pt_in_circ = 0; act_pt_in_circ < pts_in_circ; act_pt_in_circ++) {
-            int index = (act_circ * circ_cnt + act_pt_in_circ) * 3;
+            int index = (act_circ * pts_in_circ + act_pt_in_circ) * 3;
 
             float alpha = delta_alpha * act_pt_in_circ;
 

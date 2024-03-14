@@ -1,11 +1,16 @@
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-
 #include <iostream>
 #include <vector>
 
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/gtx/string_cast.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
 #include <CAD_modeler/shader.hpp>
 #include <CAD_modeler/objects/torus.hpp>
+#include <CAD_modeler/camera.hpp>
 
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -31,7 +36,7 @@ int main()
 
     // glfw window creation
     // --------------------
-    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "CAD", NULL, NULL);
     if (window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -52,7 +57,9 @@ int main()
     Shader shader("../../shaders/vertexShader.vert", "../../shaders/fragmentShader.frag");
 
     Torus torus(0.2f, 0.5f);
-    auto vertices = torus.generate_vertices(4, 4);
+    Camera camera(glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f, 0.0f, 0.0f), (float)SCR_WIDTH/(float)SCR_HEIGHT);
+
+    auto vertices = torus.generate_vertices(4, 5);
 
     unsigned int VBO, VAO;
     glGenVertexArrays(1, &VAO);
@@ -74,10 +81,6 @@ int main()
 
     glPointSize(5.0f);
 
-
-    // uncomment this call to draw in wireframe polygons.
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
     // render loop
     // -----------
     while (!glfwWindowShouldClose(window))
@@ -90,6 +93,9 @@ int main()
         // ------
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
+
+        glm::mat4x4 MVP = camera.GetPerspectiveMatrix() * camera.GetViewMatrix() * torus.model_matrix();
+        shader.setMatrix4("MVP", MVP);
 
         // draw our first triangle
         shader.use();

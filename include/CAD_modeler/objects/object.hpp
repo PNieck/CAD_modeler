@@ -6,12 +6,12 @@ class Object {
 public:
     Object();
 
+    glm::mat4x4 model_matrix() const;
+
 protected:
     glm::vec3 position;
     glm::vec3 rotation;
     float scale;
-
-    glm::mat4x4 model_matrix() const;
 
 private:
     glm::mat4x4 scale_matrix() const;
