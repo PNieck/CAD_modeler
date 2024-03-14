@@ -12,7 +12,8 @@ public:
     void rotate_y(float angle) { rotation.y += angle; }
     void rotate_z(float angle) { rotation.z += angle; }
 
-    void SetScale(float scale) { this->scale = scale; }
+    void ScaleSet(float scale) { this->scale = scale; }
+    float ScaleGet() const { return scale; }
 
     void MoveX(float x) { position.x += x; }
     void MoveY(float y) { position.y += y; }
