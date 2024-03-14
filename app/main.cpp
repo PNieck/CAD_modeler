@@ -44,10 +44,6 @@ int main()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-#ifdef __APPLE__
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-#endif
-
     // glfw window creation
     // --------------------
     GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "CAD", NULL, NULL);
@@ -110,6 +106,11 @@ int main()
 
     glPointSize(5.0f);
 
+    int small_circs = 4;
+    int old_small_circs = 0;
+    int big_circs = 4;
+    int old_big_circs = 0;
+
     // render loop
     // -----------
     while (!glfwWindowShouldClose(window))
@@ -128,6 +129,18 @@ int main()
 
         ImGui::Begin("Hello, world!");
         ImGui::Text("This is some useful text.");
+        ImGui::InputInt("Small circles", &small_circs);
+        ImGui::InputInt("Big circles", &big_circs);
+
+        if (old_small_circs != small_circs || old_big_circs != big_circs) {
+            vertices = torus.generate_vertices(small_circs, big_circs);
+            glBindBuffer(GL_ARRAY_BUFFER, VBO);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
+
+            old_small_circs = small_circs;
+            old_big_circs = big_circs;
+        }
+
         ImGui::End();
 
         // render
