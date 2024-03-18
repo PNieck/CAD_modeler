@@ -105,17 +105,38 @@ void Shader::setBool(const std::string &name, bool value) const
 
 void Shader::setInt(const std::string & name, int value) const
 {
-    glUniform1i(glGetUniformLocation(id, name.c_str()), (int)value);
+    int location = findUniformLocation(name);
+    glUniform1i(location, (int)value);
 }
 
 
 void Shader::setFloat(const std::string & name, float value) const
 {
-    glUniform1f(glGetUniformLocation(id, name.c_str()), value);
+    int location = findUniformLocation(name);
+    glUniform1f(location, value);
 }
 
 
-void Shader::setMatrix4(const std::string & name, const glm::mat4x4 & matrix)
+void Shader::setMatrix4(const std::string & name, const glm::mat4x4 & matrix) const
 {
-    glUniformMatrix4fv(glGetUniformLocation(id, name.c_str()), 1, GL_FALSE, glm::value_ptr(matrix));
+    int location = findUniformLocation(name);
+    glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(matrix));
+}
+
+
+int Shader::findUniformLocation(const std::string & name) const
+{
+    int location = glGetUniformLocation(id, name.c_str());
+
+    if (location == -1) {
+        throw UniformNotFoundInShader();
+    }
+
+    return location;
+}
+
+
+const char * UniformNotFoundInShader::what() const
+{
+    return "Cannot find uniform in shader";
 }
