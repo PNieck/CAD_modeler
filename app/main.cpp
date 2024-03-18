@@ -13,6 +13,7 @@
 #include <CAD_modeler/objects/torus.hpp>
 #include <CAD_modeler/camera.hpp>
 
+#define MIN_VAL 0.001f
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -120,8 +121,12 @@ int main()
 
     int small_circs = 4;
     int old_small_circs = 0;
-    int big_circs = 2;
+    int big_circs = 3;
     int old_big_circs = 0;
+    float R = 0.5f;
+    float old_R = 0.0f;
+    float r = 0.2f;
+    float old_r = 0.0f;
 
     // render loop
     // -----------
@@ -143,9 +148,39 @@ int main()
         ImGui::Text("This is some useful text.");
         ImGui::InputInt("Small circles", &small_circs);
         ImGui::InputInt("Big circles", &big_circs);
+        ImGui::SliderFloat("R", &R, MIN_VAL, 10.0f);
+        ImGui::SliderFloat("r", &r, MIN_VAL, R - MIN_VAL);
+        ImGui::End();
 
-        if (old_small_circs != small_circs || old_big_circs != big_circs) {
+        if (old_small_circs != small_circs ||
+            old_big_circs != big_circs ||
+            old_R != R ||
+            old_r != r)
+        {
             glBindVertexArray(VAO);
+
+            if (small_circs < 3) {
+                small_circs = 3;
+            }
+
+            if (big_circs < 3) {
+                big_circs = 3;
+            }
+
+            if (r < 0) {
+                r = MIN_VAL;
+            }
+
+            if (R < 0) {
+                R = MIN_VAL;
+            }
+
+            if (r > R) {
+                r = R - MIN_VAL;
+            }
+
+            torus.R = R;
+            torus.r = r;
 
             vertices = torus.generate_vertices(small_circs, big_circs);
             glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -157,9 +192,9 @@ int main()
 
             old_small_circs = small_circs;
             old_big_circs = big_circs;
+            old_R = R;
+            old_r = r;
         }
-
-        ImGui::End();
 
         // render
         // ------
@@ -173,7 +208,6 @@ int main()
         shader.use();
         glBindVertexArray(VAO);
         glDrawElements(GL_LINE_LOOP, indices.size(), GL_UNSIGNED_INT, 0);
-        //glDrawArrays(GL_POINTS, 0, vertices.size()/3);
         glBindVertexArray(0);
  
         ImGui::Render();
@@ -221,6 +255,12 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 
 void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 {
+    ImGuiIO& io = ImGui::GetIO();
+    io.AddMousePosEvent(static_cast<float>(xposIn), static_cast<float>(yposIn));
+
+    if (io.WantCaptureMouse)
+        return;
+
     float xpos = static_cast<float>(xposIn);
     float ypos = static_cast<float>(yposIn);
 
@@ -275,5 +315,8 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
-    torus.ScaleSet(torus.ScaleGet() + yoffset*0.5);
+    float new_scale = torus.ScaleGet() + yoffset*0.2;
+
+    if (new_scale > 0)
+        torus.ScaleSet(new_scale);
 }
