@@ -5,6 +5,7 @@
  - [glad](https://glad.dav1d.de/) - loading OpenGL functions
  - [glm](https://github.com/g-truc/glm) - math functions
  - [Dear ImGui](https://github.com/ocornut/imgui) - graphical user interface
+ - [GoogleTests](https://google.github.io/googletest/) - testing framework
 
 ## Used Tutorials
  - [An introduction to modern CMake](https://cliutils.gitlab.io/modern-cmake/)

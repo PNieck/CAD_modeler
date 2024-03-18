@@ -10,6 +10,10 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
 
     # Let's nicely support folders in IDEs
     set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
+    # Add tests
+    include(CTest)
+    enable_testing()
 endif()
 
 include(FetchContent)
@@ -36,3 +40,8 @@ add_subdirectory(src)
 
 # The executable code is here
 add_subdirectory(app)
+
+# Adding tests directory
+if((CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME) AND BUILD_TESTING)
+  add_subdirectory(tests)
+endif()
