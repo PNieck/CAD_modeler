@@ -5,16 +5,12 @@ Model::Model(int viewport_width, int viewport_height):
     camera(glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f, 0.0f, 0.0f), (float)viewport_width/(float)viewport_height),
     torus(0.2f, 0.5f),
     shader("../../shaders/vertexShader.vert", "../../shaders/fragmentShader.frag")
-{ }
-
-
-void Model::Initialize()
 {
     glEnable(GL_PRIMITIVE_RESTART);
     glPrimitiveRestartIndex(std::numeric_limits<GLuint>::max());
 
-    vertices = torus.generate_vertices(4, 2);
-    indices = torus.generate_edges(4, 2);
+    vertices = torus.generate_vertices(4, 3);
+    indices = torus.generate_edges(4, 3);
 
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);

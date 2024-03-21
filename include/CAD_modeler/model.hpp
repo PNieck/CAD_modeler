@@ -11,7 +11,6 @@ class Model
 public:
     Model(int viewport_width, int viewport_height);
 
-    void Initialize();
     void RenderFrame();
 
 private:

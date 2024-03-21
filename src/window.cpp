@@ -9,10 +9,17 @@ unsigned int Window::instances_cnt = 0;
 Window::Window(int width, int height, const std::string & name):
     window(CreateGFLWwindow(width, height, name)), controller(width, height)
 {
+    // Set window pointer to this class for all callback
+    glfwSetWindowUserPointer(window, this);
+
+    // Enable "vsync"
     glfwSwapInterval(1);
 
-    // Set window pointer to this class for all callback
-    ///glfwSetWindowUserPointer(window, this);
+    // Set callbacks
+    glfwSetFramebufferSizeCallback(window, SizeChangedCallback);
+    glfwSetCursorPosCallback(window, MouseMoveCallback);
+    glfwSetMouseButtonCallback(window, MouseButtonCallback);
+    glfwSetScrollCallback(window, ScrollCallback);
 }
 
 
@@ -66,7 +73,7 @@ void Window::DeinitializeGLFW()
     glfwTerminate();
 }
 
-#include <iostream>
+
 void Window::InitializeGlad()
 {
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
@@ -102,5 +109,10 @@ void Window::MouseMoveCallback(GLFWwindow * window, double xpos, double ypos)
 
 
 void Window::MouseButtonCallback(GLFWwindow * window, int button, int action, int mods)
+{
+}
+
+
+void Window::ScrollCallback(GLFWwindow * window, double xoffset, double yoffset)
 {
 }
