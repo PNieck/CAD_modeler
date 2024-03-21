@@ -32,6 +32,9 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(glfw glm)
 
+# Copy shaders to binary directory
+file(COPY shaders DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
 # External dependencies
 add_subdirectory(extern)
 
