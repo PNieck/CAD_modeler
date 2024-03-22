@@ -15,7 +15,8 @@ public:
     void MouseMove(int x, int y);
 
 private:
-    static constexpr float ROTATION_COEFF = 0.02;
+    static constexpr float ROTATION_COEFF = 0.02f;
+    static constexpr float TRANSLATION_COEFF = 0.01f;
 
     Model& model;
 

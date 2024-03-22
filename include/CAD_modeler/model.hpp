@@ -17,6 +17,10 @@ public:
     inline void RotateTorusY(float angle) { torus.rotate_y(angle); }
     inline void RotateTorusZ(float angle) { torus.rotate_z(angle); }
 
+    inline void MoveTorusX(float offset) { torus.MoveX(offset); }
+    inline void MoveTorusY(float offset) { torus.MoveY(offset); }
+    inline void MoveTorusZ(float offset) { torus.MoveZ(offset); }
+
 private:
     Camera camera;
     Torus torus;

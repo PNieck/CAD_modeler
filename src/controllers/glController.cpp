@@ -19,4 +19,11 @@ void GlController::MouseMove(int x, int y)
         model.RotateTorusX(offset.y * ROTATION_COEFF);
         model.RotateTorusY(offset.x * ROTATION_COEFF);
     }
+
+    if (mouseState.IsButtonClicked(MouseButton::Middle)) {
+        auto offset = mouseState.TranslationGet();
+
+        model.MoveTorusX(offset.x * TRANSLATION_COEFF);
+        model.MoveTorusY(-offset.y * TRANSLATION_COEFF);
+    }
 }

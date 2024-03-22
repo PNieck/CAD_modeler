@@ -23,7 +23,7 @@ public:
 
     void Moved(int x, int y);
 
-    inline glm::ivec2 TranslationGet() const { return oldMousePos - actMousePos; }
+    inline glm::ivec2 TranslationGet() const { return actMousePos - oldMousePos; }
 
 private:
     static const int BUTTON_CNT = 3;

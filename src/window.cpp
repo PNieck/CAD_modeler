@@ -123,11 +123,11 @@ void Window::MouseButtonCallback(GLFWwindow * glfwWindow, int button, int action
         break;
 
     case GLFW_MOUSE_BUTTON_MIDDLE:
-        mouseButton = MouseButton::Left;
+        mouseButton = MouseButton::Middle;
         break;
 
     case GLFW_MOUSE_BUTTON_RIGHT:
-        mouseButton = MouseButton::Left;
+        mouseButton = MouseButton::Right;
         break;
     
     default:
