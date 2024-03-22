@@ -13,16 +13,20 @@ public:
 
     void RenderFrame();
 
-    inline void RotateTorusX(float angle) { torus.rotate_x(angle); }
-    inline void RotateTorusY(float angle) { torus.rotate_y(angle); }
-    inline void RotateTorusZ(float angle) { torus.rotate_z(angle); }
+    inline const Torus& ConstTorusGet() const { return torus; }
+    inline Torus& TorusGet() { return torus; }
 
-    inline void MoveTorusX(float offset) { torus.MoveX(offset); }
-    inline void MoveTorusY(float offset) { torus.MoveY(offset); }
-    inline void MoveTorusZ(float offset) { torus.MoveZ(offset); }
+    void ChangeTorusBigRadius(float newRadius) {
+        torus.BigRadiusSet(newRadius);
 
-    inline float TorusScaleGet() const { return torus.ScaleGet(); }
-    inline void TorusScaleSet(float newScale) { torus.ScaleSet(newScale); }
+        vertices = torus.generate_vertices(4, 3);
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
+
+        indices = torus.generate_edges(4, 3);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * indices.size(), indices.data(), GL_STATIC_DRAW);
+    }
 
 private:
     Camera camera;

@@ -179,8 +179,8 @@ int main()
                 r = R - MIN_VAL;
             }
 
-            torus.R = R;
-            torus.r = r;
+            // torus.R = R;
+            // torus.r = r;
 
             vertices = torus.generate_vertices(small_circs, big_circs);
             glBindBuffer(GL_ARRAY_BUFFER, VBO);

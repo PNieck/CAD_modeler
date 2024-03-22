@@ -3,19 +3,23 @@
 
 #include "glController.hpp"
 #include "guiController.hpp"
+#include "../views/guiView.hpp"
 #include "../model.hpp"
+
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
 
 
 class MainController {
 public:
-    MainController(int window_width, int window_height);
+    MainController(GLFWwindow* window, int window_width, int window_height);
     
     void Render();
 
     void SizeChanged(int width, int height) {};
     inline void MouseClicked(MouseButton button) { glController.MouseClick(button); }
     inline void MouseReleased(MouseButton button) { glController.MouseRelease(button); }
-    inline void MouseMoved(int x, int y) { glController.MouseMove(x, y); }
+    void MouseMoved(int x, int y);
     inline void ScrollMoved(int offset) { glController.ScrollMoved(offset); }
 
 
@@ -23,7 +27,9 @@ private:
     Model model;
 
     GlController glController;
-    GuiController GuiController;
+    GuiController guiController;
+
+    GuiView guiView;
 };
 
 

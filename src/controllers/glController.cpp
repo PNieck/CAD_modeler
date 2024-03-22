@@ -15,24 +15,27 @@ void GlController::MouseMove(int x, int y)
 
     if (mouseState.IsButtonClicked(MouseButton::Left)) {
         auto offset = mouseState.TranslationGet();
+        Torus& torus = model.TorusGet();
 
-        model.RotateTorusX(offset.y * ROTATION_COEFF);
-        model.RotateTorusY(offset.x * ROTATION_COEFF);
+        torus.rotate_x(offset.y * ROTATION_COEFF);
+        torus.rotate_y(offset.x * ROTATION_COEFF);
     }
 
     if (mouseState.IsButtonClicked(MouseButton::Middle)) {
         auto offset = mouseState.TranslationGet();
+        Torus& torus = model.TorusGet();
 
-        model.MoveTorusX(offset.x * TRANSLATION_COEFF);
-        model.MoveTorusY(-offset.y * TRANSLATION_COEFF);
+        torus.MoveX(offset.x * TRANSLATION_COEFF);
+        torus.MoveY(-offset.y * TRANSLATION_COEFF);
     }
 }
 
 
 void GlController::ScrollMoved(int offset)
 {
-    float new_scale = model.TorusScaleGet() + offset * SCROLL_COEFF;
+    Torus& torus = model.TorusGet();
+    float new_scale = torus.ScaleGet() + offset * SCROLL_COEFF;
 
     if (new_scale > 0)
-        model.TorusScaleSet(new_scale);
+        torus.ScaleSet(new_scale);
 }

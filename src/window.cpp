@@ -7,19 +7,13 @@ unsigned int Window::instances_cnt = 0;
 
 
 Window::Window(int width, int height, const std::string & name):
-    window(CreateGFLWwindow(width, height, name)), controller(width, height)
+    window(CreateGFLWwindow(width, height, name)), controller(window, width, height)
 {
     // Set window pointer to this class for all callback
     glfwSetWindowUserPointer(window, this);
 
     // Enable "vsync"
     glfwSwapInterval(1);
-
-    // Set callbacks
-    glfwSetFramebufferSizeCallback(window, SizeChangedCallback);
-    glfwSetCursorPosCallback(window, MouseMoveCallback);
-    glfwSetMouseButtonCallback(window, MouseButtonCallback);
-    glfwSetScrollCallback(window, ScrollCallback);
 }
 
 
@@ -48,6 +42,12 @@ GLFWwindow * Window::CreateGFLWwindow(int width, int height, const std::string &
 
     glfwMakeContextCurrent(window);
     InitializeGlad();
+
+    // Set callbacks
+    glfwSetFramebufferSizeCallback(window, SizeChangedCallback);
+    glfwSetCursorPosCallback(window, MouseMoveCallback);
+    glfwSetMouseButtonCallback(window, MouseButtonCallback);
+    glfwSetScrollCallback(window, ScrollCallback);
 
     instances_cnt++;
 
@@ -154,6 +154,5 @@ void Window::MouseButtonCallback(GLFWwindow * glfwWindow, int button, int action
 void Window::ScrollCallback(GLFWwindow * glfwWindow, double xoffset, double yoffset)
 {
     Window* window = (Window*)glfwGetWindowUserPointer(glfwWindow);
-
     window->controller.ScrollMoved((int)yoffset);
 }
