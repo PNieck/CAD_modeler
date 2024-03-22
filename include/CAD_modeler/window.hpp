@@ -15,8 +15,6 @@ public:
     Window(int width, int height, const std::string &name);
     ~Window();
 
-    inline void SetController(MainController &controller) { this->controller = controller; }
-
     void RunMessageLoop();
 
 private:
@@ -32,6 +30,7 @@ private:
 
 
     static GLFWwindow* CreateGFLWwindow(int width, int height, const std::string &name);
+    
     static void InitializeGLFW();
     static void DeinitializeGLFW();
 

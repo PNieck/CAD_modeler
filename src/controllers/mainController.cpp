@@ -2,7 +2,7 @@
 
 
 MainController::MainController(int window_width, int window_height):
-    model(window_width, window_height)
+    model(window_width, window_height), glController(model)
 {
 }
 

@@ -103,16 +103,54 @@ void Window::SizeChangedCallback(GLFWwindow * glfwWindow, int width, int height)
 }
 
 
-void Window::MouseMoveCallback(GLFWwindow * window, double xpos, double ypos)
+void Window::MouseMoveCallback(GLFWwindow * glfwWindow, double xpos, double ypos)
 {
+    Window* window = (Window*)glfwGetWindowUserPointer(glfwWindow);
+
+    window->controller.MouseMoved((int)xpos, (int)ypos);
 }
 
 
-void Window::MouseButtonCallback(GLFWwindow * window, int button, int action, int mods)
+void Window::MouseButtonCallback(GLFWwindow * glfwWindow, int button, int action, int mods)
 {
+    Window* window = (Window*)glfwGetWindowUserPointer(glfwWindow);
+    
+    MouseButton mouseButton;
+
+    switch (button) {
+    case GLFW_MOUSE_BUTTON_LEFT:
+        mouseButton = MouseButton::Left;
+        break;
+
+    case GLFW_MOUSE_BUTTON_MIDDLE:
+        mouseButton = MouseButton::Left;
+        break;
+
+    case GLFW_MOUSE_BUTTON_RIGHT:
+        mouseButton = MouseButton::Left;
+        break;
+    
+    default:
+        return;
+    }
+
+    switch (action)
+    {
+    case GLFW_PRESS:
+        window->controller.MouseClicked(mouseButton);
+        break;
+
+    case GLFW_RELEASE:
+        window->controller.MouseReleased(mouseButton);
+        break;
+    
+    default:
+        break;
+    }    
+
 }
 
 
-void Window::ScrollCallback(GLFWwindow * window, double xoffset, double yoffset)
+void Window::ScrollCallback(GLFWwindow * glfwWindow, double xoffset, double yoffset)
 {
 }

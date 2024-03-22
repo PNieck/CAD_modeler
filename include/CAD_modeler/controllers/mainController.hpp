@@ -10,14 +10,19 @@ class MainController {
 public:
     MainController(int window_width, int window_height);
 
-    void SizeChanged(int width, int height) {};
+    
     void Render();
 
+    void SizeChanged(int width, int height) {};
+    inline void MouseClicked(MouseButton button) { glController.MouseClick(button); }
+    inline void MouseReleased(MouseButton button) { glController.MouseRelease(button); }
+    inline void MouseMoved(int x, int y) { glController.MouseMove(x, y); }
+
 private:
+    Model model;
+
     GlController glController;
     GuiController GuiController;
-
-    Model model;
 };
 
 

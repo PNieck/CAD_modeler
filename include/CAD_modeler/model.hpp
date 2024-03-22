@@ -13,6 +13,10 @@ public:
 
     void RenderFrame();
 
+    inline void RotateTorusX(float angle) { torus.rotate_x(angle); }
+    inline void RotateTorusY(float angle) { torus.rotate_y(angle); }
+    inline void RotateTorusZ(float angle) { torus.rotate_z(angle); }
+
 private:
     Camera camera;
     Torus torus;
