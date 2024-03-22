@@ -27,3 +27,12 @@ void GlController::MouseMove(int x, int y)
         model.MoveTorusY(-offset.y * TRANSLATION_COEFF);
     }
 }
+
+
+void GlController::ScrollMoved(int offset)
+{
+    float new_scale = model.TorusScaleGet() + offset * SCROLL_COEFF;
+
+    if (new_scale > 0)
+        model.TorusScaleSet(new_scale);
+}

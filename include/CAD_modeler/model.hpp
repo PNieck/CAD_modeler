@@ -21,6 +21,9 @@ public:
     inline void MoveTorusY(float offset) { torus.MoveY(offset); }
     inline void MoveTorusZ(float offset) { torus.MoveZ(offset); }
 
+    inline float TorusScaleGet() const { return torus.ScaleGet(); }
+    inline void TorusScaleSet(float newScale) { torus.ScaleSet(newScale); }
+
 private:
     Camera camera;
     Torus torus;

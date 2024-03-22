@@ -9,7 +9,6 @@
 class MainController {
 public:
     MainController(int window_width, int window_height);
-
     
     void Render();
 
@@ -17,6 +16,8 @@ public:
     inline void MouseClicked(MouseButton button) { glController.MouseClick(button); }
     inline void MouseReleased(MouseButton button) { glController.MouseRelease(button); }
     inline void MouseMoved(int x, int y) { glController.MouseMove(x, y); }
+    inline void ScrollMoved(int offset) { glController.ScrollMoved(offset); }
+
 
 private:
     Model model;

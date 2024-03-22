@@ -153,4 +153,7 @@ void Window::MouseButtonCallback(GLFWwindow * glfwWindow, int button, int action
 
 void Window::ScrollCallback(GLFWwindow * glfwWindow, double xoffset, double yoffset)
 {
+    Window* window = (Window*)glfwGetWindowUserPointer(glfwWindow);
+
+    window->controller.ScrollMoved((int)yoffset);
 }
