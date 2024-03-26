@@ -25,15 +25,15 @@ GuiView::GuiView(GLFWwindow * window)
 
 void GuiView::RenderGui(GuiController& controller, const Model& model) const
 {
-    const Torus& torus = model.ConstTorusGet();
+    //const Torus& torus = model.ConstTorusGet();
 
     int small_circs;
     int big_circs;
 
-    float old_r, old_R, r, R;
+    float old_r = 1.0f, old_R = 1.0f, r = 1.0f, R = 1.0f;
 
-    old_r = r = torus.SmallRadiusGet();
-    old_R = R = torus.BigRadiusGet();
+    // old_r = r = torus.SmallRadiusGet();
+    // old_R = R = torus.BigRadiusGet();
 
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();

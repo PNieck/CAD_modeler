@@ -4,7 +4,7 @@
 
 int main()
 {
-    Window window(600, 400, "TestWindow");
+    Window window(600, 400, "Modeler");
 
     window.RunMessageLoop();
 
