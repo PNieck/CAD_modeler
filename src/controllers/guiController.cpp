@@ -22,12 +22,12 @@ bool GuiController::WantCaptureMouse(int xPos, int yPos)
 
 void GuiController::TorusSmallRadiusChanged(float newRadius)
 {
-    Torus& torus = model.TorusGet();
-    torus.SmallRadiusSet(newRadius);
+    // Torus& torus = model.TorusGet();
+    // torus.SmallRadiusSet(newRadius);
 }
 
 
 void GuiController::TorusBigRadiusChanged(float newRadius)
 {
-    model.ChangeTorusBigRadius(newRadius);
+    //model.ChangeTorusBigRadius(newRadius);
 }
