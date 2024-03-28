@@ -17,7 +17,7 @@ public:
 private:
     static constexpr float ROTATION_COEFF = 0.02f;
     static constexpr float TRANSLATION_COEFF = 0.01f;
-    static constexpr float SCROLL_COEFF = 0.2f;
+    static constexpr float SCROLL_COEFF = 0.7f;
 
     Model& model;
 

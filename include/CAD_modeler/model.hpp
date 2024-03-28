@@ -16,6 +16,18 @@ public:
 
     void AddTorus();
 
+    inline void RotateCamera(float x, float y) const
+        { cameraSys->RotateAroundTarget(x, y); }
+
+    inline float GetCameraDistanceFromTarget() const
+        { return cameraSys->GetDistanceToTarget(); }
+
+    inline void SetCameraDistance(float newDist) const
+        { cameraSys->SetDistanceToTarget(newDist); }
+
+    inline void MultiplyCameraDistanceFromTarget(float coefficient) const
+        { cameraSys->MultiplyDistanceToTarget(coefficient); }
+
 private:
     Coordinator coordinator;
 

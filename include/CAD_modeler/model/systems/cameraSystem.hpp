@@ -15,6 +15,14 @@ public:
     glm::mat4x4 ViewMatrix() const;
     glm::mat4x4 PerspectiveMatrix() const;
 
+    void RotateAroundTarget(float x, float y) const;
+
+    float GetDistanceToTarget() const;
+
+    void SetDistanceToTarget(float newDist) const;
+
+    void MultiplyDistanceToTarget(float coefficient) const;
+
 private:
     static constexpr glm::vec3 globalUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
