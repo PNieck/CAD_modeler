@@ -13,9 +13,13 @@ public:
 
     glm::mat4x4 TranslationMatrix() const;
 
-    inline float X() const { return vec.x; }
-    inline float Y() const { return vec.y; } 
-    inline float Z() const { return vec.z; } 
+    inline float GetX() const { return vec.x; }
+    inline float GetY() const { return vec.y; } 
+    inline float GetZ() const { return vec.z; }
+
+    inline void SetX(float x) { vec.x = x; }
+    inline void SetY(float y) { vec.y = y; }
+    inline void SetZ(float z) { vec.z = z; }
 
     glm::vec3 vec;
 };

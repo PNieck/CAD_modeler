@@ -4,19 +4,28 @@
 #include <glm/mat4x4.hpp>
 #include <glm/ext/quaternion_float.hpp>
 
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/quaternion.hpp>
+
 
 class Rotation {
 public:
-    Rotation(): rot(0) {}
+    Rotation(): quat() {}
+    Rotation(float pitch, float yaw, float roll):
+        quat(glm::vec3(pitch, yaw, roll)) {}
 
-    glm::vec3 rot;
+    inline void Rotate(glm::vec3& vec) const
+        { vec = quat * vec; }
 
-    glm::mat4x4 GetRotationMatrix() const;
+    inline glm::mat4x4 GetRotationMatrix() const
+        { return glm::toMat4(quat); }
 
 private:
-    glm::mat4x4 RotationXMtx() const;
-    glm::mat4x4 RotationYMtx() const;
-    glm::mat4x4 RotationZMtx() const;
+    // glm::mat4x4 RotationXMtx() const;
+    // glm::mat4x4 RotationYMtx() const;
+    // glm::mat4x4 RotationZMtx() const;
+
+    glm::quat quat;
 };
 
 

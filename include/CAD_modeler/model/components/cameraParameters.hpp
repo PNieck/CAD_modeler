@@ -1,12 +1,12 @@
 #ifndef CAMERA_PARAMETERS_H
 #define CAMERA_PARAMETERS_H
 
-#include <glm/vec3.hpp>
+#include "position.hpp"
 
 
 class CameraParameters {
 public:
-    glm::vec3 target;
+    Position target;
     float aspect_ratio;
     float fov;
     float near_plane;
