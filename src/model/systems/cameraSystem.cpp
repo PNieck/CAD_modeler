@@ -132,3 +132,10 @@ float CameraSystem::GetFarPlane() const
     CameraParameters const& params = coordinator->GetComponent<CameraParameters>(camera);
     return params.far_plane;
 }
+
+
+void CameraSystem::ChangeViewportSize(int width, int height) const
+{
+    CameraParameters& params = coordinator->GetComponent<CameraParameters>(camera);
+    params.aspect_ratio = (float)width/(float)height;
+}

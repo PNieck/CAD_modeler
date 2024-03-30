@@ -38,3 +38,10 @@ void Model::AddTorus()
 {
     toriSystem->AddTorus();
 }
+
+
+void Model::ChangeViewportSize(int width, int height)
+{
+    glViewport(0, 0, width, height);
+    cameraSys->ChangeViewportSize(width, height);
+}

@@ -29,6 +29,8 @@ public:
     inline void MultiplyCameraDistanceFromTarget(float coefficient) const
         { cameraSys->MultiplyDistanceToTarget(coefficient); }
 
+    void ChangeViewportSize(int width, int height);
+
 private:
     Coordinator coordinator;
 

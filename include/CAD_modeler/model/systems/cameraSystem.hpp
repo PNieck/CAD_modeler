@@ -27,6 +27,8 @@ public:
 
     float GetFarPlane() const;
 
+    void ChangeViewportSize(int width, int height) const;
+
 private:
     static constexpr glm::vec3 globalUp = glm::vec3(0.0f, 1.0f, 0.0f);
 

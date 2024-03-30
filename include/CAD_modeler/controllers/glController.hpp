@@ -9,6 +9,8 @@ class GlController {
 public:
     GlController(Model& model);
 
+    inline void WindowSizeChanged(int width, int height) { model.ChangeViewportSize(width, height); }
+
     inline void MouseClick(MouseButton button) { mouseState.ButtonClicked(button); }
     inline void MouseRelease(MouseButton button) { mouseState.ButtonReleased(button); }
     void MouseMove(int x, int y);
