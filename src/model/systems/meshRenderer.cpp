@@ -33,8 +33,11 @@ MeshRenderer::MeshRenderer():
 
 void MeshRenderer::Render()
 {
-    auto const& cameraSystem = coordinator->GetSystem<CameraSystem>();
+    if (entities.empty()) {
+        return;
+    }
 
+    auto const& cameraSystem = coordinator->GetSystem<CameraSystem>();
     glm::mat4x4 cameraMtx = cameraSystem->PerspectiveMatrix() * cameraSystem->ViewMatrix();
 
     for (auto const entity : entities) {

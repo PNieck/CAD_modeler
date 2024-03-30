@@ -10,16 +10,18 @@ Model::Model(int viewport_width, int viewport_height)
     MeshRenderer::RegisterSystem(coordinator);
     ToriSystem::RegisterSystem(coordinator);
     GridSystem::RegisterSystem(coordinator);
+    CursorSystem::RegisterSystem(coordinator);
 
     cameraSys = coordinator.GetSystem<CameraSystem>();
     meshRenderer = coordinator.GetSystem<MeshRenderer>();
     toriSystem = coordinator.GetSystem<ToriSystem>();
     gridSystem = coordinator.GetSystem<GridSystem>();
+    cursorSystem = coordinator.GetSystem<CursorSystem>();
 
     cameraSys->Init(viewport_width, viewport_height);
     gridSystem->Init();
-
-    AddTorus();
+    cursorSystem->Init();
+    
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 }
@@ -31,6 +33,7 @@ void Model::RenderFrame()
 
     gridSystem->Render();
     meshRenderer->Render();
+    cursorSystem->Render();
 }
 
 

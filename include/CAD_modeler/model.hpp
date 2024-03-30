@@ -6,6 +6,7 @@
 #include "model/systems/meshRenderer.hpp"
 #include "model/systems/toriSystem.hpp"
 #include "model/systems/gridSystem.hpp"
+#include "model/systems/cursorSystem.hpp"
 
 
 class Model
@@ -38,6 +39,7 @@ private:
     std::shared_ptr<MeshRenderer> meshRenderer;
     std::shared_ptr<ToriSystem> toriSystem;
     std::shared_ptr<GridSystem> gridSystem;
+    std::shared_ptr<CursorSystem> cursorSystem;
 };
 
 
