@@ -43,10 +43,11 @@ void MeshRenderer::Render()
         auto const& scale = coordinator->GetComponent<Scale>(entity);
         auto const& rotation = coordinator->GetComponent<Rotation>(entity);
 
+        shader.use();
+
         glm::mat4x4 modelMtx = scale.ScaleMatrix() * rotation.GetRotationMatrix() * position.TranslationMatrix();
         shader.setMatrix4("MVP", cameraMtx * modelMtx);
-
-        shader.use();
+        
         mesh.Use();
         glDrawElements(GL_LINE_LOOP, mesh.GetElementsCnt(), GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
