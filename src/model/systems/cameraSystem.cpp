@@ -118,3 +118,17 @@ void CameraSystem::MultiplyDistanceToTarget(float coefficient) const
 
     position.vec = (position.vec - params.target.vec) * coefficient;
 }
+
+
+float CameraSystem::GetNearPlane() const
+{
+    CameraParameters const& params = coordinator->GetComponent<CameraParameters>(camera);
+    return params.near_plane;
+}
+
+
+float CameraSystem::GetFarPlane() const
+{
+    CameraParameters const& params = coordinator->GetComponent<CameraParameters>(camera);
+    return params.far_plane;
+}

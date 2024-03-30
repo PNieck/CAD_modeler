@@ -23,6 +23,10 @@ public:
 
     void MultiplyDistanceToTarget(float coefficient) const;
 
+    float GetNearPlane() const;
+
+    float GetFarPlane() const;
+
 private:
     static constexpr glm::vec3 globalUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
