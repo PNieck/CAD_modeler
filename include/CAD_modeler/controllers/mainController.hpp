@@ -17,8 +17,8 @@ public:
     void Render();
 
     inline void SizeChanged(int width, int height) { glController.WindowSizeChanged(width, height); }
-    inline void MouseClicked(MouseButton button) { glController.MouseClick(button); }
-    inline void MouseReleased(MouseButton button) { glController.MouseRelease(button); }
+    void MouseClicked(MouseButton button);
+    void MouseReleased(MouseButton button);
     void MouseMoved(int x, int y);
     inline void ScrollMoved(int offset) { glController.ScrollMoved(offset); }
 

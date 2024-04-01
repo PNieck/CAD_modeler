@@ -1,17 +1,19 @@
-#ifndef GUI_CONTROLLER_H
-#define GUI_CONTROLLER_H
+#pragma once
+
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
 
 #include "../model.hpp"
-
-#define GLFW_INCLUDE_NONE
-#include <GLFW/glfw3.h>
+#include "utils/mouseState.hpp"
 
 
 class GuiController {
 public:
     GuiController(Model& model);
 
-    bool WantCaptureMouse(int xPos, int yPos);
+    inline bool WantCaptureMouse()
+        { return ImGui::GetIO().WantCaptureMouse; }
 
     void TorusBigRadiusChanged(float newRadius);
 
@@ -20,6 +22,3 @@ public:
 private:
     Model& model;
 };
-
-
-#endif

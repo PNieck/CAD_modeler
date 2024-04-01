@@ -61,3 +61,16 @@ void CursorSystem::Render()
     mesh.Use();
     glDrawElements(GL_POINTS, mesh.GetElementsCnt(), GL_UNSIGNED_INT, 0);
 }
+
+
+void CursorSystem::SetPosition(const glm::vec3 & pos)
+{
+    auto& position = coordinator->GetComponent<Position>(cursor);
+    position.vec = pos;
+}
+
+
+Position CursorSystem::GetPosition() const
+{
+    return coordinator->GetComponent<Position>(cursor);
+}

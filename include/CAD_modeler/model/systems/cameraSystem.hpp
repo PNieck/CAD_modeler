@@ -2,6 +2,7 @@
 #define CAMERA_SYSTEM_H
 
 #include "system.hpp"
+#include "../components/position.hpp"
 
 #include <glm/mat4x4.hpp>
 
@@ -16,6 +17,10 @@ public:
     glm::mat4x4 PerspectiveMatrix() const;
 
     void RotateAroundTarget(float x, float y) const;
+
+    Position GetPosition() const;
+
+    Position GetTargetPosition() const;
 
     float GetDistanceToTarget() const;
 

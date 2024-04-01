@@ -32,6 +32,11 @@ public:
 
     void ChangeViewportSize(int width, int height);
 
+    inline void SetCursorPosition(float x, float y, float z) const
+        { cursorSystem->SetPosition(glm::vec3(x, y, z)); }
+
+    void SetCursorPositionFromWindowPoint(float x, float y) const;
+
 private:
     Coordinator coordinator;
 
