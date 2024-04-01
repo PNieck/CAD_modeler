@@ -2,17 +2,38 @@
 
 
 MainController::MainController(GLFWwindow* window, int window_width, int window_height):
-    model(window_width, window_height), glController(model), guiController(model), guiView(window)
+    model(window_width, window_height),
+    glController(model, window),
+    guiController(model),
+    guiView(window)
 {
 }
 
 
 void MainController::MouseMoved(int x, int y)
 {
-    if (guiController.WantCaptureMouse(x, y))
+    if (guiController.WantCaptureMouse())
         return;
 
     glController.MouseMove(x, y);
+}
+
+
+void MainController::MouseClicked(MouseButton button)
+{
+    if (guiController.WantCaptureMouse())
+        return;
+
+    glController.MouseClick(button);
+}
+
+
+void MainController::MouseReleased(MouseButton button)
+{
+    if (guiController.WantCaptureMouse())
+        return;
+
+    glController.MouseRelease(button);
 }
 
 

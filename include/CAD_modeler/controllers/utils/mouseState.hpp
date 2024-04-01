@@ -24,6 +24,7 @@ public:
     void Moved(int x, int y);
 
     inline glm::ivec2 TranslationGet() const { return actMousePos - oldMousePos; }
+    inline glm::ivec2 PositionGet() const { return actMousePos; }
 
 private:
     static const int BUTTON_CNT = 3;

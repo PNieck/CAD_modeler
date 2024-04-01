@@ -93,6 +93,18 @@ void CameraSystem::RotateAroundTarget(float x, float y) const
 }
 
 
+Position CameraSystem::GetPosition() const
+{
+    return coordinator->GetComponent<Position>(camera);
+}
+
+
+Position CameraSystem::GetTargetPosition() const
+{
+    return coordinator->GetComponent<CameraParameters>(camera).target;
+}
+
+
 float CameraSystem::GetDistanceToTarget() const
 {
     CameraParameters const& params = coordinator->GetComponent<CameraParameters>(camera);

@@ -6,6 +6,7 @@
 #include "model/systems/meshRenderer.hpp"
 #include "model/systems/toriSystem.hpp"
 #include "model/systems/gridSystem.hpp"
+#include "model/systems/cursorSystem.hpp"
 
 
 class Model
@@ -31,6 +32,11 @@ public:
 
     void ChangeViewportSize(int width, int height);
 
+    inline void SetCursorPosition(float x, float y, float z) const
+        { cursorSystem->SetPosition(glm::vec3(x, y, z)); }
+
+    void SetCursorPositionFromWindowPoint(float x, float y) const;
+
 private:
     Coordinator coordinator;
 
@@ -38,6 +44,7 @@ private:
     std::shared_ptr<MeshRenderer> meshRenderer;
     std::shared_ptr<ToriSystem> toriSystem;
     std::shared_ptr<GridSystem> gridSystem;
+    std::shared_ptr<CursorSystem> cursorSystem;
 };
 
 
