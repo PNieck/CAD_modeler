@@ -14,6 +14,10 @@ public:
     ~GuiView();
 
     void RenderGui(GuiController& controller, const Model& model) const;
+
+private:
+    void RenderDefaultGui(GuiController& controller, const Model& model) const;
+    void RenderAdd3DPointsGui(GuiController& controller, const Model& model) const;
 };
 
 
