@@ -1,10 +1,12 @@
 #include <CAD_modeler/controllers/glController.hpp>
 
+#include <CAD_modeler/controllers/mainController.hpp>
+
 #include <stdexcept>
 
 
-GlController::GlController(Model& model, GLFWwindow * window):
-    model(model), window(window)
+GlController::GlController(Model& model, GLFWwindow* window, MainController& controller):
+    window(window), SubController(model, controller)
 {
 }
 
@@ -13,19 +15,25 @@ void GlController::MouseClick(MouseButton button)
 {
     mouseState.ButtonClicked(button);
 
-    if (button == MouseButton::Left) {
-        int windowWidth, windowHeight;
-
-        glfwGetWindowSize(window, &windowWidth, &windowHeight);
-
-        int halfWidth = windowWidth / 2;
-        int halfHeight = windowHeight / 2;
-
-        auto mousePos = mouseState.PositionGet();
-        float x = (float)(mousePos.x - halfWidth) / (float)halfWidth;
-        float y = (float)(mousePos.y - halfHeight) / (float)halfHeight;
-        model.SetCursorPositionFromWindowPoint(x, -y);
+    if (button == MouseButton::Left && GetAppState() == AppState::Default) {
+        MoveCursor();
     }
+}
+
+
+void GlController::MoveCursor() const
+{
+    int windowWidth, windowHeight;
+
+    glfwGetWindowSize(window, &windowWidth, &windowHeight);
+
+    int halfWidth = windowWidth / 2;
+    int halfHeight = windowHeight / 2;
+
+    auto mousePos = mouseState.PositionGet();
+    float x = (float)(mousePos.x - halfWidth) / (float)halfWidth;
+    float y = (float)(mousePos.y - halfHeight) / (float)halfHeight;
+    model.SetCursorPositionFromWindowPoint(x, -y);
 }
 
 

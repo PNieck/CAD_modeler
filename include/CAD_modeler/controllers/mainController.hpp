@@ -1,10 +1,10 @@
-#ifndef MAIN_CONTROLLER_H
-#define MAIN_CONTROLLER_H
+#pragma once
 
 #include "glController.hpp"
 #include "guiController.hpp"
 #include "../views/guiView.hpp"
 #include "../model.hpp"
+#include "utils/appState.hpp"
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
@@ -22,6 +22,8 @@ public:
     void MouseMoved(int x, int y);
     inline void ScrollMoved(int offset) { glController.ScrollMoved(offset); }
 
+    inline void SetAppState(AppState newAppState) { appState = newAppState; }
+    inline AppState GetAppState() const { return appState; }
 
 private:
     Model model;
@@ -30,7 +32,6 @@ private:
     GuiController guiController;
 
     GuiView guiView;
+
+    AppState appState;
 };
-
-
-#endif

@@ -4,21 +4,14 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
-#include "../model.hpp"
-#include "utils/mouseState.hpp"
+#include "subController.hpp"
 
 
-class GuiController {
+class GuiController: public SubController {
 public:
-    GuiController(Model& model);
+    GuiController(Model& model, MainController& controller);
 
     inline bool WantCaptureMouse()
         { return ImGui::GetIO().WantCaptureMouse; }
 
-    void TorusBigRadiusChanged(float newRadius);
-
-    void TorusSmallRadiusChanged(float newRadius);
-
-private:
-    Model& model;
 };
