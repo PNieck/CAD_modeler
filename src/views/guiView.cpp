@@ -24,16 +24,31 @@ GuiView::GuiView(GLFWwindow * window)
 }
 
 
+GuiView::~GuiView()
+{
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+}
+
+
 void GuiView::RenderGui(GuiController& controller, const Model& model) const
 {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    ImGui::Begin("Torus");
+    ImGui::Begin("Modeler");
     
-    if (ImGui::Button("Add 3D points")) {
-        controller.SetAppState(AppState::Adding3dPoints);
+    switch (controller.GetAppState())
+    {
+        case AppState::Default:
+            RenderDefaultGui(controller, model);
+            break;
+
+        case AppState::Adding3dPoints:
+            RenderAdd3DPointsGui(controller, model);
+            break;
     }
 
     ImGui::End();
@@ -43,9 +58,17 @@ void GuiView::RenderGui(GuiController& controller, const Model& model) const
 }
 
 
-GuiView::~GuiView()
+void GuiView::RenderDefaultGui(GuiController & controller, const Model & model) const
 {
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();
+    if (ImGui::Button("Add 3D points")) {
+        controller.SetAppState(AppState::Adding3dPoints);
+    }
+}
+
+
+void GuiView::RenderAdd3DPointsGui(GuiController & controller, const Model & model) const
+{
+    if (ImGui::Button("Finish adding points")) {
+        controller.SetAppState(AppState::Default);
+    }
 }
