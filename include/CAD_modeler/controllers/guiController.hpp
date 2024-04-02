@@ -14,4 +14,6 @@ public:
     inline bool WantCaptureMouse()
         { return ImGui::GetIO().WantCaptureMouse; }
 
+    inline void AddTorus() const
+        { model.AddTorus(); }
 };

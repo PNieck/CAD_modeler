@@ -46,7 +46,17 @@ void Model::RenderFrame()
 
 void Model::AddTorus()
 {
-    toriSystem->AddTorus();
+    Position cursorPos = cursorSystem->GetPosition();
+
+    // Default torus parameters
+    TorusParameters params {
+        .majorRadius = 1.0f,
+        .minorRadius = 0.2f,
+        .pointsInCirc = 6,
+        .circCnt = 5,
+    };
+
+    toriSystem->AddTorus(cursorPos, params);
 }
 
 
