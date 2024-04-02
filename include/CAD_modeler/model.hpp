@@ -1,5 +1,4 @@
-#ifndef MODEL_H
-#define MODEL_H
+#pragma once
 
 #include "model/ecsCoordinator.hpp"
 #include "model/systems/cameraSystem.hpp"
@@ -7,6 +6,7 @@
 #include "model/systems/toriSystem.hpp"
 #include "model/systems/gridSystem.hpp"
 #include "model/systems/cursorSystem.hpp"
+#include "model/systems/pointsSystem.hpp"
 
 
 class Model
@@ -35,7 +35,10 @@ public:
     inline void SetCursorPosition(float x, float y, float z) const
         { cursorSystem->SetPosition(glm::vec3(x, y, z)); }
 
-    void SetCursorPositionFromWindowPoint(float x, float y) const;
+    // TODO; Change to normal coordinates
+    void SetCursorPositionFromViewport(float x, float y) const;
+
+    void Add3DPointFromViewport(float x, float y) const;
 
 private:
     Coordinator coordinator;
@@ -45,7 +48,7 @@ private:
     std::shared_ptr<ToriSystem> toriSystem;
     std::shared_ptr<GridSystem> gridSystem;
     std::shared_ptr<CursorSystem> cursorSystem;
+    std::shared_ptr<PointsSystem> pointsSystem;
+
+    glm::vec3 PointFromViewportCoordinates(float x, float y) const;
 };
-
-
-#endif

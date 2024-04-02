@@ -3,9 +3,10 @@
 
 MainController::MainController(GLFWwindow* window, int window_width, int window_height):
     model(window_width, window_height),
-    glController(model, window),
-    guiController(model),
-    guiView(window)
+    glController(model, window, *this),
+    guiController(model, *this),
+    guiView(window),
+    appState(AppState::Default)
 {
 }
 
@@ -39,6 +40,7 @@ void MainController::MouseReleased(MouseButton button)
 
 void MainController::Render()
 {
+    // FIXME: use only views
     model.RenderFrame();
     guiView.RenderGui(guiController, model);
 }

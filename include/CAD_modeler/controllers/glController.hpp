@@ -1,15 +1,17 @@
 #pragma once
 
 #include "utils/mouseState.hpp"
-#include "../model.hpp"
+#include "subController.hpp"
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
+#include <tuple>
 
-class GlController {
+
+class GlController: public SubController {
 public:
-    GlController(Model& model, GLFWwindow* window);
+    GlController(Model& model, GLFWwindow* window, MainController& controller);
 
     inline void WindowSizeChanged(int width, int height) { model.ChangeViewportSize(width, height); }
 
@@ -23,9 +25,13 @@ private:
     static constexpr float TRANSLATION_COEFF = 0.01f;
     static constexpr float SCROLL_COEFF = 0.7f;
 
+    // FIXME: remove
     GLFWwindow* window;
 
-    Model& model;
-
     MouseState mouseState;
+
+    void MoveCursor() const;
+    void Add3DPoint() const;
+
+    std::tuple<float, float> MouseToViewportCoordinates() const;
 };

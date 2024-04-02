@@ -91,12 +91,6 @@ Shader::~Shader()
 }
 
 
-void Shader::use() const
-{
-    glUseProgram(id);
-}
-
-
 void Shader::setBool(const std::string &name, bool value) const
 {
     setInt(name, (int)value);
@@ -121,6 +115,13 @@ void Shader::setMatrix4(const std::string & name, const glm::mat4x4 & matrix) co
 {
     int location = findUniformLocation(name);
     glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(matrix));
+}
+
+
+void Shader::setVec4(const std::string & name, const glm::vec4 & vec) const
+{
+    int location = findUniformLocation(name);
+    glUniform4fv(location, 1, glm::value_ptr(vec));
 }
 
 

@@ -40,13 +40,14 @@ void MeshRenderer::Render()
     auto const& cameraSystem = coordinator->GetSystem<CameraSystem>();
     glm::mat4x4 cameraMtx = cameraSystem->PerspectiveMatrix() * cameraSystem->ViewMatrix();
 
+    shader.use();
+    shader.setVec4("color", glm::vec4(1.0f));
+
     for (auto const entity : entities) {
         auto const& mesh = coordinator->GetComponent<Mesh>(entity);
         auto const& position = coordinator->GetComponent<Position>(entity);
         auto const& scale = coordinator->GetComponent<Scale>(entity);
         auto const& rotation = coordinator->GetComponent<Rotation>(entity);
-
-        shader.use();
 
         glm::mat4x4 modelMtx = scale.ScaleMatrix() * rotation.GetRotationMatrix() * position.TranslationMatrix();
         shader.setMatrix4("MVP", cameraMtx * modelMtx);

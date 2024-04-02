@@ -1,10 +1,12 @@
 #include <CAD_modeler/controllers/glController.hpp>
 
+#include <CAD_modeler/controllers/mainController.hpp>
+
 #include <stdexcept>
 
 
-GlController::GlController(Model& model, GLFWwindow * window):
-    model(model), window(window)
+GlController::GlController(Model& model, GLFWwindow* window, MainController& controller):
+    window(window), SubController(model, controller)
 {
 }
 
@@ -14,18 +16,34 @@ void GlController::MouseClick(MouseButton button)
     mouseState.ButtonClicked(button);
 
     if (button == MouseButton::Left) {
-        int windowWidth, windowHeight;
+        switch (GetAppState())
+        {
+        case AppState::Default:
+            MoveCursor();
+            break;
 
-        glfwGetWindowSize(window, &windowWidth, &windowHeight);
-
-        int halfWidth = windowWidth / 2;
-        int halfHeight = windowHeight / 2;
-
-        auto mousePos = mouseState.PositionGet();
-        float x = (float)(mousePos.x - halfWidth) / (float)halfWidth;
-        float y = (float)(mousePos.y - halfHeight) / (float)halfHeight;
-        model.SetCursorPositionFromWindowPoint(x, -y);
+        case AppState::Adding3dPoints:
+            Add3DPoint();
+            break;
+        
+        default:
+            break;
+        }
     }
+}
+
+
+void GlController::MoveCursor() const
+{
+    auto [x, y] = MouseToViewportCoordinates();
+    model.SetCursorPositionFromViewport(x, y);
+}
+
+
+void GlController::Add3DPoint() const
+{
+    auto [x, y] = MouseToViewportCoordinates();
+    model.Add3DPointFromViewport(x, y);
 }
 
 
@@ -37,6 +55,23 @@ void GlController::MouseMove(int x, int y)
         auto offset = mouseState.TranslationGet();
         model.RotateCamera(offset.y * 0.02f, offset.x * 0.02f);
     }
+}
+
+
+std::tuple<float,float> GlController::MouseToViewportCoordinates() const
+{
+    int windowWidth, windowHeight;
+
+    glfwGetWindowSize(window, &windowWidth, &windowHeight);
+
+    int halfWidth = windowWidth / 2;
+    int halfHeight = windowHeight / 2;
+
+    auto mousePos = mouseState.PositionGet();
+    float x = (float)(mousePos.x - halfWidth) / (float)halfWidth;
+    float y = -(float)(mousePos.y - halfHeight) / (float)halfHeight;
+
+    return std::make_tuple(x, y);
 }
 
 

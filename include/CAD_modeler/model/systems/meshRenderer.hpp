@@ -1,5 +1,4 @@
-#ifndef MESH_RENDERER_H
-#define MESH_RENDERER_H
+#pragma once
 
 #include "system.hpp"
 #include "../../shader.hpp"
@@ -16,6 +15,3 @@ public:
 private:
     Shader shader;
 };
-
-
-#endif

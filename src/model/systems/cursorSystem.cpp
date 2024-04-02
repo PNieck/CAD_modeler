@@ -54,6 +54,7 @@ void CursorSystem::Render()
     auto const& position = coordinator->GetComponent<Position>(cursor);
 
     shader.use();
+    shader.setVec4("color", glm::vec4(1.0f, 0.31f, 0.0f, 1.0f));
 
     glm::mat4x4 modelMtx = position.TranslationMatrix();
     shader.setMatrix4("MVP", cameraMtx * modelMtx);
