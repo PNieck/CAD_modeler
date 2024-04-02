@@ -9,6 +9,7 @@ class Position {
 public:
     Position(): vec() {}
     Position(float val): vec(val) {}
+    Position(const glm::vec3& vec): vec(vec) {}
     Position(float x, float y, float z): vec(x, y, z) {}
 
     glm::mat4x4 TranslationMatrix() const;

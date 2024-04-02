@@ -7,6 +7,7 @@
 
 GuiView::GuiView(GLFWwindow * window)
 {
+    // FIXME: function, which generates glsl version string
     const char* glsl_version = "#version 330";
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();

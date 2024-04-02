@@ -6,6 +6,8 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
+#include <tuple>
+
 
 class GlController: public SubController {
 public:
@@ -29,4 +31,7 @@ private:
     MouseState mouseState;
 
     void MoveCursor() const;
+    void Add3DPoint() const;
+
+    std::tuple<float, float> MouseToViewportCoordinates() const;
 };

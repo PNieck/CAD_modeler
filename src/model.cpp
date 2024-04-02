@@ -3,6 +3,8 @@
 #include <CAD_modeler/utilities/line.hpp>
 #include <CAD_modeler/utilities/plane.hpp>
 
+#include <stdexcept>
+
 
 Model::Model(int viewport_width, int viewport_height)
 {
@@ -14,17 +16,18 @@ Model::Model(int viewport_width, int viewport_height)
     ToriSystem::RegisterSystem(coordinator);
     GridSystem::RegisterSystem(coordinator);
     CursorSystem::RegisterSystem(coordinator);
+    PointsSystem::RegisterSystem(coordinator);
 
     cameraSys = coordinator.GetSystem<CameraSystem>();
     meshRenderer = coordinator.GetSystem<MeshRenderer>();
     toriSystem = coordinator.GetSystem<ToriSystem>();
     gridSystem = coordinator.GetSystem<GridSystem>();
     cursorSystem = coordinator.GetSystem<CursorSystem>();
+    pointsSystem = coordinator.GetSystem<PointsSystem>();
 
     cameraSys->Init(viewport_width, viewport_height);
     gridSystem->Init();
     cursorSystem->Init();
-    
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 }
@@ -37,6 +40,7 @@ void Model::RenderFrame()
     gridSystem->Render();
     meshRenderer->Render();
     cursorSystem->Render();
+    pointsSystem->Render();
 }
 
 
@@ -52,7 +56,21 @@ void Model::ChangeViewportSize(int width, int height)
     cameraSys->ChangeViewportSize(width, height);
 }
 
-void Model::SetCursorPositionFromWindowPoint(float x, float y) const
+
+void Model::SetCursorPositionFromViewport(float x, float y) const
+{
+    cursorSystem->SetPosition(PointFromViewportCoordinates(x, y));
+}
+
+
+void Model::Add3DPointFromViewport(float x, float y) const
+{
+    Position newPos(PointFromViewportCoordinates(x, y));
+    pointsSystem->CreatePoint(newPos);
+}
+
+
+glm::vec3 Model::PointFromViewportCoordinates(float x, float y) const
 {
     auto viewMtx = cameraSys->ViewMatrix();
     auto perspectiveMtx = cameraSys->PerspectiveMatrix();
@@ -62,11 +80,20 @@ void Model::SetCursorPositionFromWindowPoint(float x, float y) const
 
     auto cameraInv = glm::inverse(perspectiveMtx * viewMtx);
 
-    glm::vec4 near_v4 = cameraInv * glm::vec4(x, y, -1.0f, 1.0f);
-    glm::vec4 far_v4 = cameraInv * glm::vec4(x, y, 1.0f, 1.0f);
+    glm::vec4 nearV4 = cameraInv * glm::vec4(x, y, -1.0f, 1.0f);
+    glm::vec4 farV4 = cameraInv * glm::vec4(x, y, 1.0f, 1.0f);
 
-    glm::vec3 near = glm::vec3(near_v4.x / near_v4.w, near_v4.y / near_v4.w, near_v4.z / near_v4.w);
-    glm::vec3 far = glm::vec3(far_v4.x / far_v4.w, far_v4.y / far_v4.w, far_v4.z / far_v4.w);
+    glm::vec3 near = glm::vec3(
+        nearV4.x / nearV4.w,
+        nearV4.y / nearV4.w,
+        nearV4.z / nearV4.w
+    );
+
+    glm::vec3 far = glm::vec3(
+        farV4.x / farV4.w,
+        farV4.y / farV4.w,
+        farV4.z / farV4.w
+    );
 
     Line nearToFar = Line::FromTwoPoints(near, far);
 
@@ -75,10 +102,10 @@ void Model::SetCursorPositionFromWindowPoint(float x, float y) const
 
     std::optional<glm::vec3> intersection =
         perpendicularToScreenWithCursor.Intersect(nearToFar);
-    
+
     if (!intersection.has_value()) {
-        return;
+        throw std::runtime_error("Cannot project viewport coordinates to 3d ones");
     }
 
-    cursorSystem->SetPosition(intersection.value());
+    return intersection.value();
 }

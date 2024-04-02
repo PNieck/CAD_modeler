@@ -15,25 +15,35 @@ void GlController::MouseClick(MouseButton button)
 {
     mouseState.ButtonClicked(button);
 
-    if (button == MouseButton::Left && GetAppState() == AppState::Default) {
-        MoveCursor();
+    if (button == MouseButton::Left) {
+        switch (GetAppState())
+        {
+        case AppState::Default:
+            MoveCursor();
+            break;
+
+        case AppState::Adding3dPoints:
+            Add3DPoint();
+            break;
+        
+        default:
+            break;
+        }
     }
 }
 
 
 void GlController::MoveCursor() const
 {
-    int windowWidth, windowHeight;
+    auto [x, y] = MouseToViewportCoordinates();
+    model.SetCursorPositionFromViewport(x, y);
+}
 
-    glfwGetWindowSize(window, &windowWidth, &windowHeight);
 
-    int halfWidth = windowWidth / 2;
-    int halfHeight = windowHeight / 2;
-
-    auto mousePos = mouseState.PositionGet();
-    float x = (float)(mousePos.x - halfWidth) / (float)halfWidth;
-    float y = (float)(mousePos.y - halfHeight) / (float)halfHeight;
-    model.SetCursorPositionFromWindowPoint(x, -y);
+void GlController::Add3DPoint() const
+{
+    auto [x, y] = MouseToViewportCoordinates();
+    model.Add3DPointFromViewport(x, y);
 }
 
 
@@ -45,6 +55,23 @@ void GlController::MouseMove(int x, int y)
         auto offset = mouseState.TranslationGet();
         model.RotateCamera(offset.y * 0.02f, offset.x * 0.02f);
     }
+}
+
+
+std::tuple<float,float> GlController::MouseToViewportCoordinates() const
+{
+    int windowWidth, windowHeight;
+
+    glfwGetWindowSize(window, &windowWidth, &windowHeight);
+
+    int halfWidth = windowWidth / 2;
+    int halfHeight = windowHeight / 2;
+
+    auto mousePos = mouseState.PositionGet();
+    float x = (float)(mousePos.x - halfWidth) / (float)halfWidth;
+    float y = -(float)(mousePos.y - halfHeight) / (float)halfHeight;
+
+    return std::make_tuple(x, y);
 }
 
 
