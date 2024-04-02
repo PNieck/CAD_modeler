@@ -43,7 +43,7 @@ public:
 
 
     template<typename Comp>
-    void AddComponent(Entity entity, Comp& component) {
+    void AddComponent(Entity entity, const Comp& component) {
         componentMgr.AddComponent<Comp>(entity, component);
 
         auto const& componentsSet = componentMgr.GetEntityComponents(entity);

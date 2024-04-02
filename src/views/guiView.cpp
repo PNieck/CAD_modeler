@@ -63,6 +63,10 @@ void GuiView::RenderDefaultGui(GuiController & controller, const Model & model) 
     if (ImGui::Button("Add 3D points")) {
         controller.SetAppState(AppState::Adding3dPoints);
     }
+
+    if (ImGui::Button("Add torus")) {
+        controller.AddTorus();
+    }
 }
 
 
