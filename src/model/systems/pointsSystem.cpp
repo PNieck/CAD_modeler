@@ -44,13 +44,14 @@ void PointsSystem::Render() const
         return;
     }
 
+    shader.use();
+    shader.setVec4("color", glm::vec4(1.0f));
+
     auto const& cameraSystem = coordinator->GetSystem<CameraSystem>();
     glm::mat4x4 cameraMtx = cameraSystem->PerspectiveMatrix() * cameraSystem->ViewMatrix();
 
     for (auto const entity : entities) {
         auto const& position = coordinator->GetComponent<Position>(entity);
-
-        shader.use();
 
         shader.setMatrix4("MVP", cameraMtx * position.TranslationMatrix());
         
