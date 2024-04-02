@@ -21,7 +21,7 @@ public:
     }
 
     template<typename T>
-    inline void AddComponent(Entity entity, T& component) {
+    inline void AddComponent(Entity entity, const T& component) {
         GetComponentCollection<T>()->AddComponent(entity, component);
         componentsOfEntities[entity].insert(GetComponentId<T>());
     }

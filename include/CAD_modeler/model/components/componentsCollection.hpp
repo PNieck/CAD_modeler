@@ -17,7 +17,7 @@ public:
 template<typename T>
 class ComponentCollection: public IComponentCollection {
 public:
-    inline void AddComponent(Entity entity, T& component) {
+    inline void AddComponent(Entity entity, const T& component) {
         components.insert({ entity, component });
     }
 
