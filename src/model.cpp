@@ -18,6 +18,7 @@ Model::Model(int viewport_width, int viewport_height)
     CursorSystem::RegisterSystem(coordinator);
     PointsSystem::RegisterSystem(coordinator);
     NameSystem::RegisterSystem(coordinator);
+    SelectionSystem::RegisterSystem(coordinator);
 
     cameraSys = coordinator.GetSystem<CameraSystem>();
     meshRenderer = coordinator.GetSystem<MeshRenderer>();
@@ -26,6 +27,7 @@ Model::Model(int viewport_width, int viewport_height)
     cursorSystem = coordinator.GetSystem<CursorSystem>();
     pointsSystem = coordinator.GetSystem<PointsSystem>();
     nameSystem = coordinator.GetSystem<NameSystem>();
+    selectionSystem = coordinator.GetSystem<SelectionSystem>();
 
     cameraSys->Init(viewport_width, viewport_height);
     gridSystem->Init();

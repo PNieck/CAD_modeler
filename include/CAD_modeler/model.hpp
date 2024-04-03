@@ -1,6 +1,7 @@
 #pragma once
 
 #include "model/ecsCoordinator.hpp"
+
 #include "model/systems/cameraSystem.hpp"
 #include "model/systems/meshRenderer.hpp"
 #include "model/systems/toriSystem.hpp"
@@ -8,6 +9,7 @@
 #include "model/systems/cursorSystem.hpp"
 #include "model/systems/pointsSystem.hpp"
 #include "model/systems/nameSystem.hpp"
+#include "model/systems/selectionSystem.hpp"
 
 
 class Model
@@ -47,6 +49,15 @@ public:
     inline const Name& GetEntityName(Entity entity) const
         { return nameSystem->GetName(entity); }
 
+    inline bool IsSelected(Entity entity) const
+        { return selectionSystem->IsSelected(entity); }
+
+    inline void Select(Entity entity)
+        { return selectionSystem->Select(entity); }
+
+    inline void Deselect(Entity entity)
+        { return selectionSystem->Deselect(entity); }
+
 private:
     Coordinator coordinator;
 
@@ -57,6 +68,7 @@ private:
     std::shared_ptr<CursorSystem> cursorSystem;
     std::shared_ptr<PointsSystem> pointsSystem;
     std::shared_ptr<NameSystem> nameSystem;
+    std::shared_ptr<SelectionSystem> selectionSystem;
 
     glm::vec3 PointFromViewportCoordinates(float x, float y) const;
 };

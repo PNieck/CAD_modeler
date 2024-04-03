@@ -4,9 +4,6 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
-#include <list>
-#include <ranges>
-
 
 GuiView::GuiView(GLFWwindow * window)
 {
@@ -80,17 +77,22 @@ void GuiView::RenderDefaultGui(GuiController& controller, const Model& model) co
 void GuiView::RenderObjectNames(GuiController & controller, const Model & model) const
 {
     const auto& entities = model.EntitiesWithNames();
-    static std::list<bool> selected;
 
-    if (selected.size() != entities.size()) {
-        selected.resize(entities.size(), false);
-    }
+    for (auto entity: entities) {
+        bool oldSelected = model.IsSelected(entity);
+        bool newSelected = oldSelected;
 
-    for (auto [entity, isSelected]: std::views::zip(entities, selected)) {
         ImGui::Selectable(
             model.GetEntityName(entity).c_str(),
-            &isSelected
+            &newSelected
         );
+
+        if (oldSelected != newSelected) {
+            if (newSelected)
+                controller.SelectEntity(entity);
+            else
+                controller.DeselectEntity(entity);
+        }
     } 
 }
 
