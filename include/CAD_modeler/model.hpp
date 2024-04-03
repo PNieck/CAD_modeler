@@ -12,6 +12,7 @@
 #include "model/systems/selectionSystem.hpp"
 
 #include "model/components/scale.hpp"
+#include "model/components/rotation.hpp"
 
 
 class Model

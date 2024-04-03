@@ -146,6 +146,10 @@ void GuiView::RenderSingleObjectProperties(Entity entity) const
     it = components.find(Model::GetComponentId<Scale>());
     if (it != components.end())
         DisplayScaleProperty(entity, model.GetComponent<Scale>(entity));
+
+    it = components.find(Model::GetComponentId<Rotation>());
+    if (it != components.end())
+        DisplayRotationProperty(entity, model.GetComponent<Rotation>(entity));
 }
 
 
@@ -182,4 +186,21 @@ void GuiView::DisplayScaleProperty(Entity entity, const Scale& scale) const
 
     if (valueChanged)
         controller.ChangeComponent<Scale>(entity, Scale(x, y, z));
+}
+
+
+void GuiView::DisplayRotationProperty(Entity entity, const Rotation & rotation) const
+{
+    // To degrees
+    auto vector = glm::degrees(rotation.GetEulerAngles());
+    bool valueChanged = false;
+
+    ImGui::SeparatorText("Rotation");
+
+    valueChanged |= ImGui::DragFloat("X##Rotation", &vector.x, DRAG_ANGLE_SPEED, -180.0f, 180.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+    valueChanged |= ImGui::DragFloat("Y##Rotation", &vector.y, DRAG_ANGLE_SPEED, -90.0f, 90.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+    valueChanged |= ImGui::DragFloat("Z##Rotation", &vector.z, DRAG_ANGLE_SPEED, -180.0f, 180.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+
+    if (valueChanged)
+        controller.ChangeComponent<Rotation>(entity, Rotation( glm::radians(vector)));
 }
