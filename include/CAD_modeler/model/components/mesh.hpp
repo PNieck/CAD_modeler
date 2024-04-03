@@ -1,5 +1,4 @@
-#ifndef MESH_H
-#define MESH_H
+#pragma once
 
 #include <vector>
 
@@ -28,6 +27,3 @@ private:
 
     unsigned int elementsCnt;
 };
-
-
-#endif

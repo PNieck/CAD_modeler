@@ -20,7 +20,7 @@ public:
     void MouseClicked(MouseButton button);
     void MouseReleased(MouseButton button);
     void MouseMoved(int x, int y);
-    inline void ScrollMoved(int offset) { glController.ScrollMoved(offset); }
+    void ScrollMoved(int offset);
 
     inline void SetAppState(AppState newAppState) { appState = newAppState; }
     inline AppState GetAppState() const { return appState; }

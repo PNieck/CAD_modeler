@@ -44,3 +44,12 @@ void MainController::Render()
     model.RenderFrame();
     guiView.RenderGui(guiController, model);
 }
+
+
+void MainController::ScrollMoved(int offset)
+{
+    if (guiController.WantCaptureMouse())
+        return;
+
+    glController.ScrollMoved(offset);
+}

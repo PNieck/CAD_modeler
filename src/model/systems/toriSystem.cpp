@@ -3,6 +3,7 @@
 #include <CAD_modeler/model/components/scale.hpp>
 #include <CAD_modeler/model/components/rotation.hpp>
 #include <CAD_modeler/model/components/mesh.hpp>
+#include <CAD_modeler/model/components/name.hpp>
 
 #include <CAD_modeler/model/ecsCoordinator.hpp>
 
@@ -18,6 +19,7 @@ void ToriSystem::RegisterSystem(Coordinator & coordinator)
     coordinator.RegisterComponent<Rotation>();
     coordinator.RegisterComponent<Mesh>();
     coordinator.RegisterComponent<TorusParameters>();
+    coordinator.RegisterComponent<Name>();
 
     coordinator.RegisterRequiredComponent<ToriSystem, Position>();
     coordinator.RegisterRequiredComponent<ToriSystem, Scale>();
@@ -26,7 +28,7 @@ void ToriSystem::RegisterSystem(Coordinator & coordinator)
     coordinator.RegisterRequiredComponent<ToriSystem, TorusParameters>();
 }
 
-Entity ToriSystem::AddTorus(const Position& pos, const TorusParameters& params) const
+Entity ToriSystem::AddTorus(const Position& pos, const TorusParameters& params)
 {
     Entity torus = coordinator->CreateEntity();
 
@@ -39,6 +41,7 @@ Entity ToriSystem::AddTorus(const Position& pos, const TorusParameters& params) 
     coordinator->AddComponent<Rotation>(torus, rot);
 
     coordinator->AddComponent<TorusParameters>(torus, params);
+    coordinator->AddComponent<Name>(torus, nameGenerator.GenerateName("Torus"));
 
     auto vertices = params.GenerateVertices();
     auto indices = params.GenerateEdges();

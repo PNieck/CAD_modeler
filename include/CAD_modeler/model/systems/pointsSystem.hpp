@@ -2,6 +2,7 @@
 
 
 #include "system.hpp"
+#include "utils/nameGenerator.hpp"
 #include "../components/position.hpp"
 #include "../components/mesh.hpp"
 #include "../../shader.hpp"
@@ -20,4 +21,6 @@ public:
 private:
     Mesh pointsMesh;
     Shader shader;
+
+    NameGenerator nameGenerator;
 };
