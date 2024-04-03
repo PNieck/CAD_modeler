@@ -79,6 +79,9 @@ public:
     inline void SetComponent<TorusParameters>(Entity entity, const TorusParameters& params)
         { toriSystem->SetTorusParameter(entity, params); }
 
+    inline void DeleteEntity(Entity entity)
+        { coordinator.DestroyEntity(entity); }
+
     template <typename Comp>
     static inline constexpr ComponentId GetComponentId()
         { return ComponentsManager::GetComponentId<Comp>(); }
