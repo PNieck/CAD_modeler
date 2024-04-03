@@ -26,4 +26,7 @@ public:
     template <typename Comp>
     inline void ChangeComponent(Entity entity, const Comp& comp)
         { model.SetComponent<Comp>(entity, comp); }
+
+    inline void DeleteEntity(Entity entity) const
+        { model.DeleteEntity(entity); }
 };

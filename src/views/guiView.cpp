@@ -154,6 +154,10 @@ void GuiView::RenderSingleObjectProperties(Entity entity) const
     it = components.find(Model::GetComponentId<TorusParameters>());
     if (it != components.end())
         DisplayTorusProperty(entity, model.GetComponent<TorusParameters>(entity));
+
+    if (ImGui::Button("Delete object")) {
+        controller.DeleteEntity(entity);
+    }
 }
 
 
