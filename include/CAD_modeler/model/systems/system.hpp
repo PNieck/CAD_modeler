@@ -1,10 +1,8 @@
-#ifndef SYSTEM_H
-#define SYSTEM_H
+#pragma once
 
 #include "../entitiesManager.hpp"
 
 #include <unordered_set>
-#include <memory.h>
 
 
 class Coordinator;
@@ -21,6 +19,7 @@ public:
         entities.insert(entity);
     }
 
+    // TODO: remove
     inline void SetCoordinator(Coordinator* coordinator) {
         this->coordinator = coordinator;
     }
@@ -29,6 +28,3 @@ protected:
     std::unordered_set<Entity> entities;
     Coordinator* coordinator;
 };
-
-
-#endif

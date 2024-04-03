@@ -1,10 +1,10 @@
-#ifndef COMPONENTS_COLLECTION_H
-#define COMPONENTS_COLLECTION_H
+#pragma once
 
 
 #include "../entitiesManager.hpp"
 
 #include <unordered_map>
+
 
 class IComponentCollection
 {
@@ -26,7 +26,7 @@ public:
     }
 
     inline T& GetComponent(Entity entity) {
-        return components[entity];
+        return components.at(entity);
     }
 
     void EntityDestroyed(Entity entity) override
@@ -38,6 +38,3 @@ public:
 private:
     std::unordered_map<Entity, T> components;
 };
-
-
-#endif

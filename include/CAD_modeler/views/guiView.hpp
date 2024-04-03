@@ -1,5 +1,4 @@
-#ifndef GUI_VIEW_H
-#define GUI_VIEW_H
+#pragma once
 
 #include "../controllers/guiController.hpp"
 #include "../model.hpp"
@@ -21,6 +20,3 @@ private:
 
     void RenderObjectNames(GuiController& controller, const Model& model) const;
 };
-
-
-#endif
