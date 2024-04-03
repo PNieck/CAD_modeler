@@ -4,6 +4,7 @@
 
 #include <CAD_modeler/model/components/position.hpp>
 #include <CAD_modeler/model/components/mesh.hpp>
+#include <CAD_modeler/model/components/name.hpp>
 
 #include <CAD_modeler/model/systems/cameraSystem.hpp>
 
@@ -14,6 +15,7 @@ void CursorSystem::RegisterSystem(Coordinator & coordinator)
 
     coordinator.RegisterComponent<Position>();
     coordinator.RegisterComponent<Mesh>();
+    coordinator.RegisterComponent<Name>();
 
     glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
     glPointSize(10.0f);
@@ -42,6 +44,8 @@ void CursorSystem::Init()
     
     mesh.Update(vertices, indices);
     coordinator->AddComponent<Mesh>(cursor, mesh);
+
+    coordinator->AddComponent<Name>(cursor, "Cursor");
 }
 
 void CursorSystem::Render()

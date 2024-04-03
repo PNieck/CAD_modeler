@@ -7,6 +7,7 @@
 #include "model/systems/gridSystem.hpp"
 #include "model/systems/cursorSystem.hpp"
 #include "model/systems/pointsSystem.hpp"
+#include "model/systems/nameSystem.hpp"
 
 
 class Model
@@ -40,6 +41,12 @@ public:
 
     void Add3DPointFromViewport(float x, float y) const;
 
+    inline const std::unordered_set<Entity> EntitiesWithNames() const
+        { return nameSystem->EntitiesWithNames(); }
+
+    inline const Name& GetEntityName(Entity entity) const
+        { return nameSystem->GetName(entity); }
+
 private:
     Coordinator coordinator;
 
@@ -49,6 +56,7 @@ private:
     std::shared_ptr<GridSystem> gridSystem;
     std::shared_ptr<CursorSystem> cursorSystem;
     std::shared_ptr<PointsSystem> pointsSystem;
+    std::shared_ptr<NameSystem> nameSystem;
 
     glm::vec3 PointFromViewportCoordinates(float x, float y) const;
 };

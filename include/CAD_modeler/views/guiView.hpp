@@ -18,6 +18,8 @@ public:
 private:
     void RenderDefaultGui(GuiController& controller, const Model& model) const;
     void RenderAdd3DPointsGui(GuiController& controller, const Model& model) const;
+
+    void RenderObjectNames(GuiController& controller, const Model& model) const;
 };
 
 

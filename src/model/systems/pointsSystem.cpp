@@ -2,6 +2,8 @@
 
 #include <CAD_modeler/model/systems/cameraSystem.hpp>
 
+#include <CAD_modeler/model/components/name.hpp>
+
 #include <CAD_modeler/model/ecsCoordinator.hpp>
 
 
@@ -10,6 +12,7 @@ void PointsSystem::RegisterSystem(Coordinator& coordinator)
     coordinator.RegisterSystem<PointsSystem>();
 
     coordinator.RegisterComponent<Position>();
+    coordinator.RegisterComponent<Name>();
 }
 
 
@@ -31,6 +34,7 @@ Entity PointsSystem::CreatePoint(Position& pos)
     Entity newPoint = coordinator->CreateEntity();
 
     coordinator->AddComponent<Position>(newPoint, pos);
+    coordinator->AddComponent<Name>(newPoint, nameGenerator.GenerateName("Point"));
 
     entities.insert(newPoint);
 
