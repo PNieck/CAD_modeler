@@ -11,6 +11,9 @@
 #include "model/systems/nameSystem.hpp"
 #include "model/systems/selectionSystem.hpp"
 
+#include "model/components/scale.hpp"
+#include "model/components/rotation.hpp"
+
 
 class Model
 {
@@ -57,6 +60,28 @@ public:
 
     inline void Deselect(Entity entity)
         { return selectionSystem->Deselect(entity); }
+
+    inline const std::unordered_set<Entity>& SelectedEntities() const
+        { return selectionSystem->SelectedEntities(); }
+
+    inline const std::set<ComponentId>& GetEntityComponents(Entity entity) const
+        { return coordinator.GetEntityComponents(entity); }
+
+    template <typename Comp>
+    inline const Comp& GetComponent(Entity entity) const
+        { return coordinator.GetConstComponent<Comp>(entity); }
+
+    template <typename Comp>
+    inline void SetComponent(Entity entity, const Comp& comp)
+        { coordinator.GetComponent<Comp>(entity) = comp; }
+
+    template <>
+    inline void SetComponent<TorusParameters>(Entity entity, const TorusParameters& params)
+        { toriSystem->SetTorusParameter(entity, params); }
+
+    template <typename Comp>
+    static inline constexpr ComponentId GetComponentId()
+        { return ComponentsManager::GetComponentId<Comp>(); }
 
 private:
     Coordinator coordinator;

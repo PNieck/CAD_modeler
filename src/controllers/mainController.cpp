@@ -5,7 +5,7 @@ MainController::MainController(GLFWwindow* window, int window_width, int window_
     model(window_width, window_height),
     glController(model, window, *this),
     guiController(model, *this),
-    guiView(window),
+    guiView(window, guiController, model),
     appState(AppState::Default)
 {
 }
@@ -42,7 +42,7 @@ void MainController::Render()
 {
     // FIXME: use only views
     model.RenderFrame();
-    guiView.RenderGui(guiController, model);
+    guiView.RenderGui();
 }
 
 

@@ -22,4 +22,8 @@ public:
 
     inline void DeselectEntity(Entity entity) const
         { model.Deselect(entity); }
+
+    template <typename Comp>
+    inline void ChangeComponent(Entity entity, const Comp& comp)
+        { model.SetComponent<Comp>(entity, comp); }
 };

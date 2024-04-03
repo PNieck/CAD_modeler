@@ -9,14 +9,29 @@
 
 class GuiView {
 public:
-    GuiView(GLFWwindow* window);
+    GuiView(GLFWwindow* window, GuiController& controller, const Model& model);
     ~GuiView();
 
-    void RenderGui(GuiController& controller, const Model& model) const;
+    void RenderGui() const;
 
 private:
-    void RenderDefaultGui(GuiController& controller, const Model& model) const;
-    void RenderAdd3DPointsGui(GuiController& controller, const Model& model) const;
+    GuiController& controller;
+    const Model& model;
 
-    void RenderObjectNames(GuiController& controller, const Model& model) const;
+    static constexpr float DRAG_FLOAT_SPEED = 0.01f;
+    static constexpr float DRAG_ANGLE_SPEED = 0.5f;
+    static constexpr float MIN_SCALE = 0.01f;
+
+    void RenderDefaultGui() const;
+    void RenderAdd3DPointsGui() const;
+
+    void RenderObjectsNames() const;
+    void RenderObjectsProperties() const;
+
+    void RenderSingleObjectProperties(Entity entity) const;
+
+    void DisplayPositionProperty(Entity entity, const Position& pos) const;
+    void DisplayScaleProperty(Entity entity, const Scale& scale) const;
+    void DisplayRotationProperty(Entity entity, const Rotation& rotation) const;
+    void DisplayTorusProperty(Entity entity, const TorusParameters& params) const;
 };

@@ -11,14 +11,18 @@
 class Rotation {
 public:
     Rotation(): quat() {}
+    Rotation(glm::vec3 pitchYawRoll): quat(pitchYawRoll) {}
     Rotation(float pitch, float yaw, float roll):
-        quat(glm::vec3(pitch, yaw, roll)) {}
+        Rotation(glm::vec3(pitch, yaw, roll)) {}
 
     inline void Rotate(glm::vec3& vec) const
         { vec = quat * vec; }
 
     inline glm::mat4x4 GetRotationMatrix() const
         { return glm::toMat4(quat); }
+
+    inline glm::vec3 GetEulerAngles() const
+        { return glm::eulerAngles(quat); }
 
 private:
     // glm::mat4x4 RotationXMtx() const;

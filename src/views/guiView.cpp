@@ -4,8 +4,12 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
+#include <algorithm>
+#include <iterator>
 
-GuiView::GuiView(GLFWwindow * window)
+
+GuiView::GuiView(GLFWwindow* window, GuiController& controller, const Model& model):
+    controller(controller), model(model)
 {
     // FIXME: function, which generates glsl version string
     const char* glsl_version = "#version 330";
@@ -32,7 +36,7 @@ GuiView::~GuiView()
 }
 
 
-void GuiView::RenderGui(GuiController& controller, const Model& model) const
+void GuiView::RenderGui() const
 {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
@@ -43,22 +47,24 @@ void GuiView::RenderGui(GuiController& controller, const Model& model) const
     switch (controller.GetAppState())
     {
         case AppState::Default:
-            RenderDefaultGui(controller, model);
+            RenderDefaultGui();
             break;
 
         case AppState::Adding3dPoints:
-            RenderAdd3DPointsGui(controller, model);
+            RenderAdd3DPointsGui();
             break;
     }
 
     ImGui::End();
+
+    RenderObjectsProperties();
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
 
-void GuiView::RenderDefaultGui(GuiController& controller, const Model& model) const
+void GuiView::RenderDefaultGui() const
 {
     if (ImGui::Button("Add 3D points")) {
         controller.SetAppState(AppState::Adding3dPoints);
@@ -70,11 +76,11 @@ void GuiView::RenderDefaultGui(GuiController& controller, const Model& model) co
 
     ImGui::Separator();
 
-    RenderObjectNames(controller, model);
+    RenderObjectsNames();
 }
 
 
-void GuiView::RenderObjectNames(GuiController & controller, const Model & model) const
+void GuiView::RenderObjectsNames() const
 {
     const auto& entities = model.EntitiesWithNames();
 
@@ -97,9 +103,137 @@ void GuiView::RenderObjectNames(GuiController & controller, const Model & model)
 }
 
 
-void GuiView::RenderAdd3DPointsGui(GuiController & controller, const Model & model) const
+void GuiView::RenderAdd3DPointsGui() const
 {
     if (ImGui::Button("Finish adding points")) {
         controller.SetAppState(AppState::Default);
     }
+}
+
+
+void GuiView::RenderObjectsProperties() const
+{
+    auto const& selectedEntities = model.SelectedEntities();
+
+    ImGui::Begin("Properties");
+
+    switch (selectedEntities.size())
+    {
+    case 0:
+        ImGui::Text("Select object to show it's properties");
+        break;
+
+    case 1:
+        RenderSingleObjectProperties(*selectedEntities.begin());
+        break;
+
+    default:
+        break;
+    }
+
+    ImGui::End();
+}
+
+
+void GuiView::RenderSingleObjectProperties(Entity entity) const
+{
+    auto const& components = model.GetEntityComponents(entity);
+
+    auto it = components.find(Model::GetComponentId<Position>());
+    if (it != components.end())
+        DisplayPositionProperty(entity, model.GetComponent<Position>(entity));
+
+    it = components.find(Model::GetComponentId<Scale>());
+    if (it != components.end())
+        DisplayScaleProperty(entity, model.GetComponent<Scale>(entity));
+
+    it = components.find(Model::GetComponentId<Rotation>());
+    if (it != components.end())
+        DisplayRotationProperty(entity, model.GetComponent<Rotation>(entity));
+
+    it = components.find(Model::GetComponentId<TorusParameters>());
+    if (it != components.end())
+        DisplayTorusProperty(entity, model.GetComponent<TorusParameters>(entity));
+}
+
+
+void GuiView::DisplayPositionProperty(Entity entity, const Position& pos) const
+{
+    float x = pos.GetX();
+    float y = pos.GetY();
+    float z = pos.GetZ();
+    bool valueChanged = false;
+
+    ImGui::SeparatorText("Position");
+
+    valueChanged |= ImGui::DragFloat("X##Pos", &x, DRAG_FLOAT_SPEED);
+    valueChanged |= ImGui::DragFloat("Y##Pos", &y, DRAG_FLOAT_SPEED);
+    valueChanged |= ImGui::DragFloat("Z##Pos", &z, DRAG_FLOAT_SPEED);
+
+    if (valueChanged)
+        controller.ChangeComponent<Position>(entity, Position(x, y, z));  
+}
+
+
+void GuiView::DisplayScaleProperty(Entity entity, const Scale& scale) const
+{
+    float x = scale.GetX();
+    float y = scale.GetY();
+    float z = scale.GetZ();
+    bool valueChanged = false;
+
+    ImGui::SeparatorText("Scale");
+
+    valueChanged |= ImGui::DragFloat("X##Scale", &x, DRAG_FLOAT_SPEED, MIN_SCALE, 0.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+    valueChanged |= ImGui::DragFloat("Y##Scale", &y, DRAG_FLOAT_SPEED, MIN_SCALE, 0.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+    valueChanged |= ImGui::DragFloat("Z##Scale", &z, DRAG_FLOAT_SPEED, MIN_SCALE, 0.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+
+    if (valueChanged)
+        controller.ChangeComponent<Scale>(entity, Scale(x, y, z));
+}
+
+
+void GuiView::DisplayRotationProperty(Entity entity, const Rotation & rotation) const
+{
+    auto vector = glm::degrees(rotation.GetEulerAngles());
+    bool valueChanged = false;
+
+    ImGui::SeparatorText("Rotation");
+
+    valueChanged |= ImGui::DragFloat("X##Rotation", &vector.x, DRAG_ANGLE_SPEED, -180.0f, 180.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+    valueChanged |= ImGui::DragFloat("Y##Rotation", &vector.y, DRAG_ANGLE_SPEED, -90.0f, 90.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+    valueChanged |= ImGui::DragFloat("Z##Rotation", &vector.z, DRAG_ANGLE_SPEED, -180.0f, 180.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+
+    if (valueChanged)
+        controller.ChangeComponent<Rotation>(entity, Rotation( glm::radians(vector)));
+}
+
+
+void GuiView::DisplayTorusProperty(Entity entity, const TorusParameters& params) const
+{
+    float R = params.majorRadius;
+    float r = params.minorRadius;
+    int minDensity = params.meshDensityMinR;
+    int majDensity = params.meshDensityMajR;
+
+    bool valueChanged = false;
+
+    ImGui::SeparatorText("Rotation");
+
+    valueChanged |= ImGui::DragFloat("Major radius", &R, DRAG_FLOAT_SPEED, 0.001f, 0.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+    valueChanged |= ImGui::DragFloat("Minor radius", &r, DRAG_FLOAT_SPEED, 0.001f, R, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+    valueChanged |= ImGui::DragInt("Mesh density along major radius", &majDensity, 0.2f, 3, 100, "%d", ImGuiSliderFlags_AlwaysClamp);
+    valueChanged |= ImGui::DragInt("Mesh density along minor radius", &minDensity, 0.2f, 3, 100, "%d", ImGuiSliderFlags_AlwaysClamp);
+
+    if (valueChanged) {
+        TorusParameters newParams {
+            .majorRadius = R,
+            .minorRadius = r,
+            .meshDensityMinR = minDensity,
+            .meshDensityMajR = majDensity,
+        };
+
+        controller.ChangeComponent<TorusParameters>(entity, newParams);
+    }
+
 }

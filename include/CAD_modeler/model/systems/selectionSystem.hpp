@@ -14,4 +14,7 @@ public:
     void Select(Entity entity);
 
     void Deselect(Entity entity);
+
+    inline const std::unordered_set<Entity>& SelectedEntities() const
+        { return entities; }
 };

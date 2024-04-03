@@ -1,5 +1,4 @@
-#ifndef COORDINATOR_H
-#define COORDINATOR_H
+#pragma once
 
 #include "entitiesManager.hpp"
 #include "components/componentsManager.hpp"
@@ -63,6 +62,13 @@ public:
         return componentMgr.GetComponent<Comp>(entity);
     }
 
+    template<typename Comp>
+    inline const Comp& GetConstComponent(Entity entity) const {
+        return componentMgr.GetComponent<Comp>(entity);
+    }
+
+    inline const std::set<ComponentId>& GetEntityComponents(Entity entity) const
+        { return componentMgr.GetEntityComponents(entity); }
 
     template<typename Sys>
     inline std::shared_ptr<Sys> GetSystem() {
@@ -75,6 +81,3 @@ private:
     EntitiesManager entitiesMgr;
     SystemsManager systemsMgr;
 };
-
-
-#endif

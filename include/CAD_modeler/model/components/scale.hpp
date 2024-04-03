@@ -10,9 +10,16 @@ public:
     Scale(float value = 1.0f): scale(value) {};
     Scale(float x, float y, float z): scale(x, y, z) {}
 
-    glm::vec3 scale;
+    inline float GetX() const { return scale.x; }
+    inline float GetY() const { return scale.y; } 
+    inline float GetZ() const { return scale.z; }
+
+    inline glm::vec3& AsVector() { return scale; }
 
     glm::mat4x4 ScaleMatrix() const;
+
+private:
+    glm::vec3 scale;
 };
 
 

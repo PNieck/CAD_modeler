@@ -6,16 +6,16 @@
 
 std::vector<float> TorusParameters::GenerateVertices() const
 {
-    float deltaAlpha = 2 * std::numbers::pi / pointsInCirc;
-    float deltaBeta = 2 * std::numbers::pi / circCnt;
+    float deltaAlpha = 2 * std::numbers::pi / meshDensityMinR;
+    float deltaBeta = 2 * std::numbers::pi / meshDensityMajR;
 
-    std::vector<float> result(pointsInCirc * circCnt * 3);
+    std::vector<float> result(meshDensityMinR * meshDensityMajR * 3);
 
-    for (int actCirc = 0; actCirc < circCnt; actCirc++) {
+    for (int actCirc = 0; actCirc < meshDensityMajR; actCirc++) {
         float beta = deltaBeta * actCirc;
 
-        for (int act_pt_in_circ = 0; act_pt_in_circ < pointsInCirc; act_pt_in_circ++) {
-            int index = (actCirc * pointsInCirc + act_pt_in_circ) * 3;
+        for (int act_pt_in_circ = 0; act_pt_in_circ < meshDensityMinR; act_pt_in_circ++) {
+            int index = (actCirc * meshDensityMinR + act_pt_in_circ) * 3;
 
             float alpha = deltaAlpha * act_pt_in_circ;
 
@@ -31,28 +31,28 @@ std::vector<float> TorusParameters::GenerateVertices() const
 
 std::vector<uint32_t> TorusParameters::GenerateEdges() const
 {
-    std::vector<uint32_t> result(pointsInCirc*circCnt + circCnt + pointsInCirc*circCnt + pointsInCirc);
+    std::vector<uint32_t> result(meshDensityMinR*meshDensityMajR + meshDensityMajR + meshDensityMinR*meshDensityMajR + meshDensityMinR);
 
-    for (int i = 0; i < circCnt; i++) {
-        for (int j=0; j < pointsInCirc; j++) {
-            result[i*pointsInCirc + j + i] = j + i*pointsInCirc;
+    for (int i = 0; i < meshDensityMajR; i++) {
+        for (int j=0; j < meshDensityMinR; j++) {
+            result[i*meshDensityMinR + j + i] = j + i*meshDensityMinR;
         }
 
-        result[pointsInCirc * (i+1) + i] = std::numeric_limits<uint32_t>::max();
+        result[meshDensityMinR * (i+1) + i] = std::numeric_limits<uint32_t>::max();
     }
 
-    uint32_t index = pointsInCirc * circCnt + circCnt;
+    uint32_t index = meshDensityMinR * meshDensityMajR + meshDensityMajR;
 
-    for (int i = 0; i < pointsInCirc; i++) {
-        for (int j=0; j < circCnt; j++) {
-            result[index + j + i*circCnt + i] = j * pointsInCirc + i;
+    for (int i = 0; i < meshDensityMinR; i++) {
+        for (int j=0; j < meshDensityMajR; j++) {
+            result[index + j + i*meshDensityMajR + i] = j * meshDensityMinR + i;
         }
 
-        result[index + circCnt*(i+1) + i] = std::numeric_limits<uint32_t>::max();
+        result[index + meshDensityMajR*(i+1) + i] = std::numeric_limits<uint32_t>::max();
     }
 
 
-    for (int i=0; i < circCnt; i++) {
+    for (int i=0; i < meshDensityMajR; i++) {
         
     }
 

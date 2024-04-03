@@ -52,3 +52,13 @@ Entity ToriSystem::AddTorus(const Position& pos, const TorusParameters& params)
 
     return torus;
 }
+
+
+void ToriSystem::SetTorusParameter(Entity entity, const TorusParameters& params)
+{
+    coordinator->GetComponent<TorusParameters>(entity) = params;
+
+    auto vertices = params.GenerateVertices();
+    auto indices = params.GenerateEdges();
+    coordinator->GetComponent<Mesh>(entity).Update(vertices, indices);
+}

@@ -1,5 +1,4 @@
-#ifndef COMPONENTS_MANAGER_H
-#define COMPONENTS_MANAGER_H
+#pragma once
 
 #include "../entitiesManager.hpp"
 #include "componentsCollection.hpp"
@@ -33,12 +32,12 @@ public:
     }
 
     template<typename T>
-    inline T& GetComponent(Entity entity) {
+    inline T& GetComponent(Entity entity) const {
         return GetComponentCollection<T>()->GetComponent(entity);
     }
 
-    inline const std::set<ComponentId>& GetEntityComponents(Entity entity) {
-        return componentsOfEntities[entity];
+    inline const std::set<ComponentId>& GetEntityComponents(Entity entity) const {
+        return componentsOfEntities.at(entity);
     }
 
     void EntityDeleted(Entity entity) {
@@ -59,11 +58,8 @@ private:
     std::unordered_map<Entity, std::set<ComponentId>> componentsOfEntities;
 
     template<typename T>
-    std::shared_ptr<ComponentCollection<T>> GetComponentCollection() {
+    std::shared_ptr<ComponentCollection<T>> GetComponentCollection() const {
         std::size_t hash = GetComponentId<T>();
-        return std::static_pointer_cast<ComponentCollection<T>>(components[hash]);
+        return std::static_pointer_cast<ComponentCollection<T>>(components.at(hash));
     }
 };
-
-
-#endif
