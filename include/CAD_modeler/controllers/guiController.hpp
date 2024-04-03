@@ -22,4 +22,7 @@ public:
 
     inline void DeselectEntity(Entity entity) const
         { model.Deselect(entity); }
+
+    inline void ChangePosition(Entity entity, const Position& pos)
+        { model.SetPosition(entity, pos); }
 };

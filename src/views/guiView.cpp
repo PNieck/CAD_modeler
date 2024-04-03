@@ -4,8 +4,12 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
+#include <algorithm>
+#include <iterator>
 
-GuiView::GuiView(GLFWwindow * window)
+
+GuiView::GuiView(GLFWwindow* window, GuiController& controller, const Model& model):
+    controller(controller), model(model)
 {
     // FIXME: function, which generates glsl version string
     const char* glsl_version = "#version 330";
@@ -32,7 +36,7 @@ GuiView::~GuiView()
 }
 
 
-void GuiView::RenderGui(GuiController& controller, const Model& model) const
+void GuiView::RenderGui() const
 {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
@@ -43,22 +47,24 @@ void GuiView::RenderGui(GuiController& controller, const Model& model) const
     switch (controller.GetAppState())
     {
         case AppState::Default:
-            RenderDefaultGui(controller, model);
+            RenderDefaultGui();
             break;
 
         case AppState::Adding3dPoints:
-            RenderAdd3DPointsGui(controller, model);
+            RenderAdd3DPointsGui();
             break;
     }
 
     ImGui::End();
+
+    RenderObjectsProperties();
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
 
-void GuiView::RenderDefaultGui(GuiController& controller, const Model& model) const
+void GuiView::RenderDefaultGui() const
 {
     if (ImGui::Button("Add 3D points")) {
         controller.SetAppState(AppState::Adding3dPoints);
@@ -70,11 +76,11 @@ void GuiView::RenderDefaultGui(GuiController& controller, const Model& model) co
 
     ImGui::Separator();
 
-    RenderObjectNames(controller, model);
+    RenderObjectsNames();
 }
 
 
-void GuiView::RenderObjectNames(GuiController & controller, const Model & model) const
+void GuiView::RenderObjectsNames() const
 {
     const auto& entities = model.EntitiesWithNames();
 
@@ -97,9 +103,60 @@ void GuiView::RenderObjectNames(GuiController & controller, const Model & model)
 }
 
 
-void GuiView::RenderAdd3DPointsGui(GuiController & controller, const Model & model) const
+void GuiView::RenderAdd3DPointsGui() const
 {
     if (ImGui::Button("Finish adding points")) {
         controller.SetAppState(AppState::Default);
     }
+}
+
+
+void GuiView::RenderObjectsProperties() const
+{
+    auto const& selectedEntities = model.SelectedEntities();
+
+    ImGui::Begin("Properties");
+
+    switch (selectedEntities.size())
+    {
+    case 0:
+        ImGui::Text("Select object to show it's properties");
+        break;
+
+    case 1:
+        RenderSingleObjectProperties(*selectedEntities.begin());
+        break;
+
+    default:
+        break;
+    }
+
+    ImGui::End();
+}
+
+
+void GuiView::RenderSingleObjectProperties(Entity entity) const
+{
+    auto const& components = model.GetEntityComponents(entity);
+
+    auto it = components.find(Model::GetComponentId<Position>());
+    if (it != components.end())
+        DisplayPositionProperty(entity, model.GetPosition(entity));
+}
+
+
+void GuiView::DisplayPositionProperty(Entity entity, const Position& pos) const
+{
+    float x = pos.GetX();
+    float y = pos.GetY();
+    float z = pos.GetZ();
+
+    ImGui::SeparatorText("Position");
+
+    ImGui::DragFloat("X", &x, 0.01f);
+    ImGui::DragFloat("Y", &y, 0.01f);
+    ImGui::DragFloat("Z", &z, 0.01f);
+
+    if (x != pos.GetX() || y != pos.GetY() || z != pos.GetZ())
+        controller.ChangePosition(entity, Position(x, y, z));
 }

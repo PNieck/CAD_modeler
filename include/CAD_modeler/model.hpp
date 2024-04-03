@@ -58,6 +58,22 @@ public:
     inline void Deselect(Entity entity)
         { return selectionSystem->Deselect(entity); }
 
+    inline const std::unordered_set<Entity>& SelectedEntities() const
+        { return selectionSystem->SelectedEntities(); }
+
+    inline const std::set<ComponentId>& GetEntityComponents(Entity entity) const
+        { return coordinator.GetEntityComponents(entity); }
+
+    inline const Position& GetPosition(Entity entity) const
+        { return coordinator.GetConstComponent<Position>(entity); }
+
+    inline void SetPosition(Entity entity, const Position& pos)
+        { coordinator.GetComponent<Position>(entity) = pos; }
+
+    template <typename Comp>
+    static inline constexpr ComponentId GetComponentId()
+        { return ComponentsManager::GetComponentId<Comp>(); }
+
 private:
     Coordinator coordinator;
 

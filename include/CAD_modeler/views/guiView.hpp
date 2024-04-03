@@ -9,14 +9,22 @@
 
 class GuiView {
 public:
-    GuiView(GLFWwindow* window);
+    GuiView(GLFWwindow* window, GuiController& controller, const Model& model);
     ~GuiView();
 
-    void RenderGui(GuiController& controller, const Model& model) const;
+    void RenderGui() const;
 
 private:
-    void RenderDefaultGui(GuiController& controller, const Model& model) const;
-    void RenderAdd3DPointsGui(GuiController& controller, const Model& model) const;
+    GuiController& controller;
+    const Model& model;
 
-    void RenderObjectNames(GuiController& controller, const Model& model) const;
+    void RenderDefaultGui() const;
+    void RenderAdd3DPointsGui() const;
+
+    void RenderObjectsNames() const;
+    void RenderObjectsProperties() const;
+
+    void RenderSingleObjectProperties(Entity entity) const;
+
+    void DisplayPositionProperty(Entity entity, const Position& pos) const;
 };
