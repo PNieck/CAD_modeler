@@ -7,6 +7,7 @@
 #include <CAD_modeler/model/components/name.hpp>
 
 #include <CAD_modeler/model/systems/cameraSystem.hpp>
+#include <CAD_modeler/model/systems/selectionSystem.hpp>
 
 
 void CursorSystem::RegisterSystem(Coordinator & coordinator)
@@ -19,7 +20,6 @@ void CursorSystem::RegisterSystem(Coordinator & coordinator)
 
     glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
     glPointSize(10.0f);
-    
 }
 
 
@@ -48,17 +48,24 @@ void CursorSystem::Init()
     coordinator->AddComponent<Name>(cursor, "Cursor");
 }
 
+
 void CursorSystem::Render()
 {
     auto const& cameraSystem = coordinator->GetSystem<CameraSystem>();
+    auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
 
     glm::mat4x4 cameraMtx = cameraSystem->PerspectiveMatrix() * cameraSystem->ViewMatrix();
 
     auto const& mesh = coordinator->GetComponent<Mesh>(cursor);
     auto const& position = coordinator->GetComponent<Position>(cursor);
+    bool selected = selectionSystem->IsSelected(cursor);
 
     shader.use();
-    shader.setVec4("color", glm::vec4(1.0f, 0.31f, 0.0f, 1.0f));
+
+    if (selected)
+        shader.setVec4("color", glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+    else
+        shader.setVec4("color", glm::vec4(0.5f, 0.0f, 1.0f, 1.0f));
 
     glm::mat4x4 modelMtx = position.TranslationMatrix();
     shader.setMatrix4("MVP", cameraMtx * modelMtx);

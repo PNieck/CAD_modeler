@@ -1,8 +1,10 @@
 #include <CAD_modeler/model/systems/pointsSystem.hpp>
 
 #include <CAD_modeler/model/systems/cameraSystem.hpp>
+#include <CAD_modeler/model/systems/selectionSystem.hpp>
 
 #include <CAD_modeler/model/components/name.hpp>
+#include <CAD_modeler/model/components/position.hpp>
 
 #include <CAD_modeler/model/ecsCoordinator.hpp>
 
@@ -48,18 +50,28 @@ void PointsSystem::Render() const
         return;
     }
 
+    auto const& cameraSystem = coordinator->GetSystem<CameraSystem>();
+    auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
+
+    glm::mat4x4 cameraMtx = cameraSystem->PerspectiveMatrix() * cameraSystem->ViewMatrix();
+
     shader.use();
     shader.setVec4("color", glm::vec4(1.0f));
 
-    auto const& cameraSystem = coordinator->GetSystem<CameraSystem>();
-    glm::mat4x4 cameraMtx = cameraSystem->PerspectiveMatrix() * cameraSystem->ViewMatrix();
-
     for (auto const entity : entities) {
         auto const& position = coordinator->GetComponent<Position>(entity);
+
+        bool selection = selectionSystem->IsSelected(entity);
+
+        if (selection)
+            shader.setVec4("color", glm::vec4(1.0f, 0.5f, 0.0f, 1.0f));
 
         shader.setMatrix4("MVP", cameraMtx * position.TranslationMatrix());
         
         pointsMesh.Use();
         glDrawElements(GL_POINTS, pointsMesh.GetElementsCnt(), GL_UNSIGNED_INT, 0);
+
+        if (selection)
+            shader.setVec4("color", glm::vec4(1.0f));
     }
 }
