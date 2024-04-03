@@ -12,6 +12,8 @@ public:
 
     Entity AddTorus(const Position& pos, const TorusParameters& params);
 
+    void SetTorusParameter(Entity entity, const TorusParameters& params);
+
 private:
     NameGenerator nameGenerator;
 };

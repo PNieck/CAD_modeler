@@ -75,6 +75,10 @@ public:
     inline void SetComponent(Entity entity, const Comp& comp)
         { coordinator.GetComponent<Comp>(entity) = comp; }
 
+    template <>
+    inline void SetComponent<TorusParameters>(Entity entity, const TorusParameters& params)
+        { toriSystem->SetTorusParameter(entity, params); }
+
     template <typename Comp>
     static inline constexpr ComponentId GetComponentId()
         { return ComponentsManager::GetComponentId<Comp>(); }

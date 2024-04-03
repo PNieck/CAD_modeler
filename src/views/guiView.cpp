@@ -150,6 +150,10 @@ void GuiView::RenderSingleObjectProperties(Entity entity) const
     it = components.find(Model::GetComponentId<Rotation>());
     if (it != components.end())
         DisplayRotationProperty(entity, model.GetComponent<Rotation>(entity));
+
+    it = components.find(Model::GetComponentId<TorusParameters>());
+    if (it != components.end())
+        DisplayTorusProperty(entity, model.GetComponent<TorusParameters>(entity));
 }
 
 
@@ -191,7 +195,6 @@ void GuiView::DisplayScaleProperty(Entity entity, const Scale& scale) const
 
 void GuiView::DisplayRotationProperty(Entity entity, const Rotation & rotation) const
 {
-    // To degrees
     auto vector = glm::degrees(rotation.GetEulerAngles());
     bool valueChanged = false;
 
@@ -203,4 +206,34 @@ void GuiView::DisplayRotationProperty(Entity entity, const Rotation & rotation) 
 
     if (valueChanged)
         controller.ChangeComponent<Rotation>(entity, Rotation( glm::radians(vector)));
+}
+
+
+void GuiView::DisplayTorusProperty(Entity entity, const TorusParameters& params) const
+{
+    float R = params.majorRadius;
+    float r = params.minorRadius;
+    int minDensity = params.meshDensityMinR;
+    int majDensity = params.meshDensityMajR;
+
+    bool valueChanged = false;
+
+    ImGui::SeparatorText("Rotation");
+
+    valueChanged |= ImGui::DragFloat("Major radius", &R, DRAG_FLOAT_SPEED, 0.001f, 0.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+    valueChanged |= ImGui::DragFloat("Minor radius", &r, DRAG_FLOAT_SPEED, 0.001f, R, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+    valueChanged |= ImGui::DragInt("Mesh density along major radius", &majDensity, 0.2f, 3, 100, "%d", ImGuiSliderFlags_AlwaysClamp);
+    valueChanged |= ImGui::DragInt("Mesh density along minor radius", &minDensity, 0.2f, 3, 100, "%d", ImGuiSliderFlags_AlwaysClamp);
+
+    if (valueChanged) {
+        TorusParameters newParams {
+            .majorRadius = R,
+            .minorRadius = r,
+            .meshDensityMinR = minDensity,
+            .meshDensityMajR = majDensity,
+        };
+
+        controller.ChangeComponent<TorusParameters>(entity, newParams);
+    }
+
 }

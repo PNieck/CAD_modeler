@@ -56,8 +56,8 @@ void Model::AddTorus()
     TorusParameters params {
         .majorRadius = 1.0f,
         .minorRadius = 0.2f,
-        .pointsInCirc = 6,
-        .circCnt = 5,
+        .meshDensityMinR = 6,
+        .meshDensityMajR = 5,
     };
 
     toriSystem->AddTorus(cursorPos, params);

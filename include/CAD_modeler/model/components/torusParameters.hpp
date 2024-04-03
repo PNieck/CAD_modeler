@@ -10,9 +10,8 @@ public:
     float majorRadius;
     float minorRadius;
 
-    // TODO: find better name
-    int pointsInCirc;
-    int circCnt;
+    int meshDensityMinR;
+    int meshDensityMajR;
 
     std::vector<float> GenerateVertices() const;
     std::vector<uint32_t> GenerateEdges() const;
