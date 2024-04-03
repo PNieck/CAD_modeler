@@ -11,6 +11,8 @@
 #include "model/systems/nameSystem.hpp"
 #include "model/systems/selectionSystem.hpp"
 
+#include "model/components/scale.hpp"
+
 
 class Model
 {
@@ -64,11 +66,13 @@ public:
     inline const std::set<ComponentId>& GetEntityComponents(Entity entity) const
         { return coordinator.GetEntityComponents(entity); }
 
-    inline const Position& GetPosition(Entity entity) const
-        { return coordinator.GetConstComponent<Position>(entity); }
+    template <typename Comp>
+    inline const Comp& GetComponent(Entity entity) const
+        { return coordinator.GetConstComponent<Comp>(entity); }
 
-    inline void SetPosition(Entity entity, const Position& pos)
-        { coordinator.GetComponent<Position>(entity) = pos; }
+    template <typename Comp>
+    inline void SetComponent(Entity entity, const Comp& comp)
+        { coordinator.GetComponent<Comp>(entity) = comp; }
 
     template <typename Comp>
     static inline constexpr ComponentId GetComponentId()

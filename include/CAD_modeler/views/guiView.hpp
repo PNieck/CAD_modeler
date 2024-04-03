@@ -18,6 +18,9 @@ private:
     GuiController& controller;
     const Model& model;
 
+    static constexpr float DRAG_FLOAT_SPEED = 0.01f;
+    static constexpr float MIN_SCALE = 0.01f;
+
     void RenderDefaultGui() const;
     void RenderAdd3DPointsGui() const;
 
@@ -27,4 +30,5 @@ private:
     void RenderSingleObjectProperties(Entity entity) const;
 
     void DisplayPositionProperty(Entity entity, const Position& pos) const;
+    void DisplayScaleProperty(Entity entity, const Scale& scale) const;
 };

@@ -141,7 +141,11 @@ void GuiView::RenderSingleObjectProperties(Entity entity) const
 
     auto it = components.find(Model::GetComponentId<Position>());
     if (it != components.end())
-        DisplayPositionProperty(entity, model.GetPosition(entity));
+        DisplayPositionProperty(entity, model.GetComponent<Position>(entity));
+
+    it = components.find(Model::GetComponentId<Scale>());
+    if (it != components.end())
+        DisplayScaleProperty(entity, model.GetComponent<Scale>(entity));
 }
 
 
@@ -150,13 +154,32 @@ void GuiView::DisplayPositionProperty(Entity entity, const Position& pos) const
     float x = pos.GetX();
     float y = pos.GetY();
     float z = pos.GetZ();
+    bool valueChanged = false;
 
     ImGui::SeparatorText("Position");
 
-    ImGui::DragFloat("X", &x, 0.01f);
-    ImGui::DragFloat("Y", &y, 0.01f);
-    ImGui::DragFloat("Z", &z, 0.01f);
+    valueChanged |= ImGui::DragFloat("X##Pos", &x, DRAG_FLOAT_SPEED);
+    valueChanged |= ImGui::DragFloat("Y##Pos", &y, DRAG_FLOAT_SPEED);
+    valueChanged |= ImGui::DragFloat("Z##Pos", &z, DRAG_FLOAT_SPEED);
 
-    if (x != pos.GetX() || y != pos.GetY() || z != pos.GetZ())
-        controller.ChangePosition(entity, Position(x, y, z));
+    if (valueChanged)
+        controller.ChangeComponent<Position>(entity, Position(x, y, z));  
+}
+
+
+void GuiView::DisplayScaleProperty(Entity entity, const Scale& scale) const
+{
+    float x = scale.GetX();
+    float y = scale.GetY();
+    float z = scale.GetZ();
+    bool valueChanged = false;
+
+    ImGui::SeparatorText("Scale");
+
+    valueChanged |= ImGui::DragFloat("X##Scale", &x, DRAG_FLOAT_SPEED, MIN_SCALE, 0.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+    valueChanged |= ImGui::DragFloat("Y##Scale", &y, DRAG_FLOAT_SPEED, MIN_SCALE, 0.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+    valueChanged |= ImGui::DragFloat("Z##Scale", &z, DRAG_FLOAT_SPEED, MIN_SCALE, 0.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+
+    if (valueChanged)
+        controller.ChangeComponent<Scale>(entity, Scale(x, y, z));
 }
