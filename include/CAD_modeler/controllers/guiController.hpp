@@ -16,4 +16,10 @@ public:
 
     inline void AddTorus() const
         { model.AddTorus(); }
+
+    inline void SelectEntity(Entity entity) const
+        { model.Select(entity); }
+
+    inline void DeselectEntity(Entity entity) const
+        { model.Deselect(entity); }
 };
