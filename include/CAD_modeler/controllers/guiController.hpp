@@ -29,4 +29,7 @@ public:
 
     inline void DeleteEntity(Entity entity) const
         { model.DeleteEntity(entity); }
+
+    inline void TranslateSelected(const Position& newMidPoint)
+        { model.ChangeSelectedEntitiesPosition(newMidPoint); }
 };

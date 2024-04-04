@@ -28,6 +28,9 @@ public:
 
     void RenderMiddlePoint();
 
+    inline Entity GetMiddlePoint() const
+        { return middlePoint; }
+
 private:
     Mesh pointsMesh;
     Shader shader;

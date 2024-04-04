@@ -29,6 +29,7 @@ private:
     void RenderObjectsProperties() const;
 
     void RenderSingleObjectProperties(Entity entity) const;
+    void RenderMultipleObjectProperties() const;
 
     void DisplayPositionProperty(Entity entity, const Position& pos) const;
     void DisplayScaleProperty(Entity entity, const Scale& scale) const;

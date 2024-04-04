@@ -139,3 +139,18 @@ Line Model::LineFromViewportCoordinates(float x, float y) const
 
     return Line::FromTwoPoints(near, far);
 }
+
+
+void Model::ChangeSelectedEntitiesPosition(const Position& newMidPoint)
+{
+    Entity midPoint = selectionSystem->GetMiddlePoint();
+    Position const& midPointPos = coordinator.GetComponent<Position>(midPoint);
+
+    glm::vec3 translation = newMidPoint.vec - midPointPos.vec;
+
+    auto const& selected = selectionSystem->SelectedEntities();
+
+    for (auto entity: selected) {
+        coordinator.GetComponent<Position>(entity).vec += translation;
+    }
+}

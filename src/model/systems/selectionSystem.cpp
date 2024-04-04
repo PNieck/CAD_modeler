@@ -49,16 +49,12 @@ void SelectionSystem::Init()
 void SelectionSystem::Select(Entity entity)
 {
     coordinator->AddComponent<Selected>(entity, Selected());
-
-    UpdateMiddlePointPosition();
 }
 
 
 void SelectionSystem::Deselect(Entity entity)
 {
     coordinator->DeleteComponent<Selected>(entity);
-
-    UpdateMiddlePointPosition();
 }
 
 
@@ -95,6 +91,8 @@ void SelectionSystem::SelectFromLine(const Line& line)
 
 void SelectionSystem::RenderMiddlePoint()
 {
+    UpdateMiddlePointPosition();
+
     if (entities.size() < 2)
         return;
 
@@ -120,17 +118,14 @@ void SelectionSystem::RenderMiddlePoint()
 
 void SelectionSystem::UpdateMiddlePointPosition()
 {
-    if (entities.size() < 2) {
-        return;
-    }
-
     Position newPos(0.0f);
 
     for (auto entity: entities) {
         newPos.vec += coordinator->GetComponent<Position>(entity).vec;
     }
 
-    newPos.vec /= entities.size();
+    if (!entities.empty())
+        newPos.vec /= entities.size();
 
     coordinator->GetComponent<Position>(middlePoint) = newPos;
 }

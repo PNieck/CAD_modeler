@@ -128,6 +128,7 @@ void GuiView::RenderObjectsProperties() const
         break;
 
     default:
+        RenderMultipleObjectProperties();
         break;
     }
 
@@ -158,6 +159,27 @@ void GuiView::RenderSingleObjectProperties(Entity entity) const
     if (ImGui::Button("Delete object")) {
         controller.DeleteEntity(entity);
     }
+}
+
+
+void GuiView::RenderMultipleObjectProperties() const
+{
+    Entity midPoint = model.GetMiddlePoint();
+    const Position& pos = model.GetComponent<Position>(midPoint);
+
+    float x = pos.GetX();
+    float y = pos.GetY();
+    float z = pos.GetZ();
+    bool valueChanged = false;
+
+    ImGui::SeparatorText("Position");
+
+    valueChanged |= ImGui::DragFloat("X##Pos", &x, DRAG_FLOAT_SPEED);
+    valueChanged |= ImGui::DragFloat("Y##Pos", &y, DRAG_FLOAT_SPEED);
+    valueChanged |= ImGui::DragFloat("Z##Pos", &z, DRAG_FLOAT_SPEED);
+
+    if (valueChanged)
+        controller.TranslateSelected(Position(x, y, z));
 }
 
 
