@@ -14,6 +14,8 @@
 #include "model/components/scale.hpp"
 #include "model/components/rotation.hpp"
 
+#include "utilities/line.hpp"
+
 
 class Model
 {
@@ -58,6 +60,8 @@ public:
     inline void Select(Entity entity)
         { return selectionSystem->Select(entity); }
 
+    void TryToSelectFromViewport(float x, float y) const;
+
     inline void Deselect(Entity entity)
         { return selectionSystem->Deselect(entity); }
 
@@ -99,4 +103,5 @@ private:
     std::shared_ptr<SelectionSystem> selectionSystem;
 
     glm::vec3 PointFromViewportCoordinates(float x, float y) const;
+    Line LineFromViewportCoordinates(float x, float y) const;
 };

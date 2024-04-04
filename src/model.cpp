@@ -84,18 +84,44 @@ void Model::Add3DPointFromViewport(float x, float y) const
 }
 
 
+void Model::TryToSelectFromViewport(float x, float y) const
+{
+    Line line(LineFromViewportCoordinates(x, y));
+    selectionSystem->SelectFromLine(line);
+}
+
+
 glm::vec3 Model::PointFromViewportCoordinates(float x, float y) const
 {
-    auto viewMtx = cameraSys->ViewMatrix();
-    auto perspectiveMtx = cameraSys->PerspectiveMatrix();
     auto const& cameraTarget = cameraSys->GetTargetPosition();
     auto const& cameraPos = cameraSys->GetPosition();
     auto cursorPos = cursorSystem->GetPosition();
 
+    Line nearToFar = LineFromViewportCoordinates(x, y);
+
+    glm::vec3 cameraDirection = cameraTarget.vec - cameraPos.vec;
+    Plane perpendicularToScreenWithCursor(cursorPos.vec, cameraDirection);
+
+    std::optional<glm::vec3> intersection =
+        perpendicularToScreenWithCursor.Intersect(nearToFar);
+
+    if (!intersection.has_value()) {
+        throw std::runtime_error("Cannot project viewport coordinates to 3d ones");
+    }
+
+    return intersection.value();
+}
+
+
+Line Model::LineFromViewportCoordinates(float x, float y) const
+{
+    auto viewMtx = cameraSys->ViewMatrix();
+    auto perspectiveMtx = cameraSys->PerspectiveMatrix();
+
     auto cameraInv = glm::inverse(perspectiveMtx * viewMtx);
 
-    glm::vec4 nearV4 = cameraInv * glm::vec4(x, y, -1.0f, 1.0f);
-    glm::vec4 farV4 = cameraInv * glm::vec4(x, y, 1.0f, 1.0f);
+    glm::vec4 nearV4 = cameraInv * glm::vec4(x, y, 1.0f, 1.0f);
+    glm::vec4 farV4 = cameraInv * glm::vec4(x, y, -1.0f, 1.0f);
 
     glm::vec3 near = glm::vec3(
         nearV4.x / nearV4.w,
@@ -109,17 +135,5 @@ glm::vec3 Model::PointFromViewportCoordinates(float x, float y) const
         farV4.z / farV4.w
     );
 
-    Line nearToFar = Line::FromTwoPoints(near, far);
-
-    glm::vec3 cameraDirection = cameraTarget.vec - cameraPos.vec;
-    Plane perpendicularToScreenWithCursor(cursorPos.vec, cameraDirection);
-
-    std::optional<glm::vec3> intersection =
-        perpendicularToScreenWithCursor.Intersect(nearToFar);
-
-    if (!intersection.has_value()) {
-        throw std::runtime_error("Cannot project viewport coordinates to 3d ones");
-    }
-
-    return intersection.value();
+    return Line::FromTwoPoints(near, far);
 }

@@ -1,7 +1,7 @@
 #pragma once
 
-
 #include "system.hpp"
+#include "../../utilities/line.hpp"
 
 
 class SelectionSystem: public System {
@@ -17,4 +17,6 @@ public:
 
     inline const std::unordered_set<Entity>& SelectedEntities() const
         { return entities; }
+
+    void SelectFromLine(const Line& line);
 };

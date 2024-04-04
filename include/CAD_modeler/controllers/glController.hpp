@@ -32,6 +32,7 @@ private:
 
     void MoveCursor() const;
     void Add3DPoint() const;
+    void TryToSelectObject() const;
 
     std::tuple<float, float> MouseToViewportCoordinates() const;
 };

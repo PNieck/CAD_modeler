@@ -24,6 +24,10 @@ public:
         this->coordinator = coordinator;
     }
 
+    inline const std::unordered_set<Entity>& GetEntities() const {
+        return entities;
+    }
+
 protected:
     std::unordered_set<Entity> entities;
     Coordinator* coordinator;

@@ -30,6 +30,9 @@ void GlController::MouseClick(MouseButton button)
             break;
         }
     }
+    else if (button == MouseButton::Right) {
+        TryToSelectObject();
+    }
 }
 
 
@@ -44,6 +47,13 @@ void GlController::Add3DPoint() const
 {
     auto [x, y] = MouseToViewportCoordinates();
     model.Add3DPointFromViewport(x, y);
+}
+
+
+void GlController::TryToSelectObject() const
+{
+    auto [x, y] = MouseToViewportCoordinates();
+    model.TryToSelectFromViewport(x, y);
 }
 
 
