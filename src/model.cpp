@@ -32,6 +32,7 @@ Model::Model(int viewport_width, int viewport_height)
     cameraSys->Init(viewport_width, viewport_height);
     gridSystem->Init();
     cursorSystem->Init();
+    selectionSystem->Init();
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 }
@@ -45,6 +46,7 @@ void Model::RenderFrame()
     meshRenderer->Render();
     cursorSystem->Render();
     pointsSystem->Render();
+    selectionSystem->RenderMiddlePoint();
 }
 
 

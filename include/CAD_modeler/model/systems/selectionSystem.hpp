@@ -1,12 +1,18 @@
 #pragma once
 
 #include "system.hpp"
+#include "../components/mesh.hpp"
+#include "../../shader.hpp"
 #include "../../utilities/line.hpp"
 
 
 class SelectionSystem: public System {
 public:
     static void RegisterSystem(Coordinator& coordinator);
+
+    SelectionSystem();
+
+    void Init();
 
     inline bool IsSelected(Entity entity) const
         { return entities.contains(entity); }
@@ -19,4 +25,14 @@ public:
         { return entities; }
 
     void SelectFromLine(const Line& line);
+
+    void RenderMiddlePoint();
+
+private:
+    Mesh pointsMesh;
+    Shader shader;
+
+    Entity middlePoint;
+
+    void UpdateMiddlePointPosition();
 };
