@@ -32,4 +32,10 @@ public:
 
     inline void TranslateSelected(const Position& newMidPoint)
         { model.ChangeSelectedEntitiesPosition(newMidPoint); }
+
+    inline void ScaleSelected(const Scale& scale)
+        { model.ChangeSelectedEntitiesScale(scale); }
+
+    inline void RotateSelected(const Rotation& rot)
+        { model.RotateSelectedEntities(rot); }
 };

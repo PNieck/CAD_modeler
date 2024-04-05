@@ -52,6 +52,8 @@ public:
         return typeid(T).hash_code();
     }
 
+    
+
 private:
     std::unordered_map<ComponentId, std::shared_ptr<IComponentCollection>> components;
 

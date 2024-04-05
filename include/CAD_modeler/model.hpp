@@ -91,6 +91,10 @@ public:
 
     void ChangeSelectedEntitiesPosition(const Position& newMidPoint);
 
+    void ChangeSelectedEntitiesScale(const Scale& scale);
+
+    void RotateSelectedEntities(const Rotation& rotation);
+
     template <typename Comp>
     static inline constexpr ComponentId GetComponentId()
         { return ComponentsManager::GetComponentId<Comp>(); }

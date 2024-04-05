@@ -57,7 +57,7 @@ void MeshRenderer::Render()
         if (selection)
             shader.setVec4("color", glm::vec4(1.0f, 0.5f, 0.0f, 1.0f));
 
-        glm::mat4x4 modelMtx = scale.ScaleMatrix() * rotation.GetRotationMatrix() * position.TranslationMatrix();
+        glm::mat4x4 modelMtx = position.TranslationMatrix() * rotation.GetRotationMatrix() * scale.ScaleMatrix();
         shader.setMatrix4("MVP", cameraMtx * modelMtx);
         
         mesh.Use();
