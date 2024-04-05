@@ -1,5 +1,4 @@
-#ifndef ENTITIES_MANAGER_H
-#define ENTITIES_MANAGER_H
+#pragma once
 
 #include "idManager.hpp"
 
@@ -19,6 +18,3 @@ private:
     IdManager idManager;
 
 };
-
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef ROTATION_H
-#define ROTATION_H
+#pragma once
 
 #include <glm/mat4x4.hpp>
 #include <glm/ext/quaternion_float.hpp>
@@ -33,6 +32,3 @@ private:
 
     
 };
-
-
-#endif

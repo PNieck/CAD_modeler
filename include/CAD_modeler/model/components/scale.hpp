@@ -1,5 +1,4 @@
-#ifndef SCALE_H
-#define SCALE_H
+#pragma once
 
 #include <glm/mat4x4.hpp>
 #include <glm/vec3.hpp>
@@ -22,6 +21,3 @@ public:
 private:
     
 };
-
-
-#endif

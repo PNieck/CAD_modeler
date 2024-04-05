@@ -1,5 +1,4 @@
-#ifndef TORUS_PARAMETERS_H
-#define TORUS_PARAMETERS_H
+#pragma once
 
 #include <vector>
 #include <cstdint>
@@ -22,6 +21,3 @@ private:
     float VertexY(float alpha, float beta) const;
     float VertexZ(float alpha) const;
 };
-
-
-#endif
