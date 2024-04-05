@@ -122,26 +122,14 @@ void SelectionSystem::RenderMiddlePoint()
 
 void SelectionSystem::UpdateMiddlePointPosition()
 {
-<<<<<<< HEAD
     Position newPos(0.0f);
-=======
-    if (entities.size() < 2) {
-        return;
-    }
-
-    Position newPos;
->>>>>>> f78852f90c81467cd8d08461600b200a79c8ac7c
 
     for (auto entity: entities) {
         newPos.vec += coordinator->GetComponent<Position>(entity).vec;
     }
 
-<<<<<<< HEAD
     if (!entities.empty())
         newPos.vec /= entities.size();
-=======
-    newPos.vec /= entities.size();
->>>>>>> f78852f90c81467cd8d08461600b200a79c8ac7c
 
     coordinator->GetComponent<Position>(middlePoint) = newPos;
 }
