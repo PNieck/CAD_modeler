@@ -1,5 +1,4 @@
-#ifndef ID_MANGER_H
-#define ID_MANGER_H
+#pragma once
 
 #include <cstdint>
 #include <queue>
@@ -19,6 +18,3 @@ private:
     std::priority_queue<Id, std::vector<Id>, std::greater<Id>> priority_queue;
     Id biggestId = 0;
 };
-
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef MOUSE_STATE_H
-#define MOUSE_STATE_H
+#pragma once
 
 #include <vector>
 #include <glm/vec2.hpp>
@@ -34,6 +33,3 @@ private:
     glm::ivec2 oldMousePos;
     glm::ivec2 actMousePos;
 };
-
-
-#endif

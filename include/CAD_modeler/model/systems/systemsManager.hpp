@@ -1,5 +1,4 @@
-#ifndef SYSTEMS_MANAGER_H
-#define SYSTEMS_MANAGER_H
+#pragma once
 
 #include <unordered_map>
 #include <map>
@@ -92,5 +91,3 @@ private:
 
     std::unordered_map<SystemId, std::shared_ptr<System>> systems;
 };
-
-#endif

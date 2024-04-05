@@ -1,5 +1,4 @@
-#ifndef MAIN_VIEW_H
-#define MAIN_VIEW_H
+#pragma once
 
 #include <string>
 #include <stdexcept>
@@ -42,6 +41,3 @@ class WindowCreationError: public std::runtime_error {
 public:
     WindowCreationError(const std::string &msg): runtime_error(msg) {};
 };
-
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef CAMERA_PARAMETERS_H
-#define CAMERA_PARAMETERS_H
+#pragma once
 
 #include "position.hpp"
 
@@ -12,6 +11,3 @@ public:
     float near_plane;
     float far_plane;
 };
-
-
-#endif

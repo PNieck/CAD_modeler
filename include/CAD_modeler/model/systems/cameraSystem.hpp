@@ -1,5 +1,4 @@
-#ifndef CAMERA_SYSTEM_H
-#define CAMERA_SYSTEM_H
+#pragma once
 
 #include "system.hpp"
 #include "../components/position.hpp"
@@ -39,6 +38,3 @@ private:
 
     Entity camera;
 };
-
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef SHADER_H
-#define SHADER_H
+#pragma once
 
 #include <glad/glad.h>
 #include <glm/mat4x4.hpp>
@@ -32,6 +31,3 @@ class UniformNotFoundInShader: std::exception {
 public:
      const char * what() const override;
 };
-
-
-#endif
