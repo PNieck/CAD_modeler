@@ -180,6 +180,34 @@ void GuiView::RenderMultipleObjectProperties() const
 
     if (valueChanged)
         controller.TranslateSelected(Position(x, y, z));
+
+    x = 1.0f;
+    y = 1.0f;
+    z = 1.0f;
+    valueChanged = false;
+
+    ImGui::SeparatorText("Scale");
+
+    valueChanged |= ImGui::DragFloat("X##Scale", &x, DRAG_FLOAT_SPEED, MIN_SCALE, 0.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+    valueChanged |= ImGui::DragFloat("Y##Scale", &y, DRAG_FLOAT_SPEED, MIN_SCALE, 0.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+    valueChanged |= ImGui::DragFloat("Z##Scale", &z, DRAG_FLOAT_SPEED, MIN_SCALE, 0.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+
+    if (valueChanged)
+        controller.ScaleSelected(Scale(x, y, z));
+    
+    Rotation rotation;
+
+    auto vector = glm::degrees(rotation.GetEulerAngles());
+    valueChanged = false;
+
+    ImGui::SeparatorText("Rotation");
+
+    valueChanged |= ImGui::DragFloat("X##Rotation", &vector.x, DRAG_ANGLE_SPEED, -180.0f, 180.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+    valueChanged |= ImGui::DragFloat("Y##Rotation", &vector.y, DRAG_ANGLE_SPEED, -90.0f, 90.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+    valueChanged |= ImGui::DragFloat("Z##Rotation", &vector.z, DRAG_ANGLE_SPEED, -180.0f, 180.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+
+    if (valueChanged)
+        controller.RotateSelected(Rotation( glm::radians(vector)));
 }
 
 

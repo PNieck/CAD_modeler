@@ -18,8 +18,9 @@ public:
 
     glm::mat4x4 ScaleMatrix() const;
 
-private:
     glm::vec3 scale;
+private:
+    
 };
 
 

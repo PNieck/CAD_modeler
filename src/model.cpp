@@ -154,3 +154,54 @@ void Model::ChangeSelectedEntitiesPosition(const Position& newMidPoint)
         coordinator.GetComponent<Position>(entity).vec += translation;
     }
 }
+
+
+void Model::ChangeSelectedEntitiesScale(const Scale& scale)
+{
+    Entity midPoint = selectionSystem->GetMiddlePoint();
+    Position const& midPointPos = coordinator.GetComponent<Position>(midPoint);
+
+    auto const& selected = selectionSystem->SelectedEntities();
+
+    for (auto entity: selected) {
+        Position& pos = coordinator.GetComponent<Position>(entity);
+        glm::vec3 dist = pos.vec - midPointPos.vec;
+
+        dist.x *= scale.GetX();
+        dist.y *= scale.GetY();
+        dist.z *= scale.GetZ();
+
+        pos.vec = midPointPos.vec + dist;
+
+        if (coordinator.GetEntityComponents(entity).contains(ComponentsManager::GetComponentId<Scale>())) {
+            auto& sc = coordinator.GetComponent<Scale>(entity);
+            sc.scale *= scale.scale;
+        }
+    }
+}
+
+
+void Model::RotateSelectedEntities(const Rotation& rotation)
+{
+    Entity midPoint = selectionSystem->GetMiddlePoint();
+    Position const& midPointPos = coordinator.GetComponent<Position>(midPoint);
+
+    auto const& selected = selectionSystem->SelectedEntities();
+
+    for (auto entity: selected) {
+        Position& pos = coordinator.GetComponent<Position>(entity);
+        glm::vec3 dist = pos.vec - midPointPos.vec;
+
+        dist = glm::rotate(rotation.quat, dist);
+
+        pos.vec = midPointPos.vec + dist;
+
+        if (coordinator.GetEntityComponents(entity).contains(ComponentsManager::GetComponentId<Rotation>())) {
+            auto& rot = coordinator.GetComponent<Rotation>(entity);
+            auto quat = rotation.quat * rot.quat;
+            quat = glm::normalize(quat);
+
+            coordinator.GetComponent<Rotation>(entity) = Rotation(quat);
+        }
+    }
+}
