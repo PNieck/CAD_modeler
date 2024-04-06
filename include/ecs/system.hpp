@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../entitiesManager.hpp"
+#include "entitiesManager.hpp"
 
 #include <unordered_set>
 

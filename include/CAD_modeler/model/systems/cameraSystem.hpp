@@ -1,6 +1,6 @@
 #pragma once
 
-#include "system.hpp"
+#include <ecs/system.hpp>
 #include "../components/position.hpp"
 
 #include <glm/mat4x4.hpp>

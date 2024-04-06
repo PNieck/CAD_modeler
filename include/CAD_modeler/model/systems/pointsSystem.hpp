@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "system.hpp"
+#include <ecs/system.hpp>
 #include "utils/nameGenerator.hpp"
 #include "../components/position.hpp"
 #include "../components/mesh.hpp"
