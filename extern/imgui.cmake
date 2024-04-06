@@ -1,3 +1,8 @@
+# Check if subrepo was downloaded
+if(NOT EXISTS "${PROJECT_SOURCE_DIR}/extern/imgui/imgui.h")
+    message(FATAL_ERROR "The submodules were not downloaded! GIT_SUBMODULE was turned off or failed. Please update submodules and try again.")
+endif()
+
 # Basic ImGui files
 file(GLOB IMGUI_HEADER_LIST CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/extern/imgui/*.h")
 file(GLOB IMGUI_SOURCE_LIST CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/extern/imgui/*.cpp")
@@ -18,3 +23,5 @@ add_library(
 
 target_link_libraries(imgui glfw)
 target_include_directories(imgui PUBLIC imgui/)
+
+
