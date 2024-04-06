@@ -1,2 +1,5 @@
 add_subdirectory(glad)
-add_subdirectory(imgui)
+
+include(glfw.cmake)
+include(glm.cmake)
+include(imgui.cmake)
