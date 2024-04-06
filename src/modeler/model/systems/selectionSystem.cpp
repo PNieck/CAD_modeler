@@ -1,6 +1,6 @@
 #include <CAD_modeler/model/systems/selectionSystem.hpp>
 
-#include <CAD_modeler/model/ecsCoordinator.hpp>
+#include <ecs/coordinator.hpp>
 
 #include <CAD_modeler/model/components/selected.hpp>
 

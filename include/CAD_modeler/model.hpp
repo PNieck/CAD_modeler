@@ -1,6 +1,6 @@
 #pragma once
 
-#include "model/ecsCoordinator.hpp"
+#include <ecs/coordinator.hpp>
 
 #include "model/systems/cameraSystem.hpp"
 #include "model/systems/meshRenderer.hpp"

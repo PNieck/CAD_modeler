@@ -1,5 +1,7 @@
 #include <CAD_modeler/model/systems/meshRenderer.hpp>
 
+#include <ecs/coordinator.hpp>
+
 #include <CAD_modeler/model/components/mesh.hpp>
 #include <CAD_modeler/model/components/position.hpp>
 #include <CAD_modeler/model/components/scale.hpp>
@@ -7,8 +9,6 @@
 
 #include <CAD_modeler/model/systems/cameraSystem.hpp>
 #include <CAD_modeler/model/systems/selectionSystem.hpp>
-
-#include <CAD_modeler/model/ecsCoordinator.hpp>
 
 
 void MeshRenderer::RegisterSystem(Coordinator & coordinator)

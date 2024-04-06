@@ -1,9 +1,10 @@
 #include <CAD_modeler/model/systems/cameraSystem.hpp>
 
+#include <ecs/coordinator.hpp>
+
 #include <CAD_modeler/model/components/cameraParameters.hpp>
 #include <CAD_modeler/model/components/position.hpp>
 #include <CAD_modeler/model/components/rotation.hpp>
-#include <CAD_modeler/model/ecsCoordinator.hpp>
 
 #include <glm/trigonometric.hpp>
 #include <glm/mat4x4.hpp>

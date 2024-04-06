@@ -1,6 +1,6 @@
 #include <CAD_modeler/model/systems/nameSystem.hpp>
 
-#include <CAD_modeler/model/ecsCoordinator.hpp>
+#include <ecs/coordinator.hpp>
 
 
 void NameSystem::RegisterSystem(Coordinator & coordinator)

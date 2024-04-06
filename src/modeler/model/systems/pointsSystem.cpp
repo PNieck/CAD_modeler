@@ -1,12 +1,12 @@
 #include <CAD_modeler/model/systems/pointsSystem.hpp>
 
+#include <ecs/coordinator.hpp>
+
 #include <CAD_modeler/model/systems/cameraSystem.hpp>
 #include <CAD_modeler/model/systems/selectionSystem.hpp>
 
 #include <CAD_modeler/model/components/name.hpp>
 #include <CAD_modeler/model/components/position.hpp>
-
-#include <CAD_modeler/model/ecsCoordinator.hpp>
 
 
 void PointsSystem::RegisterSystem(Coordinator& coordinator)

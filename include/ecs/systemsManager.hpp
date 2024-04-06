@@ -8,7 +8,7 @@
 #include <algorithm>
 
 #include "system.hpp"
-#include "../components/componentsManager.hpp"
+#include "componentsManager.hpp"
 
 
 using SystemId = std::size_t;

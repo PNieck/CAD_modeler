@@ -1,8 +1,8 @@
 #pragma once
 
 #include "entitiesManager.hpp"
-#include "components/componentsManager.hpp"
-#include "systems/systemsManager.hpp"
+#include "componentsManager.hpp"
+#include "systemsManager.hpp"
 
 #include <memory>
 

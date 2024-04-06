@@ -1,11 +1,11 @@
 #include <CAD_modeler/model/systems/toriSystem.hpp>
 
+#include <ecs/coordinator.hpp>
+
 #include <CAD_modeler/model/components/scale.hpp>
 #include <CAD_modeler/model/components/rotation.hpp>
 #include <CAD_modeler/model/components/mesh.hpp>
 #include <CAD_modeler/model/components/name.hpp>
-
-#include <CAD_modeler/model/ecsCoordinator.hpp>
 
 #include <vector>
 

@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "system.hpp"
+#include <ecs/system.hpp>
 #include "../components/name.hpp"
 
 
