@@ -1,9 +1,8 @@
 #pragma once
 
-
 #include <ecs/system.hpp>
-#include "../../shader.hpp"
 #include "../components/position.hpp"
+#include "shaders/shaderRepository.hpp"
 
 #include <glm/vec3.hpp>
 
@@ -12,9 +11,7 @@ class CursorSystem: public System {
 public:
     static void RegisterSystem(Coordinator& coordinator);
 
-    CursorSystem();
-
-    void Init();
+    void Init(ShaderRepository* shadersRepo);
 
     void Render();
 
@@ -24,5 +21,5 @@ public:
 
 private:
     Entity cursor;
-    Shader shader;
+    ShaderRepository* shaderRepo;
 };

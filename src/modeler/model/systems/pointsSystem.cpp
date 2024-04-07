@@ -18,8 +18,7 @@ void PointsSystem::RegisterSystem(Coordinator& coordinator)
 }
 
 
-PointsSystem::PointsSystem():
-    shader("../../shaders/vertexShader.vert", "../../shaders/fragmentShader.frag")
+PointsSystem::PointsSystem()
 {
     std::vector<float> vertices = {
         0.0f, 0.0f, 0.0f
@@ -52,11 +51,12 @@ void PointsSystem::Render() const
 
     auto const& cameraSystem = coordinator->GetSystem<CameraSystem>();
     auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
+    auto const& shader = shaderRepo->GetStdShader();
 
     glm::mat4x4 cameraMtx = cameraSystem->PerspectiveMatrix() * cameraSystem->ViewMatrix();
 
-    shader.use();
-    shader.setVec4("color", glm::vec4(1.0f));
+    shader.Use();
+    shader.SetColor(glm::vec4(1.0f));
 
     for (auto const entity : entities) {
         auto const& position = coordinator->GetComponent<Position>(entity);
@@ -64,14 +64,14 @@ void PointsSystem::Render() const
         bool selection = selectionSystem->IsSelected(entity);
 
         if (selection)
-            shader.setVec4("color", glm::vec4(1.0f, 0.5f, 0.0f, 1.0f));
+            shader.SetColor(glm::vec4(1.0f, 0.5f, 0.0f, 1.0f));
 
-        shader.setMatrix4("MVP", cameraMtx * position.TranslationMatrix());
+        shader.SetMVP(cameraMtx * position.TranslationMatrix());
         
         pointsMesh.Use();
         glDrawElements(GL_POINTS, pointsMesh.GetElementsCnt(), GL_UNSIGNED_INT, 0);
 
         if (selection)
-            shader.setVec4("color", glm::vec4(1.0f));
+            shader.SetColor(glm::vec4(1.0f));
     }
 }

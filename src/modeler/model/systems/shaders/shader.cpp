@@ -1,4 +1,4 @@
-#include <CAD_modeler/shader.hpp>
+#include <CAD_modeler/model/systems/shaders/shader.hpp>
 
 #include <fstream>
 #include <sstream>

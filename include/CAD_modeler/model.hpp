@@ -3,13 +3,13 @@
 #include <ecs/coordinator.hpp>
 
 #include "model/systems/cameraSystem.hpp"
-#include "model/systems/meshRenderer.hpp"
 #include "model/systems/toriSystem.hpp"
 #include "model/systems/gridSystem.hpp"
 #include "model/systems/cursorSystem.hpp"
 #include "model/systems/pointsSystem.hpp"
 #include "model/systems/nameSystem.hpp"
 #include "model/systems/selectionSystem.hpp"
+#include "model/systems/shaders/shaderRepository.hpp"
 
 #include "model/components/scale.hpp"
 #include "model/components/rotation.hpp"
@@ -101,9 +101,9 @@ public:
 
 private:
     Coordinator coordinator;
+    ShaderRepository shadersRepo;
 
     std::shared_ptr<CameraSystem> cameraSys;
-    std::shared_ptr<MeshRenderer> meshRenderer;
     std::shared_ptr<ToriSystem> toriSystem;
     std::shared_ptr<GridSystem> gridSystem;
     std::shared_ptr<CursorSystem> cursorSystem;

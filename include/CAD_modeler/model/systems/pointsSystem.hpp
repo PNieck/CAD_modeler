@@ -1,11 +1,10 @@
 #pragma once
 
-
 #include <ecs/system.hpp>
 #include "utils/nameGenerator.hpp"
 #include "../components/position.hpp"
 #include "../components/mesh.hpp"
-#include "../../shader.hpp"
+#include "shaders/shaderRepository.hpp"
 
 
 class PointsSystem: public System {
@@ -14,13 +13,17 @@ public:
 
     PointsSystem();
 
+    inline void Init(ShaderRepository* shaderRepo)
+        { this->shaderRepo = shaderRepo; }
+
+
     Entity CreatePoint(Position& pos);
 
     void Render() const;
 
 private:
     Mesh pointsMesh;
-    Shader shader;
+    ShaderRepository* shaderRepo;
 
     NameGenerator nameGenerator;
 };

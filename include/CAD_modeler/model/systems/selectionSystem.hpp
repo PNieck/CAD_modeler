@@ -2,7 +2,7 @@
 
 #include <ecs/system.hpp>
 #include "../components/mesh.hpp"
-#include "../../shader.hpp"
+#include "shaders/shaderRepository.hpp"
 #include "../../utilities/line.hpp"
 
 
