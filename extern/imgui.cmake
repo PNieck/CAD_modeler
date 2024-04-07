@@ -19,9 +19,11 @@ add_library(
     imgui/backends/imgui_impl_opengl3.h
     imgui/backends/imgui_impl_opengl3.cpp
     imgui/backends/imgui_impl_opengl3_loader.h
+
+    # Text input wrappers for standard library (STL) std::string
+    imgui/misc/cpp/imgui_stdlib.h
+    imgui/misc/cpp/imgui_stdlib.cpp
 )
 
 target_link_libraries(imgui glfw)
 target_include_directories(imgui PUBLIC imgui/)
-
-

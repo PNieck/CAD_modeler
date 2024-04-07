@@ -1,8 +1,6 @@
 #pragma once
 
 #include <imgui.h>
-#include <backends/imgui_impl_glfw.h>
-#include <backends/imgui_impl_opengl3.h>
 
 #include "subController.hpp"
 
@@ -38,4 +36,7 @@ public:
 
     inline void RotateSelected(const Rotation& rot)
         { model.RotateSelectedEntities(rot); }
+
+    inline void ChangeEntityName(Entity entity, const Name& name)
+        { model.ChangeEntityName(entity, name); }
 };
