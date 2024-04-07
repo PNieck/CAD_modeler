@@ -30,7 +30,7 @@ Model::Model(int viewport_width, int viewport_height)
     cameraSys->Init(viewport_width, viewport_height);
     gridSystem->Init(&shadersRepo);
     cursorSystem->Init(&shadersRepo);
-    selectionSystem->Init();
+    selectionSystem->Init(&shadersRepo);
     pointsSystem->Init(&shadersRepo);
     toriSystem->Init(&shadersRepo);
 
