@@ -30,9 +30,10 @@ Model::Model(int viewport_width, int viewport_height)
     selectionSystem = coordinator.GetSystem<SelectionSystem>();
 
     cameraSys->Init(viewport_width, viewport_height);
-    gridSystem->Init();
-    cursorSystem->Init();
+    gridSystem->Init(&shadersRepo);
+    cursorSystem->Init(&shadersRepo);
     selectionSystem->Init();
+    pointsSystem->Init(&shadersRepo);
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 }

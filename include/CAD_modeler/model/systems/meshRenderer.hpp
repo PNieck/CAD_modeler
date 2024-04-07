@@ -1,7 +1,7 @@
 #pragma once
 
 #include <ecs/system.hpp>
-#include "../../shader.hpp"
+#include "shaders/shaderRepository.hpp"
 
 
 class MeshRenderer: public System {

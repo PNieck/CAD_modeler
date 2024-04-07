@@ -7,6 +7,9 @@
 #include <CAD_modeler/model/components/mesh.hpp>
 #include <CAD_modeler/model/components/name.hpp>
 
+#include <CAD_modeler/model/systems/cameraSystem.hpp>
+#include <CAD_modeler/model/systems/selectionSystem.hpp>
+
 #include <vector>
 
 
@@ -27,6 +30,13 @@ void ToriSystem::RegisterSystem(Coordinator & coordinator)
     coordinator.RegisterRequiredComponent<ToriSystem, Mesh>();
     coordinator.RegisterRequiredComponent<ToriSystem, TorusParameters>();
 }
+
+
+void ToriSystem::Init(ShaderRepository * shaderRepo)
+{
+    this->shadersRepo = shaderRepo;
+}
+
 
 Entity ToriSystem::AddTorus(const Position& pos, const TorusParameters& params)
 {
@@ -61,4 +71,42 @@ void ToriSystem::SetTorusParameter(Entity entity, const TorusParameters& params)
     auto vertices = params.GenerateVertices();
     auto indices = params.GenerateEdges();
     coordinator->GetComponent<Mesh>(entity).Update(vertices, indices);
+}
+
+
+void ToriSystem::Render()
+{
+    if (entities.empty()) {
+        return;
+    }
+
+    auto const& cameraSystem = coordinator->GetSystem<CameraSystem>();
+    auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
+    auto const& shader = shadersRepo->GetStdShader();
+
+    glm::mat4x4 cameraMtx = cameraSystem->PerspectiveMatrix() * cameraSystem->ViewMatrix();
+
+    shader.Use();
+    shader.SetColor(glm::vec4(1.0f));
+
+    for (auto const entity : entities) {
+        auto const& mesh = coordinator->GetComponent<Mesh>(entity);
+        auto const& position = coordinator->GetComponent<Position>(entity);
+        auto const& scale = coordinator->GetComponent<Scale>(entity);
+        auto const& rotation = coordinator->GetComponent<Rotation>(entity);
+        
+        bool selection = selectionSystem->IsSelected(entity);
+
+        if (selection)
+            shader.SetColor(glm::vec4(1.0f, 0.5f, 0.0f, 1.0f));
+
+        glm::mat4x4 modelMtx = position.TranslationMatrix() * rotation.GetRotationMatrix() * scale.ScaleMatrix();
+        shader.SetMVP(cameraMtx * modelMtx);
+        
+        mesh.Use();
+        glDrawElements(GL_LINE_LOOP, mesh.GetElementsCnt(), GL_UNSIGNED_INT, 0);
+        
+        if (selection)
+            shader.SetColor(glm::vec4(1.0f));
+    }
 }

@@ -1,21 +1,19 @@
 #pragma once
 
-
 #include <ecs/system.hpp>
-#include "../../shader.hpp"
+#include "shaders/shaderRepository.hpp"
 
 
 class GridSystem: public System {
 public:
     static void RegisterSystem(Coordinator& coordinator);
 
-    GridSystem();
-
-    void Init();
+    void Init(ShaderRepository* shaderRepo);
 
     void Render() const;
 
 private:
-    Shader gridShader;
     Entity grid;
+
+    ShaderRepository* shaderRepo;
 };

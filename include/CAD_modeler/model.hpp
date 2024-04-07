@@ -10,6 +10,7 @@
 #include "model/systems/pointsSystem.hpp"
 #include "model/systems/nameSystem.hpp"
 #include "model/systems/selectionSystem.hpp"
+#include "model/systems/shaders/shaderRepository.hpp"
 
 #include "model/components/scale.hpp"
 #include "model/components/rotation.hpp"
@@ -101,6 +102,7 @@ public:
 
 private:
     Coordinator coordinator;
+    ShaderRepository shadersRepo;
 
     std::shared_ptr<CameraSystem> cameraSys;
     std::shared_ptr<MeshRenderer> meshRenderer;

@@ -23,14 +23,10 @@ void CursorSystem::RegisterSystem(Coordinator & coordinator)
 }
 
 
-CursorSystem::CursorSystem():
-    shader("../../shaders/vertexShader.vert", "../../shaders/fragmentShader.frag")
+void CursorSystem::Init(ShaderRepository* shadersRepo)
 {
-}
+    this->shaderRepo = shadersRepo;
 
-
-void CursorSystem::Init()
-{
     cursor = coordinator->CreateEntity();
 
     Position pos(0.0f);
@@ -53,6 +49,7 @@ void CursorSystem::Render()
 {
     auto const& cameraSystem = coordinator->GetSystem<CameraSystem>();
     auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
+    auto const& shader = shaderRepo->GetStdShader();
 
     glm::mat4x4 cameraMtx = cameraSystem->PerspectiveMatrix() * cameraSystem->ViewMatrix();
 
@@ -60,15 +57,15 @@ void CursorSystem::Render()
     auto const& position = coordinator->GetComponent<Position>(cursor);
     bool selected = selectionSystem->IsSelected(cursor);
 
-    shader.use();
+    shader.Use();
 
     if (selected)
-        shader.setVec4("color", glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+        shader.SetColor(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
     else
-        shader.setVec4("color", glm::vec4(0.5f, 0.0f, 1.0f, 1.0f));
+        shader.SetColor(glm::vec4(0.5f, 0.0f, 1.0f, 1.0f));
 
     glm::mat4x4 modelMtx = position.TranslationMatrix();
-    shader.setMatrix4("MVP", cameraMtx * modelMtx);
+    shader.SetMVP(cameraMtx * modelMtx);
 
     mesh.Use();
     glDrawElements(GL_POINTS, mesh.GetElementsCnt(), GL_UNSIGNED_INT, 0);

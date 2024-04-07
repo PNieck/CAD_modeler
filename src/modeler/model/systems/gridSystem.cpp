@@ -14,14 +14,10 @@ void GridSystem::RegisterSystem(Coordinator & coordinator)
 }
 
 
-GridSystem::GridSystem():
-    gridShader("../../shaders/grid.vert", "../../shaders/grid.frag")
+void GridSystem::Init(ShaderRepository * shaderRepo)
 {
-}
+    this->shaderRepo = shaderRepo;
 
-
-void GridSystem::Init()
-{
     grid = coordinator->CreateEntity();
 
     Mesh mesh;
@@ -50,15 +46,16 @@ void GridSystem::Render() const
 {
     auto const& cameraSystem = coordinator->GetSystem<CameraSystem>();
     auto const& gridMesh = coordinator->GetComponent<Mesh>(grid);
+    auto const& gridShader = shaderRepo->GetGridShader();
 
     glm::mat4x4 viewMtx = cameraSystem->ViewMatrix();
     glm::mat4x4 projectionMtx = cameraSystem->PerspectiveMatrix();
 
-    gridShader.use();
-    gridShader.setFloat("far", cameraSystem->GetFarPlane());
-    gridShader.setFloat("near", cameraSystem->GetNearPlane());
-    gridShader.setMatrix4("view", viewMtx);
-    gridShader.setMatrix4("proj", projectionMtx);
+    gridShader.Use();
+    gridShader.SetFarPlane(cameraSystem->GetFarPlane());
+    gridShader.SetNearPlane(cameraSystem->GetNearPlane());
+    gridShader.SetViewMatrix(viewMtx);
+    gridShader.SetProjectionMatrix(projectionMtx);
     
     gridMesh.Use();
     glDrawElements(GL_TRIANGLES, gridMesh.GetElementsCnt(), GL_UNSIGNED_INT, 0);
