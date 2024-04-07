@@ -18,10 +18,16 @@ add_library(modeler_lib ${SOURCE_LIST} ${HEADER_LIST})
 target_include_directories(modeler_lib PUBLIC ../include)
 target_link_libraries(modeler_lib PRIVATE glfw glad glm imgui ecs)
 
+# Copy shaders
+add_custom_target(copy_shaders
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/shaders ${CMAKE_BINARY_DIR}/shaders
+)
+add_dependencies(modeler_lib copy_shaders)
+
 
 # For IDEs
 source_group(
   TREE "${PROJECT_SOURCE_DIR}/include"
   PREFIX "Header Files"
-  FILES ${HEADER_LIST}
+  FILES ${HEADER_LIST} ${ECS_LIB_HEADERS}
 )
