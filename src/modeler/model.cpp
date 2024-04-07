@@ -12,7 +12,6 @@ Model::Model(int viewport_width, int viewport_height)
     glPrimitiveRestartIndex(std::numeric_limits<uint32_t>::max());
 
     CameraSystem::RegisterSystem(coordinator);
-    MeshRenderer::RegisterSystem(coordinator);
     ToriSystem::RegisterSystem(coordinator);
     GridSystem::RegisterSystem(coordinator);
     CursorSystem::RegisterSystem(coordinator);
@@ -21,7 +20,6 @@ Model::Model(int viewport_width, int viewport_height)
     SelectionSystem::RegisterSystem(coordinator);
 
     cameraSys = coordinator.GetSystem<CameraSystem>();
-    meshRenderer = coordinator.GetSystem<MeshRenderer>();
     toriSystem = coordinator.GetSystem<ToriSystem>();
     gridSystem = coordinator.GetSystem<GridSystem>();
     cursorSystem = coordinator.GetSystem<CursorSystem>();
@@ -34,6 +32,7 @@ Model::Model(int viewport_width, int viewport_height)
     cursorSystem->Init(&shadersRepo);
     selectionSystem->Init();
     pointsSystem->Init(&shadersRepo);
+    toriSystem->Init(&shadersRepo);
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 }
@@ -44,7 +43,7 @@ void Model::RenderFrame()
     glClear(GL_COLOR_BUFFER_BIT);
 
     gridSystem->Render();
-    meshRenderer->Render();
+    toriSystem->Render();
     cursorSystem->Render();
     pointsSystem->Render();
     selectionSystem->RenderMiddlePoint();
