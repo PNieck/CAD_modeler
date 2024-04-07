@@ -15,9 +15,6 @@ void SelectionSystem::RegisterSystem(Coordinator & coordinator)
 {
     coordinator.RegisterSystem<SelectionSystem>();
 
-    coordinator.RegisterComponent<Selected>();
-    coordinator.RegisterComponent<Position>();
-
     coordinator.RegisterRequiredComponent<SelectionSystem, Selected>();
 }
 

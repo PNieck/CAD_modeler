@@ -12,9 +12,6 @@
 void PointsSystem::RegisterSystem(Coordinator& coordinator)
 {
     coordinator.RegisterSystem<PointsSystem>();
-
-    coordinator.RegisterComponent<Position>();
-    coordinator.RegisterComponent<Name>();
 }
 
 

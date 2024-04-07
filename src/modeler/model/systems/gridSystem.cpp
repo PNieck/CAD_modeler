@@ -9,8 +9,6 @@
 void GridSystem::RegisterSystem(Coordinator & coordinator)
 {
     coordinator.RegisterSystem<GridSystem>();
-
-    coordinator.RegisterComponent<Mesh>();
 }
 
 

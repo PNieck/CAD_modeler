@@ -3,6 +3,8 @@
 #include <CAD_modeler/utilities/line.hpp>
 #include <CAD_modeler/utilities/plane.hpp>
 
+#include <CAD_modeler/model/components/registerComponents.hpp>
+
 #include <stdexcept>
 
 
@@ -10,6 +12,8 @@ Model::Model(int viewport_width, int viewport_height)
 {
     glEnable(GL_PRIMITIVE_RESTART);
     glPrimitiveRestartIndex(std::numeric_limits<uint32_t>::max());
+
+    RegisterAllComponents(coordinator);
 
     CameraSystem::RegisterSystem(coordinator);
     ToriSystem::RegisterSystem(coordinator);

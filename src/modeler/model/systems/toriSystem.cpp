@@ -17,13 +17,6 @@ void ToriSystem::RegisterSystem(Coordinator & coordinator)
 {
     coordinator.RegisterSystem<ToriSystem>();
 
-    coordinator.RegisterComponent<Position>();
-    coordinator.RegisterComponent<Scale>();
-    coordinator.RegisterComponent<Rotation>();
-    coordinator.RegisterComponent<Mesh>();
-    coordinator.RegisterComponent<TorusParameters>();
-    coordinator.RegisterComponent<Name>();
-
     coordinator.RegisterRequiredComponent<ToriSystem, Position>();
     coordinator.RegisterRequiredComponent<ToriSystem, Scale>();
     coordinator.RegisterRequiredComponent<ToriSystem, Rotation>();

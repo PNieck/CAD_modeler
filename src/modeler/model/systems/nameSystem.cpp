@@ -7,8 +7,6 @@ void NameSystem::RegisterSystem(Coordinator & coordinator)
 {
     coordinator.RegisterSystem<NameSystem>();
 
-    coordinator.RegisterComponent<Name>();
-
     coordinator.RegisterRequiredComponent<NameSystem, Name>();
 }
 

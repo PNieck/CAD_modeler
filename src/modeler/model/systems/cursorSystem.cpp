@@ -14,10 +14,6 @@ void CursorSystem::RegisterSystem(Coordinator & coordinator)
 {
     coordinator.RegisterSystem<CursorSystem>();
 
-    coordinator.RegisterComponent<Position>();
-    coordinator.RegisterComponent<Mesh>();
-    coordinator.RegisterComponent<Name>();
-
     glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
     glPointSize(10.0f);
 }

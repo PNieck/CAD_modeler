@@ -14,9 +14,6 @@
 void CameraSystem::RegisterSystem(Coordinator & coordinator)
 {
     coordinator.RegisterSystem<CameraSystem>();
-
-    coordinator.RegisterComponent<CameraParameters>();
-    coordinator.RegisterComponent<Position>();
 }
 
 
