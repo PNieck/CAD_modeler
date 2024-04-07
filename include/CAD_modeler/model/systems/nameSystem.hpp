@@ -12,5 +12,7 @@ public:
     inline const std::unordered_set<Entity>& EntitiesWithNames() const
         { return entities; }
 
-    Name& GetName(Entity entity) const;
+    const Name& GetName(Entity entity) const;
+
+    void SetName(Entity entity, const Name& name) const;
 };

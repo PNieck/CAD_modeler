@@ -13,7 +13,13 @@ void NameSystem::RegisterSystem(Coordinator & coordinator)
 }
 
 
-Name & NameSystem::GetName(Entity entity) const
+const Name& NameSystem::GetName(Entity entity) const
 {
     return coordinator->GetComponent<Name>(entity);
+}
+
+
+void NameSystem::SetName(Entity entity, const Name& name) const
+{
+    coordinator->GetComponent<Name>(entity) = name;
 }
