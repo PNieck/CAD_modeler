@@ -22,8 +22,7 @@ void SelectionSystem::RegisterSystem(Coordinator & coordinator)
 }
 
 
-SelectionSystem::SelectionSystem():
-    shader("../../shaders/vertexShader.vert", "../../shaders/fragmentShader.frag")
+SelectionSystem::SelectionSystem()
 {
     std::vector<float> vertices = {
         0.0f, 0.0f, 0.0f
@@ -35,8 +34,10 @@ SelectionSystem::SelectionSystem():
 }
 
 
-void SelectionSystem::Init()
+void SelectionSystem::Init(ShaderRepository* shaderRepo)
 {
+    this->shadersRepo = shaderRepo;
+
     middlePoint = coordinator->CreateEntity();
 
     Position pos;
@@ -102,18 +103,19 @@ void SelectionSystem::RenderMiddlePoint()
 
     auto const& cameraSystem = coordinator->GetSystem<CameraSystem>();
     auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
+    auto const& shader = shadersRepo->GetStdShader();
 
     glm::mat4x4 cameraMtx = cameraSystem->PerspectiveMatrix() * cameraSystem->ViewMatrix();
 
     auto const& mesh = coordinator->GetComponent<Mesh>(middlePoint);
     auto const& position = coordinator->GetComponent<Position>(middlePoint);
 
-    shader.use();
+    shader.Use();
 
-    shader.setVec4("color", glm::vec4(1.0f, 1.0f, 0.0f, 1.0f));
+    shader.SetColor(glm::vec4(1.0f, 1.0f, 0.0f, 1.0f));
 
     glm::mat4x4 modelMtx = position.TranslationMatrix();
-    shader.setMatrix4("MVP", cameraMtx * modelMtx);
+    shader.SetMVP(cameraMtx * modelMtx);
 
     mesh.Use();
     glDrawElements(GL_POINTS, mesh.GetElementsCnt(), GL_UNSIGNED_INT, 0);

@@ -95,6 +95,9 @@ public:
 
     void RotateSelectedEntities(const Rotation& rotation);
 
+    inline void ChangeEntityName(Entity entity, const Name& name)
+        { nameSystem->SetName(entity, name); }
+
     template <typename Comp>
     static inline constexpr ComponentId GetComponentId()
         { return ComponentsManager::GetComponentId<Comp>(); }

@@ -35,4 +35,5 @@ private:
     void DisplayScaleProperty(Entity entity, const Scale& scale) const;
     void DisplayRotationProperty(Entity entity, const Rotation& rotation) const;
     void DisplayTorusProperty(Entity entity, const TorusParameters& params) const;
+    void DisplayNameEditor(Entity entity, const Name& name) const;
 };

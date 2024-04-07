@@ -3,6 +3,7 @@
 #include <imgui.h>
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
+#include <misc/cpp/imgui_stdlib.h>
 
 #include <algorithm>
 #include <iterator>
@@ -156,6 +157,10 @@ void GuiView::RenderSingleObjectProperties(Entity entity) const
     if (it != components.end())
         DisplayTorusProperty(entity, model.GetComponent<TorusParameters>(entity));
 
+    it = components.find(Model::GetComponentId<Name>());
+    if (it != components.end())
+        DisplayNameEditor(entity, model.GetComponent<Name>(entity));
+
     if (ImGui::Button("Delete object")) {
         controller.DeleteEntity(entity);
     }
@@ -289,5 +294,15 @@ void GuiView::DisplayTorusProperty(Entity entity, const TorusParameters& params)
 
         controller.ChangeComponent<TorusParameters>(entity, newParams);
     }
+}
 
+
+void GuiView::DisplayNameEditor(Entity entity, const Name& name) const
+{
+    Name tmp = name;
+
+    ImGui::SeparatorText("Object name");
+
+    if (ImGui::InputText("##objectName", &tmp))
+        controller.ChangeEntityName(entity, tmp);
 }

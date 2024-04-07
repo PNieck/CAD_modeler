@@ -12,7 +12,7 @@ public:
 
     SelectionSystem();
 
-    void Init();
+    void Init(ShaderRepository* shaderRepo);
 
     inline bool IsSelected(Entity entity) const
         { return entities.contains(entity); }
@@ -33,8 +33,7 @@ public:
 
 private:
     Mesh pointsMesh;
-    Shader shader;
-
+    ShaderRepository* shadersRepo;
     Entity middlePoint;
 
     void UpdateMiddlePointPosition();
