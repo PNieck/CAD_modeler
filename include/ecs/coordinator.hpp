@@ -3,19 +3,20 @@
 #include "entitiesManager.hpp"
 #include "componentsManager.hpp"
 #include "systemsManager.hpp"
+#include "eventsManager.hpp"
 
 #include <memory>
 
 
 class Coordinator {
 public:
-    template<typename Comp>
+    template <typename Comp>
     inline void RegisterComponent() {
         componentMgr.RegisterComponent<Comp>();
     }
 
 
-    template<typename Sys>
+    template <typename Sys>
     void RegisterSystem() {
         systemsMgr.RegisterSystem<Sys>();
         auto const& system = systemsMgr.GetSystem<Sys>();
@@ -23,7 +24,7 @@ public:
     }
 
 
-    template<typename Sys, typename Comp>
+    template <typename Sys, typename Comp>
     inline void RegisterRequiredComponent() {
         systemsMgr.RegisterRequiredComponent<Sys, Comp>();
     }
@@ -37,11 +38,12 @@ public:
     void DestroyEntity(Entity entity) {
         componentMgr.EntityDeleted(entity);
         systemsMgr.EntityDeleted(entity);
+        eventMgr.EntityDeleted(entity);
         entitiesMgr.DestroyEntity(entity);
     }
 
 
-    template<typename Comp>
+    template <typename Comp>
     void AddComponent(Entity entity, const Comp& component) {
         componentMgr.AddComponent<Comp>(entity, component);
 
@@ -50,27 +52,36 @@ public:
     }
 
 
-    template<typename Comp>
+    template <typename Comp>
     void DeleteComponent(Entity entity) {
         componentMgr.DeleteComponent<Comp>(entity);
         systemsMgr.EntityLostComponent<Comp>(entity);
     }
 
 
-    template<typename Comp>
-    inline Comp& GetComponent(Entity entity) {
+    template <typename Comp>
+    inline const Comp& GetComponent(Entity entity) const {
         return componentMgr.GetComponent<Comp>(entity);
     }
 
-    template<typename Comp>
-    inline const Comp& GetConstComponent(Entity entity) const {
-        return componentMgr.GetComponent<Comp>(entity);
+    template <typename Comp>
+    void SetComponent(Entity entity, const Comp& component) {
+        componentMgr.GetComponent<Comp>(entity) = component;
+        eventMgr.ComponentChanged<Comp>(entity, component);
     }
+
+    template <typename Comp>
+    inline void SubscribeComponentChange(Entity entity, std::function<void(Entity, const Comp&)> function)
+        { eventMgr.SubscribeComponentChange<Comp>(entity, function); }
+
+    template <typename Comp>
+    inline void UnsubscribeComponentChange(Entity entity, std::function<void(Entity, const Comp&)> function)
+        { eventMgr.UnsubscribeComponentChange<Comp>(entity, function); }
 
     inline const std::set<ComponentId>& GetEntityComponents(Entity entity) const
         { return componentMgr.GetEntityComponents(entity); }
 
-    template<typename Sys>
+    template <typename Sys>
     inline std::shared_ptr<Sys> GetSystem() {
         return systemsMgr.GetSystem<Sys>();
     }
@@ -80,4 +91,5 @@ private:
     ComponentsManager componentMgr;
     EntitiesManager entitiesMgr;
     SystemsManager systemsMgr;
+    EventsManager eventMgr;
 };
