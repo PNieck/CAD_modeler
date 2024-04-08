@@ -2,8 +2,6 @@
 
 #include <ecs/componentsManager.hpp>
 #include <ecs/entitiesManager.hpp>
-#include <CAD_modeler/model/components/position.hpp>
-#include <CAD_modeler/model/components/scale.hpp>
 
 
 class Component1 {
