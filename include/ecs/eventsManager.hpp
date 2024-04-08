@@ -55,6 +55,10 @@ private:
     struct EntityComponentKey {
         Entity entity;
         ComponentId compId;
+
+        bool operator== (const EntityComponentKey& rhs) const {
+            return this->entity == rhs.entity && this->compId == rhs.compId;
+        }
     };
 
 
@@ -77,9 +81,15 @@ private:
         }
     };
 
+    struct AnyHash {
+        size_t operator()(const std::any& val) {
+            return val.type().hash_code();
+        }
+    };
+
     std::unordered_map<
         EntityComponentKey,
-        std::unordered_set<std::any>,
+        std::unordered_set<std::any, AnyHash>,
         EntityComponentKeyHash
     > listeners;
 
