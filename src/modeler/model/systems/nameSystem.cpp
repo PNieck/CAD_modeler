@@ -7,8 +7,6 @@ void NameSystem::RegisterSystem(Coordinator & coordinator)
 {
     coordinator.RegisterSystem<NameSystem>();
 
-    coordinator.RegisterComponent<Name>();
-
     coordinator.RegisterRequiredComponent<NameSystem, Name>();
 }
 
@@ -21,5 +19,5 @@ const Name& NameSystem::GetName(Entity entity) const
 
 void NameSystem::SetName(Entity entity, const Name& name) const
 {
-    coordinator->GetComponent<Name>(entity) = name;
+    coordinator->SetComponent<Name>(entity, name);
 }

@@ -17,13 +17,6 @@ void ToriSystem::RegisterSystem(Coordinator & coordinator)
 {
     coordinator.RegisterSystem<ToriSystem>();
 
-    coordinator.RegisterComponent<Position>();
-    coordinator.RegisterComponent<Scale>();
-    coordinator.RegisterComponent<Rotation>();
-    coordinator.RegisterComponent<Mesh>();
-    coordinator.RegisterComponent<TorusParameters>();
-    coordinator.RegisterComponent<Name>();
-
     coordinator.RegisterRequiredComponent<ToriSystem, Position>();
     coordinator.RegisterRequiredComponent<ToriSystem, Scale>();
     coordinator.RegisterRequiredComponent<ToriSystem, Rotation>();
@@ -66,11 +59,14 @@ Entity ToriSystem::AddTorus(const Position& pos, const TorusParameters& params)
 
 void ToriSystem::SetTorusParameter(Entity entity, const TorusParameters& params)
 {
-    coordinator->GetComponent<TorusParameters>(entity) = params;
+    coordinator->SetComponent<TorusParameters>(entity, params);
 
     auto vertices = params.GenerateVertices();
     auto indices = params.GenerateEdges();
-    coordinator->GetComponent<Mesh>(entity).Update(vertices, indices);
+
+    Mesh mesh = coordinator->GetComponent<Mesh>(entity);
+    mesh.Update(vertices, indices);
+    coordinator->SetComponent<Mesh>(entity, mesh);
 }
 
 

@@ -73,11 +73,11 @@ public:
 
     template <typename Comp>
     inline const Comp& GetComponent(Entity entity) const
-        { return coordinator.GetConstComponent<Comp>(entity); }
+        { return coordinator.GetComponent<Comp>(entity); }
 
     template <typename Comp>
     inline void SetComponent(Entity entity, const Comp& comp)
-        { coordinator.GetComponent<Comp>(entity) = comp; }
+        { coordinator.SetComponent<Comp>(entity, comp); }
 
     template <>
     inline void SetComponent<TorusParameters>(Entity entity, const TorusParameters& params)
@@ -89,11 +89,14 @@ public:
     inline Entity GetMiddlePoint() const
         { return selectionSystem->GetMiddlePoint(); }
 
-    void ChangeSelectedEntitiesPosition(const Position& newMidPoint);
+    inline void ChangeSelectedEntitiesPosition(const Position& newMidPoint)
+        { selectionSystem->MoveSelected(newMidPoint); }
 
-    void ChangeSelectedEntitiesScale(const Scale& scale);
+    inline void ChangeSelectedEntitiesScale(const Scale& scale)
+        { selectionSystem->ScaleSelected(scale); }
 
-    void RotateSelectedEntities(const Rotation& rotation);
+    inline void RotateSelectedEntities(const Rotation& rotation)
+        { selectionSystem->RotateSelected(rotation); }
 
     inline void ChangeEntityName(Entity entity, const Name& name)
         { nameSystem->SetName(entity, name); }

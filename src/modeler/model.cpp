@@ -3,6 +3,8 @@
 #include <CAD_modeler/utilities/line.hpp>
 #include <CAD_modeler/utilities/plane.hpp>
 
+#include <CAD_modeler/model/components/registerComponents.hpp>
+
 #include <stdexcept>
 
 
@@ -10,6 +12,8 @@ Model::Model(int viewport_width, int viewport_height)
 {
     glEnable(GL_PRIMITIVE_RESTART);
     glPrimitiveRestartIndex(std::numeric_limits<uint32_t>::max());
+
+    RegisterAllComponents(coordinator);
 
     CameraSystem::RegisterSystem(coordinator);
     ToriSystem::RegisterSystem(coordinator);
@@ -138,70 +142,4 @@ Line Model::LineFromViewportCoordinates(float x, float y) const
     );
 
     return Line::FromTwoPoints(near, far);
-}
-
-
-void Model::ChangeSelectedEntitiesPosition(const Position& newMidPoint)
-{
-    Entity midPoint = selectionSystem->GetMiddlePoint();
-    Position const& midPointPos = coordinator.GetComponent<Position>(midPoint);
-
-    glm::vec3 translation = newMidPoint.vec - midPointPos.vec;
-
-    auto const& selected = selectionSystem->SelectedEntities();
-
-    for (auto entity: selected) {
-        coordinator.GetComponent<Position>(entity).vec += translation;
-    }
-}
-
-
-void Model::ChangeSelectedEntitiesScale(const Scale& scale)
-{
-    Entity midPoint = selectionSystem->GetMiddlePoint();
-    Position const& midPointPos = coordinator.GetComponent<Position>(midPoint);
-
-    auto const& selected = selectionSystem->SelectedEntities();
-
-    for (auto entity: selected) {
-        Position& pos = coordinator.GetComponent<Position>(entity);
-        glm::vec3 dist = pos.vec - midPointPos.vec;
-
-        dist.x *= scale.GetX();
-        dist.y *= scale.GetY();
-        dist.z *= scale.GetZ();
-
-        pos.vec = midPointPos.vec + dist;
-
-        if (coordinator.GetEntityComponents(entity).contains(ComponentsManager::GetComponentId<Scale>())) {
-            auto& sc = coordinator.GetComponent<Scale>(entity);
-            sc.scale *= scale.scale;
-        }
-    }
-}
-
-
-void Model::RotateSelectedEntities(const Rotation& rotation)
-{
-    Entity midPoint = selectionSystem->GetMiddlePoint();
-    Position const& midPointPos = coordinator.GetComponent<Position>(midPoint);
-
-    auto const& selected = selectionSystem->SelectedEntities();
-
-    for (auto entity: selected) {
-        Position& pos = coordinator.GetComponent<Position>(entity);
-        glm::vec3 dist = pos.vec - midPointPos.vec;
-
-        dist = glm::rotate(rotation.quat, dist);
-
-        pos.vec = midPointPos.vec + dist;
-
-        if (coordinator.GetEntityComponents(entity).contains(ComponentsManager::GetComponentId<Rotation>())) {
-            auto& rot = coordinator.GetComponent<Rotation>(entity);
-            auto quat = rotation.quat * rot.quat;
-            quat = glm::normalize(quat);
-
-            coordinator.GetComponent<Rotation>(entity) = Rotation(quat);
-        }
-    }
 }

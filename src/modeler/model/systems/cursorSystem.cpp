@@ -14,10 +14,6 @@ void CursorSystem::RegisterSystem(Coordinator & coordinator)
 {
     coordinator.RegisterSystem<CursorSystem>();
 
-    coordinator.RegisterComponent<Position>();
-    coordinator.RegisterComponent<Mesh>();
-    coordinator.RegisterComponent<Name>();
-
     glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
     glPointSize(10.0f);
 }
@@ -72,10 +68,9 @@ void CursorSystem::Render()
 }
 
 
-void CursorSystem::SetPosition(const glm::vec3 & pos)
+void CursorSystem::SetPosition(const glm::vec3& pos)
 {
-    auto& position = coordinator->GetComponent<Position>(cursor);
-    position.vec = pos;
+    coordinator->SetComponent<Position>(cursor, Position(pos));
 }
 
 
