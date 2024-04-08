@@ -89,11 +89,14 @@ public:
     inline Entity GetMiddlePoint() const
         { return selectionSystem->GetMiddlePoint(); }
 
-    void ChangeSelectedEntitiesPosition(const Position& newMidPoint);
+    inline void ChangeSelectedEntitiesPosition(const Position& newMidPoint)
+        { selectionSystem->MoveSelected(newMidPoint); }
 
-    void ChangeSelectedEntitiesScale(const Scale& scale);
+    inline void ChangeSelectedEntitiesScale(const Scale& scale)
+        { selectionSystem->ScaleSelected(scale); }
 
-    void RotateSelectedEntities(const Rotation& rotation);
+    inline void RotateSelectedEntities(const Rotation& rotation)
+        { selectionSystem->RotateSelected(rotation); }
 
     inline void ChangeEntityName(Entity entity, const Name& name)
         { nameSystem->SetName(entity, name); }
