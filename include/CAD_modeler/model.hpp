@@ -73,11 +73,11 @@ public:
 
     template <typename Comp>
     inline const Comp& GetComponent(Entity entity) const
-        { return coordinator.GetConstComponent<Comp>(entity); }
+        { return coordinator.GetComponent<Comp>(entity); }
 
     template <typename Comp>
     inline void SetComponent(Entity entity, const Comp& comp)
-        { coordinator.GetComponent<Comp>(entity) = comp; }
+        { coordinator.SetComponent<Comp>(entity, comp); }
 
     template <>
     inline void SetComponent<TorusParameters>(Entity entity, const TorusParameters& params)

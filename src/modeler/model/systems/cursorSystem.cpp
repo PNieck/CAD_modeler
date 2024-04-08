@@ -68,10 +68,9 @@ void CursorSystem::Render()
 }
 
 
-void CursorSystem::SetPosition(const glm::vec3 & pos)
+void CursorSystem::SetPosition(const glm::vec3& pos)
 {
-    auto& position = coordinator->GetComponent<Position>(cursor);
-    position.vec = pos;
+    coordinator->SetComponent<Position>(cursor, Position(pos));
 }
 
 

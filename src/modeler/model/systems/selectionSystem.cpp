@@ -130,5 +130,5 @@ void SelectionSystem::UpdateMiddlePointPosition()
     if (!entities.empty())
         newPos.vec /= entities.size();
 
-    coordinator->GetComponent<Position>(middlePoint) = newPos;
+    coordinator->SetComponent<Position>(middlePoint, newPos);
 }

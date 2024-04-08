@@ -6,8 +6,9 @@
 
 class Scale {
 public:
-    Scale(float value = 1.0f): scale(value) {};
+    Scale(float value = 1.0f): scale(value) {}
     Scale(float x, float y, float z): scale(x, y, z) {}
+    Scale(glm::vec3 vec): scale(vec) {}
 
     inline float GetX() const { return scale.x; }
     inline float GetY() const { return scale.y; } 
