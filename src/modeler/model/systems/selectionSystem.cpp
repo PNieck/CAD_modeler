@@ -139,11 +139,14 @@ void SelectionSystem::MoveSelected(const Position & newMiddlePointPos)
     Entity midPoint = GetMiddlePoint();
     Position const& midPointPos = coordinator->GetComponent<Position>(midPoint);
 
-    Position newPos(newMiddlePointPos.vec - midPointPos.vec);
+    glm::vec3 delta = newMiddlePointPos.vec - midPointPos.vec;
 
     auto const& selected = SelectedEntities();
 
     for (auto entity: selected) {
+        auto const& oldPos = coordinator->GetComponent<Position>(entity);
+
+        Position newPos(oldPos.vec + delta);
         coordinator->SetComponent<Position>(entity, newPos);
     }
 
