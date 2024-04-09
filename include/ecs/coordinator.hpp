@@ -71,12 +71,12 @@ public:
     }
 
     template <typename Comp>
-    inline void SubscribeComponentChange(Entity entity, std::function<void(Entity, const Comp&)> function)
-        { eventMgr.SubscribeComponentChange<Comp>(entity, function); }
+    inline HandlerId SubscribeToComponentChange(Entity entity, std::function<void(Entity, const Comp&)> function)
+        { return eventMgr.SubscribeToComponentChange<Comp>(entity, function); }
 
     template <typename Comp>
-    inline void UnsubscribeComponentChange(Entity entity, std::function<void(Entity, const Comp&)> function)
-        { eventMgr.UnsubscribeComponentChange<Comp>(entity, function); }
+    inline void UnsubscribeToComponentChange(Entity entity, HandlerId handlerId)
+        { eventMgr.UnsubscribeToComponentChange<Comp>(entity, handlerId); }
 
     inline const std::set<ComponentId>& GetEntityComponents(Entity entity) const
         { return componentMgr.GetEntityComponents(entity); }
