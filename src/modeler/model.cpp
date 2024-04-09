@@ -22,6 +22,7 @@ Model::Model(int viewport_width, int viewport_height)
     PointsSystem::RegisterSystem(coordinator);
     NameSystem::RegisterSystem(coordinator);
     SelectionSystem::RegisterSystem(coordinator);
+    BezierCurveSystem::RegisterSystem(coordinator);
 
     cameraSys = coordinator.GetSystem<CameraSystem>();
     toriSystem = coordinator.GetSystem<ToriSystem>();
@@ -30,6 +31,7 @@ Model::Model(int viewport_width, int viewport_height)
     pointsSystem = coordinator.GetSystem<PointsSystem>();
     nameSystem = coordinator.GetSystem<NameSystem>();
     selectionSystem = coordinator.GetSystem<SelectionSystem>();
+    bezierCurveSystem = coordinator.GetSystem<BezierCurveSystem>();
 
     cameraSys->Init(viewport_width, viewport_height);
     gridSystem->Init(&shadersRepo);
@@ -37,8 +39,15 @@ Model::Model(int viewport_width, int viewport_height)
     selectionSystem->Init(&shadersRepo);
     pointsSystem->Init(&shadersRepo);
     toriSystem->Init(&shadersRepo);
+    bezierCurveSystem->Init(&shadersRepo);
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+
+    Entity point1 = pointsSystem->CreatePoint(Position(1.f, 1.f, 1.f));
+    Entity point2 = pointsSystem->CreatePoint(Position(2.f, 2.f, 2.f));
+    Entity point3 = pointsSystem->CreatePoint(Position(3.f, 3.f, 3.f));
+
+    bezierCurveSystem->CreateBezierCurve({point1, point2, point3});
 }
 
 
@@ -51,6 +60,7 @@ void Model::RenderFrame()
     cursorSystem->Render();
     pointsSystem->Render();
     selectionSystem->RenderMiddlePoint();
+    bezierCurveSystem->Render();
 }
 
 
