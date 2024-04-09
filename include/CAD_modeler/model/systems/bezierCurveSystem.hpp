@@ -4,6 +4,7 @@
 
 #include "shaders/shaderRepository.hpp"
 #include "../components/bezierCurveParameters.hpp"
+#include "../components/position.hpp"
 
 #include <vector>
 
@@ -25,5 +26,13 @@ private:
     std::vector<float> GenerateBezierPolygonVertices(const BezierCurveParameter& params) const;
     std::vector<uint32_t> GenerateBezierPolygonIndices(const BezierCurveParameter& params) const;
 
-    void PointChangedPosition(Entity entity, const Position& pos);
+    struct ControlPointChangedPositionCallback {
+        ControlPointChangedPositionCallback(Entity bezierCurve, BezierCurveSystem& system):
+            bezierSystem(system), bezierCurve(bezierCurve) {}
+
+        BezierCurveSystem& bezierSystem;
+        Entity bezierCurve;
+
+        void operator()(Entity entity, const Position& pos) const;
+    };
 };

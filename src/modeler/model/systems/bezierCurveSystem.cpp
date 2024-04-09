@@ -28,15 +28,21 @@ Entity BezierCurveSystem::CreateBezierCurve(const std::vector<Entity>& entities)
 
     BezierCurveParameter params(entities);
     params.drawPolygon = true;
-    coordinator->AddComponent<BezierCurveParameter>(bezierCurve, params);
 
     Mesh mesh;
     auto vertices = GenerateBezierPolygonVertices(params);
     auto indices = GenerateBezierPolygonIndices(params);
     mesh.Update(vertices, indices);
-    coordinator->AddComponent<Mesh>(bezierCurve, mesh);
-
     
+    ControlPointChangedPositionCallback callback(bezierCurve, *this);
+
+    for (Entity entity: entities) {
+        auto handlerId = coordinator->SubscribeToComponentChange<Position>(entity, callback);
+        params.handlers.insert({ entity, handlerId });
+    }
+
+    coordinator->AddComponent<BezierCurveParameter>(bezierCurve, params);
+    coordinator->AddComponent<Mesh>(bezierCurve, mesh);
 
     return bezierCurve;
 }
@@ -93,6 +99,8 @@ std::vector<float> BezierCurveSystem::GenerateBezierPolygonVertices(const Bezier
         result[i * COORD_IN_VERTEX] = pos.GetX();
         result[i * COORD_IN_VERTEX + 1] = pos.GetY();
         result[i * COORD_IN_VERTEX + 2] = pos.GetZ();
+
+        i++;
     }
 
     return result;
@@ -110,4 +118,19 @@ std::vector<uint32_t> BezierCurveSystem::GenerateBezierPolygonIndices(const Bezi
     }
 
     return result;
+}
+
+
+void BezierCurveSystem::ControlPointChangedPositionCallback::operator()(Entity entity, const Position & pos) const
+{
+    auto mesh = bezierSystem.coordinator->GetComponent<Mesh>(bezierCurve);
+    auto const& params = bezierSystem.coordinator->GetComponent<BezierCurveParameter>(bezierCurve);
+
+    auto vertices = bezierSystem.GenerateBezierPolygonVertices(params);
+    auto indices = bezierSystem.GenerateBezierPolygonIndices(params);
+
+    mesh.Use();
+    mesh.Update(vertices, indices);
+
+    bezierSystem.coordinator->SetComponent<Mesh>(bezierCurve, mesh);
 }

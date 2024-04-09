@@ -1,8 +1,9 @@
 #pragma once
 
-#include <ecs/entitiesManager.hpp>
+#include <ecs/coordinator.hpp>
 
 #include <vector>
+#include <unordered_map>
 
 
 class BezierCurveParameter {
@@ -17,6 +18,8 @@ public:
 
     inline const std::vector<Entity>& ControlPoints() const
         { return controlPoints; }
+
+    std::unordered_map<Entity, HandlerId> handlers;
 
 private:
     std::vector<Entity> controlPoints;
