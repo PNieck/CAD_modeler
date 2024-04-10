@@ -3,11 +3,14 @@
 #include <ecs/coordinator.hpp>
 
 #include <CAD_modeler/model/components/bezierCurveParameters.hpp>
+#include <CAD_modeler/model/components/bezierMesh.hpp>
 #include <CAD_modeler/model/components/position.hpp>
 #include <CAD_modeler/model/components/mesh.hpp>
 
 #include <CAD_modeler/model/systems/cameraSystem.hpp>
 #include <CAD_modeler/model/systems/selectionSystem.hpp>
+
+#include <cmath>
 
 
 static constexpr int COORD_IN_VERTEX = 3;
@@ -19,6 +22,7 @@ void BezierCurveSystem::RegisterSystem(Coordinator & coordinator)
 
     coordinator.RegisterRequiredComponent<BezierCurveSystem, BezierCurveParameter>();
     coordinator.RegisterRequiredComponent<BezierCurveSystem, Mesh>();
+    coordinator.RegisterRequiredComponent<BezierCurveSystem, BezierMesh>();
 }
 
 
@@ -30,9 +34,16 @@ Entity BezierCurveSystem::CreateBezierCurve(const std::vector<Entity>& entities)
     params.drawPolygon = true;
 
     Mesh mesh;
-    auto vertices = GenerateBezierPolygonVertices(params);
-    auto indices = GenerateBezierPolygonIndices(params);
-    mesh.Update(vertices, indices);
+    mesh.Update(
+        GenerateBezierPolygonVertices(params),
+        GenerateBezierPolygonIndices(params)
+    );
+
+    BezierMesh bezierMesh;
+    bezierMesh.Update(
+        CalculateBezierMesh(params),
+        CalculateBezierIndices(params)
+    );
     
     ControlPointChangedPositionCallback callback(bezierCurve, *this);
 
@@ -43,6 +54,7 @@ Entity BezierCurveSystem::CreateBezierCurve(const std::vector<Entity>& entities)
 
     coordinator->AddComponent<BezierCurveParameter>(bezierCurve, params);
     coordinator->AddComponent<Mesh>(bezierCurve, mesh);
+    coordinator->AddComponent<BezierMesh>(bezierCurve, bezierMesh);
 
     return bezierCurve;
 }
@@ -62,26 +74,30 @@ void BezierCurveSystem::Render() const
 
     shader.Use();
     shader.SetColor(glm::vec4(1.0f));
+    shader.SetMVP(cameraMtx);
 
     for (auto const entity: entities) {
         auto const& params = coordinator->GetComponent<BezierCurveParameter>(entity);
-        if (!params.drawPolygon)
-            continue;
 
-        auto const& mesh = coordinator->GetComponent<Mesh>(entity);
+        if (params.drawPolygon) {
+            auto const& mesh = coordinator->GetComponent<Mesh>(entity);
 
-        bool selection = selectionSystem->IsSelected(entity);
+            bool selection = selectionSystem->IsSelected(entity);
 
-        if (selection)
-            shader.SetColor(glm::vec4(1.0f, 0.5f, 0.0f, 1.0f));
+            if (selection)
+                shader.SetColor(glm::vec4(1.0f, 0.5f, 0.0f, 1.0f));
 
-        shader.SetMVP(cameraMtx);
+            mesh.Use();
+            glDrawElements(GL_LINE_STRIP, mesh.GetElementsCnt(), GL_UNSIGNED_INT, 0);
 
-        mesh.Use();
-        glDrawElements(GL_LINE_STRIP, mesh.GetElementsCnt(), GL_UNSIGNED_INT, 0);
+            if (selection)
+                shader.SetColor(glm::vec4(1.0f));
+        }
 
-        if (selection)
-            shader.SetColor(glm::vec4(1.0f));
+        auto const& bezierMesh = coordinator->GetComponent<BezierMesh>(entity);
+
+        bezierMesh.Use();
+        glDrawElements(GL_LINE_STRIP, bezierMesh.GetElementsCnt(), GL_UNSIGNED_INT, 0);
     }
 }
 
@@ -114,6 +130,49 @@ std::vector<uint32_t> BezierCurveSystem::GenerateBezierPolygonIndices(const Bezi
     std::vector<uint32_t> result(controlPoints.size());
 
     for (int i=0; i < controlPoints.size(); i++) {
+        result[i] = i;
+    }
+
+    return result;
+}
+
+
+std::vector<float> BezierCurveSystem::CalculateBezierMesh(const BezierCurveParameter & params) const
+{
+    static constexpr int segments = 50;
+
+    std::vector<float> result(segments * 3);
+    float t = 0.0f;
+
+    auto const& controlPoints = params.ControlPoints();
+
+    auto const& pos0 = coordinator->GetComponent<Position>(controlPoints[0]);
+    auto const& pos1 = coordinator->GetComponent<Position>(controlPoints[1]);
+    auto const& pos2 = coordinator->GetComponent<Position>(controlPoints[2]);
+    auto const& pos3 = coordinator->GetComponent<Position>(controlPoints[3]);
+
+    for (int i=0; i < segments; i++) {
+        glm::vec3 pos = std::powf(1-t, 3) * pos0.vec +
+            3 * std::powf(1-t, 2) * t * pos1.vec +
+            3 * (1-t) * std::powf(t, 2) * pos2.vec +
+            std::powf(t, 3) * pos3.vec;
+
+        result[3*i] = pos.x;
+        result[3*i + 1] = pos.y;
+        result[3*i + 2] = pos.z;
+
+        t += 1.0f/static_cast<float>(segments - 1);
+    }
+
+    return result;
+}
+
+
+std::vector<uint32_t> BezierCurveSystem::CalculateBezierIndices(const BezierCurveParameter & params) const
+{
+    std::vector<uint32_t> result(50);
+
+    for (int i=0; i < 50; i++) {
         result[i] = i;
     }
 

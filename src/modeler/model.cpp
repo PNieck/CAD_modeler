@@ -43,11 +43,12 @@ Model::Model(int viewport_width, int viewport_height)
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
-    Entity point1 = pointsSystem->CreatePoint(Position(1.f, 1.f, 1.f));
-    Entity point2 = pointsSystem->CreatePoint(Position(2.f, 2.f, 2.f));
-    Entity point3 = pointsSystem->CreatePoint(Position(3.f, 3.f, 3.f));
+    Entity point1 = pointsSystem->CreatePoint(Position(-1.f, -1.f, -1.f));
+    Entity point2 = pointsSystem->CreatePoint(Position(2.f, 2.f, 5.f));
+    Entity point3 = pointsSystem->CreatePoint(Position(3.f, 3.f, 10.f));
+    Entity point4 = pointsSystem->CreatePoint(Position(4.f, 4.f, 4.f));
 
-    bezierCurveSystem->CreateBezierCurve({point1, point2, point3});
+    bezierCurveSystem->CreateBezierCurve({point1, point2, point3, point4});
 }
 
 

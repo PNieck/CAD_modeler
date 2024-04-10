@@ -26,6 +26,10 @@ private:
     std::vector<float> GenerateBezierPolygonVertices(const BezierCurveParameter& params) const;
     std::vector<uint32_t> GenerateBezierPolygonIndices(const BezierCurveParameter& params) const;
 
+    std::vector<float> CalculateBezierMesh(const BezierCurveParameter& params) const;
+    std::vector<uint32_t> CalculateBezierIndices(const BezierCurveParameter& params) const;
+
+
     struct ControlPointChangedPositionCallback {
         ControlPointChangedPositionCallback(Entity bezierCurve, BezierCurveSystem& system):
             bezierSystem(system), bezierCurve(bezierCurve) {}
@@ -35,4 +39,6 @@ private:
 
         void operator()(Entity entity, const Position& pos) const;
     };
+
+    
 };
