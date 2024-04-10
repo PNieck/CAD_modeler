@@ -183,13 +183,18 @@ std::vector<uint32_t> BezierCurveSystem::CalculateBezierIndices(const BezierCurv
 void BezierCurveSystem::ControlPointChangedPositionCallback::operator()(Entity entity, const Position & pos) const
 {
     auto mesh = bezierSystem.coordinator->GetComponent<Mesh>(bezierCurve);
+    auto bezierMesh = bezierSystem.coordinator->GetComponent<BezierMesh>(bezierCurve);
     auto const& params = bezierSystem.coordinator->GetComponent<BezierCurveParameter>(bezierCurve);
 
-    auto vertices = bezierSystem.GenerateBezierPolygonVertices(params);
-    auto indices = bezierSystem.GenerateBezierPolygonIndices(params);
+    mesh.Update(
+        bezierSystem.GenerateBezierPolygonVertices(params),
+        bezierSystem.GenerateBezierPolygonIndices(params)
+    );
 
-    mesh.Use();
-    mesh.Update(vertices, indices);
+    bezierMesh.Update(
+        bezierSystem.CalculateBezierMesh(params),
+        bezierSystem.CalculateBezierIndices(params)
+    );
 
     bezierSystem.coordinator->SetComponent<Mesh>(bezierCurve, mesh);
 }
