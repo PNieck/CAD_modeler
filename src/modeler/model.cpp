@@ -42,6 +42,11 @@ Model::Model(int viewport_width, int viewport_height)
     bezierCurveSystem->Init(&shadersRepo);
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glEnable(GL_LINE_SMOOTH);
+    glLineWidth(1.0);
+    glEnable(GL_BLEND);
+    glDepthMask(GL_FALSE);
+    glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
 
     Entity point1 = pointsSystem->CreatePoint(Position(-1.f, -1.f, -1.f));
     Entity point2 = pointsSystem->CreatePoint(Position(2.f, 2.f, 5.f));
