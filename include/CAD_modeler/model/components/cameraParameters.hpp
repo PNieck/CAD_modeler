@@ -6,7 +6,8 @@
 class CameraParameters {
 public:
     Position target;
-    float aspect_ratio;
+    int viewportWidth;
+    int viewportHeight;
     float fov;
     float near_plane;
     float far_plane;
