@@ -4,6 +4,7 @@
 #include <CAD_modeler/utilities/plane.hpp>
 
 #include <CAD_modeler/model/components/registerComponents.hpp>
+#include <CAD_modeler/model/components/cameraParameters.hpp>
 
 #include <stdexcept>
 
@@ -33,7 +34,16 @@ Model::Model(int viewport_width, int viewport_height)
     selectionSystem = coordinator.GetSystem<SelectionSystem>();
     bezierCurveSystem = coordinator.GetSystem<BezierCurveSystem>();
 
-    cameraSys->Init(viewport_width, viewport_height);
+    CameraParameters params {
+        .target = Position(0.0f),
+        .viewportWidth = viewport_width,
+        .viewportHeight = viewport_height,
+        .fov = glm::radians(45.0f),
+        .near_plane = 0.1f,
+        .far_plane = 100.0f,
+    };
+
+    cameraSys->Init(params, Position(0.0f, 0.0f, 10.0f));
     gridSystem->Init(&shadersRepo);
     cursorSystem->Init(&shadersRepo);
     selectionSystem->Init(&shadersRepo);

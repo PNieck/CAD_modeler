@@ -7,6 +7,7 @@
 #include "../components/position.hpp"
 
 #include <vector>
+#include <tuple>
 
 
 class BezierCurveSystem: public System {
@@ -29,9 +30,12 @@ private:
     std::vector<float> CalculateBezierMesh(const BezierCurveParameter& params) const;
     std::vector<uint32_t> CalculateBezierIndices(const BezierCurveParameter& params) const;
 
+    std::tuple<std::vector<float>, std::vector<uint32_t>> CalculateAdaptableBezierMesh(const BezierCurveParameter& params) const;
 
-    struct ControlPointChangedPositionCallback {
-        ControlPointChangedPositionCallback(Entity bezierCurve, BezierCurveSystem& system):
+    static glm::vec3 ProjectPoint(const glm::vec3& point, const glm::mat4x4 mat);
+
+    struct RecalculateMeshEvent {
+        RecalculateMeshEvent(Entity bezierCurve, BezierCurveSystem& system):
             bezierSystem(system), bezierCurve(bezierCurve) {}
 
         BezierCurveSystem& bezierSystem;
