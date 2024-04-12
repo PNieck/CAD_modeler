@@ -13,7 +13,7 @@ GuiView::GuiView(GLFWwindow* window, GuiController& controller, const Model& mod
     controller(controller), model(model)
 {
     // FIXME: function, which generates glsl version string
-    const char* glsl_version = "#version 330";
+    const char* glsl_version = "#version 410";
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
