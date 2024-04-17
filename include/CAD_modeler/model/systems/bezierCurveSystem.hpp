@@ -9,6 +9,7 @@
 
 #include <vector>
 #include <tuple>
+#include <stack>
 
 
 class BezierCurveSystem: public System {
@@ -30,6 +31,8 @@ private:
 
     std::vector<float> GenerateBezierPolygonVertices(const BezierCurveParameter& params) const;
     std::vector<uint32_t> GenerateBezierPolygonIndices(const BezierCurveParameter& params) const;
+
+    void RenderCurvesPolygons(std::stack<Entity>& entities) const;
 
     struct RecalculateMeshEvent {
         RecalculateMeshEvent(Entity bezierCurve, BezierCurveSystem& system):

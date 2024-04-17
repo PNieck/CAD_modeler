@@ -161,6 +161,10 @@ void GuiView::RenderSingleObjectProperties(Entity entity) const
     if (it != components.end())
         DisplayNameEditor(entity, model.GetComponent<Name>(entity));
 
+    it = components.find(Model::GetComponentId<BezierCurveParameter>());
+    if (it != components.end())
+        DisplayBezierCurveProperty(entity, model.GetComponent<BezierCurveParameter>(entity));
+
     if (ImGui::Button("Delete object")) {
         controller.DeleteEntity(entity);
     }
@@ -293,6 +297,22 @@ void GuiView::DisplayTorusProperty(Entity entity, const TorusParameters& params)
         };
 
         controller.ChangeComponent<TorusParameters>(entity, newParams);
+    }
+}
+
+
+void GuiView::DisplayBezierCurveProperty(Entity entity, const BezierCurveParameter& params) const
+{
+    bool drawPolygon = params.drawPolygon;
+
+    ImGui::SeparatorText("Curve options");
+
+    ImGui::Checkbox("Draw polygon", &drawPolygon);
+
+    if (drawPolygon != params.drawPolygon) {
+        BezierCurveParameter newParams = params;
+        newParams.drawPolygon = drawPolygon;
+        controller.ChangeComponent<BezierCurveParameter>(entity, newParams);
     }
 }
 

@@ -63,6 +63,7 @@ void BezierCurveSystem::Render() const
     auto const& cameraSystem = coordinator->GetSystem<CameraSystem>();
     auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
     auto const& shader = shaderRepo->GetBezierShader();
+    std::stack<Entity> polygonsToDraw;
 
     glm::mat4x4 cameraMtx = cameraSystem->PerspectiveMatrix() * cameraSystem->ViewMatrix();
 
@@ -72,6 +73,9 @@ void BezierCurveSystem::Render() const
 
     for (auto const entity: entities) {
         auto const& params = coordinator->GetComponent<BezierCurveParameter>(entity);
+
+        if (params.drawPolygon)
+            polygonsToDraw.push(entity);
 
         bool selection = selectionSystem->IsSelected(entity);
 
@@ -83,6 +87,41 @@ void BezierCurveSystem::Render() const
 
         glPatchParameteri(GL_PATCH_VERTICES, 4);
 	    glDrawElements(GL_PATCHES, mesh.GetElementsCnt(), GL_UNSIGNED_INT, 0);
+
+        if (selection)
+            shader.SetColor(glm::vec4(1.0f));
+    }
+
+    if (!polygonsToDraw.empty())
+        RenderCurvesPolygons(polygonsToDraw);
+}
+
+
+void BezierCurveSystem::RenderCurvesPolygons(std::stack<Entity>& entities) const
+{
+    auto const& cameraSystem = coordinator->GetSystem<CameraSystem>();
+    auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
+    auto const& shader = shaderRepo->GetStdShader();
+
+    glm::mat4x4 cameraMtx = cameraSystem->PerspectiveMatrix() * cameraSystem->ViewMatrix();
+
+    shader.Use();
+    shader.SetColor(glm::vec4(1.0f));
+    shader.SetMVP(cameraMtx);
+
+    while (!entities.empty()) {
+        Entity entity = entities.top();
+        entities.pop();
+
+        bool selection = selectionSystem->IsSelected(entity);
+
+        if (selection)
+            shader.SetColor(glm::vec4(1.0f, 0.5f, 0.0f, 1.0f));
+
+        auto const& mesh = coordinator->GetComponent<Mesh>(entity);
+        mesh.Use();
+
+	    glDrawElements(GL_LINE_STRIP, mesh.GetElementsCnt(), GL_UNSIGNED_INT, 0);
 
         if (selection)
             shader.SetColor(glm::vec4(1.0f));

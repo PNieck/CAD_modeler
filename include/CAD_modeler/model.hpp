@@ -103,6 +103,9 @@ public:
     inline void ChangeEntityName(Entity entity, const Name& name)
         { nameSystem->SetName(entity, name); }
 
+    inline void TurnOnDisplayingCurvePolygon(Entity entity) const
+        {  }
+
     template <typename Comp>
     static inline constexpr ComponentId GetComponentId()
         { return ComponentsManager::GetComponentId<Comp>(); }
