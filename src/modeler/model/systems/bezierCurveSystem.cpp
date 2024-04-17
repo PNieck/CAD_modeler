@@ -74,8 +74,8 @@ void BezierCurveSystem::Render() const
         auto const& mesh = coordinator->GetComponent<Mesh>(entity);
         mesh.Use();
 
-        glPatchParameteri( GL_PATCH_VERTICES, 4 );
-	    glDrawArrays( GL_PATCHES, 0, mesh.GetElementsCnt());
+        glPatchParameteri(GL_PATCH_VERTICES, 4);
+	    glDrawElements(GL_PATCHES, mesh.GetElementsCnt(), GL_UNSIGNED_INT, 0);
     }
 }
 
@@ -101,14 +101,27 @@ std::vector<float> BezierCurveSystem::GenerateBezierPolygonVertices(const Bezier
 }
 
 
+int ceiling(int x, int y) {
+    return (x + y - 1) / y;
+}
+
+
 std::vector<uint32_t> BezierCurveSystem::GenerateBezierPolygonIndices(const BezierCurveParameter& params) const
 {
     auto const& controlPoints = params.ControlPoints();
 
-    std::vector<uint32_t> result(controlPoints.size());
+    // Ceiling
+    int segmentsCnt = (controlPoints.size() - 1) / (CONTROL_POINTS_PER_SEGMENT - 1);
+    int resultSize = segmentsCnt * CONTROL_POINTS_PER_SEGMENT;
 
-    for (int i=0; i < controlPoints.size(); i++) {
-        result[i] = i;
+    std::vector<uint32_t> result;
+    result.reserve(resultSize);
+
+    for (int firstControlPoint=0; firstControlPoint < resultSize - 3; firstControlPoint += 3) {
+        result.push_back(firstControlPoint);
+        result.push_back(firstControlPoint + 1);
+        result.push_back(firstControlPoint + 2);
+        result.push_back(firstControlPoint + 3);
     }
 
     return result;

@@ -24,15 +24,10 @@ public:
 private:
     ShaderRepository* shaderRepo;
 
+    static constexpr int CONTROL_POINTS_PER_SEGMENT = 4;
+
     std::vector<float> GenerateBezierPolygonVertices(const BezierCurveParameter& params) const;
     std::vector<uint32_t> GenerateBezierPolygonIndices(const BezierCurveParameter& params) const;
-
-    std::vector<float> CalculateBezierMesh(const BezierCurveParameter& params) const;
-    std::vector<uint32_t> CalculateBezierIndices(const BezierCurveParameter& params) const;
-
-    std::tuple<std::vector<float>, std::vector<uint32_t>> CalculateAdaptableBezierMesh(const BezierCurveParameter& params) const;
-
-    static glm::vec3 ProjectPoint(const glm::vec3& point, const glm::mat4x4 mat);
 
     struct RecalculateMeshEvent {
         RecalculateMeshEvent(Entity bezierCurve, BezierCurveSystem& system):
@@ -43,6 +38,4 @@ private:
 
         void operator()(Entity entity, const Position& pos) const;
     };
-
-    
 };
