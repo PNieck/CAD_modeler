@@ -5,6 +5,7 @@
 #include "shaders/shaderRepository.hpp"
 #include "../components/bezierCurveParameters.hpp"
 #include "../components/position.hpp"
+#include "utils/nameGenerator.hpp"
 
 #include <vector>
 #include <tuple>
@@ -23,6 +24,7 @@ public:
 
 private:
     ShaderRepository* shaderRepo;
+    NameGenerator nameGenerator;
 
     static constexpr int CONTROL_POINTS_PER_SEGMENT = 4;
 

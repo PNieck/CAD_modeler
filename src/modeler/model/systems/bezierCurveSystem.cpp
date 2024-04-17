@@ -5,6 +5,7 @@
 #include <CAD_modeler/model/components/bezierCurveParameters.hpp>
 #include <CAD_modeler/model/components/position.hpp>
 #include <CAD_modeler/model/components/mesh.hpp>
+#include <CAD_modeler/model/components/name.hpp>
 
 #include <CAD_modeler/model/systems/cameraSystem.hpp>
 #include <CAD_modeler/model/systems/selectionSystem.hpp>
@@ -47,6 +48,7 @@ Entity BezierCurveSystem::CreateBezierCurve(const std::vector<Entity>& entities)
 
     coordinator->AddComponent<BezierCurveParameter>(bezierCurve, params);
     coordinator->AddComponent<Mesh>(bezierCurve, mesh);
+    coordinator->AddComponent<Name>(bezierCurve, nameGenerator.GenerateName("CurveC0_"));
 
     return bezierCurve;
 }
@@ -71,11 +73,19 @@ void BezierCurveSystem::Render() const
     for (auto const entity: entities) {
         auto const& params = coordinator->GetComponent<BezierCurveParameter>(entity);
 
+        bool selection = selectionSystem->IsSelected(entity);
+
+        if (selection)
+            shader.SetColor(glm::vec4(1.0f, 0.5f, 0.0f, 1.0f));
+
         auto const& mesh = coordinator->GetComponent<Mesh>(entity);
         mesh.Use();
 
         glPatchParameteri(GL_PATCH_VERTICES, 4);
 	    glDrawElements(GL_PATCHES, mesh.GetElementsCnt(), GL_UNSIGNED_INT, 0);
+
+        if (selection)
+            shader.SetColor(glm::vec4(1.0f));
     }
 }
 
