@@ -110,19 +110,33 @@ std::vector<uint32_t> BezierCurveSystem::GenerateBezierPolygonIndices(const Bezi
 {
     auto const& controlPoints = params.ControlPoints();
 
-    // Ceiling
-    int segmentsCnt = (controlPoints.size() - 1) / (CONTROL_POINTS_PER_SEGMENT - 1);
-    int resultSize = segmentsCnt * CONTROL_POINTS_PER_SEGMENT;
+    int fullSegmentsCnt = (controlPoints.size() - 1) / (CONTROL_POINTS_PER_SEGMENT - 1);
+    int allSegmentsCnt = ceiling(controlPoints.size() - 1, CONTROL_POINTS_PER_SEGMENT - 1);
+    int resultSize = allSegmentsCnt * CONTROL_POINTS_PER_SEGMENT;
 
     std::vector<uint32_t> result;
     result.reserve(resultSize);
 
-    for (int firstControlPoint=0; firstControlPoint < resultSize - 3; firstControlPoint += 3) {
+    // Add all full segments
+    int firstControlPoint = 0;
+    for (; firstControlPoint < fullSegmentsCnt * CONTROL_POINTS_PER_SEGMENT - 3; firstControlPoint += 3) {
         result.push_back(firstControlPoint);
         result.push_back(firstControlPoint + 1);
         result.push_back(firstControlPoint + 2);
         result.push_back(firstControlPoint + 3);
     }
+
+    // Add the rest of control points
+    int i = firstControlPoint;
+    while (i < controlPoints.size()) {
+        result.push_back(i++);
+    }
+
+    // Repet the last control point
+    while (result.size() < resultSize) {
+        result.push_back(controlPoints.size() - 1);
+    }
+    
 
     return result;
 }
