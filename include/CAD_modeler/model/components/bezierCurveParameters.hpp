@@ -20,7 +20,6 @@ public:
         { return controlPoints; }
 
     std::unordered_map<Entity, HandlerId> handlers;
-    HandlerId cameraMovedEvent;
 
 private:
     std::vector<Entity> controlPoints;

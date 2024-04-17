@@ -9,7 +9,6 @@
 #include <CAD_modeler/model/components/selected.hpp>
 #include <CAD_modeler/model/components/torusParameters.hpp>
 #include <CAD_modeler/model/components/bezierCurveParameters.hpp>
-#include <CAD_modeler/model/components/bezierMesh.hpp>
 
 
 void RegisterAllComponents(Coordinator& coordinator)
@@ -23,5 +22,4 @@ void RegisterAllComponents(Coordinator& coordinator)
     coordinator.RegisterComponent<Selected>();
     coordinator.RegisterComponent<TorusParameters>();
     coordinator.RegisterComponent<BezierCurveParameter>();
-    coordinator.RegisterComponent<BezierMesh>();
 }
