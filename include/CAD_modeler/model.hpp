@@ -28,6 +28,9 @@ public:
 
     void AddTorus();
 
+    inline void AddC0Curve(const std::vector<Entity>& controlPoints) const
+        { bezierCurveSystem->CreateBezierCurve(controlPoints); }
+
     inline void RotateCamera(float x, float y) const
         { cameraSys->RotateAroundTarget(x, y); }
 
@@ -103,8 +106,8 @@ public:
     inline void ChangeEntityName(Entity entity, const Name& name)
         { nameSystem->SetName(entity, name); }
 
-    inline void TurnOnDisplayingCurvePolygon(Entity entity) const
-        {  }
+    inline const std::unordered_set<Entity>& GetAllPoints() const
+        { return pointsSystem->GetPoints(); } 
 
     template <typename Comp>
     static inline constexpr ComponentId GetComponentId()

@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <iterator>
+#include <stdexcept>
 
 
 GuiView::GuiView(GLFWwindow* window, GuiController& controller, const Model& model):
@@ -54,6 +55,13 @@ void GuiView::RenderGui() const
         case AppState::Adding3dPoints:
             RenderAdd3DPointsGui();
             break;
+
+        case AppState::AddingC0Curve:
+            RenderAddingC0CurveGui();
+            break;
+
+        default:
+            throw std::runtime_error("Unknown app state");
     }
 
     ImGui::End();
@@ -73,6 +81,10 @@ void GuiView::RenderDefaultGui() const
 
     if (ImGui::Button("Add torus")) {
         controller.AddTorus();
+    }
+
+    if (ImGui::Button("Add C0 curve")) {
+        controller.SetAppState(AppState::AddingC0Curve);
     }
 
     ImGui::Separator();
@@ -109,6 +121,46 @@ void GuiView::RenderAdd3DPointsGui() const
     if (ImGui::Button("Finish adding points")) {
         controller.SetAppState(AppState::Default);
     }
+}
+
+
+void GuiView::RenderAddingC0CurveGui() const
+{
+    static std::vector<Entity> controlPoints;
+
+    if (ImGui::Button("Finish adding points")) {
+        controller.AddC0Curve(controlPoints);
+        controlPoints.clear();
+        controller.SetAppState(AppState::Default);
+    }    
+
+    ImGui::SeparatorText("Points");
+
+    for (auto entity: model.GetAllPoints()) {
+        bool oldSelected = false;
+
+        if (std::find(controlPoints.begin(), controlPoints.end(), entity) != controlPoints.end())
+            oldSelected = true;
+
+        bool newSelected = oldSelected;
+
+        ImGui::Selectable(
+            model.GetEntityName(entity).c_str(),
+            &newSelected
+        );
+
+        if (oldSelected != newSelected) {
+            if (newSelected) {
+                controlPoints.push_back(entity);
+                controller.SelectEntity(entity);
+            }
+            else {
+                auto it = std::find(controlPoints.begin(), controlPoints.end(), entity);
+                controlPoints.erase(it);
+                controller.DeselectEntity(entity);
+            }
+        }
+    } 
 }
 
 

@@ -57,17 +57,6 @@ Model::Model(int viewport_width, int viewport_height)
     glEnable(GL_BLEND);
     glDepthMask(GL_FALSE);
     glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-
-    Entity point1 = pointsSystem->CreatePoint(Position(-1.f, -1.f, -1.f));
-    Entity point2 = pointsSystem->CreatePoint(Position(2.f, 2.f, 5.f));
-    Entity point3 = pointsSystem->CreatePoint(Position(3.f, 3.f, 10.f));
-    Entity point4 = pointsSystem->CreatePoint(Position(4.f, 4.f, 4.f));
-
-    Entity point5 = pointsSystem->CreatePoint(Position(5.f, 5.f, 5.f));
-    Entity point6 = pointsSystem->CreatePoint(Position(6.f, 6.f, 6.f));
-    Entity point7 = pointsSystem->CreatePoint(Position(7.f, 7.f, 7.f));
-
-    bezierCurveSystem->CreateBezierCurve({point1, point2, point3, point4, point5, point6, point7});
 }
 
 

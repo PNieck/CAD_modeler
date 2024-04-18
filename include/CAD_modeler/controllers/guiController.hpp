@@ -15,6 +15,9 @@ public:
     inline void AddTorus() const
         { model.AddTorus(); }
 
+    inline void AddC0Curve(const std::vector<Entity>& entities) const
+        { model.AddC0Curve(entities); }
+
     inline void SelectEntity(Entity entity) const
         { model.Select(entity); }
 

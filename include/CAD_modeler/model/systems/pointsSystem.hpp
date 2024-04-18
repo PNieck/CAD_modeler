@@ -19,6 +19,9 @@ public:
 
     Entity CreatePoint(const Position& pos);
 
+    inline const std::unordered_set<Entity>& GetPoints() const
+        { return entities; }
+
     void Render() const;
 
 private:

@@ -62,6 +62,14 @@ void SelectionSystem::Deselect(Entity entity)
 }
 
 
+void SelectionSystem::DeselectAllEntities()
+{
+    for (auto entity: entities) {
+        coordinator->DeleteComponent<Selected>(entity);
+    }
+}
+
+
 void SelectionSystem::SelectFromLine(const Line& line)
 {
     auto const& pointsSystem = coordinator->GetSystem<PointsSystem>();
