@@ -14,6 +14,9 @@ public:
     inline void AddControlPoint(Entity entity)
         { controlPoints.push_back(entity); }
 
+    inline void DeleteControlPoint(Entity entity)
+        { controlPoints.erase(std::find(controlPoints.begin(), controlPoints.end(), entity)); }
+
     bool drawPolygon;
 
     inline const std::vector<Entity>& ControlPoints() const

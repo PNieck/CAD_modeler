@@ -21,6 +21,9 @@ public:
 
     Entity CreateBezierCurve(const std::vector<Entity>& entities);
 
+    std::vector<float> GenerateBezierPolygonVertices(const BezierCurveParameter& params) const;
+    std::vector<uint32_t> GenerateBezierPolygonIndices(const BezierCurveParameter& params) const;
+
     void Render() const;
 
 private:
@@ -28,9 +31,6 @@ private:
     NameGenerator nameGenerator;
 
     static constexpr int CONTROL_POINTS_PER_SEGMENT = 4;
-
-    std::vector<float> GenerateBezierPolygonVertices(const BezierCurveParameter& params) const;
-    std::vector<uint32_t> GenerateBezierPolygonIndices(const BezierCurveParameter& params) const;
 
     void RenderCurvesPolygons(std::stack<Entity>& entities) const;
 
@@ -41,6 +41,6 @@ private:
         BezierCurveSystem& bezierSystem;
         Entity bezierCurve;
 
-        void operator()(Entity entity, const Position& pos) const;
+        void operator()(Entity entity, const Position& pos, EventType eventType) const;
     };
 };

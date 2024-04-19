@@ -42,7 +42,7 @@ Entity BezierCurveSystem::CreateBezierCurve(const std::vector<Entity>& entities)
     RecalculateMeshEvent callback(bezierCurve, *this);
 
     for (Entity entity: entities) {
-        auto handlerId = coordinator->SubscribeToComponentChange<Position>(entity, callback);
+        auto handlerId = coordinator->Subscribe<Position>(entity, callback);
         params.handlers.insert({ entity, handlerId });
     }
 
@@ -191,15 +191,36 @@ std::vector<uint32_t> BezierCurveSystem::GenerateBezierPolygonIndices(const Bezi
 }
 
 
-void BezierCurveSystem::RecalculateMeshEvent::operator()(Entity entity, const Position & pos) const
+void BezierCurveSystem::RecalculateMeshEvent::operator()(Entity entity, const Position& pos, EventType eventType) const
 {
-    auto mesh = bezierSystem.coordinator->GetComponent<Mesh>(bezierCurve);
-    auto const& params = bezierSystem.coordinator->GetComponent<BezierCurveParameter>(bezierCurve);
+    bool curveDestroyed = false;
 
-    mesh.Update(
-        bezierSystem.GenerateBezierPolygonVertices(params),
-        bezierSystem.GenerateBezierPolygonIndices(params)
+    if (eventType == EventType::ComponentDeleted) {
+        bezierSystem.coordinator->EditComponent<BezierCurveParameter>(bezierCurve,
+            [&curveDestroyed, entity, this](BezierCurveParameter& params) {
+                params.DeleteControlPoint(entity);
+                bezierSystem.coordinator->Unsubscribe<Position>(entity, params.handlers.at(entity));
+                params.handlers.erase(entity);
+
+                if (params.handlers.size() == 0) {
+                    bezierSystem.coordinator->DestroyEntity(bezierCurve);
+                    curveDestroyed = true;
+                }
+            }
+        );
+    }
+
+    if (curveDestroyed)
+        return;
+
+    bezierSystem.coordinator->EditComponent<Mesh>(bezierCurve,
+        [this](Mesh& mesh) {
+            auto const& params = bezierSystem.coordinator->GetComponent<BezierCurveParameter>(bezierCurve);
+
+            mesh.Update(
+                bezierSystem.GenerateBezierPolygonVertices(params),
+                bezierSystem.GenerateBezierPolygonIndices(params)
+            );
+        }
     );
-
-    bezierSystem.coordinator->SetComponent<Mesh>(bezierCurve, mesh);
 }
