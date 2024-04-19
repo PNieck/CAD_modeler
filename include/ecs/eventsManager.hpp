@@ -7,41 +7,70 @@
 #include <any>
 #include <functional>
 #include <unordered_map>
+#include <optional>
+#include <stack>
 
 
 using HandlerId = Id;
 
 
+enum class EventType {
+    NewComponent,
+    ComponentChanged,
+    ComponentDeleted,
+};
+
+
 class EventsManager {
 public:
+    EventsManager(ComponentsManager& compMgr):
+        componentsMgr(compMgr) {}
+
     template <typename Comp>
-    HandlerId SubscribeToComponentChange(Entity entity, const std::function<void(Entity, const Comp&)>& function) {
+    void RegisterComponent() {
+        componentDeletionFunctions.insert({ComponentsManager::GetComponentId<Comp>(), &EventsManager::ComponentDeleted<Comp>});
+    }
+
+
+    template <typename Comp>
+    HandlerId Subscribe(Entity entity, const std::function<void(Entity, const Comp&, EventType)>& function) {
         HandlerId newHandlerId = handlersIdManager.CreateNewId();
-        GetHandlers<Comp>(entity).insert({ newHandlerId, function });
+        listeners[entity][ComponentsManager::GetComponentId<Comp>()].insert({ newHandlerId, function });
 
         return newHandlerId;
     }
 
 
     template <typename Comp>
-    inline void UnsubscribeToComponentChange(Entity entity, HandlerId handlerId) {
-        GetHandlers<Comp>(entity).erase(handlerId);
+    inline void Unsubscribe(Entity entity, HandlerId handlerId) {
+        //GetHandlers<Comp>(entity).erase(handlerId);
+        HandlersToUnsubscribe.push(std::make_tuple(entity, ComponentsManager::GetComponentId<Comp>(), handlerId));
     }
 
 
     template <typename Comp>
-    void ComponentChanged(Entity entity, const Comp& component) {
-        auto const& handlers = GetHandlers<Comp>(entity);
+    inline void ComponentChanged(Entity entity, const Comp& component)
+        { ComponentEvent<Comp>(entity, component, EventType::ComponentChanged); }
 
-        for(auto const& pair: handlers) {
-            auto function = std::any_cast<std::function<void(Entity, const Comp&)>>(pair.second);
 
-            function(entity, component);
-        }
-    }
+    template <typename Comp>
+    void ComponentDeleted(Entity entity)
+        { ComponentEvent<Comp>(entity, componentsMgr.GetComponent<Comp>(entity), EventType::ComponentDeleted); }
+
+
+    template <typename Comp>
+    inline void ComponentAdded(Entity entity, const Comp& component)
+        { ComponentEvent<Comp>(entity, component, EventType::NewComponent); }
 
 
     void EntityDeleted(Entity entity) {
+        auto const& components = componentsMgr.GetEntityComponents(entity);
+
+        // Run events for all components deletion
+        for (auto compId: components) {
+            componentDeletionFunctions.at(compId)(*this, entity);
+        }
+
         for (auto const& pairs: listeners[entity]) {
             for (auto const& handler: pairs.second) {
                 handlersIdManager.DestroyId(handler.first);
@@ -64,12 +93,59 @@ private:
         >
     > listeners;
 
+    std::unordered_map<ComponentId, std::function<void(EventsManager&, Entity)>> componentDeletionFunctions;
+
     IdManager handlersIdManager;
 
+    ComponentsManager& componentsMgr;
+
+    std::stack<std::tuple<Entity, ComponentId, HandlerId>> HandlersToUnsubscribe;
+    unsigned int eventResolvingDepth = 0;
+
+    std::unordered_map<HandlerId, std::any>* GetHandlers(Entity entity, ComponentId compId) {
+        auto it = listeners.find(entity);
+        if (it == listeners.end())
+            return nullptr;
+
+        auto it2 = (*it).second.find(compId);
+        if (it2 == (*it).second.end())
+            return nullptr;
+
+        return &((*it2).second);
+    }
 
     template <typename Comp>
-    std::unordered_map<HandlerId, std::any>& GetHandlers(Entity entity) {
-        ComponentId compId = ComponentsManager::GetComponentId<Comp>();
-        return listeners[entity][compId];
+    void ComponentEvent(Entity entity, const Comp& component, EventType type) {
+        auto handlers = GetHandlers(entity, ComponentsManager::GetComponentId<Comp>());
+
+        if (handlers == nullptr)
+            return;
+
+        if (eventResolvingDepth++ == 0)
+            FlushUnsubscribedHandlersBuffer();
+
+        for(auto const& pair: *handlers) {
+            auto function = std::any_cast<std::function<void(Entity, const Comp&, EventType)>>(pair.second);
+
+            function(entity, component, type);
+        }
+
+        eventResolvingDepth--;
+    }
+
+
+    void FlushUnsubscribedHandlersBuffer() {
+        while (!HandlersToUnsubscribe.empty()) {
+            auto& handleTuple = HandlersToUnsubscribe.top();
+
+            auto handlers = GetHandlers(std::get<0>(handleTuple), std::get<1>(handleTuple));
+            if (handlers == nullptr) {
+                HandlersToUnsubscribe.pop();
+                continue;
+            }
+
+            handlers->erase(std::get<2>(handleTuple));
+            HandlersToUnsubscribe.pop();
+        }
     }
 };

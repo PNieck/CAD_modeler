@@ -6,13 +6,18 @@
 #include "eventsManager.hpp"
 
 #include <memory>
+#include <functional>
 
 
 class Coordinator {
 public:
+    Coordinator():
+        componentMgr(), entitiesMgr(), systemsMgr(), eventMgr(componentMgr) {}
+
     template <typename Comp>
-    inline void RegisterComponent() {
+    void RegisterComponent() {
         componentMgr.RegisterComponent<Comp>();
+        eventMgr.RegisterComponent<Comp>();
     }
 
 
@@ -36,9 +41,9 @@ public:
 
 
     void DestroyEntity(Entity entity) {
+        eventMgr.EntityDeleted(entity);
         componentMgr.EntityDeleted(entity);
         systemsMgr.EntityDeleted(entity);
-        eventMgr.EntityDeleted(entity);
         entitiesMgr.DestroyEntity(entity);
     }
 
@@ -49,11 +54,14 @@ public:
 
         auto const& componentsSet = componentMgr.GetEntityComponents(entity);
         systemsMgr.EntityGainedComponent<Comp>(entity, componentsSet);
+
+        eventMgr.ComponentAdded<Comp>(entity, component);
     }
 
 
     template <typename Comp>
     void DeleteComponent(Entity entity) {
+        eventMgr.ComponentDeleted<Comp>(entity);
         componentMgr.DeleteComponent<Comp>(entity);
         systemsMgr.EntityLostComponent<Comp>(entity);
     }
@@ -71,12 +79,19 @@ public:
     }
 
     template <typename Comp>
-    inline HandlerId SubscribeToComponentChange(Entity entity, std::function<void(Entity, const Comp&)> function)
-        { return eventMgr.SubscribeToComponentChange<Comp>(entity, function); }
+    void EditComponent(Entity entity, std::function<void(Comp& component)> func) {
+        Comp& component = componentMgr.GetComponent<Comp>(entity);
+        func(component);
+        eventMgr.ComponentChanged<Comp>(entity, component);
+    }
 
     template <typename Comp>
-    inline void UnsubscribeToComponentChange(Entity entity, HandlerId handlerId)
-        { eventMgr.UnsubscribeToComponentChange<Comp>(entity, handlerId); }
+    inline HandlerId Subscribe(Entity entity, std::function<void(Entity, const Comp&, EventType)> function)
+        { return eventMgr.Subscribe<Comp>(entity, function); }
+
+    template <typename Comp>
+    inline void Unsubscribe(Entity entity, HandlerId handlerId)
+        { eventMgr.Unsubscribe<Comp>(entity, handlerId); }
 
     inline const std::set<ComponentId>& GetEntityComponents(Entity entity) const
         { return componentMgr.GetEntityComponents(entity); }
