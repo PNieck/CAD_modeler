@@ -70,6 +70,9 @@ public:
     inline void Deselect(Entity entity)
         { return selectionSystem->Deselect(entity); }
 
+    inline void DeselectAllEntities() const
+        { selectionSystem->DeselectAllEntities(); }
+
     inline const std::unordered_set<Entity>& SelectedEntities() const
         { return selectionSystem->SelectedEntities(); }
 

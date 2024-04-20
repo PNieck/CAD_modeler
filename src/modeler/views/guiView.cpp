@@ -85,6 +85,7 @@ void GuiView::RenderDefaultGui() const
 
     if (ImGui::Button("Add C0 curve")) {
         controller.SetAppState(AppState::AddingC0Curve);
+        controller.DeselectAllEntities();
     }
 
     ImGui::Separator();

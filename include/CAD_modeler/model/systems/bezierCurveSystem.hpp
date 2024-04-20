@@ -34,13 +34,14 @@ private:
 
     void RenderCurvesPolygons(std::stack<Entity>& entities) const;
 
-    struct RecalculateMeshEvent {
-        RecalculateMeshEvent(Entity bezierCurve, BezierCurveSystem& system):
+    struct RecalculateMeshHandler: EventHandler<Position> {
+        RecalculateMeshHandler(Entity bezierCurve, BezierCurveSystem& system):
             bezierSystem(system), bezierCurve(bezierCurve) {}
 
         BezierCurveSystem& bezierSystem;
         Entity bezierCurve;
 
         void operator()(Entity entity, const Position& pos, EventType eventType) const;
+        void HandleEvent(Entity entity, const Position& component, EventType eventType);
     };
 };

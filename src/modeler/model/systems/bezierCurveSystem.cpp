@@ -38,11 +38,11 @@ Entity BezierCurveSystem::CreateBezierCurve(const std::vector<Entity>& entities)
         GenerateBezierPolygonVertices(params),
         GenerateBezierPolygonIndices(params)
     );
-    
-    RecalculateMeshEvent callback(bezierCurve, *this);
+
+    auto handler = std::make_shared<RecalculateMeshHandler>(bezierCurve, *this);
 
     for (Entity entity: entities) {
-        auto handlerId = coordinator->Subscribe<Position>(entity, callback);
+        auto handlerId = coordinator->Subscribe<Position>(entity, std::static_pointer_cast<EventHandler<Position>>(handler));
         params.handlers.insert({ entity, handlerId });
     }
 
@@ -191,7 +191,7 @@ std::vector<uint32_t> BezierCurveSystem::GenerateBezierPolygonIndices(const Bezi
 }
 
 
-void BezierCurveSystem::RecalculateMeshEvent::operator()(Entity entity, const Position& pos, EventType eventType) const
+void BezierCurveSystem::RecalculateMeshHandler::HandleEvent(Entity entity, const Position& pos, EventType eventType)
 {
     bool curveDestroyed = false;
 

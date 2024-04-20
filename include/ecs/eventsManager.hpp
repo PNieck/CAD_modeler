@@ -2,6 +2,7 @@
 
 #include "entitiesManager.hpp"
 #include "componentsManager.hpp"
+#include "eventHandler.hpp"
 #include "idManager.hpp"
 
 #include <any>
@@ -9,9 +10,7 @@
 #include <unordered_map>
 #include <optional>
 #include <stack>
-
-
-using HandlerId = Id;
+#include <memory>
 
 
 enum class EventType {
@@ -21,6 +20,9 @@ enum class EventType {
 };
 
 
+using HandlerId = Id;
+
+
 class EventsManager {
 public:
     EventsManager(ComponentsManager& compMgr):
@@ -28,23 +30,27 @@ public:
 
     template <typename Comp>
     void RegisterComponent() {
-        componentDeletionFunctions.insert({ComponentsManager::GetComponentId<Comp>(), &EventsManager::ComponentDeleted<Comp>});
+        componentDeletionFunctions.insert(
+            {ComponentsManager::GetComponentId<Comp>(), &EventsManager::ComponentDeleted<Comp>}
+        );
     }
 
 
     template <typename Comp>
-    HandlerId Subscribe(Entity entity, const std::function<void(Entity, const Comp&, EventType)>& function) {
+    HandlerId Subscribe(Entity entity, std::shared_ptr<EventHandler<Comp>> handler) {
         HandlerId newHandlerId = handlersIdManager.CreateNewId();
-        listeners[entity][ComponentsManager::GetComponentId<Comp>()].insert({ newHandlerId, function });
+        listeners[entity][ComponentsManager::GetComponentId<Comp>()].insert({ newHandlerId, handler });
 
         return newHandlerId;
     }
 
 
     template <typename Comp>
-    inline void Unsubscribe(Entity entity, HandlerId handlerId) {
-        //GetHandlers<Comp>(entity).erase(handlerId);
-        HandlersToUnsubscribe.push(std::make_tuple(entity, ComponentsManager::GetComponentId<Comp>(), handlerId));
+    void Unsubscribe(Entity entity, HandlerId handlerId) {
+        auto handers = GetHandlers(entity, ComponentsManager::GetComponentId<Comp>());
+
+        if (handers != nullptr)
+            handers->erase(handlerId);
     }
 
 
@@ -88,7 +94,7 @@ private:
             ComponentId,
             std::unordered_map<
                 HandlerId,
-                std::any
+                std::shared_ptr<void>
             >
         >
     > listeners;
@@ -99,10 +105,7 @@ private:
 
     ComponentsManager& componentsMgr;
 
-    std::stack<std::tuple<Entity, ComponentId, HandlerId>> HandlersToUnsubscribe;
-    unsigned int eventResolvingDepth = 0;
-
-    std::unordered_map<HandlerId, std::any>* GetHandlers(Entity entity, ComponentId compId) {
+    std::unordered_map<HandlerId, std::shared_ptr<void>>* GetHandlers(Entity entity, ComponentId compId) {
         auto it = listeners.find(entity);
         if (it == listeners.end())
             return nullptr;
@@ -121,31 +124,18 @@ private:
         if (handlers == nullptr)
             return;
 
-        if (eventResolvingDepth++ == 0)
-            FlushUnsubscribedHandlersBuffer();
+        std::stack<std::shared_ptr<void>> handlersStack;
 
-        for(auto const& pair: *handlers) {
-            auto function = std::any_cast<std::function<void(Entity, const Comp&, EventType)>>(pair.second);
-
-            function(entity, component, type);
+        for (auto handler: *handlers) {
+            handlersStack.push(handler.second);
         }
 
-        eventResolvingDepth--;
-    }
+        while (!handlersStack.empty()) {
+            auto function = std::static_pointer_cast<EventHandler<Comp>>(handlersStack.top());
+            function->HandleEvent(entity, component, type);
+            //(*function)();
 
-
-    void FlushUnsubscribedHandlersBuffer() {
-        while (!HandlersToUnsubscribe.empty()) {
-            auto& handleTuple = HandlersToUnsubscribe.top();
-
-            auto handlers = GetHandlers(std::get<0>(handleTuple), std::get<1>(handleTuple));
-            if (handlers == nullptr) {
-                HandlersToUnsubscribe.pop();
-                continue;
-            }
-
-            handlers->erase(std::get<2>(handleTuple));
-            HandlersToUnsubscribe.pop();
+            handlersStack.pop();
         }
     }
 };

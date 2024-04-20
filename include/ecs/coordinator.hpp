@@ -86,7 +86,7 @@ public:
     }
 
     template <typename Comp>
-    inline HandlerId Subscribe(Entity entity, std::function<void(Entity, const Comp&, EventType)> function)
+    inline HandlerId Subscribe(Entity entity, std::shared_ptr<EventHandler<Comp>> function)
         { return eventMgr.Subscribe<Comp>(entity, function); }
 
     template <typename Comp>
