@@ -74,19 +74,23 @@ void BezierCurveSystem::AddControlPoint(Entity bezierCurve, Entity entity)
 
 void BezierCurveSystem::DeleteControlPoint(Entity bezierCurve, Entity entity)
 {
+    bool entityDeleted = false;
+
     coordinator->EditComponent<BezierCurveParameter>(bezierCurve,
-        [bezierCurve, entity, this](BezierCurveParameter& params) {
+        [&entityDeleted, bezierCurve, entity, this](BezierCurveParameter& params) {
             params.DeleteControlPoint(entity);
             coordinator->Unsubscribe<Position>(entity, params.handlers.at(entity));
             params.handlers.erase(entity);
 
             if (params.handlers.size() == 0) {
                 coordinator->DestroyEntity(bezierCurve);
+                entityDeleted = true;
             }
         }
     );
 
-    UpdateMesh(bezierCurve);
+    if (!entityDeleted)
+        UpdateMesh(bezierCurve);
 }
 
 

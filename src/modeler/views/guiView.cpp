@@ -45,6 +45,8 @@ void GuiView::RenderGui() const
     ImGui::NewFrame();
 
     ImGui::Begin("Modeler");
+
+    ImGui::ShowDemoWindow();
     
     switch (controller.GetAppState())
     {
@@ -372,9 +374,29 @@ void GuiView::DisplayBezierCurveProperty(Entity entity, const BezierCurveParamet
     ImGui::Checkbox("Draw polygon", &drawPolygon);
 
     if (drawPolygon != params.drawPolygon) {
+
+        // TODO: change copying whole params
         BezierCurveParameter newParams = params;
         newParams.drawPolygon = drawPolygon;
         controller.ChangeComponent<BezierCurveParameter>(entity, newParams);
+    }
+
+    ImGui::SeparatorText("Control Points");
+
+    int selected = -1;
+    int n = 0;
+    for (auto controlPoint: params.ControlPoints()) {
+        if (ImGui::Selectable(model.GetEntityName(controlPoint).c_str(), selected == n))
+            selected = n;
+        if (ImGui::BeginPopupContextItem()) {
+            selected = n;
+            if (ImGui::Button("Delete control point")) {
+                controller.DeleteC0ControlPoint(entity, controlPoint);
+            }
+            ImGui::EndPopup();
+        }
+
+        ++n;
     }
 }
 
