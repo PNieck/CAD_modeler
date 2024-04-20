@@ -93,6 +93,10 @@ public:
     inline void Unsubscribe(Entity entity, HandlerId handlerId)
         { eventMgr.Unsubscribe<Comp>(entity, handlerId); }
 
+    template <typename Comp>
+    inline std::shared_ptr<EventHandler<Comp>> GetEventHandler(Entity entity, HandlerId handlerId)
+        { return eventMgr.GetHandler<Comp>(entity, handlerId); }
+
     inline const std::set<ComponentId>& GetEntityComponents(Entity entity) const
         { return componentMgr.GetEntityComponents(entity); }
 

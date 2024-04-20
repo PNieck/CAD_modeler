@@ -64,8 +64,11 @@ void SelectionSystem::Deselect(Entity entity)
 
 void SelectionSystem::DeselectAllEntities()
 {
-    for (auto entity: entities) {
-        coordinator->DeleteComponent<Selected>(entity);
+    auto it = entities.begin();
+    
+    // Cannot use standard for, because collection changes during iteration
+    while (it != entities.end()) {
+        coordinator->DeleteComponent<Selected>(*(it++));
     }
 }
 

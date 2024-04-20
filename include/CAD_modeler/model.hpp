@@ -28,8 +28,14 @@ public:
 
     void AddTorus();
 
-    inline void AddC0Curve(const std::vector<Entity>& controlPoints) const
-        { bezierCurveSystem->CreateBezierCurve(controlPoints); }
+    inline Entity AddC0Curve(const std::vector<Entity>& controlPoints) const
+        { return bezierCurveSystem->CreateBezierCurve(controlPoints); }
+
+    inline void AddC0CurveControlPoint(Entity curve, Entity entity) const
+        { bezierCurveSystem->AddControlPoint(curve, entity); }
+
+    inline void DeleteC0CurveControlPoint(Entity curve, Entity controlPoint) const
+        { bezierCurveSystem->DeleteControlPoint(curve, controlPoint); }
 
     inline void RotateCamera(float x, float y) const
         { cameraSys->RotateAroundTarget(x, y); }

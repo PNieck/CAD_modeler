@@ -127,20 +127,21 @@ void GuiView::RenderAdd3DPointsGui() const
 
 void GuiView::RenderAddingC0CurveGui() const
 {
-    static std::vector<Entity> controlPoints;
+    static std::unordered_set<Entity> controlPoints;
+    static Entity curve;
 
     if (ImGui::Button("Finish adding points")) {
-        controller.AddC0Curve(controlPoints);
         controlPoints.clear();
         controller.SetAppState(AppState::Default);
+        controller.DeselectAllEntities();
     }    
 
-    ImGui::SeparatorText("Points");
+    ImGui::SeparatorText("Select control points");
 
     for (auto entity: model.GetAllPoints()) {
         bool oldSelected = false;
 
-        if (std::find(controlPoints.begin(), controlPoints.end(), entity) != controlPoints.end())
+        if (controlPoints.contains(entity))
             oldSelected = true;
 
         bool newSelected = oldSelected;
@@ -152,12 +153,20 @@ void GuiView::RenderAddingC0CurveGui() const
 
         if (oldSelected != newSelected) {
             if (newSelected) {
-                controlPoints.push_back(entity);
+                controlPoints.insert(entity);
+                if (controlPoints.size() == 1)
+                    curve = controller.AddC0Curve({entity});
+                else 
+                    controller.AddC0CurveControlPoint(curve, entity);
                 controller.SelectEntity(entity);
             }
             else {
                 auto it = std::find(controlPoints.begin(), controlPoints.end(), entity);
                 controlPoints.erase(it);
+                if (controlPoints.size() == 0)
+                    controller.DeleteEntity(curve);
+                else
+                    controller.DeleteC0ControlPoint(curve, entity);
                 controller.DeselectEntity(entity);
             }
         }

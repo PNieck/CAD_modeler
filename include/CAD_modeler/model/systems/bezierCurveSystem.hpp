@@ -20,9 +20,11 @@ public:
         { this->shaderRepo = shadersRepo; }
 
     Entity CreateBezierCurve(const std::vector<Entity>& entities);
+    inline Entity CreateBezierCurve(Entity entity)
+        { CreateBezierCurve({entity}); }
 
-    std::vector<float> GenerateBezierPolygonVertices(const BezierCurveParameter& params) const;
-    std::vector<uint32_t> GenerateBezierPolygonIndices(const BezierCurveParameter& params) const;
+    void AddControlPoint(Entity bezierCurve, Entity entity);
+    void DeleteControlPoint(Entity bezierCurve, Entity entity);
 
     void Render() const;
 
@@ -33,6 +35,10 @@ private:
     static constexpr int CONTROL_POINTS_PER_SEGMENT = 4;
 
     void RenderCurvesPolygons(std::stack<Entity>& entities) const;
+    void UpdateMesh(Entity bezierCurve) const;
+
+    std::vector<float> GenerateBezierPolygonVertices(const BezierCurveParameter& params) const;
+    std::vector<uint32_t> GenerateBezierPolygonIndices(const BezierCurveParameter& params) const;
 
     struct RecalculateMeshHandler: EventHandler<Position> {
         RecalculateMeshHandler(Entity bezierCurve, BezierCurveSystem& system):
@@ -41,7 +47,6 @@ private:
         BezierCurveSystem& bezierSystem;
         Entity bezierCurve;
 
-        void operator()(Entity entity, const Position& pos, EventType eventType) const;
         void HandleEvent(Entity entity, const Position& component, EventType eventType);
     };
 };

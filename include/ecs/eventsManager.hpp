@@ -47,10 +47,18 @@ public:
 
     template <typename Comp>
     void Unsubscribe(Entity entity, HandlerId handlerId) {
-        auto handers = GetHandlers(entity, ComponentsManager::GetComponentId<Comp>());
+        auto handlers = GetHandlers(entity, ComponentsManager::GetComponentId<Comp>());
 
-        if (handers != nullptr)
-            handers->erase(handlerId);
+        if (handlers != nullptr)
+            handlers->erase(handlerId);
+    }
+
+
+    template <typename Comp>
+    std::shared_ptr<EventHandler<Comp>> GetHandler(Entity entity, HandlerId handlerId) {
+        auto handlers = GetHandlers(entity, ComponentsManager::GetComponentId<Comp>());
+
+        return std::static_pointer_cast<EventHandler<Comp>>(handlers->at(handlerId));
     }
 
 
