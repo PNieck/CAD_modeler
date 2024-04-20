@@ -45,8 +45,6 @@ void GuiView::RenderGui() const
     ImGui::NewFrame();
 
     ImGui::Begin("Modeler");
-
-    ImGui::ShowDemoWindow();
     
     switch (controller.GetAppState())
     {
@@ -397,6 +395,23 @@ void GuiView::DisplayBezierCurveProperty(Entity entity, const BezierCurveParamet
         }
 
         ++n;
+    }
+
+    if (ImGui::Button("Add control points"))
+        ImGui::OpenPopup("Add_c0_control_points_popup");
+    
+    if (ImGui::BeginPopup("Add_c0_control_points_popup")) {
+        auto const& points = model.GetAllPoints();
+
+        for (auto point: points) {
+            if (std::find(params.ControlPoints().begin(), params.ControlPoints().end(), point) == params.ControlPoints().end()) {
+                if (ImGui::Selectable(model.GetEntityName(point).c_str(), false)) {
+                    controller.AddC0CurveControlPoint(entity, point);
+                }
+            }
+        }
+
+        ImGui::EndPopup();
     }
 }
 
