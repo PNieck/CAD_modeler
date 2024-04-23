@@ -11,7 +11,14 @@ class Shader {
 public:
     unsigned int id;
 
-    Shader(const char* vertexPath, const char* fragmentPath);
+    Shader(
+        const char* vertexPath,
+        const char* fragmentPath,
+        const char* tesselationControlPath = nullptr,
+        const char* tesselationEvaluationPath = nullptr,
+        const char* geometryPath = nullptr
+    );
+
     ~Shader();
 
     inline void use() const
@@ -25,6 +32,8 @@ public:
 
 private:
     int findUniformLocation(const std::string &name) const;
+
+    static unsigned int compileSingleShader(const char* path, GLenum shaderType);
 };
 
 

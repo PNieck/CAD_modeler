@@ -9,6 +9,8 @@
 #include "model/systems/pointsSystem.hpp"
 #include "model/systems/nameSystem.hpp"
 #include "model/systems/selectionSystem.hpp"
+#include "model/systems/bezierCurveSystem.hpp"
+
 #include "model/systems/shaders/shaderRepository.hpp"
 
 #include "model/components/scale.hpp"
@@ -25,6 +27,15 @@ public:
     void RenderFrame();
 
     void AddTorus();
+
+    inline Entity AddC0Curve(const std::vector<Entity>& controlPoints) const
+        { return bezierCurveSystem->CreateBezierCurve(controlPoints); }
+
+    inline void AddC0CurveControlPoint(Entity curve, Entity entity) const
+        { bezierCurveSystem->AddControlPoint(curve, entity); }
+
+    inline void DeleteC0CurveControlPoint(Entity curve, Entity controlPoint) const
+        { bezierCurveSystem->DeleteControlPoint(curve, controlPoint); }
 
     inline void RotateCamera(float x, float y) const
         { cameraSys->RotateAroundTarget(x, y); }
@@ -46,7 +57,7 @@ public:
     // TODO; Change to normal coordinates
     void SetCursorPositionFromViewport(float x, float y) const;
 
-    void Add3DPointFromViewport(float x, float y) const;
+    Entity Add3DPointFromViewport(float x, float y) const;
 
     inline const std::unordered_set<Entity> EntitiesWithNames() const
         { return nameSystem->EntitiesWithNames(); }
@@ -65,8 +76,11 @@ public:
     inline void Deselect(Entity entity)
         { return selectionSystem->Deselect(entity); }
 
-    inline const std::unordered_set<Entity>& SelectedEntities() const
-        { return selectionSystem->SelectedEntities(); }
+    inline void DeselectAllEntities() const
+        { selectionSystem->DeselectAllEntities(); }
+
+    inline const std::unordered_set<Entity>& GetAllSelectedEntities() const
+        { return selectionSystem->GetEntities(); }
 
     inline const std::set<ComponentId>& GetEntityComponents(Entity entity) const
         { return coordinator.GetEntityComponents(entity); }
@@ -101,6 +115,12 @@ public:
     inline void ChangeEntityName(Entity entity, const Name& name)
         { nameSystem->SetName(entity, name); }
 
+    inline const std::unordered_set<Entity>& GetAllPoints() const
+        { return pointsSystem->GetEntities(); }
+
+    inline const std::unordered_set<Entity>& GetAllC0Curves() const
+        { return bezierCurveSystem->GetEntities(); }
+
     template <typename Comp>
     static inline constexpr ComponentId GetComponentId()
         { return ComponentsManager::GetComponentId<Comp>(); }
@@ -116,6 +136,7 @@ private:
     std::shared_ptr<PointsSystem> pointsSystem;
     std::shared_ptr<NameSystem> nameSystem;
     std::shared_ptr<SelectionSystem> selectionSystem;
+    std::shared_ptr<BezierCurveSystem> bezierCurveSystem;
 
     glm::vec3 PointFromViewportCoordinates(float x, float y) const;
     Line LineFromViewportCoordinates(float x, float y) const;

@@ -3,5 +3,6 @@
 
 enum class AppState {
     Default,
-    Adding3dPoints
+    Adding3dPoints,
+    AddingC0Curve,
 };

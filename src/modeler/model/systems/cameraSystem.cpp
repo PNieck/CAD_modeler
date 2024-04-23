@@ -6,8 +6,6 @@
 #include <CAD_modeler/model/components/position.hpp>
 #include <CAD_modeler/model/components/rotation.hpp>
 
-#include <glm/trigonometric.hpp>
-#include <glm/mat4x4.hpp>
 #include <glm/vec4.hpp>
 
 
@@ -17,20 +15,11 @@ void CameraSystem::RegisterSystem(Coordinator & coordinator)
 }
 
 
-void CameraSystem::Init(int viewport_width, int viewport_height)
+void CameraSystem::Init(const CameraParameters& params, const Position& cameraPos)
 {
     camera = coordinator->CreateEntity();
 
-    Position pos(0.0f, 0.0f, 10.0f);
-    coordinator->AddComponent<Position>(camera, pos);
-
-    CameraParameters params {
-        .target = Position(0.0f),
-        .aspect_ratio = (float)viewport_width/(float)viewport_height,
-        .fov = glm::radians(45.0f),
-        .near_plane = 0.1f,
-        .far_plane = 100.0f,
-    };
+    coordinator->AddComponent<Position>(camera, cameraPos);
     coordinator->AddComponent<CameraParameters>(camera, params);
 }
 
@@ -57,8 +46,10 @@ glm::mat4x4 CameraSystem::PerspectiveMatrix() const
 {
     CameraParameters const& params = coordinator->GetComponent<CameraParameters>(camera);
 
+    float aspectRatio = static_cast<float>(params.viewportWidth) / static_cast<float>(params.viewportHeight);
+
     float v1 = 1.0f/std::tan(params.fov/2.0);
-    float v2 = v1/params.aspect_ratio;
+    float v2 = v1/aspectRatio;
     float v3 = (params.far_plane + params.near_plane)/(params.far_plane - params.near_plane);
     float v4 = -2.0 * (params.far_plane * params.near_plane) / (params.far_plane - params.near_plane);
 
@@ -143,11 +134,32 @@ float CameraSystem::GetFarPlane() const
     return params.far_plane;
 }
 
+int CameraSystem::GetViewportWidth() const
+{
+    CameraParameters const& params = coordinator->GetComponent<CameraParameters>(camera);
+    return params.viewportWidth;
+}
+
+
+int CameraSystem::GetViewportHeight() const
+{
+    CameraParameters const& params = coordinator->GetComponent<CameraParameters>(camera);
+    return params.viewportHeight;
+}
+
+
+float CameraSystem::GetFov() const
+{
+    CameraParameters const& params = coordinator->GetComponent<CameraParameters>(camera);
+    return params.fov;
+}
+
 
 void CameraSystem::ChangeViewportSize(int width, int height) const
 {
     CameraParameters params = coordinator->GetComponent<CameraParameters>(camera);
-    params.aspect_ratio = (float)width/(float)height;
+    params.viewportHeight = height;
+    params.viewportWidth = width;
 
     coordinator->SetComponent<CameraParameters>(camera, params);
 }

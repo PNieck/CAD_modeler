@@ -62,6 +62,17 @@ void SelectionSystem::Deselect(Entity entity)
 }
 
 
+void SelectionSystem::DeselectAllEntities()
+{
+    auto it = entities.begin();
+    
+    // Cannot use standard for, because collection changes during iteration
+    while (it != entities.end()) {
+        coordinator->DeleteComponent<Selected>(*(it++));
+    }
+}
+
+
 void SelectionSystem::SelectFromLine(const Line& line)
 {
     auto const& pointsSystem = coordinator->GetSystem<PointsSystem>();
@@ -122,13 +133,17 @@ void SelectionSystem::RenderMiddlePoint()
 void SelectionSystem::UpdateMiddlePointPosition()
 {
     Position newPos(0.0f);
+    int cnt = 0;
 
     for (auto entity: entities) {
-        newPos.vec += coordinator->GetComponent<Position>(entity).vec;
+        if (coordinator->GetEntityComponents(entity).contains(ComponentsManager::GetComponentId<Position>())) {
+            newPos.vec += coordinator->GetComponent<Position>(entity).vec;
+            cnt++;
+        }
     }
 
-    if (!entities.empty())
-        newPos.vec /= entities.size();
+    if (cnt != 0)
+        newPos.vec /= cnt;
 
     coordinator->SetComponent<Position>(middlePoint, newPos);
 }
@@ -139,11 +154,15 @@ void SelectionSystem::MoveSelected(const Position & newMiddlePointPos)
     Entity midPoint = GetMiddlePoint();
     Position const& midPointPos = coordinator->GetComponent<Position>(midPoint);
 
-    Position newPos(newMiddlePointPos.vec - midPointPos.vec);
+    glm::vec3 delta = newMiddlePointPos.vec - midPointPos.vec;
 
-    auto const& selected = SelectedEntities();
+    for (auto entity: entities) {
+        if (!coordinator->GetEntityComponents(entity).contains(ComponentsManager::GetComponentId<Position>()))
+            continue;
 
-    for (auto entity: selected) {
+        auto const& oldPos = coordinator->GetComponent<Position>(entity);
+
+        Position newPos(oldPos.vec + delta);
         coordinator->SetComponent<Position>(entity, newPos);
     }
 
@@ -156,19 +175,22 @@ void SelectionSystem::ScaleSelected(const Scale& scale)
     Entity midPoint = GetMiddlePoint();
     Position const& midPointPos = coordinator->GetComponent<Position>(midPoint);
 
-    auto const& selected = SelectedEntities();
-    for (auto entity: selected) {
-        Position const& pos = coordinator->GetComponent<Position>(entity);
-        glm::vec3 dist = pos.vec - midPointPos.vec;
+    for (auto entity: entities) {
+        auto const& components = coordinator->GetEntityComponents(entity);
 
-        dist.x *= scale.GetX();
-        dist.y *= scale.GetY();
-        dist.z *= scale.GetZ();
+        if (components.contains(ComponentsManager::GetComponentId<Position>())) {
+            Position const& pos = coordinator->GetComponent<Position>(entity);
+            glm::vec3 dist = pos.vec - midPointPos.vec;
 
-        Position newPos(midPointPos.vec + dist);
-        coordinator->SetComponent<Position>(entity, newPos);
+            dist.x *= scale.GetX();
+            dist.y *= scale.GetY();
+            dist.z *= scale.GetZ();
 
-        if (coordinator->GetEntityComponents(entity).contains(ComponentsManager::GetComponentId<Scale>())) {
+            Position newPos(midPointPos.vec + dist);
+            coordinator->SetComponent<Position>(entity, newPos);
+        }
+
+        if (components.contains(ComponentsManager::GetComponentId<Scale>())) {
             auto const& sc = coordinator->GetComponent<Scale>(entity);
             Scale newScale(sc.scale * scale.scale);
             coordinator->SetComponent<Scale>(entity, newScale);
@@ -182,17 +204,20 @@ void SelectionSystem::RotateSelected(const Rotation & rotation)
     Entity midPoint = GetMiddlePoint();
     Position const& midPointPos = coordinator->GetComponent<Position>(midPoint);
 
-    auto const& selected = SelectedEntities();
-    for (auto entity: selected) {
-        Position const& pos = coordinator->GetComponent<Position>(entity);
-        glm::vec3 dist = pos.vec - midPointPos.vec;
+    for (auto entity: entities) {
+        auto const& components = coordinator->GetEntityComponents(entity);
 
-        dist = glm::rotate(rotation.quat, dist);
+        if (components.contains(ComponentsManager::GetComponentId<Position>())) {
+            Position const& pos = coordinator->GetComponent<Position>(entity);
+            glm::vec3 dist = pos.vec - midPointPos.vec;
 
-        Position newPos(midPointPos.vec + dist);
-        coordinator->SetComponent<Position>(entity, newPos);
+            dist = glm::rotate(rotation.quat, dist);
 
-        if (coordinator->GetEntityComponents(entity).contains(ComponentsManager::GetComponentId<Rotation>())) {
+            Position newPos(midPointPos.vec + dist);
+            coordinator->SetComponent<Position>(entity, newPos);
+        }
+
+        if (components.contains(ComponentsManager::GetComponentId<Rotation>())) {
             auto& rot = coordinator->GetComponent<Rotation>(entity);
             auto quat = rotation.quat * rot.quat;
             quat = glm::normalize(quat);

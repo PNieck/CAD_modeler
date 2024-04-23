@@ -27,7 +27,7 @@ PointsSystem::PointsSystem()
 }
 
 
-Entity PointsSystem::CreatePoint(Position& pos)
+Entity PointsSystem::CreatePoint(const Position& pos)
 {
     Entity newPoint = coordinator->CreateEntity();
 

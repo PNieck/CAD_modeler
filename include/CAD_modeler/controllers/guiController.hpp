@@ -15,11 +15,23 @@ public:
     inline void AddTorus() const
         { model.AddTorus(); }
 
+    inline Entity AddC0Curve(const std::vector<Entity>& entities) const
+        { return model.AddC0Curve(entities); }
+
+    inline void AddC0CurveControlPoint(Entity curve, Entity entity) const
+        { model.AddC0CurveControlPoint(curve, entity); }
+
+    inline void DeleteC0ControlPoint(Entity curve, Entity controlPoint) const
+        { model.DeleteC0CurveControlPoint(curve, controlPoint); }
+
     inline void SelectEntity(Entity entity) const
         { model.Select(entity); }
 
     inline void DeselectEntity(Entity entity) const
         { model.Deselect(entity); }
+
+    inline void DeselectAllEntities() const
+        { model.DeselectAllEntities(); }
 
     template <typename Comp>
     inline void ChangeComponent(Entity entity, const Comp& comp)

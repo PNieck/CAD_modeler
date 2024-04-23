@@ -4,6 +4,7 @@
 #include <CAD_modeler/utilities/plane.hpp>
 
 #include <CAD_modeler/model/components/registerComponents.hpp>
+#include <CAD_modeler/model/components/cameraParameters.hpp>
 
 #include <stdexcept>
 
@@ -22,6 +23,7 @@ Model::Model(int viewport_width, int viewport_height)
     PointsSystem::RegisterSystem(coordinator);
     NameSystem::RegisterSystem(coordinator);
     SelectionSystem::RegisterSystem(coordinator);
+    BezierCurveSystem::RegisterSystem(coordinator);
 
     cameraSys = coordinator.GetSystem<CameraSystem>();
     toriSystem = coordinator.GetSystem<ToriSystem>();
@@ -30,15 +32,31 @@ Model::Model(int viewport_width, int viewport_height)
     pointsSystem = coordinator.GetSystem<PointsSystem>();
     nameSystem = coordinator.GetSystem<NameSystem>();
     selectionSystem = coordinator.GetSystem<SelectionSystem>();
+    bezierCurveSystem = coordinator.GetSystem<BezierCurveSystem>();
 
-    cameraSys->Init(viewport_width, viewport_height);
+    CameraParameters params {
+        .target = Position(0.0f),
+        .viewportWidth = viewport_width,
+        .viewportHeight = viewport_height,
+        .fov = glm::radians(45.0f),
+        .near_plane = 0.1f,
+        .far_plane = 100.0f,
+    };
+
+    cameraSys->Init(params, Position(0.0f, 0.0f, 10.0f));
     gridSystem->Init(&shadersRepo);
     cursorSystem->Init(&shadersRepo);
     selectionSystem->Init(&shadersRepo);
     pointsSystem->Init(&shadersRepo);
     toriSystem->Init(&shadersRepo);
+    bezierCurveSystem->Init(&shadersRepo);
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glEnable(GL_LINE_SMOOTH);
+    glLineWidth(1.0);
+    glEnable(GL_BLEND);
+    glDepthMask(GL_FALSE);
+    glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
 }
 
 
@@ -51,6 +69,7 @@ void Model::RenderFrame()
     cursorSystem->Render();
     pointsSystem->Render();
     selectionSystem->RenderMiddlePoint();
+    bezierCurveSystem->Render();
 }
 
 
@@ -83,10 +102,10 @@ void Model::SetCursorPositionFromViewport(float x, float y) const
 }
 
 
-void Model::Add3DPointFromViewport(float x, float y) const
+Entity Model::Add3DPointFromViewport(float x, float y) const
 {
     Position newPos(PointFromViewportCoordinates(x, y));
-    pointsSystem->CreatePoint(newPos);
+    return pointsSystem->CreatePoint(newPos);
 }
 
 

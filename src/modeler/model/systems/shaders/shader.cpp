@@ -7,81 +7,73 @@
 #include <glm/gtc/type_ptr.hpp>
 
 
-Shader::Shader(const char * vertexPath, const char * fragmentPath)
-{
-    std::string vertexCode;
-    std::string fragmentCode;
-    std::ifstream vShaderFile;
-    std::ifstream fShaderFile;
-
-    // Ensure ifstream object can throw exceptions
-    vShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-    fShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-
-    try {
-        vShaderFile.open(vertexPath);
-        fShaderFile.open(fragmentPath);
-
-        std::stringstream vShaderStream, fShaderStream;
-
-        vShaderStream << vShaderFile.rdbuf();
-        fShaderStream << fShaderFile.rdbuf();
-
-        vShaderFile.close();
-        fShaderFile.close();
-
-        vertexCode = vShaderStream.str();
-        fragmentCode = fShaderStream.str();
-    }
-    catch(std::ifstream::failure e)
-    {
-        std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
+Shader::Shader(
+    const char* vertexPath,
+    const char* fragmentPath,
+    const char* tesselationControlPath,
+    const char* tesselationEvaluationPath,
+    const char* geometryPath
+) {
+    if (vertexPath == nullptr || fragmentPath == nullptr) {
+        throw std::runtime_error("Vertex shader and fragment shader are mandatory");
     }
 
-    const char* vShaderCode = vertexCode.c_str();
-    const char* fShaderCode = fragmentCode.c_str();
-
-    unsigned int vertex, fragment;
-    int success;
-    const int infoLogSize = 512;
-    char infoLog[infoLogSize];
-
-    vertex = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertex, 1, &vShaderCode, NULL);
-    glCompileShader(vertex);
-
-    // Checking for compilation error
-    glGetShaderiv(vertex, GL_COMPILE_STATUS, &success);
-    if (!success) {
-        glGetShaderInfoLog(vertex, infoLogSize, NULL, infoLog);
-        std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+    if (tesselationControlPath != nullptr && tesselationEvaluationPath == nullptr) {
+        throw std::runtime_error("Tesselation evaluation shader is required when tesselation control is used");
     }
 
-    fragment = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragment, 1, &fShaderCode, NULL);
-    glCompileShader(fragment);
+    unsigned int vertex = compileSingleShader(vertexPath, GL_VERTEX_SHADER);
+    unsigned int fragment = compileSingleShader(fragmentPath, GL_FRAGMENT_SHADER);
+    unsigned int tesselationControl;
+    unsigned int tesselationEvaluation;
+    unsigned int geometry;
 
-    // Checking for compilation error
-    glGetShaderiv(vertex, GL_COMPILE_STATUS, &success);
-    if (!success) {
-        glGetShaderInfoLog(fragment, infoLogSize, NULL, infoLog);
-        std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
-    }
+    if (tesselationControlPath != nullptr)
+        tesselationControl = compileSingleShader(tesselationControlPath, GL_TESS_CONTROL_SHADER);
+
+    if (tesselationEvaluationPath != nullptr)
+        tesselationEvaluation = compileSingleShader(tesselationEvaluationPath, GL_TESS_EVALUATION_SHADER);
+
+    if (geometryPath != nullptr)
+        geometry = compileSingleShader(geometryPath, GL_GEOMETRY_SHADER);
 
     id = glCreateProgram();
+
     glAttachShader(id, vertex);
     glAttachShader(id, fragment);
+
+    if (tesselationControlPath != nullptr)
+        glAttachShader(id, tesselationControl);
+
+    if (tesselationEvaluationPath != nullptr)
+        glAttachShader(id, tesselationEvaluation);
+
+    if (geometryPath != nullptr)
+        glAttachShader(id, geometry);
+
     glLinkProgram(id);
 
+    int success;
     glGetProgramiv(id, GL_LINK_STATUS, &success);
     if(!success)
     {
+        const int infoLogSize = 512;
+        char infoLog[infoLogSize];
         glGetProgramInfoLog(id, infoLogSize, NULL, infoLog);
-        std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
+        throw std::runtime_error(infoLog);
     }
 
     glDeleteShader(vertex);
     glDeleteShader(fragment);
+
+    if (tesselationControlPath != nullptr)
+        glDeleteShader(tesselationControl);
+    
+    if (tesselationEvaluationPath != nullptr)
+        glDeleteShader(tesselationEvaluation);
+
+    if (geometryPath != nullptr)
+        glDeleteShader(geometry);
 }
 
 
@@ -140,4 +132,38 @@ int Shader::findUniformLocation(const std::string & name) const
 const char * UniformNotFoundInShader::what() const
 {
     return "Cannot find uniform in shader";
+}
+
+
+unsigned int Shader::compileSingleShader(const char* path, GLenum shaderType)
+{
+    const int infoLogSize = 512;
+    char infoLog[infoLogSize];
+
+    std::ifstream shaderFile;
+
+    // Ensure ifstream object can throw exceptions
+    shaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+    shaderFile.open(path);
+
+    std::stringstream shaderStream;
+    shaderStream << shaderFile.rdbuf();
+    shaderFile.close();
+
+    std::string shaderCode = shaderStream.str();
+    const char* shaderCodeCStr = shaderCode.c_str();
+
+    unsigned int shader = glCreateShader(shaderType);
+    glShaderSource(shader, 1, &shaderCodeCStr, NULL);
+    glCompileShader(shader);
+
+    // Checking for compilation error
+    int success;
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        glGetShaderInfoLog(shader, infoLogSize, NULL, infoLog);
+        throw std::runtime_error(infoLog);
+    }
+
+    return shader;
 }
