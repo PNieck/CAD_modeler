@@ -49,4 +49,13 @@ private:
 
         void HandleEvent(Entity entity, const Position& component, EventType eventType);
     };
+
+    struct ParameterDeletionHandler: EventHandler<BezierCurveParameter> {
+        ParameterDeletionHandler(Coordinator& coordinator):
+            coordinator(coordinator) {}
+
+        Coordinator& coordinator;
+
+        void HandleEvent(Entity entity, const BezierCurveParameter& component, EventType eventType);
+    };
 };

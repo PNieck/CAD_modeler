@@ -176,7 +176,7 @@ void GuiView::RenderAddingC0CurveGui() const
 
 void GuiView::RenderObjectsProperties() const
 {
-    auto const& selectedEntities = model.SelectedEntities();
+    auto const& selectedEntities = model.GetAllSelectedEntities();
 
     ImGui::Begin("Properties");
 

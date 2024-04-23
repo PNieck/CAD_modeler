@@ -57,7 +57,7 @@ public:
     // TODO; Change to normal coordinates
     void SetCursorPositionFromViewport(float x, float y) const;
 
-    void Add3DPointFromViewport(float x, float y) const;
+    Entity Add3DPointFromViewport(float x, float y) const;
 
     inline const std::unordered_set<Entity> EntitiesWithNames() const
         { return nameSystem->EntitiesWithNames(); }
@@ -79,8 +79,8 @@ public:
     inline void DeselectAllEntities() const
         { selectionSystem->DeselectAllEntities(); }
 
-    inline const std::unordered_set<Entity>& SelectedEntities() const
-        { return selectionSystem->SelectedEntities(); }
+    inline const std::unordered_set<Entity>& GetAllSelectedEntities() const
+        { return selectionSystem->GetEntities(); }
 
     inline const std::set<ComponentId>& GetEntityComponents(Entity entity) const
         { return coordinator.GetEntityComponents(entity); }
@@ -116,7 +116,10 @@ public:
         { nameSystem->SetName(entity, name); }
 
     inline const std::unordered_set<Entity>& GetAllPoints() const
-        { return pointsSystem->GetPoints(); } 
+        { return pointsSystem->GetEntities(); }
+
+    inline const std::unordered_set<Entity>& GetAllC0Curves() const
+        { return bezierCurveSystem->GetEntities(); }
 
     template <typename Comp>
     static inline constexpr ComponentId GetComponentId()

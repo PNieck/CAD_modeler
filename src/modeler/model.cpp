@@ -102,10 +102,10 @@ void Model::SetCursorPositionFromViewport(float x, float y) const
 }
 
 
-void Model::Add3DPointFromViewport(float x, float y) const
+Entity Model::Add3DPointFromViewport(float x, float y) const
 {
     Position newPos(PointFromViewportCoordinates(x, y));
-    pointsSystem->CreatePoint(newPos);
+    return pointsSystem->CreatePoint(newPos);
 }
 
 

@@ -23,6 +23,7 @@ public:
         { return controlPoints; }
 
     std::unordered_map<Entity, HandlerId> handlers;
+    HandlerId parameterDeletionHandler;
 
 private:
     std::vector<Entity> controlPoints;

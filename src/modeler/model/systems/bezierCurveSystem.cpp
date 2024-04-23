@@ -28,6 +28,8 @@ void BezierCurveSystem::RegisterSystem(Coordinator & coordinator)
 
 Entity BezierCurveSystem::CreateBezierCurve(const std::vector<Entity>& entities)
 {
+    static std::shared_ptr<ParameterDeletionHandler> parameterDeletionHandler(new ParameterDeletionHandler(*coordinator));
+
     Entity bezierCurve = coordinator->CreateEntity();
 
     BezierCurveParameter params(entities);
@@ -45,6 +47,8 @@ Entity BezierCurveSystem::CreateBezierCurve(const std::vector<Entity>& entities)
         auto handlerId = coordinator->Subscribe<Position>(entity, std::static_pointer_cast<EventHandler<Position>>(handler));
         params.handlers.insert({ entity, handlerId });
     }
+
+    params.parameterDeletionHandler = coordinator->Subscribe<BezierCurveParameter>(bezierCurve, std::static_pointer_cast<EventHandler<BezierCurveParameter>>(parameterDeletionHandler));
 
     coordinator->AddComponent<BezierCurveParameter>(bezierCurve, params);
     coordinator->AddComponent<Mesh>(bezierCurve, mesh);
@@ -269,4 +273,23 @@ void BezierCurveSystem::RecalculateMeshHandler::HandleEvent(Entity entity, const
         return;
 
     bezierSystem.UpdateMesh(bezierCurve);
+}
+
+
+void BezierCurveSystem::ParameterDeletionHandler::HandleEvent(Entity entity, const BezierCurveParameter& component, EventType eventType)
+{
+    if (eventType != EventType::ComponentDeleted)
+        return;
+
+    auto entitiesIt = component.ControlPoints().begin();
+    auto handlersIt = component.handlers.begin();
+
+    while (handlersIt != component.handlers.end() || entitiesIt != component.ControlPoints().end()) {
+        coordinator.Unsubscribe<Position>(*entitiesIt, (*handlersIt).second);
+
+        ++entitiesIt;
+        ++handlersIt;
+    }
+
+    coordinator.Unsubscribe<BezierCurveParameter>(entity, component.parameterDeletionHandler);
 }

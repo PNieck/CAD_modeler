@@ -26,9 +26,6 @@ public:
 
     void DeselectAllEntities();
 
-    inline const std::unordered_set<Entity>& SelectedEntities() const
-        { return entities; }
-
     void SelectFromLine(const Line& line);
 
     void RenderMiddlePoint();

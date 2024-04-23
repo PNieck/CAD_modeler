@@ -156,9 +156,7 @@ void SelectionSystem::MoveSelected(const Position & newMiddlePointPos)
 
     glm::vec3 delta = newMiddlePointPos.vec - midPointPos.vec;
 
-    auto const& selected = SelectedEntities();
-
-    for (auto entity: selected) {
+    for (auto entity: entities) {
         if (!coordinator->GetEntityComponents(entity).contains(ComponentsManager::GetComponentId<Position>()))
             continue;
 
@@ -177,8 +175,7 @@ void SelectionSystem::ScaleSelected(const Scale& scale)
     Entity midPoint = GetMiddlePoint();
     Position const& midPointPos = coordinator->GetComponent<Position>(midPoint);
 
-    auto const& selected = SelectedEntities();
-    for (auto entity: selected) {
+    for (auto entity: entities) {
         auto const& components = coordinator->GetEntityComponents(entity);
 
         if (components.contains(ComponentsManager::GetComponentId<Position>())) {
@@ -207,8 +204,7 @@ void SelectionSystem::RotateSelected(const Rotation & rotation)
     Entity midPoint = GetMiddlePoint();
     Position const& midPointPos = coordinator->GetComponent<Position>(midPoint);
 
-    auto const& selected = SelectedEntities();
-    for (auto entity: selected) {
+    for (auto entity: entities) {
         auto const& components = coordinator->GetEntityComponents(entity);
 
         if (components.contains(ComponentsManager::GetComponentId<Position>())) {
