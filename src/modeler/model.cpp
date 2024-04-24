@@ -2,6 +2,7 @@
 
 #include <CAD_modeler/utilities/line.hpp>
 #include <CAD_modeler/utilities/plane.hpp>
+#include <CAD_modeler/utilities/angle.hpp>
 
 #include <CAD_modeler/model/components/registerComponents.hpp>
 #include <CAD_modeler/model/components/cameraParameters.hpp>
@@ -38,7 +39,7 @@ Model::Model(int viewport_width, int viewport_height)
         .target = Position(0.0f),
         .viewportWidth = viewport_width,
         .viewportHeight = viewport_height,
-        .fov = glm::radians(45.0f),
+        .fov = Angle::FromDegrees(45.f).ToRadians(),
         .near_plane = 0.1f,
         .far_plane = 100.0f,
     };
@@ -116,7 +117,7 @@ void Model::TryToSelectFromViewport(float x, float y) const
 }
 
 
-glm::vec3 Model::PointFromViewportCoordinates(float x, float y) const
+alg::Vec3 Model::PointFromViewportCoordinates(float x, float y) const
 {
     auto const& cameraTarget = cameraSys->GetTargetPosition();
     auto const& cameraPos = cameraSys->GetPosition();
@@ -124,10 +125,10 @@ glm::vec3 Model::PointFromViewportCoordinates(float x, float y) const
 
     Line nearToFar = LineFromViewportCoordinates(x, y);
 
-    glm::vec3 cameraDirection = cameraTarget.vec - cameraPos.vec;
+    alg::Vec3 cameraDirection = cameraTarget.vec - cameraPos.vec;
     Plane perpendicularToScreenWithCursor(cursorPos.vec, cameraDirection);
 
-    std::optional<glm::vec3> intersection =
+    std::optional<alg::Vec3> intersection =
         perpendicularToScreenWithCursor.Intersect(nearToFar);
 
     if (!intersection.has_value()) {
@@ -143,21 +144,21 @@ Line Model::LineFromViewportCoordinates(float x, float y) const
     auto viewMtx = cameraSys->ViewMatrix();
     auto perspectiveMtx = cameraSys->PerspectiveMatrix();
 
-    auto cameraInv = glm::inverse(perspectiveMtx * viewMtx);
+    auto cameraInv = (perspectiveMtx * viewMtx).Inverse().value();
 
-    glm::vec4 nearV4 = cameraInv * glm::vec4(x, y, 1.0f, 1.0f);
-    glm::vec4 farV4 = cameraInv * glm::vec4(x, y, -1.0f, 1.0f);
+    alg::Vec4 nearV4 = cameraInv * alg::Vec4(x, y, 1.0f, 1.0f);
+    alg::Vec4 farV4 = cameraInv * alg::Vec4(x, y, -1.0f, 1.0f);
 
-    glm::vec3 near = glm::vec3(
-        nearV4.x / nearV4.w,
-        nearV4.y / nearV4.w,
-        nearV4.z / nearV4.w
+    alg::Vec3 near = alg::Vec3(
+        nearV4.X() / nearV4.W(),
+        nearV4.Y() / nearV4.W(),
+        nearV4.Z() / nearV4.W()
     );
 
-    glm::vec3 far = glm::vec3(
-        farV4.x / farV4.w,
-        farV4.y / farV4.w,
-        farV4.z / farV4.w
+    alg::Vec3 far = alg::Vec3(
+        farV4.X() / farV4.W(),
+        farV4.Y() / farV4.W(),
+        farV4.Z() / farV4.W()
     );
 
     return Line::FromTwoPoints(near, far);

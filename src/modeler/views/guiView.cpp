@@ -1,5 +1,7 @@
 #include <CAD_modeler/views/guiView.hpp>
 
+#include <CAD_modeler/utilities/angle.hpp>
+
 #include <imgui.h>
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
@@ -268,17 +270,29 @@ void GuiView::RenderMultipleObjectProperties() const
     
     Rotation rotation;
 
-    auto vector = glm::degrees(rotation.GetEulerAngles());
+    auto vector = rotation.GetRollPitchRoll();
+    vector.X() = Angle::FromRadians(vector.X()).ToDegrees();
+    vector.Y() = Angle::FromRadians(vector.Y()).ToDegrees();
+    vector.Z() = Angle::FromRadians(vector.Z()).ToDegrees();
+
     valueChanged = false;
 
     ImGui::SeparatorText("Rotation");
 
-    valueChanged |= ImGui::DragFloat("X##Rotation", &vector.x, DRAG_ANGLE_SPEED, -180.0f, 180.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
-    valueChanged |= ImGui::DragFloat("Y##Rotation", &vector.y, DRAG_ANGLE_SPEED, -90.0f, 90.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
-    valueChanged |= ImGui::DragFloat("Z##Rotation", &vector.z, DRAG_ANGLE_SPEED, -180.0f, 180.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+    valueChanged |= ImGui::DragFloat("X##Rotation", &vector.X(), DRAG_ANGLE_SPEED, -180.0f, 180.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+    valueChanged |= ImGui::DragFloat("Y##Rotation", &vector.Y(), DRAG_ANGLE_SPEED, -90.0f, 90.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+    valueChanged |= ImGui::DragFloat("Z##Rotation", &vector.Z(), DRAG_ANGLE_SPEED, -180.0f, 180.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
 
-    if (valueChanged)
-        controller.RotateSelected(Rotation( glm::radians(vector)));
+    if (valueChanged) {
+        Rotation newRot(
+            Angle::FromDegrees(vector.X()).ToRadians(),
+            Angle::FromDegrees(vector.Y()).ToRadians(),
+            Angle::FromDegrees(vector.Z()).ToRadians()
+        );
+
+        controller.RotateSelected(newRot);
+    }
+        
 }
 
 
@@ -320,17 +334,27 @@ void GuiView::DisplayScaleProperty(Entity entity, const Scale& scale) const
 
 void GuiView::DisplayRotationProperty(Entity entity, const Rotation & rotation) const
 {
-    auto vector = glm::degrees(rotation.GetEulerAngles());
+    auto vector = rotation.GetRollPitchRoll();
+    vector.X() = Angle::FromRadians(vector.X()).ToDegrees();
+    vector.Y() = Angle::FromRadians(vector.Y()).ToDegrees();
+    vector.Z() = Angle::FromRadians(vector.Z()).ToDegrees();
     bool valueChanged = false;
 
     ImGui::SeparatorText("Rotation");
 
-    valueChanged |= ImGui::DragFloat("X##Rotation", &vector.x, DRAG_ANGLE_SPEED, -180.0f, 180.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
-    valueChanged |= ImGui::DragFloat("Y##Rotation", &vector.y, DRAG_ANGLE_SPEED, -90.0f, 90.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
-    valueChanged |= ImGui::DragFloat("Z##Rotation", &vector.z, DRAG_ANGLE_SPEED, -180.0f, 180.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+    valueChanged |= ImGui::DragFloat("X##Rotation", &vector.X(), DRAG_ANGLE_SPEED, -180.0f, 180.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+    valueChanged |= ImGui::DragFloat("Y##Rotation", &vector.Y(), DRAG_ANGLE_SPEED, -90.0f, 90.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+    valueChanged |= ImGui::DragFloat("Z##Rotation", &vector.Z(), DRAG_ANGLE_SPEED, -180.0f, 180.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
 
-    if (valueChanged)
-        controller.ChangeComponent<Rotation>(entity, Rotation( glm::radians(vector)));
+    if (valueChanged) {
+        Rotation newRot(
+            Angle::FromDegrees(vector.X()).ToRadians(),
+            Angle::FromDegrees(vector.Y()).ToRadians(),
+            Angle::FromDegrees(vector.Z()).ToRadians()
+        );
+
+        controller.ChangeComponent<Rotation>(entity, newRot);
+    }
 }
 
 

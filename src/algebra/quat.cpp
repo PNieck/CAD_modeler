@@ -52,12 +52,16 @@ alg::Mat4x4 alg::Quat::ToRotationMatrix() const
     float wz = W() * Z();
     float wy = W() * Y();
     
-    return alg::Mat4x4(
+    alg::Mat4x4 rot(
         2.f*(w2 + X()*X()) - 1.f,            2.f*(xy - wz),            2.f*(xz + wz), 0.f,
                    2.f*(xy + wz), 2.f*(w2 + Y()*Y()) - 1.f,            2.f*(yz - wx), 0.f,
                    2.f*(xz - wy),            2.f*(yz + wx), 2.f*(w2 + Y()*Y()) - 1.f, 0.f,
                              0.f,                      0.f,                      0.f, 1.f
     );
+
+    rot.TransposeSelf();
+
+    return rot;
 }
 
 

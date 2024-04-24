@@ -27,6 +27,8 @@ namespace alg
 
         std::optional<Mat4x4> Inverse() const;
 
+        void TransposeSelf();
+
         inline float* Data()
             { return data.data(); }
 
@@ -39,6 +41,7 @@ namespace alg
         Mat4x4& operator*=(float scalar);
 
         friend alg::Vec4 operator*(const Mat4x4& mat, const Vec4& vec);
+        friend alg::Vec4 operator*(const Vec4& vec, const Mat4x4& mat);
         friend alg::Mat4x4 operator*(const Mat4x4& mat1, const Mat4x4& mat2);
 
     private:

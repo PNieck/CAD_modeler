@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vector>
-#include <glm/vec2.hpp>
+#include <algebra/vec2.hpp>
 
 
 enum MouseButton {
@@ -22,14 +22,14 @@ public:
 
     void Moved(int x, int y);
 
-    inline glm::ivec2 TranslationGet() const { return actMousePos - oldMousePos; }
-    inline glm::ivec2 PositionGet() const { return actMousePos; }
+    inline alg::IVec2 TranslationGet() const { return actMousePos - oldMousePos; }
+    inline alg::IVec2 PositionGet() const { return actMousePos; }
 
 private:
     static const int BUTTON_CNT = 3;
 
     bool buttonClicked[BUTTON_CNT];
 
-    glm::ivec2 oldMousePos;
-    glm::ivec2 actMousePos;
+    alg::IVec2 oldMousePos;
+    alg::IVec2 actMousePos;
 };

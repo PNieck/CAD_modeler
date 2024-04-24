@@ -4,6 +4,7 @@
 #include <CAD_modeler/model/components/registerComponents.hpp>
 #include <CAD_modeler/model/systems/cameraSystem.hpp>
 
+#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -30,6 +31,8 @@ TEST(CameraSystemsTests, Initialization) {
 }
 
 
+#include <glm/gtx/string_cast.hpp>
+#include <iostream>
 TEST(CameraSystemsTests, PerspectiveMatrixCompareWithGLM) {
     Coordinator coordinator;
 
@@ -56,7 +59,20 @@ TEST(CameraSystemsTests, PerspectiveMatrixCompareWithGLM) {
         cameraSystem->GetFarPlane()
     );
 
-    EXPECT_EQ(glmMatrix, systemProjectionMatrix);
+    std::cout << glm::to_string(glmMatrix) << "\n\n";
+
+    for (int row=0; row < 4; row++) {
+        for (int col=0; col < 4; col++) {
+            std::cout << systemProjectionMatrix(row, col) << " ";
+        }
+        std::cout << "\n";
+    }
+
+    for (int row=0; row < 4; row++) {
+        for (int col=0; col < 4; col++) {
+            EXPECT_EQ(glmMatrix[row][col], systemProjectionMatrix(row, col));
+        }
+    }
 }
 
 
@@ -80,10 +96,23 @@ TEST(CameraSystemsTests, ViewMatrixCompareWithGLM) {
 
     auto systemViewMatrix = cameraSystem->ViewMatrix();
     auto glmMatrix = glm::lookAt(
-        cameraSystem->GetPosition().vec,
-        cameraSystem->GetTargetPosition().vec,
+        glm::vec3(0.0f, 0.0f, 10.0f),
+        glm::vec3(0.0f),
         glm::vec3(0.0f, 1.0f, 0.0f)
     );
 
-    EXPECT_EQ(glmMatrix, systemViewMatrix);
+    std::cout << glm::to_string(glmMatrix) << "\n\n";
+
+    for (int row=0; row < 4; row++) {
+        for (int col=0; col < 4; col++) {
+            std::cout << systemViewMatrix(row, col) << " ";
+        }
+        std::cout << "\n";
+    }
+
+    for (int row=0; row < 4; row++) {
+        for (int col=0; col < 4; col++) {
+            EXPECT_EQ(glmMatrix[row][col], systemViewMatrix(row, col));
+        }
+    }
 }

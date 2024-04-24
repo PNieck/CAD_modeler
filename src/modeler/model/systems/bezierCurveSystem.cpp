@@ -109,10 +109,10 @@ void BezierCurveSystem::Render() const
     auto const& shader = shaderRepo->GetBezierShader();
     std::stack<Entity> polygonsToDraw;
 
-    glm::mat4x4 cameraMtx = cameraSystem->PerspectiveMatrix() * cameraSystem->ViewMatrix();
+    alg::Mat4x4 cameraMtx = cameraSystem->PerspectiveMatrix() * cameraSystem->ViewMatrix();
 
     shader.Use();
-    shader.SetColor(glm::vec4(1.0f));
+    shader.SetColor(alg::Vec4(1.0f));
     shader.SetMVP(cameraMtx);
 
     for (auto const entity: entities) {
@@ -124,7 +124,7 @@ void BezierCurveSystem::Render() const
         bool selection = selectionSystem->IsSelected(entity);
 
         if (selection)
-            shader.SetColor(glm::vec4(1.0f, 0.5f, 0.0f, 1.0f));
+            shader.SetColor(alg::Vec4(1.0f, 0.5f, 0.0f, 1.0f));
 
         auto const& mesh = coordinator->GetComponent<Mesh>(entity);
         mesh.Use();
@@ -133,7 +133,7 @@ void BezierCurveSystem::Render() const
 	    glDrawElements(GL_PATCHES, mesh.GetElementsCnt(), GL_UNSIGNED_INT, 0);
 
         if (selection)
-            shader.SetColor(glm::vec4(1.0f));
+            shader.SetColor(alg::Vec4(1.0f));
     }
 
     if (!polygonsToDraw.empty())
@@ -147,10 +147,10 @@ void BezierCurveSystem::RenderCurvesPolygons(std::stack<Entity>& entities) const
     auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
     auto const& shader = shaderRepo->GetStdShader();
 
-    glm::mat4x4 cameraMtx = cameraSystem->PerspectiveMatrix() * cameraSystem->ViewMatrix();
+    alg::Mat4x4 cameraMtx = cameraSystem->PerspectiveMatrix() * cameraSystem->ViewMatrix();
 
     shader.Use();
-    shader.SetColor(glm::vec4(1.0f));
+    shader.SetColor(alg::Vec4(1.0f));
     shader.SetMVP(cameraMtx);
 
     while (!entities.empty()) {
@@ -160,7 +160,7 @@ void BezierCurveSystem::RenderCurvesPolygons(std::stack<Entity>& entities) const
         bool selection = selectionSystem->IsSelected(entity);
 
         if (selection)
-            shader.SetColor(glm::vec4(1.0f, 0.5f, 0.0f, 1.0f));
+            shader.SetColor(alg::Vec4(1.0f, 0.5f, 0.0f, 1.0f));
 
         auto const& mesh = coordinator->GetComponent<Mesh>(entity);
         mesh.Use();
@@ -168,7 +168,7 @@ void BezierCurveSystem::RenderCurvesPolygons(std::stack<Entity>& entities) const
 	    glDrawElements(GL_LINE_STRIP, mesh.GetElementsCnt(), GL_UNSIGNED_INT, 0);
 
         if (selection)
-            shader.SetColor(glm::vec4(1.0f));
+            shader.SetColor(alg::Vec4(1.0f));
     }
 }
 

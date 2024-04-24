@@ -52,7 +52,7 @@ public:
     void ChangeViewportSize(int width, int height);
 
     inline void SetCursorPosition(float x, float y, float z) const
-        { cursorSystem->SetPosition(glm::vec3(x, y, z)); }
+        { cursorSystem->SetPosition(alg::Vec3(x, y, z)); }
 
     // TODO; Change to normal coordinates
     void SetCursorPositionFromViewport(float x, float y) const;
@@ -138,6 +138,6 @@ private:
     std::shared_ptr<SelectionSystem> selectionSystem;
     std::shared_ptr<BezierCurveSystem> bezierCurveSystem;
 
-    glm::vec3 PointFromViewportCoordinates(float x, float y) const;
+    alg::Vec3 PointFromViewportCoordinates(float x, float y) const;
     Line LineFromViewportCoordinates(float x, float y) const;
 };

@@ -1,24 +1,23 @@
 #pragma once
 
-#include <glm/mat4x4.hpp>
-#include <glm/vec3.hpp>
+#include <algebra/vec3.hpp>
+#include <algebra/mat4x4.hpp>
 
 
 class Scale {
 public:
     Scale(float value = 1.0f): scale(value) {}
     Scale(float x, float y, float z): scale(x, y, z) {}
-    Scale(glm::vec3 vec): scale(vec) {}
+    Scale(alg::Vec3 vec): scale(vec) {}
 
-    inline float GetX() const { return scale.x; }
-    inline float GetY() const { return scale.y; } 
-    inline float GetZ() const { return scale.z; }
+    inline float GetX() const { return scale.X(); }
+    inline float GetY() const { return scale.Y(); } 
+    inline float GetZ() const { return scale.Z(); }
 
-    inline glm::vec3& AsVector() { return scale; }
+    inline alg::Vec3& AsVector() { return scale; }
 
-    glm::mat4x4 ScaleMatrix() const;
+    alg::Mat4x4 ScaleMatrix() const;
 
-    glm::vec3 scale;
 private:
-    
+    alg::Vec3 scale;
 };

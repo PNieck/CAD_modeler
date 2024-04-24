@@ -4,7 +4,6 @@
 #include <sstream>
 #include <iostream>
 
-#include <glm/gtc/type_ptr.hpp>
 
 
 Shader::Shader(
@@ -103,17 +102,17 @@ void Shader::setFloat(const std::string & name, float value) const
 }
 
 
-void Shader::setMatrix4(const std::string & name, const glm::mat4x4 & matrix) const
+void Shader::setMatrix4(const std::string & name, const alg::Mat4x4& matrix) const
 {
     int location = findUniformLocation(name);
-    glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(matrix));
+    glUniformMatrix4fv(location, 1, GL_FALSE, matrix.Data());
 }
 
 
-void Shader::setVec4(const std::string & name, const glm::vec4 & vec) const
+void Shader::setVec4(const std::string & name, const alg::Vec4& vec) const
 {
     int location = findUniformLocation(name);
-    glUniform4fv(location, 1, glm::value_ptr(vec));
+    glUniform4fv(location, 1, vec.Data());
 }
 
 

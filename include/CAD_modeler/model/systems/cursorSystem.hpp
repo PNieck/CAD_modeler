@@ -4,7 +4,7 @@
 #include "../components/position.hpp"
 #include "shaders/shaderRepository.hpp"
 
-#include <glm/vec3.hpp>
+#include <algebra/vec3.hpp>
 
 
 class CursorSystem: public System {
@@ -15,7 +15,7 @@ public:
 
     void Render();
 
-    void SetPosition(const glm::vec3& position);
+    void SetPosition(const alg::Vec3& position);
 
     Position GetPosition() const;
 

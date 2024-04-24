@@ -47,7 +47,7 @@ void CursorSystem::Render()
     auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
     auto const& shader = shaderRepo->GetStdShader();
 
-    glm::mat4x4 cameraMtx = cameraSystem->PerspectiveMatrix() * cameraSystem->ViewMatrix();
+    alg::Mat4x4 cameraMtx = cameraSystem->PerspectiveMatrix() * cameraSystem->ViewMatrix();
 
     auto const& mesh = coordinator->GetComponent<Mesh>(cursor);
     auto const& position = coordinator->GetComponent<Position>(cursor);
@@ -56,11 +56,11 @@ void CursorSystem::Render()
     shader.Use();
 
     if (selected)
-        shader.SetColor(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+        shader.SetColor(alg::Vec4(1.0f, 0.0f, 0.0f, 1.0f));
     else
-        shader.SetColor(glm::vec4(0.5f, 0.0f, 1.0f, 1.0f));
+        shader.SetColor(alg::Vec4(0.5f, 0.0f, 1.0f, 1.0f));
 
-    glm::mat4x4 modelMtx = position.TranslationMatrix();
+    alg::Mat4x4 modelMtx = position.TranslationMatrix();
     shader.SetMVP(cameraMtx * modelMtx);
 
     mesh.Use();
@@ -68,7 +68,7 @@ void CursorSystem::Render()
 }
 
 
-void CursorSystem::SetPosition(const glm::vec3& pos)
+void CursorSystem::SetPosition(const alg::Vec3& pos)
 {
     coordinator->SetComponent<Position>(cursor, Position(pos));
 }

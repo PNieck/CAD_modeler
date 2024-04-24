@@ -80,10 +80,10 @@ void ToriSystem::Render()
     auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
     auto const& shader = shadersRepo->GetStdShader();
 
-    glm::mat4x4 cameraMtx = cameraSystem->PerspectiveMatrix() * cameraSystem->ViewMatrix();
+    alg::Mat4x4 cameraMtx = cameraSystem->PerspectiveMatrix() * cameraSystem->ViewMatrix();
 
     shader.Use();
-    shader.SetColor(glm::vec4(1.0f));
+    shader.SetColor(alg::Vec4(1.0f));
 
     for (auto const entity : entities) {
         auto const& mesh = coordinator->GetComponent<Mesh>(entity);
@@ -94,15 +94,15 @@ void ToriSystem::Render()
         bool selection = selectionSystem->IsSelected(entity);
 
         if (selection)
-            shader.SetColor(glm::vec4(1.0f, 0.5f, 0.0f, 1.0f));
+            shader.SetColor(alg::Vec4(1.0f, 0.5f, 0.0f, 1.0f));
 
-        glm::mat4x4 modelMtx = position.TranslationMatrix() * rotation.GetRotationMatrix() * scale.ScaleMatrix();
+        alg::Mat4x4 modelMtx = position.TranslationMatrix() * rotation.GetRotationMatrix() * scale.ScaleMatrix();
         shader.SetMVP(cameraMtx * modelMtx);
         
         mesh.Use();
         glDrawElements(GL_LINE_LOOP, mesh.GetElementsCnt(), GL_UNSIGNED_INT, 0);
         
         if (selection)
-            shader.SetColor(glm::vec4(1.0f));
+            shader.SetColor(alg::Vec4(1.0f));
     }
 }

@@ -1,5 +1,7 @@
 #include <algebra/mat4x4.hpp>
 
+#include <algorithm>
+
 
 alg::Mat4x4::Mat4x4(float _00, float _01, float _02, float _03, float _10, float _11, float _12, float _13, float _20, float _21, float _22, float _23, float _30, float _31, float _32, float _33)
 {
@@ -138,6 +140,17 @@ std::optional<alg::Mat4x4> alg::Mat4x4::Inverse() const
 }
 
 
+void alg::Mat4x4::TransposeSelf()
+{
+    std::swap(data[1], data[4]);
+    std::swap(data[2], data[8]);
+    std::swap(data[3], data[12]);
+    std::swap(data[6], data[9]);
+    std::swap(data[7], data[13]);
+    std::swap(data[11], data[14]);
+}
+
+
 alg::Mat4x4 & alg::Mat4x4::operator*=(float scalar)
 {
     for (int i=0; i < alg::Mat4x4::Rows * alg::Mat4x4::Cols; ++i) {
@@ -149,6 +162,24 @@ alg::Mat4x4 & alg::Mat4x4::operator*=(float scalar)
 
 
 alg::Vec4 alg::operator*(const Mat4x4& mat, const Vec4& vec)
+{
+    // return alg::Vec4(
+    //     mat(0, 0) * vec.X() + mat(0, 1) * vec.Y() + mat(0, 2) * vec.Z() + mat(0, 3) * vec.W(),
+    //     mat(1, 0) * vec.X() + mat(1, 1) * vec.Y() + mat(1, 2) * vec.Z() + mat(1, 3) * vec.W(),
+    //     mat(2, 0) * vec.X() + mat(2, 1) * vec.Y() + mat(2, 2) * vec.Z() + mat(2, 3) * vec.W(),
+    //     mat(3, 0) * vec.X() + mat(3, 1) * vec.Y() + mat(3, 2) * vec.Z() + mat(3, 3) * vec.W()
+    // );
+
+    return alg::Vec4(
+        mat(0,0) * vec.X() + mat(1, 0) * vec.Y() + mat(2, 0) * vec.Z() + mat(3,0) * vec.W(),
+        mat(0,1) * vec.X() + mat(1, 1) * vec.Y() + mat(2, 1) * vec.Z() + mat(3,1) * vec.W(),
+        mat(0,2) * vec.X() + mat(1, 2) * vec.Y() + mat(2, 2) * vec.Z() + mat(3,2) * vec.W(),
+        mat(0,3) * vec.X() + mat(1, 3) * vec.Y() + mat(2, 3) * vec.Z() + mat(3,3) * vec.W()
+    );
+}
+
+
+alg::Vec4 alg::operator*(const Vec4 & vec, const Mat4x4 & mat)
 {
     return alg::Vec4(
         mat(0, 0) * vec.X() + mat(0, 1) * vec.Y() + mat(0, 2) * vec.Z() + mat(0, 3) * vec.W(),
@@ -165,8 +196,10 @@ alg::Mat4x4 alg::operator*(const Mat4x4 & mat1, const Mat4x4 & mat2)
 
     for (int i=0; i < alg::Mat4x4::Rows; ++i) {
         for (int j=0; j < alg::Mat4x4::Cols; ++j) {
+            result(i, j) = 0;
+
             for (int k=0; k < alg::Mat4x4::Cols; ++k) {
-                result(i, j) = mat1(i, k) + mat2(k, j);
+                result(i, j) += mat2(i, k) * mat1(k, j);
             }
         }
     }
