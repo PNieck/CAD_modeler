@@ -23,6 +23,6 @@ target_link_libraries(
 gtest_discover_tests(sample_test)
 
 
+add_subdirectory(algebra/)
 add_subdirectory(ecs/)
-
 add_subdirectory(modeler/)
