@@ -2,21 +2,22 @@
 
 #include <cmath>
 #include <numbers>
+#include <algorithm>
 
 
 alg::Quat::Quat(float pitch, float yaw, float roll)
 {
-    float cr = cos(roll * 0.5);
-    float sr = sin(roll * 0.5);
-    float cp = cos(pitch * 0.5);
-    float sp = sin(pitch * 0.5);
+    float cz = cos(roll * 0.5);
+    float sz = sin(roll * 0.5);
+    float cx = cos(pitch * 0.5);
+    float sx = sin(pitch * 0.5);
     float cy = cos(yaw * 0.5);
     float sy = sin(yaw * 0.5);
 
-    W() = cr * cp * cy + sr * sp * sy;
-    X() = sr * cp * cy - cr * sp * sy;
-    Y() = cr * sp * cy + sr * cp * sy;
-    Z() = cr * cp * sy - sr * sp * cy;
+    W() = cx * cy * cz + sx * sy * sz;
+    X() = sx * cy * cz - cx * sy * sz;
+    Y() = cx * sy * cz + sx * cy * sz;
+    Z() = cx * cy * sz - sx * sy * cz;
 }
 
 
@@ -53,9 +54,9 @@ alg::Mat4x4 alg::Quat::ToRotationMatrix() const
     float wy = W() * Y();
     
     alg::Mat4x4 rot(
-        2.f*(w2 + X()*X()) - 1.f,            2.f*(xy - wz),            2.f*(xz + wz), 0.f,
-                   2.f*(xy + wz), 2.f*(w2 + Y()*Y()) - 1.f,            2.f*(yz - wx), 0.f,
-                   2.f*(xz - wy),            2.f*(yz + wx), 2.f*(w2 + Y()*Y()) - 1.f, 0.f,
+        1.f - 2.f*(Y()*Y() + Z()*Z()),            2.f*(xy - wz),            2.f*(xz + wy), 0.f,
+                        2.f*(xy + wz), 1.0f - 2.f*(X()*X() + Z()*Z()),            2.f*(yz - wx), 0.f,
+                   2.f*(xz - wy),            2.f*(yz + wx), 1.f - 2.f*(X()*X() + Y()*Y()), 0.f,
                              0.f,                      0.f,                      0.f, 1.f
     );
 
@@ -65,24 +66,31 @@ alg::Mat4x4 alg::Quat::ToRotationMatrix() const
 }
 
 
-alg::Vec3 alg::Quat::ToRollPitchRoll() const
+alg::Vec3 alg::Quat::ToRollPitchYaw() const
 {
-    // roll (x-axis rotation)
-    float sinr_cosp = 2 * (W() * X() + Y() * Z());
-    float cosr_cosp = 1 - 2 * (X() * X() + Y() * Y());
-    float roll = std::atan2(sinr_cosp, cosr_cosp);
+    float y = 2.f * (Y() * Z() + W() * X());
+    float x = W() * W() - X() * X() - Y() * Y() + Z() * Z();
 
-    // pitch (y-axis rotation)
-    float sinp = std::sqrt(1 + 2 * (W() * Y() - X() * Z()));
-    float cosp = std::sqrt(1 - 2 * (W() * Y() - X() * Z()));
-    float pitch = 2 * std::atan2(sinp, cosp) - std::numbers::pi_v<float> / 2.0f;
+    float pitch;
+    if (std::abs(x) <= std::numeric_limits<float>::epsilon() &&
+        std::abs(y) <= std::numeric_limits<float>::epsilon())
+        pitch = 2.f * std::atan2(X(), W());
+    else
+        pitch = std::atan2(y, x);
 
-    // yaw (z-axis rotation)
-    float siny_cosp = 2 * (W() * Z() + X() * Y());
-    float cosy_cosp = 1 - 2 * (Y() * Y() + Z() * Z());
-    float yaw = std::atan2(siny_cosp, cosy_cosp);
+    float yaw = std::asin(std::clamp(-2.f * (X() * Z() - W() * Y()), -1.f, 1.f));
 
-    return alg::Vec3(roll, pitch, roll);
+    y = 2.f * (X() * Y() + W() * Z());
+    x = W() * W() + X() * X() - Y() * Y() - Z() * Z();
+
+    float roll;
+    if (std::abs(x) <= std::numeric_limits<float>::epsilon() &&
+        std::abs(y) <= std::numeric_limits<float>::epsilon())
+        roll = 0;
+    else
+        roll = std::atan2(y, x);
+
+    return alg::Vec3(pitch, yaw, roll);
 }
 
 

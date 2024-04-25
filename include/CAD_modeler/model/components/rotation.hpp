@@ -20,7 +20,7 @@ public:
         { return quat.ToRotationMatrix(); }
 
     inline alg::Vec3 GetRollPitchRoll() const
-        { return quat.ToRollPitchRoll(); }
+        { return quat.ToRollPitchYaw(); }
 
     inline alg::Quat GetQuaternion() const
         { return quat; }

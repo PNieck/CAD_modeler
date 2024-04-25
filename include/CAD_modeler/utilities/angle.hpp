@@ -20,7 +20,7 @@ public:
 private:
     Angle(float degrees): degrees(degrees) {}
 
-    static constexpr float degreeToRadiansConst = 180.f * std::numbers::pi_v<float>;
+    static constexpr float degreeToRadiansConst = std::numbers::pi_v<float> / 180.f;
     static constexpr float radiansToDegreesConst = 1.f / degreeToRadiansConst;
 
     float degrees;

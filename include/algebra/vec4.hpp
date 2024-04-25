@@ -60,7 +60,7 @@ namespace alg
         }
 
         inline float LengthSquared() const
-            { return data[0]*data[0] + data[1]*data[1] + data[2]*data[2] * data[3]*data[3]; }
+            { return data[0]*data[0] + data[1]*data[1] + data[2]*data[2] + data[3]*data[3]; }
         
         inline float Length() const
             { return std::sqrt(LengthSquared()); }

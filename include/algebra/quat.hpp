@@ -54,13 +54,13 @@ namespace alg
             { return Quat(data.Normalize()); }
 
         alg::Mat4x4 ToRotationMatrix() const;
-        alg::Vec3 ToRollPitchRoll() const;
+        alg::Vec3 ToRollPitchYaw() const;
         
 
         Quat operator*(const Quat& q) const;
 
         static Quat Identity()
-            { return Quat(1.0f, 0.0f, 0.0f, 0.0f); }
+            { return Quat(0.0f, 0.0f, 0.0f, 1.0f); }
         
     private:
         Vec4 data;
