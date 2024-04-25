@@ -7,6 +7,8 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/string_cast.hpp>
+#include <iostream>
 
 
 TEST(CameraSystemsTests, Initialization) {
@@ -31,9 +33,7 @@ TEST(CameraSystemsTests, Initialization) {
 }
 
 
-#include <glm/gtx/string_cast.hpp>
-#include <iostream>
-TEST(CameraSystemsTests, PerspectiveMatrixCompareWithGLM) {
+TEST(CameraSystemsTests, SimplePerspectiveMatrixCompareWithGLM) {
     Coordinator coordinator;
 
     RegisterAllComponents(coordinator);
@@ -76,7 +76,7 @@ TEST(CameraSystemsTests, PerspectiveMatrixCompareWithGLM) {
 }
 
 
-TEST(CameraSystemsTests, ViewMatrixCompareWithGLM) {
+TEST(CameraSystemsTests, SimpleViewMatrixCompareWithGLM) {
     Coordinator coordinator;
 
     RegisterAllComponents(coordinator);
@@ -113,6 +113,48 @@ TEST(CameraSystemsTests, ViewMatrixCompareWithGLM) {
     for (int row=0; row < 4; row++) {
         for (int col=0; col < 4; col++) {
             EXPECT_EQ(glmMatrix[row][col], systemViewMatrix(row, col));
+        }
+    }
+}
+
+
+TEST(CameraSystemsTests, ViewMatrixCompareWithGLM) {
+    Coordinator coordinator;
+
+    RegisterAllComponents(coordinator);
+    CameraSystem::RegisterSystem(coordinator);
+    auto cameraSystem = coordinator.GetSystem<CameraSystem>();
+
+    CameraParameters params {
+        .target = Position(0.0f),
+        .viewportWidth = 600,
+        .viewportHeight = 400,
+        .fov = glm::radians(45.0f),
+        .near_plane = 0.1f,
+        .far_plane = 100.0f,
+    };
+
+    cameraSystem->Init(params, Position(-5.0f, 4.0f, 10.0f));
+
+    auto systemViewMatrix = cameraSystem->ViewMatrix();
+    auto glmMatrix = glm::lookAt(
+        glm::vec3(-5.0f, 4.0f, 10.0f),
+        glm::vec3(0.0f),
+        glm::vec3(0.0f, 1.0f, 0.0f)
+    );
+
+    std::cout << glm::to_string(glmMatrix) << "\n\n";
+
+    for (int row=0; row < 4; row++) {
+        for (int col=0; col < 4; col++) {
+            std::cout << systemViewMatrix(row, col) << " ";
+        }
+        std::cout << "\n";
+    }
+
+    for (int row=0; row < 4; row++) {
+        for (int col=0; col < 4; col++) {
+            EXPECT_NEAR(glmMatrix[row][col], systemViewMatrix(row, col), 0.001);
         }
     }
 }

@@ -132,4 +132,43 @@ TEST(MatrixTests, MatrixMultiplicationComparison) {
             ASSERT_EQ(resultAlg(row, col), resultGlm[row][col]);
         }
     }
+
+    resultAlg = algMat2 * algMat1;
+    resultGlm = glmMat2 * glmMat1;
+
+    for (int row=0; row < 4; row++) {
+        for (int col=0; col < 4; col++) {
+            ASSERT_EQ(resultAlg(row, col), resultGlm[row][col]);
+        }
+    }
+}
+
+
+TEST(MatrixTests, MatrixInversion) {
+    alg::Mat4x4 mat(
+        2.f, 5.f, 0.f, 8.f,
+        1.f, 4.f, 2.f, 6.f,
+        7.f, 8.f, 9.f, 3.f,
+        1.f, 5.f, 7.f, 8.f
+    );
+
+    auto inv = mat.Inverse();
+
+    ASSERT_TRUE(inv.has_value());
+
+    auto identity = inv.value() * mat;
+
+    for (int row=0; row < 4; row++) {
+        for (int col=0; col < 4; col++) {
+            EXPECT_NEAR(identity(row, col), row==col ? 1.f : 0.f, 0.001);
+        }
+    }
+
+    identity = mat * inv.value();
+
+    for (int row=0; row < 4; row++) {
+        for (int col=0; col < 4; col++) {
+            EXPECT_NEAR(identity(row, col), row==col ? 1.f : 0.f, 0.001);
+        }
+    }
 }

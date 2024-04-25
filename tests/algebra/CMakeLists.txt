@@ -27,3 +27,19 @@ target_link_libraries(
 )
 
 gtest_discover_tests(matrix_tests)
+
+
+add_executable(
+    quaternion_tests
+    quaternionTests.cpp
+)
+
+target_link_libraries(
+    quaternion_tests
+    PRIVATE
+    GTest::gtest_main
+    algebra
+    glm
+)
+
+gtest_discover_tests(quaternion_tests)

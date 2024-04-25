@@ -29,3 +29,18 @@ target_link_libraries(
 )
 
 gtest_discover_tests(camera_system_tests)
+
+
+add_executable(
+    angle_tests
+    angleTests.cpp
+)
+
+target_link_libraries(
+    angle_tests
+    PRIVATE
+    GTest::gtest_main
+    modeler_lib
+)
+
+gtest_discover_tests(angle_tests)
