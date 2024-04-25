@@ -14,6 +14,6 @@ void MouseState::Moved(int x, int y)
 {
     oldMousePos = actMousePos;
 
-    actMousePos.x = x;
-    actMousePos.y = y;
+    actMousePos.X() = x;
+    actMousePos.Y() = y;
 }

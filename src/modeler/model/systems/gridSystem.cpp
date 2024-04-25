@@ -46,8 +46,8 @@ void GridSystem::Render() const
     auto const& gridMesh = coordinator->GetComponent<Mesh>(grid);
     auto const& gridShader = shaderRepo->GetGridShader();
 
-    glm::mat4x4 viewMtx = cameraSystem->ViewMatrix();
-    glm::mat4x4 projectionMtx = cameraSystem->PerspectiveMatrix();
+    alg::Mat4x4 viewMtx = cameraSystem->ViewMatrix();
+    alg::Mat4x4 projectionMtx = cameraSystem->PerspectiveMatrix();
 
     gridShader.Use();
     gridShader.SetFarPlane(cameraSystem->GetFarPlane());

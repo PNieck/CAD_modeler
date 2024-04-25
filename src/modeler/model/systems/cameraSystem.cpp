@@ -2,11 +2,13 @@
 
 #include <ecs/coordinator.hpp>
 
+#include <algebra/vec4.hpp>
+
 #include <CAD_modeler/model/components/cameraParameters.hpp>
 #include <CAD_modeler/model/components/position.hpp>
 #include <CAD_modeler/model/components/rotation.hpp>
 
-#include <glm/vec4.hpp>
+#include <CAD_modeler/utilities/angle.hpp>
 
 
 void CameraSystem::RegisterSystem(Coordinator & coordinator)
@@ -24,25 +26,29 @@ void CameraSystem::Init(const CameraParameters& params, const Position& cameraPo
 }
 
 
-glm::mat4x4 CameraSystem::ViewMatrix() const
+alg::Mat4x4 CameraSystem::ViewMatrix() const
 {
     Position const& position = coordinator->GetComponent<Position>(camera);
     CameraParameters const& params = coordinator->GetComponent<CameraParameters>(camera);
 
-    glm::vec3 direction = glm::normalize(position.vec - params.target.vec);
-    glm::vec3 right = glm::normalize(glm::cross(globalUp, direction));
-    glm::vec3 up = glm::normalize(glm::cross(direction, right));
+    alg::Vec3 direction = (position.vec - params.target.vec).Normalize();
+    alg::Vec3 right = alg::Cross(globalUp, direction).Normalize();
+    alg::Vec3 up = alg::Cross(direction, right).Normalize();
 
-    return glm::transpose(glm::mat4x4(
-            right.x,     right.y,     right.z,     -position.GetX()*right.x -     position.GetY()*right.y -     position.GetZ()*right.z,
-               up.x,        up.y,        up.z,        -position.GetX()*up.x -        position.GetY()*up.y -        position.GetZ()*up.z,
-        direction.x, direction.y, direction.z, -position.GetX()*direction.x - position.GetY()*direction.y - position.GetZ()*direction.z,
-               0.0f,        0.0f,        0.0f,                                                                      1.0f
-    ));
+    alg::Mat4x4 result(
+            right.X(),     right.Y(),     right.Z(),     -position.GetX()*right.X() -     position.GetY()*right.Y() -     position.GetZ()*right.Z(),
+               up.X(),        up.Y(),        up.Z(),        -position.GetX()*up.X() -        position.GetY()*up.Y() -        position.GetZ()*up.Z(),
+        direction.X(), direction.Y(), direction.Z(), -position.GetX()*direction.X() - position.GetY()*direction.Y() - position.GetZ()*direction.Z(),
+                 0.0f,          0.0f,          0.0f,                                                                                           1.0f
+    );
+
+    result.TransposeSelf();
+
+    return result;
 }
 
 
-glm::mat4x4 CameraSystem::PerspectiveMatrix() const
+alg::Mat4x4 CameraSystem::PerspectiveMatrix() const
 {
     CameraParameters const& params = coordinator->GetComponent<CameraParameters>(camera);
 
@@ -53,12 +59,16 @@ glm::mat4x4 CameraSystem::PerspectiveMatrix() const
     float v3 = (params.far_plane + params.near_plane)/(params.far_plane - params.near_plane);
     float v4 = -2.0 * (params.far_plane * params.near_plane) / (params.far_plane - params.near_plane);
 
-    return glm::transpose(glm::mat4x4(
+    alg::Mat4x4 result(
         v2, 0.0f, 0.0f, 0.0f,
         0.0f, v1, 0.0f, 0.0f,
         0.0f, 0.0f, -v3, v4,
         0.0f, 0.0f, -1.0f, 0.0f
-    ));
+    );
+
+    result.TransposeSelf();
+
+    return result;
 }
 
 
@@ -67,16 +77,16 @@ void CameraSystem::RotateAroundTarget(float x, float y) const
     CameraParameters const& params = coordinator->GetComponent<CameraParameters>(camera);
     Position const& position = coordinator->GetComponent<Position>(camera);
 
-    glm::mat4x4 translationMtx = params.target.TranslationMatrix();
-    glm::mat4x4 translationInv = glm::inverse(translationMtx);
+    alg::Mat4x4 translationMtx = params.target.TranslationMatrix();
+    alg::Mat4x4 translationInv = translationMtx.Inverse().value();
 
     Rotation rot(x, y, 0.0f);
 
-    glm::vec4 pos(position.vec, 1.0f);
+    alg::Vec4 pos(position.vec, 1.0f);
 
     pos = translationMtx * rot.GetRotationMatrix() * translationInv * pos;
 
-    coordinator->SetComponent<Position>(camera, Position(pos.x, pos.y, pos.z));
+    coordinator->SetComponent<Position>(camera, Position(pos.X(), pos.Y(), pos.Z()));
 }
 
 
@@ -97,7 +107,7 @@ float CameraSystem::GetDistanceToTarget() const
     CameraParameters const& params = coordinator->GetComponent<CameraParameters>(camera);
     Position const& position = coordinator->GetComponent<Position>(camera);
 
-    return static_cast<float>((params.target.vec - position.vec).length());
+    return (params.target.vec - position.vec).Length();
 }
 
 
@@ -106,7 +116,7 @@ void CameraSystem::SetDistanceToTarget(float newDist) const
     CameraParameters const& params = coordinator->GetComponent<CameraParameters>(camera);
     Position const& position = coordinator->GetComponent<Position>(camera);
 
-    Position newPos(glm::normalize(params.target.vec - position.vec) * newDist + params.target.vec);
+    Position newPos((params.target.vec - position.vec).Normalize() * newDist + params.target.vec);
     coordinator->SetComponent<Position>(camera, newPos);
 }
 

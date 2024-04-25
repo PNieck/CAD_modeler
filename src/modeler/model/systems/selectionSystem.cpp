@@ -83,11 +83,11 @@ void SelectionSystem::SelectFromLine(const Line& line)
     for (auto const entity: pointsSystem->GetEntities()) {
         auto const& position = coordinator->GetComponent<Position>(entity);
 
-        float t = glm::dot(line.GetDirection(), position.vec - line.GetSamplePoint());
-        glm::vec3 projection = line.GetPointOnLine(t);
+        float t = alg::Dot(line.GetDirection(), position.vec - line.GetSamplePoint());
+        alg::Vec3 projection = line.GetPointOnLine(t);
 
         // TODO: change to distance Squared
-        float distance = glm::distance(projection, position.vec);
+        float distance = alg::Distance(projection, position.vec);
 
         if (t < smallestT && distance < 0.5) {
             smallestT = t;
@@ -113,16 +113,16 @@ void SelectionSystem::RenderMiddlePoint()
     auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
     auto const& shader = shadersRepo->GetStdShader();
 
-    glm::mat4x4 cameraMtx = cameraSystem->PerspectiveMatrix() * cameraSystem->ViewMatrix();
+    alg::Mat4x4 cameraMtx = cameraSystem->PerspectiveMatrix() * cameraSystem->ViewMatrix();
 
     auto const& mesh = coordinator->GetComponent<Mesh>(middlePoint);
     auto const& position = coordinator->GetComponent<Position>(middlePoint);
 
     shader.Use();
 
-    shader.SetColor(glm::vec4(1.0f, 1.0f, 0.0f, 1.0f));
+    shader.SetColor(alg::Vec4(1.0f, 1.0f, 0.0f, 1.0f));
 
-    glm::mat4x4 modelMtx = position.TranslationMatrix();
+    alg::Mat4x4 modelMtx = position.TranslationMatrix();
     shader.SetMVP(cameraMtx * modelMtx);
 
     mesh.Use();
@@ -154,7 +154,7 @@ void SelectionSystem::MoveSelected(const Position & newMiddlePointPos)
     Entity midPoint = GetMiddlePoint();
     Position const& midPointPos = coordinator->GetComponent<Position>(midPoint);
 
-    glm::vec3 delta = newMiddlePointPos.vec - midPointPos.vec;
+    alg::Vec3 delta = newMiddlePointPos.vec - midPointPos.vec;
 
     for (auto entity: entities) {
         if (!coordinator->GetEntityComponents(entity).contains(ComponentsManager::GetComponentId<Position>()))
@@ -180,11 +180,11 @@ void SelectionSystem::ScaleSelected(const Scale& scale)
 
         if (components.contains(ComponentsManager::GetComponentId<Position>())) {
             Position const& pos = coordinator->GetComponent<Position>(entity);
-            glm::vec3 dist = pos.vec - midPointPos.vec;
+            alg::Vec3 dist = pos.vec - midPointPos.vec;
 
-            dist.x *= scale.GetX();
-            dist.y *= scale.GetY();
-            dist.z *= scale.GetZ();
+            dist.X() *= scale.GetX();
+            dist.Y() *= scale.GetY();
+            dist.Z() *= scale.GetZ();
 
             Position newPos(midPointPos.vec + dist);
             coordinator->SetComponent<Position>(entity, newPos);
@@ -192,7 +192,13 @@ void SelectionSystem::ScaleSelected(const Scale& scale)
 
         if (components.contains(ComponentsManager::GetComponentId<Scale>())) {
             auto const& sc = coordinator->GetComponent<Scale>(entity);
-            Scale newScale(sc.scale * scale.scale);
+
+            Scale newScale(
+                sc.GetX() * scale.GetX(),
+                sc.GetY() * scale.GetY(),
+                sc.GetZ() * scale.GetZ()   
+            );
+
             coordinator->SetComponent<Scale>(entity, newScale);
         }
     }
@@ -209,9 +215,9 @@ void SelectionSystem::RotateSelected(const Rotation & rotation)
 
         if (components.contains(ComponentsManager::GetComponentId<Position>())) {
             Position const& pos = coordinator->GetComponent<Position>(entity);
-            glm::vec3 dist = pos.vec - midPointPos.vec;
+            alg::Vec3 dist = pos.vec - midPointPos.vec;
 
-            dist = glm::rotate(rotation.quat, dist);
+            dist = rotation.GetQuaternion().Rotate(dist);
 
             Position newPos(midPointPos.vec + dist);
             coordinator->SetComponent<Position>(entity, newPos);
@@ -219,8 +225,8 @@ void SelectionSystem::RotateSelected(const Rotation & rotation)
 
         if (components.contains(ComponentsManager::GetComponentId<Rotation>())) {
             auto& rot = coordinator->GetComponent<Rotation>(entity);
-            auto quat = rotation.quat * rot.quat;
-            quat = glm::normalize(quat);
+            auto quat = rotation.GetQuaternion() * rot.GetQuaternion();
+            quat = quat.Normalize();
 
             coordinator->SetComponent<Rotation>(entity, Rotation(quat));
         }

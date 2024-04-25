@@ -74,7 +74,7 @@ void GlController::MouseMove(int x, int y)
 
     if (mouseState.IsButtonClicked(MouseButton::Middle)) {
         auto offset = mouseState.TranslationGet();
-        model.RotateCamera(offset.y * 0.02f, offset.x * 0.02f);
+        model.RotateCamera(offset.Y() * 0.02f, offset.X() * 0.02f);
     }
 }
 
@@ -89,8 +89,8 @@ std::tuple<float,float> GlController::MouseToViewportCoordinates() const
     int halfHeight = windowHeight / 2;
 
     auto mousePos = mouseState.PositionGet();
-    float x = (float)(mousePos.x - halfWidth) / (float)halfWidth;
-    float y = -(float)(mousePos.y - halfHeight) / (float)halfHeight;
+    float x = (float)(mousePos.X() - halfWidth) / (float)halfWidth;
+    float y = -(float)(mousePos.Y() - halfHeight) / (float)halfHeight;
 
     return std::make_tuple(x, y);
 }

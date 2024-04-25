@@ -1,16 +1,16 @@
 #include <CAD_modeler/utilities/plane.hpp>
 
 
-std::optional<glm::vec3> Plane::Intersect(const Line & line)
+std::optional<alg::Vec3> Plane::Intersect(const Line& line)
 {
-    float dotWithDir = glm::dot(perpendicularVec, line.GetDirection());
+    float dotWithDir = alg::Dot(perpendicularVec, line.GetDirection());
 
     if (dotWithDir == 0.0f) {
         return std::nullopt;
     }
 
-    float dotWithLinePt = glm::dot(perpendicularVec, line.GetSamplePoint());
-    float dotWithPlanePt = glm::dot(perpendicularVec, pointOnPlane);
+    float dotWithLinePt = alg::Dot(perpendicularVec, line.GetSamplePoint());
+    float dotWithPlanePt = alg::Dot(perpendicularVec, pointOnPlane);
 
     float t = (dotWithPlanePt - dotWithLinePt) / dotWithDir;
 

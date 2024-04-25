@@ -1,34 +1,30 @@
 #pragma once
 
-#include <glm/mat4x4.hpp>
-#include <glm/ext/quaternion_float.hpp>
-
-#define GLM_ENABLE_EXPERIMENTAL
-#include <glm/gtx/quaternion.hpp>
+#include <algebra/quat.hpp>
+#include <algebra/vec3.hpp>
+#include <algebra/mat4x4.hpp>
 
 
 class Rotation {
 public:
-    Rotation(): quat(1.0f, 0.0f, 0.0f, 0.0f) {}
-    Rotation(glm::vec3 pitchYawRoll): quat(pitchYawRoll) {}
+    Rotation(): quat(alg::Quat::Identity()) {}
+    Rotation(alg::Vec3 pitchYawRoll): quat(pitchYawRoll) {}
     Rotation(float pitch, float yaw, float roll):
-        Rotation(glm::vec3(pitch, yaw, roll)) {}
-    Rotation(const glm::quat& rot): quat(rot) {}
+        quat(pitch, yaw, roll) {}
+    Rotation(const alg::Quat& rot): quat(rot) {}
 
-    inline void Rotate(glm::vec3& vec) const
-        { vec = quat * vec; }
+    inline void Rotate(alg::Vec3& vec) const
+        { vec = quat.Rotate(vec); }
 
-    inline glm::mat4x4 GetRotationMatrix() const
-        { return glm::toMat4(quat); }
+    inline alg::Mat4x4 GetRotationMatrix() const
+        { return quat.ToRotationMatrix(); }
 
-    inline glm::vec3 GetEulerAngles() const
-        { return glm::eulerAngles(quat); }
+    inline alg::Vec3 GetRollPitchRoll() const
+        { return quat.ToRollPitchYaw(); }
 
-    glm::quat quat;
+    inline alg::Quat GetQuaternion() const
+        { return quat; }
+
 private:
-    // glm::mat4x4 RotationXMtx() const;
-    // glm::mat4x4 RotationYMtx() const;
-    // glm::mat4x4 RotationZMtx() const;
-
-    
+    alg::Quat quat;
 };

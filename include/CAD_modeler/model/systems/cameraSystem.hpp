@@ -4,8 +4,7 @@
 #include "../components/position.hpp"
 #include "../components/cameraParameters.hpp"
 
-#include <glm/mat4x4.hpp>
-#include <glm/trigonometric.hpp>
+#include <algebra/mat4x4.hpp>
 
 
 class CameraSystem: public System {
@@ -14,8 +13,8 @@ public:
 
     void Init(const CameraParameters& params, const Position& cameraPos);
 
-    glm::mat4x4 ViewMatrix() const;
-    glm::mat4x4 PerspectiveMatrix() const;
+    alg::Mat4x4 ViewMatrix() const;
+    alg::Mat4x4 PerspectiveMatrix() const;
 
     void RotateAroundTarget(float x, float y) const;
 
@@ -45,7 +44,7 @@ public:
         { return camera; }
 
 private:
-    static constexpr glm::vec3 globalUp = glm::vec3(0.0f, 1.0f, 0.0f);
+    static constexpr alg::Vec3 globalUp = alg::Vec3(0.0f, 1.0f, 0.0f);
 
     Entity camera;
 };
