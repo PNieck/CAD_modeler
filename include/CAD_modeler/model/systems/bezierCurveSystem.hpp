@@ -3,7 +3,7 @@
 #include <ecs/system.hpp>
 
 #include "shaders/shaderRepository.hpp"
-#include "../components/bezierCurveParameters.hpp"
+#include "../components/c0CurveParameters.hpp"
 #include "../components/position.hpp"
 #include "utils/nameGenerator.hpp"
 
@@ -37,8 +37,8 @@ private:
     void RenderCurvesPolygons(std::stack<Entity>& entities) const;
     void UpdateMesh(Entity bezierCurve) const;
 
-    std::vector<float> GenerateBezierPolygonVertices(const BezierCurveParameter& params) const;
-    std::vector<uint32_t> GenerateBezierPolygonIndices(const BezierCurveParameter& params) const;
+    std::vector<float> GenerateBezierPolygonVertices(const C0CurveParameters& params) const;
+    std::vector<uint32_t> GenerateBezierPolygonIndices(const C0CurveParameters& params) const;
 
     struct RecalculateMeshHandler: EventHandler<Position> {
         RecalculateMeshHandler(Entity bezierCurve, BezierCurveSystem& system):
@@ -50,12 +50,12 @@ private:
         void HandleEvent(Entity entity, const Position& component, EventType eventType);
     };
 
-    struct ParameterDeletionHandler: EventHandler<BezierCurveParameter> {
+    struct ParameterDeletionHandler: EventHandler<C0CurveParameters> {
         ParameterDeletionHandler(Coordinator& coordinator):
             coordinator(coordinator) {}
 
         Coordinator& coordinator;
 
-        void HandleEvent(Entity entity, const BezierCurveParameter& component, EventType eventType);
+        void HandleEvent(Entity entity, const C0CurveParameters& component, EventType eventType);
     };
 };

@@ -6,9 +6,9 @@
 #include <unordered_map>
 
 
-class BezierCurveParameter {
+class C0CurveParameters {
 public:
-    BezierCurveParameter(const std::vector<Entity> controlPoints):
+    C0CurveParameters(const std::vector<Entity> controlPoints):
         controlPoints(controlPoints) {}
 
     inline void AddControlPoint(Entity entity)

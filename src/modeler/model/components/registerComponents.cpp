@@ -8,7 +8,7 @@
 #include <CAD_modeler/model/components/scale.hpp>
 #include <CAD_modeler/model/components/selected.hpp>
 #include <CAD_modeler/model/components/torusParameters.hpp>
-#include <CAD_modeler/model/components/bezierCurveParameters.hpp>
+#include <CAD_modeler/model/components/c0CurveParameters.hpp>
 
 
 void RegisterAllComponents(Coordinator& coordinator)
@@ -21,5 +21,5 @@ void RegisterAllComponents(Coordinator& coordinator)
     coordinator.RegisterComponent<Scale>();
     coordinator.RegisterComponent<Selected>();
     coordinator.RegisterComponent<TorusParameters>();
-    coordinator.RegisterComponent<BezierCurveParameter>();
+    coordinator.RegisterComponent<C0CurveParameters>();
 }

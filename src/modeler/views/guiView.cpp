@@ -225,9 +225,9 @@ void GuiView::RenderSingleObjectProperties(Entity entity) const
     if (it != components.end())
         DisplayNameEditor(entity, model.GetComponent<Name>(entity));
 
-    it = components.find(Model::GetComponentId<BezierCurveParameter>());
+    it = components.find(Model::GetComponentId<C0CurveParameters>());
     if (it != components.end())
-        DisplayBezierCurveProperty(entity, model.GetComponent<BezierCurveParameter>(entity));
+        DisplayBezierCurveProperty(entity, model.GetComponent<C0CurveParameters>(entity));
 
     if (ImGui::Button("Delete object")) {
         controller.DeleteEntity(entity);
@@ -387,7 +387,7 @@ void GuiView::DisplayTorusProperty(Entity entity, const TorusParameters& params)
 }
 
 
-void GuiView::DisplayBezierCurveProperty(Entity entity, const BezierCurveParameter& params) const
+void GuiView::DisplayBezierCurveProperty(Entity entity, const C0CurveParameters& params) const
 {
     bool drawPolygon = params.drawPolygon;
 
@@ -398,9 +398,9 @@ void GuiView::DisplayBezierCurveProperty(Entity entity, const BezierCurveParamet
     if (drawPolygon != params.drawPolygon) {
 
         // TODO: change copying whole params
-        BezierCurveParameter newParams = params;
+        C0CurveParameters newParams = params;
         newParams.drawPolygon = drawPolygon;
-        controller.ChangeComponent<BezierCurveParameter>(entity, newParams);
+        controller.ChangeComponent<C0CurveParameters>(entity, newParams);
     }
 
     ImGui::SeparatorText("Control Points");
