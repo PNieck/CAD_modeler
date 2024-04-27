@@ -12,7 +12,7 @@
 #include <stack>
 
 
-class BezierCurveSystem: public System {
+class C0CurveSystem: public System {
 public:
     static void RegisterSystem(Coordinator& coordinator);
 
@@ -41,10 +41,10 @@ private:
     std::vector<uint32_t> GenerateBezierPolygonIndices(const C0CurveParameters& params) const;
 
     struct RecalculateMeshHandler: EventHandler<Position> {
-        RecalculateMeshHandler(Entity bezierCurve, BezierCurveSystem& system):
+        RecalculateMeshHandler(Entity bezierCurve, C0CurveSystem& system):
             bezierSystem(system), bezierCurve(bezierCurve) {}
 
-        BezierCurveSystem& bezierSystem;
+        C0CurveSystem& bezierSystem;
         Entity bezierCurve;
 
         void HandleEvent(Entity entity, const Position& component, EventType eventType);

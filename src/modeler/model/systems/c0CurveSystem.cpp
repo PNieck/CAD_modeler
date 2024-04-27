@@ -1,4 +1,4 @@
-#include <CAD_modeler/model/systems/bezierCurveSystem.hpp>
+#include <CAD_modeler/model/systems/c0CurveSystem.hpp>
 
 #include <ecs/coordinator.hpp>
 
@@ -17,16 +17,16 @@
 static constexpr int COORD_IN_VERTEX = 3;
 
 
-void BezierCurveSystem::RegisterSystem(Coordinator & coordinator)
+void C0CurveSystem::RegisterSystem(Coordinator & coordinator)
 {
-    coordinator.RegisterSystem<BezierCurveSystem>();
+    coordinator.RegisterSystem<C0CurveSystem>();
 
-    coordinator.RegisterRequiredComponent<BezierCurveSystem, C0CurveParameters>();
-    coordinator.RegisterRequiredComponent<BezierCurveSystem, Mesh>();
+    coordinator.RegisterRequiredComponent<C0CurveSystem, C0CurveParameters>();
+    coordinator.RegisterRequiredComponent<C0CurveSystem, Mesh>();
 }
 
 
-Entity BezierCurveSystem::CreateBezierCurve(const std::vector<Entity>& entities)
+Entity C0CurveSystem::CreateBezierCurve(const std::vector<Entity>& entities)
 {
     static std::shared_ptr<ParameterDeletionHandler> parameterDeletionHandler(new ParameterDeletionHandler(*coordinator));
 
@@ -58,7 +58,7 @@ Entity BezierCurveSystem::CreateBezierCurve(const std::vector<Entity>& entities)
 }
 
 
-void BezierCurveSystem::AddControlPoint(Entity bezierCurve, Entity entity)
+void C0CurveSystem::AddControlPoint(Entity bezierCurve, Entity entity)
 {
     coordinator->EditComponent<C0CurveParameters>(bezierCurve,
         [entity, this](C0CurveParameters& params) {
@@ -76,7 +76,7 @@ void BezierCurveSystem::AddControlPoint(Entity bezierCurve, Entity entity)
 }
 
 
-void BezierCurveSystem::DeleteControlPoint(Entity bezierCurve, Entity entity)
+void C0CurveSystem::DeleteControlPoint(Entity bezierCurve, Entity entity)
 {
     bool entityDeleted = false;
 
@@ -98,7 +98,7 @@ void BezierCurveSystem::DeleteControlPoint(Entity bezierCurve, Entity entity)
 }
 
 
-void BezierCurveSystem::Render() const
+void C0CurveSystem::Render() const
 {
     if (entities.empty()) {
         return;
@@ -141,7 +141,7 @@ void BezierCurveSystem::Render() const
 }
 
 
-void BezierCurveSystem::RenderCurvesPolygons(std::stack<Entity>& entities) const
+void C0CurveSystem::RenderCurvesPolygons(std::stack<Entity>& entities) const
 {
     auto const& cameraSystem = coordinator->GetSystem<CameraSystem>();
     auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
@@ -173,7 +173,7 @@ void BezierCurveSystem::RenderCurvesPolygons(std::stack<Entity>& entities) const
 }
 
 
-void BezierCurveSystem::UpdateMesh(Entity bezierCurve) const
+void C0CurveSystem::UpdateMesh(Entity bezierCurve) const
 {
     coordinator->EditComponent<Mesh>(bezierCurve,
         [bezierCurve, this](Mesh& mesh) {
@@ -188,7 +188,7 @@ void BezierCurveSystem::UpdateMesh(Entity bezierCurve) const
 }
 
 
-std::vector<float> BezierCurveSystem::GenerateBezierPolygonVertices(const C0CurveParameters& params) const
+std::vector<float> C0CurveSystem::GenerateBezierPolygonVertices(const C0CurveParameters& params) const
 {
     auto const& controlPoints = params.ControlPoints();
 
@@ -214,7 +214,7 @@ int ceiling(int x, int y) {
 }
 
 
-std::vector<uint32_t> BezierCurveSystem::GenerateBezierPolygonIndices(const C0CurveParameters& params) const
+std::vector<uint32_t> C0CurveSystem::GenerateBezierPolygonIndices(const C0CurveParameters& params) const
 {
     auto const& controlPoints = params.ControlPoints();
 
@@ -250,7 +250,7 @@ std::vector<uint32_t> BezierCurveSystem::GenerateBezierPolygonIndices(const C0Cu
 }
 
 
-void BezierCurveSystem::RecalculateMeshHandler::HandleEvent(Entity entity, const Position& pos, EventType eventType)
+void C0CurveSystem::RecalculateMeshHandler::HandleEvent(Entity entity, const Position& pos, EventType eventType)
 {
     bool curveDestroyed = false;
 
@@ -276,7 +276,7 @@ void BezierCurveSystem::RecalculateMeshHandler::HandleEvent(Entity entity, const
 }
 
 
-void BezierCurveSystem::ParameterDeletionHandler::HandleEvent(Entity entity, const C0CurveParameters& component, EventType eventType)
+void C0CurveSystem::ParameterDeletionHandler::HandleEvent(Entity entity, const C0CurveParameters& component, EventType eventType)
 {
     if (eventType != EventType::ComponentDeleted)
         return;

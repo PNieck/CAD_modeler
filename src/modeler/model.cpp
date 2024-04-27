@@ -24,7 +24,7 @@ Model::Model(int viewport_width, int viewport_height)
     PointsSystem::RegisterSystem(coordinator);
     NameSystem::RegisterSystem(coordinator);
     SelectionSystem::RegisterSystem(coordinator);
-    BezierCurveSystem::RegisterSystem(coordinator);
+    C0CurveSystem::RegisterSystem(coordinator);
 
     cameraSys = coordinator.GetSystem<CameraSystem>();
     toriSystem = coordinator.GetSystem<ToriSystem>();
@@ -33,7 +33,7 @@ Model::Model(int viewport_width, int viewport_height)
     pointsSystem = coordinator.GetSystem<PointsSystem>();
     nameSystem = coordinator.GetSystem<NameSystem>();
     selectionSystem = coordinator.GetSystem<SelectionSystem>();
-    bezierCurveSystem = coordinator.GetSystem<BezierCurveSystem>();
+    bezierCurveSystem = coordinator.GetSystem<C0CurveSystem>();
 
     CameraParameters params {
         .target = Position(0.0f),

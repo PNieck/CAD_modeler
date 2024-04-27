@@ -9,7 +9,7 @@
 #include "model/systems/pointsSystem.hpp"
 #include "model/systems/nameSystem.hpp"
 #include "model/systems/selectionSystem.hpp"
-#include "model/systems/bezierCurveSystem.hpp"
+#include "model/systems/c0CurveSystem.hpp"
 
 #include "model/systems/shaders/shaderRepository.hpp"
 
@@ -136,7 +136,7 @@ private:
     std::shared_ptr<PointsSystem> pointsSystem;
     std::shared_ptr<NameSystem> nameSystem;
     std::shared_ptr<SelectionSystem> selectionSystem;
-    std::shared_ptr<BezierCurveSystem> bezierCurveSystem;
+    std::shared_ptr<C0CurveSystem> bezierCurveSystem;
 
     alg::Vec3 PointFromViewportCoordinates(float x, float y) const;
     Line LineFromViewportCoordinates(float x, float y) const;
