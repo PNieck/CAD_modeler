@@ -18,12 +18,13 @@ public:
         { controlPoints.erase(std::find(controlPoints.begin(), controlPoints.end(), entity)); }
 
     bool drawPolygon;
+    bool meshNeedsUpdate;
 
     inline const std::vector<Entity>& ControlPoints() const
         { return controlPoints; }
 
-    std::unordered_map<Entity, HandlerId> handlers;
-    HandlerId parameterDeletionHandler;
+    std::unordered_map<Entity, HandlerId> controlPointsHandlers;
+    HandlerId deletionHandler;
 
 private:
     std::vector<Entity> controlPoints;

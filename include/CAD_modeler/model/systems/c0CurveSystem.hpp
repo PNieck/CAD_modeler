@@ -19,9 +19,9 @@ public:
     inline void Init(ShaderRepository* shadersRepo)
         { this->shaderRepo = shadersRepo; }
 
-    Entity CreateBezierCurve(const std::vector<Entity>& entities);
-    inline Entity CreateBezierCurve(Entity entity)
-        { CreateBezierCurve({entity}); }
+    Entity CreateC0Curve(const std::vector<Entity>& entities);
+    inline Entity CreateC0Curve(Entity entity)
+        { CreateC0Curve({entity}); }
 
     void AddControlPoint(Entity bezierCurve, Entity entity);
     void DeleteControlPoint(Entity bezierCurve, Entity entity);
@@ -40,8 +40,8 @@ private:
     std::vector<float> GenerateBezierPolygonVertices(const C0CurveParameters& params) const;
     std::vector<uint32_t> GenerateBezierPolygonIndices(const C0CurveParameters& params) const;
 
-    struct RecalculateMeshHandler: EventHandler<Position> {
-        RecalculateMeshHandler(Entity bezierCurve, C0CurveSystem& system):
+    struct ControlPointsMoveHandler: EventHandler<Position> {
+        ControlPointsMoveHandler(Entity bezierCurve, C0CurveSystem& system):
             bezierSystem(system), bezierCurve(bezierCurve) {}
 
         C0CurveSystem& bezierSystem;
