@@ -7,6 +7,7 @@
 #include "../components/c0CurveParameters.hpp"
 #include "../components/position.hpp"
 #include "utils/nameGenerator.hpp"
+#include "curveControlPointsSystem.hpp"
 
 #include <vector>
 #include <tuple>
@@ -24,8 +25,11 @@ public:
     inline Entity CreateC0Curve(Entity entity)
         { CreateC0Curve({entity}); }
 
-    void AddControlPoint(Entity bezierCurve, Entity entity);
-    void DeleteControlPoint(Entity bezierCurve, Entity entity);
+    inline void AddControlPoint(Entity bezierCurve, Entity entity)
+        { coordinator->GetSystem<CurveControlPointsSystem>()->AddControlPoint(bezierCurve, entity); }
+
+    inline void DeleteControlPoint(Entity bezierCurve, Entity entity)
+        { coordinator->GetSystem<CurveControlPointsSystem>()->DeleteControlPoint(bezierCurve, entity); }
 
     void Render() const;
 

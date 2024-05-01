@@ -34,13 +34,11 @@ void C0CurveSystem::RegisterSystem(Coordinator & coordinator)
 
 Entity C0CurveSystem::CreateC0Curve(const std::vector<Entity>& entities)
 {
-    static std::shared_ptr<DeletionHandler> deletionHandler(new DeletionHandler(*coordinator));
-
-    Entity bezierCurve = coordinator->CreateEntity();
+    Entity curve = coordinator->GetSystem<CurveControlPointsSystem>()->CreateControlPoints(entities);
 
     C0CurveParameters params;
 
-    CurveControlPoints controlPoints(entities);
+    auto const& controlPoints = coordinator->GetComponent<CurveControlPoints>(curve);
 
     Mesh mesh;
     mesh.Update(
@@ -48,61 +46,11 @@ Entity C0CurveSystem::CreateC0Curve(const std::vector<Entity>& entities)
         GenerateBezierPolygonIndices(controlPoints)
     );
 
-    auto handler = std::make_shared<ControlPointMovedHandler>(bezierCurve, *coordinator);
+    coordinator->AddComponent<C0CurveParameters>(curve, params);
+    coordinator->AddComponent<Mesh>(curve, mesh);
+    coordinator->AddComponent<Name>(curve, nameGenerator.GenerateName("CurveC0_"));
 
-    for (Entity entity: entities) {
-        auto handlerId = coordinator->Subscribe<Position>(entity, std::static_pointer_cast<EventHandler<Position>>(handler));
-        controlPoints.controlPointsHandlers.insert({ entity, handlerId });
-    }
-
-    controlPoints.deletionHandler = coordinator->Subscribe<CurveControlPoints>(bezierCurve, std::static_pointer_cast<EventHandler<CurveControlPoints>>(deletionHandler));
-
-    coordinator->AddComponent<C0CurveParameters>(bezierCurve, params);
-    coordinator->AddComponent<CurveControlPoints>(bezierCurve, controlPoints);
-    coordinator->AddComponent<Mesh>(bezierCurve, mesh);
-    coordinator->AddComponent<Name>(bezierCurve, nameGenerator.GenerateName("CurveC0_"));
-
-    return bezierCurve;
-}
-
-
-void C0CurveSystem::AddControlPoint(Entity bezierCurve, Entity entity)
-{
-    coordinator->EditComponent<CurveControlPoints>(bezierCurve,
-        [entity, this](CurveControlPoints& params) {
-            auto const& controlPoints = params.ControlPoints();
-            Entity controlPoint = *controlPoints.begin();
-            HandlerId handlerId = params.controlPointsHandlers.at(controlPoint);
-            auto eventHandler = coordinator->GetEventHandler<Position>(controlPoint, handlerId);
-
-            params.AddControlPoint(entity);
-            params.controlPointsHandlers.insert({entity, coordinator->Subscribe<Position>(entity, eventHandler)});
-        }
-    );
-
-    UpdateMesh(bezierCurve);
-}
-
-
-void C0CurveSystem::DeleteControlPoint(Entity bezierCurve, Entity entity)
-{
-    bool entityDeleted = false;
-
-    coordinator->EditComponent<CurveControlPoints>(bezierCurve,
-        [&entityDeleted, bezierCurve, entity, this](CurveControlPoints& params) {
-            params.DeleteControlPoint(entity);
-            coordinator->Unsubscribe<Position>(entity, params.controlPointsHandlers.at(entity));
-            params.controlPointsHandlers.erase(entity);
-
-            if (params.controlPointsHandlers.size() == 0) {
-                coordinator->DestroyEntity(bezierCurve);
-                entityDeleted = true;
-            }
-        }
-    );
-
-    if (!entityDeleted)
-        UpdateMesh(bezierCurve);
+    return curve;
 }
 
 
@@ -193,7 +141,7 @@ void C0CurveSystem::UpdateEntities() const
 
     for (auto entity: toUpdate) {
         UpdateMesh(entity);
-        coordinator->DeleteComponent<ToUpdate>(entity);
+        coordinator->GetSystem<ToUpdateSystem>()->Unmark(entity);
     }
 }
 

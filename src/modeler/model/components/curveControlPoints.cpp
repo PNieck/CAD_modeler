@@ -1,11 +1,11 @@
 #include <CAD_modeler/model/components/curveControlPoints.hpp>
 
-#include <CAD_modeler/model/components/toUpdate.hpp>
+#include <CAD_modeler/model/systems/toUpdateSystem.hpp>
 
 
 void ControlPointMovedHandler::HandleEvent(Entity entity, const Position & component, EventType eventType)
 {
-    coordinator.AddComponent<ToUpdate>(curve, ToUpdate());
+    coordinator.GetSystem<ToUpdateSystem>()->MarkAsToUpdate(curve);
 }
 
 

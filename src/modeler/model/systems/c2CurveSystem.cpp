@@ -10,6 +10,7 @@
 
 #include <CAD_modeler/model/systems/cameraSystem.hpp>
 #include <CAD_modeler/model/systems/selectionSystem.hpp>
+#include <CAD_modeler/model/systems/curveControlPointsSystem.hpp>
 
 
 void C2CurveSystem::RegisterSystem(Coordinator & coordinator)
@@ -24,10 +25,10 @@ void C2CurveSystem::RegisterSystem(Coordinator & coordinator)
 
 Entity C2CurveSystem::CreateC2Curve(const std::vector<Entity>& entities)
 {
-    Entity bezierCurve = coordinator->CreateEntity();
+    Entity curve = coordinator->GetSystem<CurveControlPointsSystem>()->CreateControlPoints(entities);
+    auto const& controlPoints = coordinator->GetComponent<CurveControlPoints>(curve);
 
     C2CurveParameters params;
-    CurveControlPoints controlPoints(entities);
 
     Mesh mesh;
     mesh.Update(
@@ -35,23 +36,11 @@ Entity C2CurveSystem::CreateC2Curve(const std::vector<Entity>& entities)
         GenerateBezierPolygonIndices(controlPoints)
     );
 
-    // auto handler = std::make_shared<RecalculateMeshHandler>(bezierCurve, *this);
+    coordinator->AddComponent<C2CurveParameters>(curve, params);
+    coordinator->AddComponent<Mesh>(curve, mesh);
+    coordinator->AddComponent<Name>(curve, nameGenerator.GenerateName("CurveC2_"));
 
-    // for (Entity entity: entities) {
-    //     auto handlerId = coordinator->Subscribe<Position>(entity, std::static_pointer_cast<EventHandler<Position>>(handler));
-    //     params.handlers.insert({ entity, handlerId });
-    // }
-
-    // params.parameterDeletionHandler = coordinator->Subscribe<C0CurveParameters>(bezierCurve, std::static_pointer_cast<EventHandler<C0CurveParameters>>(parameterDeletionHandler));
-
-    coordinator->AddComponent<C2CurveParameters>(bezierCurve, params);
-    coordinator->AddComponent<CurveControlPoints>(bezierCurve, controlPoints);
-    coordinator->AddComponent<Mesh>(bezierCurve, mesh);
-    coordinator->AddComponent<Name>(bezierCurve, nameGenerator.GenerateName("CurveC2_"));
-
-    return bezierCurve;
-
-
+    return curve;
 }
 
 
