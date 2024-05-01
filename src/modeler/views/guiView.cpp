@@ -225,9 +225,13 @@ void GuiView::RenderSingleObjectProperties(Entity entity) const
     if (it != components.end())
         DisplayNameEditor(entity, model.GetComponent<Name>(entity));
 
+    it = components.find(Model::GetComponentId<CurveControlPoints>());
+    if (it != components.end())
+        DisplayCurveControlPoints(entity, model.GetComponent<CurveControlPoints>(entity));
+
     it = components.find(Model::GetComponentId<C0CurveParameters>());
     if (it != components.end())
-        DisplayBezierCurveProperty(entity, model.GetComponent<C0CurveParameters>(entity));
+        DisplayC0CurveParameters(entity, model.GetComponent<C0CurveParameters>(entity));
 
     if (ImGui::Button("Delete object")) {
         controller.DeleteEntity(entity);
@@ -387,22 +391,8 @@ void GuiView::DisplayTorusProperty(Entity entity, const TorusParameters& params)
 }
 
 
-void GuiView::DisplayBezierCurveProperty(Entity entity, const C0CurveParameters& params) const
+void GuiView::DisplayCurveControlPoints(Entity entity, const CurveControlPoints& params) const
 {
-    bool drawPolygon = params.drawPolygon;
-
-    ImGui::SeparatorText("Curve options");
-
-    ImGui::Checkbox("Draw polygon", &drawPolygon);
-
-    if (drawPolygon != params.drawPolygon) {
-
-        // TODO: change copying whole params
-        C0CurveParameters newParams = params;
-        newParams.drawPolygon = drawPolygon;
-        controller.ChangeComponent<C0CurveParameters>(entity, newParams);
-    }
-
     ImGui::SeparatorText("Control Points");
 
     int selected = -1;
@@ -436,6 +426,20 @@ void GuiView::DisplayBezierCurveProperty(Entity entity, const C0CurveParameters&
         }
 
         ImGui::EndPopup();
+    }
+}
+
+
+void GuiView::DisplayC0CurveParameters(Entity entity, const C0CurveParameters & params) const
+{
+    bool drawPolygon = params.drawPolygon;
+
+    ImGui::Checkbox("Draw polygon", &drawPolygon);
+
+    if (drawPolygon != params.drawPolygon) {
+        C0CurveParameters newParams;
+        newParams.drawPolygon = drawPolygon;
+        controller.ChangeComponent<C0CurveParameters>(entity, newParams);
     }
 }
 

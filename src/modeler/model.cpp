@@ -7,6 +7,8 @@
 #include <CAD_modeler/model/components/registerComponents.hpp>
 #include <CAD_modeler/model/components/cameraParameters.hpp>
 
+#include <CAD_modeler/model/systems/toUpdateSystem.hpp>
+
 #include <stdexcept>
 
 
@@ -25,6 +27,8 @@ Model::Model(int viewport_width, int viewport_height)
     NameSystem::RegisterSystem(coordinator);
     SelectionSystem::RegisterSystem(coordinator);
     C0CurveSystem::RegisterSystem(coordinator);
+    C2CurveSystem::RegisterSystem(coordinator);
+    ToUpdateSystem::RegisterSystem(coordinator);
 
     cameraSys = coordinator.GetSystem<CameraSystem>();
     toriSystem = coordinator.GetSystem<ToriSystem>();
@@ -33,7 +37,8 @@ Model::Model(int viewport_width, int viewport_height)
     pointsSystem = coordinator.GetSystem<PointsSystem>();
     nameSystem = coordinator.GetSystem<NameSystem>();
     selectionSystem = coordinator.GetSystem<SelectionSystem>();
-    bezierCurveSystem = coordinator.GetSystem<C0CurveSystem>();
+    c0CurveSystem = coordinator.GetSystem<C0CurveSystem>();
+    c2CurveSystem = coordinator.GetSystem<C2CurveSystem>();
 
     CameraParameters params {
         .target = Position(0.0f),
@@ -50,7 +55,8 @@ Model::Model(int viewport_width, int viewport_height)
     selectionSystem->Init(&shadersRepo);
     pointsSystem->Init(&shadersRepo);
     toriSystem->Init(&shadersRepo);
-    bezierCurveSystem->Init(&shadersRepo);
+    c0CurveSystem->Init(&shadersRepo);
+    c2CurveSystem->Init(&shadersRepo);
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glEnable(GL_LINE_SMOOTH);
@@ -58,6 +64,17 @@ Model::Model(int viewport_width, int viewport_height)
     glEnable(GL_BLEND);
     glDepthMask(GL_FALSE);
     glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+
+    Entity point1 = pointsSystem->CreatePoint(Position(1.f));
+    Entity point2 = pointsSystem->CreatePoint(Position(2.f));
+    Entity point3 = pointsSystem->CreatePoint(Position(3.f));
+    Entity point4 = pointsSystem->CreatePoint(Position(4.f));
+
+    Entity c2Curve = c2CurveSystem->CreateC2Curve({
+        point1, point2, point3, point4
+    });
+
+
 }
 
 
@@ -70,7 +87,8 @@ void Model::RenderFrame()
     cursorSystem->Render();
     pointsSystem->Render();
     selectionSystem->RenderMiddlePoint();
-    bezierCurveSystem->Render();
+    c0CurveSystem->Render();
+    c2CurveSystem->Render();
 }
 
 

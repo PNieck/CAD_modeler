@@ -3,12 +3,17 @@
 #include <ecs/coordinator.hpp>
 
 #include <CAD_modeler/model/components/c0CurveParameters.hpp>
+#include <CAD_modeler/model/components/curveControlPoints.hpp>
 #include <CAD_modeler/model/components/position.hpp>
+#include <CAD_modeler/model/components/toUpdate.hpp>
 #include <CAD_modeler/model/components/mesh.hpp>
 #include <CAD_modeler/model/components/name.hpp>
 
+#include <CAD_modeler/model/systems/toUpdateSystem.hpp>
 #include <CAD_modeler/model/systems/cameraSystem.hpp>
 #include <CAD_modeler/model/systems/selectionSystem.hpp>
+
+#include <CAD_modeler/utilities/setIntersection.hpp>
 
 #include <cmath>
 #include <algorithm>
@@ -22,36 +27,38 @@ void C0CurveSystem::RegisterSystem(Coordinator & coordinator)
     coordinator.RegisterSystem<C0CurveSystem>();
 
     coordinator.RegisterRequiredComponent<C0CurveSystem, C0CurveParameters>();
+    coordinator.RegisterRequiredComponent<C0CurveSystem, CurveControlPoints>();
     coordinator.RegisterRequiredComponent<C0CurveSystem, Mesh>();
 }
 
 
 Entity C0CurveSystem::CreateC0Curve(const std::vector<Entity>& entities)
 {
-    static std::shared_ptr<ParameterDeletionHandler> deletionHandler(new ParameterDeletionHandler(*coordinator));
+    static std::shared_ptr<DeletionHandler> deletionHandler(new DeletionHandler(*coordinator));
 
     Entity bezierCurve = coordinator->CreateEntity();
 
-    C0CurveParameters params(entities);
-    params.drawPolygon = false;
-    params.meshNeedsUpdate = false;
+    C0CurveParameters params;
+
+    CurveControlPoints controlPoints(entities);
 
     Mesh mesh;
     mesh.Update(
-        GenerateBezierPolygonVertices(params),
-        GenerateBezierPolygonIndices(params)
+        GenerateBezierPolygonVertices(controlPoints),
+        GenerateBezierPolygonIndices(controlPoints)
     );
 
-    auto handler = std::make_shared<ControlPointsMoveHandler>(bezierCurve, *this);
+    auto handler = std::make_shared<ControlPointMovedHandler>(bezierCurve, *coordinator);
 
     for (Entity entity: entities) {
         auto handlerId = coordinator->Subscribe<Position>(entity, std::static_pointer_cast<EventHandler<Position>>(handler));
-        params.controlPointsHandlers.insert({ entity, handlerId });
+        controlPoints.controlPointsHandlers.insert({ entity, handlerId });
     }
 
-    params.deletionHandler = coordinator->Subscribe<C0CurveParameters>(bezierCurve, std::static_pointer_cast<EventHandler<C0CurveParameters>>(deletionHandler));
+    controlPoints.deletionHandler = coordinator->Subscribe<CurveControlPoints>(bezierCurve, std::static_pointer_cast<EventHandler<CurveControlPoints>>(deletionHandler));
 
     coordinator->AddComponent<C0CurveParameters>(bezierCurve, params);
+    coordinator->AddComponent<CurveControlPoints>(bezierCurve, controlPoints);
     coordinator->AddComponent<Mesh>(bezierCurve, mesh);
     coordinator->AddComponent<Name>(bezierCurve, nameGenerator.GenerateName("CurveC0_"));
 
@@ -61,8 +68,8 @@ Entity C0CurveSystem::CreateC0Curve(const std::vector<Entity>& entities)
 
 void C0CurveSystem::AddControlPoint(Entity bezierCurve, Entity entity)
 {
-    coordinator->EditComponent<C0CurveParameters>(bezierCurve,
-        [entity, this](C0CurveParameters& params) {
+    coordinator->EditComponent<CurveControlPoints>(bezierCurve,
+        [entity, this](CurveControlPoints& params) {
             auto const& controlPoints = params.ControlPoints();
             Entity controlPoint = *controlPoints.begin();
             HandlerId handlerId = params.controlPointsHandlers.at(controlPoint);
@@ -81,8 +88,8 @@ void C0CurveSystem::DeleteControlPoint(Entity bezierCurve, Entity entity)
 {
     bool entityDeleted = false;
 
-    coordinator->EditComponent<C0CurveParameters>(bezierCurve,
-        [&entityDeleted, bezierCurve, entity, this](C0CurveParameters& params) {
+    coordinator->EditComponent<CurveControlPoints>(bezierCurve,
+        [&entityDeleted, bezierCurve, entity, this](CurveControlPoints& params) {
             params.DeleteControlPoint(entity);
             coordinator->Unsubscribe<Position>(entity, params.controlPointsHandlers.at(entity));
             params.controlPointsHandlers.erase(entity);
@@ -107,8 +114,11 @@ void C0CurveSystem::Render() const
 
     auto const& cameraSystem = coordinator->GetSystem<CameraSystem>();
     auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
+
     auto const& shader = shaderRepo->GetBezierShader();
     std::stack<Entity> polygonsToDraw;
+
+    UpdateEntities();
 
     alg::Mat4x4 cameraMtx = cameraSystem->PerspectiveMatrix() * cameraSystem->ViewMatrix();
 
@@ -117,10 +127,8 @@ void C0CurveSystem::Render() const
     shader.SetMVP(cameraMtx);
 
     for (auto const entity: entities) {
+        auto const& controlPoints = coordinator->GetComponent<CurveControlPoints>(entity);
         auto const& params = coordinator->GetComponent<C0CurveParameters>(entity);
-
-        if (params.meshNeedsUpdate)
-            UpdateMesh(entity);
 
         if (params.drawPolygon)
             polygonsToDraw.push(entity);
@@ -177,11 +185,24 @@ void C0CurveSystem::RenderCurvesPolygons(std::stack<Entity>& entities) const
 }
 
 
+void C0CurveSystem::UpdateEntities() const
+{
+    auto const& toUpdateSystem = coordinator->GetSystem<ToUpdateSystem>();
+
+    auto toUpdate = intersect(toUpdateSystem->GetEntities(), entities);
+
+    for (auto entity: toUpdate) {
+        UpdateMesh(entity);
+        coordinator->DeleteComponent<ToUpdate>(entity);
+    }
+}
+
+
 void C0CurveSystem::UpdateMesh(Entity bezierCurve) const
 {
     coordinator->EditComponent<Mesh>(bezierCurve,
         [bezierCurve, this](Mesh& mesh) {
-            auto const& params = coordinator->GetComponent<C0CurveParameters>(bezierCurve);
+            auto const& params = coordinator->GetComponent<CurveControlPoints>(bezierCurve);
 
             mesh.Update(
                 GenerateBezierPolygonVertices(params),
@@ -189,16 +210,10 @@ void C0CurveSystem::UpdateMesh(Entity bezierCurve) const
             );
         }
     );
-
-    coordinator->EditComponent<C0CurveParameters>(bezierCurve,
-        [](C0CurveParameters& params) {
-            params.meshNeedsUpdate = false;
-        }
-    );
 }
 
 
-std::vector<float> C0CurveSystem::GenerateBezierPolygonVertices(const C0CurveParameters& params) const
+std::vector<float> C0CurveSystem::GenerateBezierPolygonVertices(const CurveControlPoints& params) const
 {
     auto const& controlPoints = params.ControlPoints();
 
@@ -224,7 +239,7 @@ int ceiling(int x, int y) {
 }
 
 
-std::vector<uint32_t> C0CurveSystem::GenerateBezierPolygonIndices(const C0CurveParameters& params) const
+std::vector<uint32_t> C0CurveSystem::GenerateBezierPolygonIndices(const CurveControlPoints& params) const
 {
     auto const& controlPoints = params.ControlPoints();
 
@@ -257,44 +272,4 @@ std::vector<uint32_t> C0CurveSystem::GenerateBezierPolygonIndices(const C0CurveP
     
 
     return result;
-}
-
-
-void C0CurveSystem::ControlPointsMoveHandler::HandleEvent(Entity entity, const Position& pos, EventType eventType)
-{
-    bezierSystem.coordinator->EditComponent<C0CurveParameters>(bezierCurve,
-        [eventType, entity, this](C0CurveParameters& params) {
-            if (eventType == EventType::ComponentDeleted) {
-                params.DeleteControlPoint(entity);
-                bezierSystem.coordinator->Unsubscribe<Position>(entity, params.controlPointsHandlers.at(entity));
-                params.controlPointsHandlers.erase(entity);
-
-                if (params.controlPointsHandlers.size() == 0) {
-                    bezierSystem.coordinator->DestroyEntity(bezierCurve);
-                    return;
-                }
-            }
-
-            params.meshNeedsUpdate = true;
-        }
-    );
-}
-
-
-void C0CurveSystem::ParameterDeletionHandler::HandleEvent(Entity entity, const C0CurveParameters& component, EventType eventType)
-{
-    if (eventType != EventType::ComponentDeleted)
-        return;
-
-    auto entitiesIt = component.ControlPoints().begin();
-    auto handlersIt = component.controlPointsHandlers.begin();
-
-    while (handlersIt != component.controlPointsHandlers.end() || entitiesIt != component.ControlPoints().end()) {
-        coordinator.Unsubscribe<Position>(*entitiesIt, (*handlersIt).second);
-
-        ++entitiesIt;
-        ++handlersIt;
-    }
-
-    coordinator.Unsubscribe<C0CurveParameters>(entity, component.deletionHandler);
 }

@@ -10,6 +10,7 @@
 #include "model/systems/nameSystem.hpp"
 #include "model/systems/selectionSystem.hpp"
 #include "model/systems/c0CurveSystem.hpp"
+#include "model/systems/c2CurveSystem.hpp"
 
 #include "model/systems/shaders/shaderRepository.hpp"
 
@@ -29,13 +30,13 @@ public:
     void AddTorus();
 
     inline Entity AddC0Curve(const std::vector<Entity>& controlPoints) const
-        { return bezierCurveSystem->CreateBezierCurve(controlPoints); }
+        { return c0CurveSystem->CreateC0Curve(controlPoints); }
 
     inline void AddC0CurveControlPoint(Entity curve, Entity entity) const
-        { bezierCurveSystem->AddControlPoint(curve, entity); }
+        { c0CurveSystem->AddControlPoint(curve, entity); }
 
     inline void DeleteC0CurveControlPoint(Entity curve, Entity controlPoint) const
-        { bezierCurveSystem->DeleteControlPoint(curve, controlPoint); }
+        { c0CurveSystem->DeleteControlPoint(curve, controlPoint); }
 
     inline void RotateCamera(float x, float y) const
         { cameraSys->RotateAroundTarget(x, y); }
@@ -119,7 +120,7 @@ public:
         { return pointsSystem->GetEntities(); }
 
     inline const std::unordered_set<Entity>& GetAllC0Curves() const
-        { return bezierCurveSystem->GetEntities(); }
+        { return c0CurveSystem->GetEntities(); }
 
     template <typename Comp>
     static inline constexpr ComponentId GetComponentId()
@@ -136,7 +137,8 @@ private:
     std::shared_ptr<PointsSystem> pointsSystem;
     std::shared_ptr<NameSystem> nameSystem;
     std::shared_ptr<SelectionSystem> selectionSystem;
-    std::shared_ptr<C0CurveSystem> bezierCurveSystem;
+    std::shared_ptr<C0CurveSystem> c0CurveSystem;
+    std::shared_ptr<C2CurveSystem> c2CurveSystem;
 
     alg::Vec3 PointFromViewportCoordinates(float x, float y) const;
     Line LineFromViewportCoordinates(float x, float y) const;
