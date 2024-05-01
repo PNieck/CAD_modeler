@@ -10,7 +10,10 @@
 
 #include <CAD_modeler/model/systems/cameraSystem.hpp>
 #include <CAD_modeler/model/systems/selectionSystem.hpp>
+#include <CAD_modeler/model/systems/toUpdateSystem.hpp>
 #include <CAD_modeler/model/systems/curveControlPointsSystem.hpp>
+
+#include <CAD_modeler/utilities/setIntersection.hpp>
 
 
 void C2CurveSystem::RegisterSystem(Coordinator & coordinator)
@@ -44,16 +47,6 @@ Entity C2CurveSystem::CreateC2Curve(const std::vector<Entity>& entities)
 }
 
 
-void C2CurveSystem::AddControlPoint(Entity bezierCurve, Entity entity)
-{
-}
-
-
-void C2CurveSystem::DeleteControlPoint(Entity bezierCurve, Entity entity)
-{
-}
-
-
 void C2CurveSystem::Render() const
 {
      if (entities.empty()) {
@@ -64,6 +57,8 @@ void C2CurveSystem::Render() const
     auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
     auto const& shader = shaderRepo->GetBezierShader();
     std::stack<Entity> polygonsToDraw;
+
+    UpdateEntities();
 
     alg::Mat4x4 cameraMtx = cameraSystem->PerspectiveMatrix() * cameraSystem->ViewMatrix();
 
@@ -89,6 +84,34 @@ void C2CurveSystem::Render() const
 
     // if (!polygonsToDraw.empty())
     //     RenderCurvesPolygons(polygonsToDraw);
+}
+
+
+void C2CurveSystem::UpdateEntities() const
+{
+    auto const& toUpdateSystem = coordinator->GetSystem<ToUpdateSystem>();
+
+    auto toUpdate = intersect(toUpdateSystem->GetEntities(), entities);
+
+    for (auto entity: toUpdate) {
+        UpdateMesh(entity);
+        coordinator->GetSystem<ToUpdateSystem>()->Unmark(entity);
+    }
+}
+
+
+void C2CurveSystem::UpdateMesh(Entity curve) const
+{
+    coordinator->EditComponent<Mesh>(curve,
+        [curve, this](Mesh& mesh) {
+            auto const& params = coordinator->GetComponent<CurveControlPoints>(curve);
+
+            mesh.Update(
+                GenerateBezierPolygonVertices(params),
+                GenerateBezierPolygonIndices(params)
+            );
+        }
+    );
 }
 
 
