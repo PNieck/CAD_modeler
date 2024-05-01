@@ -15,6 +15,8 @@
 
 #include <CAD_modeler/utilities/setIntersection.hpp>
 
+#include <algorithm>
+
 
 void C2CurveSystem::RegisterSystem(Coordinator & coordinator)
 {
@@ -56,7 +58,6 @@ void C2CurveSystem::Render() const
     auto const& cameraSystem = coordinator->GetSystem<CameraSystem>();
     auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
     auto const& shader = shaderRepo->GetBezierShader();
-    std::stack<Entity> polygonsToDraw;
 
     UpdateEntities();
 
@@ -117,38 +118,45 @@ void C2CurveSystem::UpdateMesh(Entity curve) const
 
 std::vector<float> C2CurveSystem::GenerateBezierPolygonVertices(const CurveControlPoints& params) const
 {
-    std::vector<float> result;
-
     auto const& controlPoints = params.ControlPoints();
 
-    auto const& pos1 = coordinator->GetComponent<Position>(controlPoints[0]);
-    auto const& pos2 = coordinator->GetComponent<Position>(controlPoints[1]);
-    auto const& pos3 = coordinator->GetComponent<Position>(controlPoints[2]);
-    auto const& pos4 = coordinator->GetComponent<Position>(controlPoints[3]);
+    std::vector<float> result;
 
-    alg::Vec3 g0 = (2.f/3.f) * pos1.vec + (1.f/3.f) * pos2.vec;
-    alg::Vec3 f1 = (1.f/3.f) * pos2.vec + (2.f/3.f) * pos3.vec;
-    alg::Vec3 e0 = 0.5f * g0 + 0.5f * f1;
+    if (controlPoints.size() < 4)
+        return result;
 
-    alg::Vec3 g1 = (2.f/3.f) * pos2.vec + (1.f/3.f) * pos3.vec;
-    alg::Vec3 f2 = (1.f/3.f) * pos3.vec + (2.f/3.f) * pos4.vec;
-    alg::Vec3 e1 = 0.5f * g1 + 0.5f * f2;
+    result.reserve((controlPoints.size() - 3)*3);
 
-    result.push_back(e0.X());
-    result.push_back(e0.Y());
-    result.push_back(e0.Z());
+    for (int i=0; i < controlPoints.size() - 3 ; ++i) {
+        auto const& pos1 = coordinator->GetComponent<Position>(controlPoints[i]);
+        auto const& pos2 = coordinator->GetComponent<Position>(controlPoints[i+1]);
+        auto const& pos3 = coordinator->GetComponent<Position>(controlPoints[i+2]);
+        auto const& pos4 = coordinator->GetComponent<Position>(controlPoints[i+3]);
 
-    result.push_back(f1.X());
-    result.push_back(f1.Y());
-    result.push_back(f1.Z());
+        alg::Vec3 g0 = (2.f/3.f) * pos1.vec + (1.f/3.f) * pos2.vec;
+        alg::Vec3 f1 = (1.f/3.f) * pos2.vec + (2.f/3.f) * pos3.vec;
+        alg::Vec3 e0 = 0.5f * g0 + 0.5f * f1;
 
-    result.push_back(g1.X());
-    result.push_back(g1.Y());
-    result.push_back(g1.Z());
+        alg::Vec3 g1 = (2.f/3.f) * pos2.vec + (1.f/3.f) * pos3.vec;
+        alg::Vec3 f2 = (1.f/3.f) * pos3.vec + (2.f/3.f) * pos4.vec;
+        alg::Vec3 e1 = 0.5f * g1 + 0.5f * f2;
 
-    result.push_back(e1.X());
-    result.push_back(e1.Y());
-    result.push_back(e1.Z());
+        result.push_back(e0.X());
+        result.push_back(e0.Y());
+        result.push_back(e0.Z());
+
+        result.push_back(f1.X());
+        result.push_back(f1.Y());
+        result.push_back(f1.Z());
+
+        result.push_back(g1.X());
+        result.push_back(g1.Y());
+        result.push_back(g1.Z());
+
+        result.push_back(e1.X());
+        result.push_back(e1.Y());
+        result.push_back(e1.Z());
+    }
 
     return result;
 }
@@ -156,9 +164,13 @@ std::vector<float> C2CurveSystem::GenerateBezierPolygonVertices(const CurveContr
 
 std::vector<uint32_t> C2CurveSystem::GenerateBezierPolygonIndices(const CurveControlPoints& params) const
 {
-    std::vector<uint32_t> result = {
-        0,1 ,2, 3
-    };
+    auto const& controlPoints = params.ControlPoints();
+    size_t segments = std::max<size_t>(controlPoints.size() - 3, 0);
+    std::vector<uint32_t> result(4 * segments);
+
+    for (int i = 0; i < result.size(); ++i) {
+        result[i] = i;
+    }
 
     return result;
 }
