@@ -36,7 +36,6 @@ private:
     void UpdateEntities() const;
     void UpdateMesh(Entity curve) const;
 
-    std::vector<float> GenerateBezierPolygonVertices(const CurveControlPoints& params) const;
-    std::vector<uint32_t> GenerateBezierPolygonIndices(const CurveControlPoints& params) const;
-
+    std::vector<float> GenerateCurveMeshVertices(const CurveControlPoints& params) const;
+    std::vector<uint32_t> GenerateCurveMeshIndices(const CurveControlPoints& params) const;
 };

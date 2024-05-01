@@ -37,8 +37,8 @@ Entity C2CurveSystem::CreateC2Curve(const std::vector<Entity>& entities)
 
     Mesh mesh;
     mesh.Update(
-        GenerateBezierPolygonVertices(controlPoints),
-        GenerateBezierPolygonIndices(controlPoints)
+        GenerateCurveMeshVertices(controlPoints),
+        GenerateCurveMeshIndices(controlPoints)
     );
 
     coordinator->AddComponent<C2CurveParameters>(curve, params);
@@ -108,15 +108,15 @@ void C2CurveSystem::UpdateMesh(Entity curve) const
             auto const& params = coordinator->GetComponent<CurveControlPoints>(curve);
 
             mesh.Update(
-                GenerateBezierPolygonVertices(params),
-                GenerateBezierPolygonIndices(params)
+                GenerateCurveMeshVertices(params),
+                GenerateCurveMeshIndices(params)
             );
         }
     );
 }
 
 
-std::vector<float> C2CurveSystem::GenerateBezierPolygonVertices(const CurveControlPoints& params) const
+std::vector<float> C2CurveSystem::GenerateCurveMeshVertices(const CurveControlPoints& params) const
 {
     auto const& controlPoints = params.ControlPoints();
 
@@ -162,7 +162,7 @@ std::vector<float> C2CurveSystem::GenerateBezierPolygonVertices(const CurveContr
 }
 
 
-std::vector<uint32_t> C2CurveSystem::GenerateBezierPolygonIndices(const CurveControlPoints& params) const
+std::vector<uint32_t> C2CurveSystem::GenerateCurveMeshIndices(const CurveControlPoints& params) const
 {
     auto const& controlPoints = params.ControlPoints();
     size_t segments = std::max<size_t>(controlPoints.size() - 3, 0);
