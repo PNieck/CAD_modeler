@@ -52,6 +52,7 @@ private:
     void RenderBezierPolygons(std::stack<Entity>& entities) const;
 
     BezierControlPoints CreateBezierControlPoints(const CurveControlPoints& params) const;
+    void DeleteBezierControlPoints(Entity entity) const;
     std::vector<alg::Vec3> CreateBezierControlPointsPositions(const CurveControlPoints& params) const;
 
     std::vector<float> GenerateCurveMeshVertices(const CurveControlPoints& params) const;

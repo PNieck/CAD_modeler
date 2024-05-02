@@ -124,6 +124,8 @@ void C2CurveSystem::HideBezierControlPoints(Entity entity)
             params.showBezierControlPoints = false;
         }
     );
+
+    DeleteBezierControlPoints(entity);
 }
 
 
@@ -351,6 +353,18 @@ BezierControlPoints C2CurveSystem::CreateBezierControlPoints(const CurveControlP
     }
 
     return bezierControlPoints;
+}
+
+
+void C2CurveSystem::DeleteBezierControlPoints(Entity entity) const
+{
+    auto const& bezierControlPoints = coordinator->GetComponent<BezierControlPoints>(entity);
+
+    for (auto point: bezierControlPoints.ControlPoints()) {
+        coordinator->DestroyEntity(point);
+    }
+
+    coordinator->DeleteComponent<BezierControlPoints>(entity);
 }
 
 
