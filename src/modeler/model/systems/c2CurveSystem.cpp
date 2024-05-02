@@ -82,6 +82,26 @@ void C2CurveSystem::HideBSplinePolygon(Entity entity)
 }
 
 
+void C2CurveSystem::ShowBezierPolygon(Entity entity)
+{
+    coordinator->EditComponent<C2CurveParameters>(entity,
+        [](C2CurveParameters& params) {
+            params.drawBezierPolygon = true;
+        }
+    );
+}
+
+
+void C2CurveSystem::HideBezierPolygon(Entity entity)
+{
+    coordinator->EditComponent<C2CurveParameters>(entity,
+        [](C2CurveParameters& params) {
+            params.drawBezierPolygon = false;
+        }
+    );
+}
+
+
 void C2CurveSystem::Render() const
 {
      if (entities.empty()) {
@@ -93,6 +113,7 @@ void C2CurveSystem::Render() const
 
     auto const& shader = shaderRepo->GetBezierShader();
     std::stack<Entity> bSplinePolygonsToDraw;
+    std::stack<Entity> bezierPolygonsToDraw;
 
     UpdateEntities();
 
@@ -106,6 +127,9 @@ void C2CurveSystem::Render() const
         auto const& params = coordinator->GetComponent<C2CurveParameters>(entity);
         if (params.drawBSplinePolygon)
             bSplinePolygonsToDraw.push(entity);
+
+        if (params.drawBezierPolygon)
+            bezierPolygonsToDraw.push(entity);
 
         bool selection = selectionSystem->IsSelected(entity);
 
@@ -124,6 +148,9 @@ void C2CurveSystem::Render() const
 
     if (!bSplinePolygonsToDraw.empty())
         RenderBSplinePolygons(bSplinePolygonsToDraw);
+
+    if (!bezierPolygonsToDraw.empty())
+        RenderBezierPolygons(bezierPolygonsToDraw);
 }
 
 
@@ -134,7 +161,7 @@ void C2CurveSystem::UpdateEntities() const
     auto toUpdate = intersect(toUpdateSystem->GetEntities(), entities);
 
     for (auto entity: toUpdate) {
-        UpdateMesh(entity);
+        UpdateCurveMesh(entity);
         coordinator->GetSystem<ToUpdateSystem>()->Unmark(entity);
 
         if (coordinator->GetComponent<C2CurveParameters>(entity).drawBSplinePolygon) {
@@ -144,7 +171,7 @@ void C2CurveSystem::UpdateEntities() const
 }
 
 
-void C2CurveSystem::UpdateMesh(Entity curve) const
+void C2CurveSystem::UpdateCurveMesh(Entity curve) const
 {
     coordinator->EditComponent<Mesh>(curve,
         [curve, this](Mesh& mesh) {
@@ -196,6 +223,38 @@ void C2CurveSystem::RenderBSplinePolygons(std::stack<Entity>& entities) const
             shader.SetColor(alg::Vec4(1.0f, 0.5f, 0.0f, 1.0f));
 
         auto const& mesh = coordinator->GetComponent<BSplinePolygonMesh>(entity);
+        mesh.Use();
+
+	    glDrawElements(GL_LINE_STRIP, mesh.GetElementsCnt(), GL_UNSIGNED_INT, 0);
+
+        if (selection)
+            shader.SetColor(alg::Vec4(1.0f));
+    }
+}
+
+
+void C2CurveSystem::RenderBezierPolygons(std::stack<Entity>& entities) const
+{
+    auto const& cameraSystem = coordinator->GetSystem<CameraSystem>();
+    auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
+    auto const& shader = shaderRepo->GetStdShader();
+
+    alg::Mat4x4 cameraMtx = cameraSystem->PerspectiveMatrix() * cameraSystem->ViewMatrix();
+
+    shader.Use();
+    shader.SetColor(alg::Vec4(1.0f));
+    shader.SetMVP(cameraMtx);
+
+    while (!entities.empty()) {
+        Entity entity = entities.top();
+        entities.pop();
+
+        bool selection = selectionSystem->IsSelected(entity);
+
+        if (selection)
+            shader.SetColor(alg::Vec4(1.0f, 0.5f, 0.0f, 1.0f));
+
+        auto const& mesh = coordinator->GetComponent<Mesh>(entity);
         mesh.Use();
 
 	    glDrawElements(GL_LINE_STRIP, mesh.GetElementsCnt(), GL_UNSIGNED_INT, 0);

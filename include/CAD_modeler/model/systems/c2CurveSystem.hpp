@@ -30,6 +30,9 @@ public:
     void ShowBSplinePolygon(Entity entity);
     void HideBSplinePolygon(Entity entity);
 
+    void ShowBezierPolygon(Entity entity);
+    void HideBezierPolygon(Entity entity);
+
     void Render() const;
 
 private:
@@ -37,10 +40,11 @@ private:
     NameGenerator nameGenerator;
 
     void UpdateEntities() const;
-    void UpdateMesh(Entity curve) const;
+    void UpdateCurveMesh(Entity curve) const;
     void UpdateBSplinePolygon(Entity curve) const;
 
     void RenderBSplinePolygons(std::stack<Entity>& entities) const;
+    void RenderBezierPolygons(std::stack<Entity>& entities) const;
 
     std::vector<float> GenerateCurveMeshVertices(const CurveControlPoints& params) const;
     std::vector<uint32_t> GenerateCurveMeshIndices(const CurveControlPoints& params) const;

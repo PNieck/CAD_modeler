@@ -128,6 +128,12 @@ public:
     inline const void HideC2BSplinePolygon(Entity entity) const
         { return c2CurveSystem->HideBSplinePolygon(entity); }
 
+    inline const void ShowC2BezierPolygon(Entity entity) const
+        { return c2CurveSystem->ShowBezierPolygon(entity); }
+
+    inline const void HideC2BezierPolygon(Entity entity) const
+        { return c2CurveSystem->HideBezierPolygon(entity); }
+
     template <typename Comp>
     static inline constexpr ComponentId GetComponentId()
         { return ComponentsManager::GetComponentId<Comp>(); }

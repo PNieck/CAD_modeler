@@ -57,4 +57,10 @@ public:
 
     inline void HideC2BSplinePolygon(Entity entity)
         { model.HideC2BSplinePolygon(entity); }
+
+    inline void ShowC2BezierPolygon(Entity entity)
+        { model.ShowC2BezierPolygon(entity); }
+
+    inline void HideC2BezierPolygon(Entity entity)
+        { model.HideC2BezierPolygon(entity); }
 };
