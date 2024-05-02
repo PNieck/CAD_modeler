@@ -120,6 +120,12 @@ namespace alg
 
 
     template <typename DataType>
+    inline DataType DistanceSquared(const Vector3<DataType>& v1, const Vector3<DataType>& v2) {
+        return (v1 - v2).LengthSquared();
+    }
+
+
+    template <typename DataType>
     Vector3<DataType> operator*(DataType scalar, const Vector3<DataType>& v) {
         return Vector3<DataType>(
             v.X() * scalar,
