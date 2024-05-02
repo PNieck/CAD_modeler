@@ -134,6 +134,12 @@ public:
     inline const void HideC2BezierPolygon(Entity entity) const
         { return c2CurveSystem->HideBezierPolygon(entity); }
 
+    inline const void ShowC2BezierControlPoints(Entity entity) const
+        { return c2CurveSystem->ShowBezierControlPoints(entity); }
+
+    inline const void HideC2BezierControlPoints(Entity entity) const
+        { return c2CurveSystem->HideBezierControlPoints(entity); }
+
     template <typename Comp>
     static inline constexpr ComponentId GetComponentId()
         { return ComponentsManager::GetComponentId<Comp>(); }

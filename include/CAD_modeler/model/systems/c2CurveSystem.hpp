@@ -6,6 +6,7 @@
 #include "shaders/shaderRepository.hpp"
 #include "../components/c2CurveParameters.hpp"
 #include "../components/curveControlPoints.hpp"
+#include "../components/bezierControlPoints.hpp"
 #include "utils/nameGenerator.hpp"
 #include "curveControlPointsSystem.hpp"
 
@@ -33,6 +34,9 @@ public:
     void ShowBezierPolygon(Entity entity);
     void HideBezierPolygon(Entity entity);
 
+    void ShowBezierControlPoints(Entity entity);
+    void HideBezierControlPoints(Entity entity);
+
     void Render() const;
 
 private:
@@ -42,9 +46,13 @@ private:
     void UpdateEntities() const;
     void UpdateCurveMesh(Entity curve) const;
     void UpdateBSplinePolygon(Entity curve) const;
+    void UpdateBezierControlPoints(Entity curve, const C2CurveParameters& params) const;
 
     void RenderBSplinePolygons(std::stack<Entity>& entities) const;
     void RenderBezierPolygons(std::stack<Entity>& entities) const;
+
+    BezierControlPoints CreateBezierControlPoints(const CurveControlPoints& params) const;
+    std::vector<alg::Vec3> CreateBezierControlPointsPositions(const CurveControlPoints& params) const;
 
     std::vector<float> GenerateCurveMeshVertices(const CurveControlPoints& params) const;
     std::vector<uint32_t> GenerateCurveMeshIndices(const CurveControlPoints& params) const;

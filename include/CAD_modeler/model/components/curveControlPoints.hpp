@@ -23,6 +23,9 @@ public:
     inline const std::vector<Entity>& ControlPoints() const
         { return controlPoints; }
 
+    inline size_t Size() const
+        { return controlPoints.size(); }
+
     std::unordered_map<Entity, HandlerId> controlPointsHandlers;
     HandlerId deletionHandler;
 

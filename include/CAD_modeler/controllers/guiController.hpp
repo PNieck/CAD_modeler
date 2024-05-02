@@ -61,6 +61,12 @@ public:
     inline void ShowC2BezierPolygon(Entity entity)
         { model.ShowC2BezierPolygon(entity); }
 
+    inline void HideC2BezierControlPoints(Entity entity)
+        { model.HideC2BezierControlPoints(entity); }
+
+    inline void ShowC2BezierControlPoints(Entity entity)
+        { model.ShowC2BezierControlPoints(entity); }
+
     inline void HideC2BezierPolygon(Entity entity)
         { model.HideC2BezierPolygon(entity); }
 };

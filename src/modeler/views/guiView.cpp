@@ -472,6 +472,17 @@ void GuiView::DisplayC2CurveParameters(Entity entity, const C2CurveParameters & 
         else
             model.HideC2BezierPolygon(entity);
     }
+
+    drawPolygon = params.showBezierControlPoints;
+
+    ImGui::Checkbox("Show Bezier control points", &drawPolygon);
+
+    if (drawPolygon != params.showBezierControlPoints) {
+        if (drawPolygon)
+            model.ShowC2BezierControlPoints(entity);
+        else
+            model.HideC2BezierControlPoints(entity);
+    }
 }
 
 

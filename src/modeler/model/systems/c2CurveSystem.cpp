@@ -12,6 +12,7 @@
 #include <CAD_modeler/model/systems/cameraSystem.hpp>
 #include <CAD_modeler/model/systems/selectionSystem.hpp>
 #include <CAD_modeler/model/systems/toUpdateSystem.hpp>
+#include <CAD_modeler/model/systems/pointsSystem.hpp>
 #include <CAD_modeler/model/systems/curveControlPointsSystem.hpp>
 
 #include <CAD_modeler/utilities/setIntersection.hpp>
@@ -102,6 +103,30 @@ void C2CurveSystem::HideBezierPolygon(Entity entity)
 }
 
 
+void C2CurveSystem::ShowBezierControlPoints(Entity entity)
+{
+    coordinator->EditComponent<C2CurveParameters>(entity,
+        [](C2CurveParameters& params) {
+            params.showBezierControlPoints = true;
+        }
+    );
+
+    auto bezierControlPoints = CreateBezierControlPoints(coordinator->GetComponent<CurveControlPoints>(entity));
+
+    coordinator->AddComponent<BezierControlPoints>(entity, bezierControlPoints);
+}
+
+
+void C2CurveSystem::HideBezierControlPoints(Entity entity)
+{
+    coordinator->EditComponent<C2CurveParameters>(entity,
+        [](C2CurveParameters& params) {
+            params.showBezierControlPoints = false;
+        }
+    );
+}
+
+
 void C2CurveSystem::Render() const
 {
      if (entities.empty()) {
@@ -164,9 +189,13 @@ void C2CurveSystem::UpdateEntities() const
         UpdateCurveMesh(entity);
         coordinator->GetSystem<ToUpdateSystem>()->Unmark(entity);
 
-        if (coordinator->GetComponent<C2CurveParameters>(entity).drawBSplinePolygon) {
+        auto const& params = coordinator->GetComponent<C2CurveParameters>(entity);
+
+        if (params.drawBSplinePolygon)
             UpdateBSplinePolygon(entity);
-        }
+
+        if (params.showBezierControlPoints)
+            UpdateBezierControlPoints(entity, params);
     }
 }
 
@@ -196,6 +225,50 @@ void C2CurveSystem::UpdateBSplinePolygon(Entity curve) const
                 GenerateBSplinePolygonVertices(params),
                 GenerateBSplinePolygonIndices(params)
             );
+        }
+    );
+}
+
+
+void C2CurveSystem::UpdateBezierControlPoints(Entity curve, const C2CurveParameters & params) const
+{
+    auto const& bezierControlPoints = coordinator->GetComponent<BezierControlPoints>(curve);
+
+    auto const& controlPoints = coordinator->GetComponent<CurveControlPoints>(curve);
+    auto controlPointsPositions = CreateBezierControlPointsPositions(controlPoints);
+
+    if (controlPointsPositions.size() > bezierControlPoints.Size()) {
+        coordinator->EditComponent<BezierControlPoints>(curve,
+            [&controlPointsPositions, this](BezierControlPoints& bezier) {
+                auto pointsSystem = coordinator->GetSystem<PointsSystem>();
+
+                do {
+                    Entity entity = pointsSystem->CreatePoint(Position(0.f));
+                    bezier.AddControlPoint(entity);
+                } while (controlPointsPositions.size() > bezier.Size());
+            }
+        );
+    }
+
+    if (controlPointsPositions.size() < bezierControlPoints.Size()) {
+        coordinator->EditComponent<BezierControlPoints>(curve,
+            [&controlPointsPositions, this](BezierControlPoints& bezier) {
+                do {
+                    auto point = *bezier.ControlPoints().begin();
+                    bezier.DeleteControlPoint(point);
+                    coordinator->DestroyEntity(point);
+                } while (controlPointsPositions.size() < bezier.Size());
+            }
+        );
+    }
+
+    coordinator->EditComponent<BezierControlPoints>(curve,
+        [&controlPointsPositions, this](BezierControlPoints& bezier) {
+            auto& controlPoints = bezier.ControlPoints();
+            
+            for (int i=0; i < bezier.Size(); ++i) {
+                coordinator->SetComponent<Position>(controlPoints[i], Position(controlPointsPositions[i]));
+            }
         }
     );
 }
@@ -265,16 +338,32 @@ void C2CurveSystem::RenderBezierPolygons(std::stack<Entity>& entities) const
 }
 
 
-std::vector<float> C2CurveSystem::GenerateCurveMeshVertices(const CurveControlPoints& params) const
+BezierControlPoints C2CurveSystem::CreateBezierControlPoints(const CurveControlPoints & params) const
+{
+    BezierControlPoints bezierControlPoints;
+    auto pointsSystem = coordinator->GetSystem<PointsSystem>();
+
+    auto pointsPositions = CreateBezierControlPointsPositions(params);
+
+    for (auto& vec: pointsPositions) {
+        Entity point = pointsSystem->CreatePoint(Position(vec));
+        bezierControlPoints.AddControlPoint(point);
+    }
+
+    return bezierControlPoints;
+}
+
+
+std::vector<alg::Vec3> C2CurveSystem::CreateBezierControlPointsPositions(const CurveControlPoints & params) const
 {
     auto const& controlPoints = params.ControlPoints();
 
-    std::vector<float> result;
+    std::vector<alg::Vec3> result;
 
     if (controlPoints.size() < 4)
         return result;
 
-    result.reserve((controlPoints.size() - 3)*3);
+    result.reserve(controlPoints.size() - 3);
 
     for (int i=0; i < controlPoints.size() - 3 ; ++i) {
         auto const& pos1 = coordinator->GetComponent<Position>(controlPoints[i]);
@@ -284,27 +373,34 @@ std::vector<float> C2CurveSystem::GenerateCurveMeshVertices(const CurveControlPo
 
         alg::Vec3 g0 = (2.f/3.f) * pos1.vec + (1.f/3.f) * pos2.vec;
         alg::Vec3 f1 = (1.f/3.f) * pos2.vec + (2.f/3.f) * pos3.vec;
-        alg::Vec3 e0 = 0.5f * g0 + 0.5f * f1;
+        alg::Vec3 e0 = (g0 + f1) * 0.5f;
 
         alg::Vec3 g1 = (2.f/3.f) * pos2.vec + (1.f/3.f) * pos3.vec;
         alg::Vec3 f2 = (1.f/3.f) * pos3.vec + (2.f/3.f) * pos4.vec;
-        alg::Vec3 e1 = 0.5f * g1 + 0.5f * f2;
+        alg::Vec3 e1 = (g1 + f2) * 0.5f;
 
-        result.push_back(e0.X());
-        result.push_back(e0.Y());
-        result.push_back(e0.Z());
+        result.push_back(e0);
+        result.push_back(f1);
+        result.push_back(g1);
+        result.push_back(e1);
+    }
 
-        result.push_back(f1.X());
-        result.push_back(f1.Y());
-        result.push_back(f1.Z());
+    return result;
+}
 
-        result.push_back(g1.X());
-        result.push_back(g1.Y());
-        result.push_back(g1.Z());
 
-        result.push_back(e1.X());
-        result.push_back(e1.Y());
-        result.push_back(e1.Z());
+std::vector<float> C2CurveSystem::GenerateCurveMeshVertices(const CurveControlPoints& params) const
+{
+    std::vector<float> result;
+
+    auto controlPointsPositions = CreateBezierControlPointsPositions(params);
+
+    result.reserve(controlPointsPositions.size() * 3);
+
+    for (auto& vec: controlPointsPositions) {
+        result.push_back(vec.X());
+        result.push_back(vec.Y());
+        result.push_back(vec.Z());
     }
 
     return result;
