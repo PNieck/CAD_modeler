@@ -27,12 +27,14 @@ PointsSystem::PointsSystem()
 }
 
 
-Entity PointsSystem::CreatePoint(const Position& pos)
+Entity PointsSystem::CreatePoint(const Position& pos, bool createName)
 {
     Entity newPoint = coordinator->CreateEntity();
 
     coordinator->AddComponent<Position>(newPoint, pos);
-    coordinator->AddComponent<Name>(newPoint, nameGenerator.GenerateName("Point"));
+
+    if (createName)
+        coordinator->AddComponent<Name>(newPoint, nameGenerator.GenerateName("Point"));
 
     entities.insert(newPoint);
 

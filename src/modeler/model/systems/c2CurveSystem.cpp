@@ -243,7 +243,7 @@ void C2CurveSystem::UpdateBezierControlPoints(Entity curve, const C2CurveParamet
                 auto pointsSystem = coordinator->GetSystem<PointsSystem>();
 
                 do {
-                    Entity entity = pointsSystem->CreatePoint(Position(0.f));
+                    Entity entity = pointsSystem->CreatePoint(Position(0.f), false);
                     bezier.AddControlPoint(entity);
                 } while (controlPointsPositions.size() > bezier.Size());
             }
@@ -346,7 +346,7 @@ BezierControlPoints C2CurveSystem::CreateBezierControlPoints(const CurveControlP
     auto pointsPositions = CreateBezierControlPointsPositions(params);
 
     for (auto& vec: pointsPositions) {
-        Entity point = pointsSystem->CreatePoint(Position(vec));
+        Entity point = pointsSystem->CreatePoint(Position(vec), false);
         bezierControlPoints.AddControlPoint(point);
     }
 

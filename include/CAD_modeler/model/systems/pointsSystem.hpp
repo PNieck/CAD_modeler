@@ -16,7 +16,7 @@ public:
     inline void Init(ShaderRepository* shaderRepo)
         { this->shaderRepo = shaderRepo; }
 
-    Entity CreatePoint(const Position& pos);
+    Entity CreatePoint(const Position& pos, bool createName = true);
 
     void Render() const;
 
