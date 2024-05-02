@@ -348,7 +348,7 @@ std::vector<uint32_t> C2CurveSystem::GenerateBSplinePolygonIndices(const CurveCo
 {
     auto const& controlPoints = params.ControlPoints();
 
-    std::vector<uint32_t> result(3 * controlPoints.size());
+    std::vector<uint32_t> result(controlPoints.size());
 
     for (int i = 0; i < result.size(); ++i) {
         result[i] = i;
