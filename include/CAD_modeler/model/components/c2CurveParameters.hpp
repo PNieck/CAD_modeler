@@ -4,5 +4,6 @@
 
 
 class C2CurveParameters {
-    
+public:
+    bool drawBSplinePolygon = false;
 };

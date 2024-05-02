@@ -12,6 +12,7 @@
 #include <CAD_modeler/model/components/curveControlPoints.hpp>
 #include <CAD_modeler/model/components/c0CurveParameters.hpp>
 #include <CAD_modeler/model/components/c2CurveParameters.hpp>
+#include <CAD_modeler/model/components/bSplinePolygonMesh.hpp>
 
 
 void RegisterAllComponents(Coordinator& coordinator)
@@ -28,4 +29,5 @@ void RegisterAllComponents(Coordinator& coordinator)
     coordinator.RegisterComponent<CurveControlPoints>();
     coordinator.RegisterComponent<C0CurveParameters>();
     coordinator.RegisterComponent<C2CurveParameters>();
+    coordinator.RegisterComponent<BSplinePolygonMesh>();
 }

@@ -233,6 +233,10 @@ void GuiView::RenderSingleObjectProperties(Entity entity) const
     if (it != components.end())
         DisplayC0CurveParameters(entity, model.GetComponent<C0CurveParameters>(entity));
 
+    it = components.find(Model::GetComponentId<C2CurveParameters>());
+    if (it != components.end())
+        DisplayC2CurveParameters(entity, model.GetComponent<C2CurveParameters>(entity));
+
     if (ImGui::Button("Delete object")) {
         controller.DeleteEntity(entity);
     }
@@ -441,6 +445,21 @@ void GuiView::DisplayC0CurveParameters(Entity entity, const C0CurveParameters & 
         C0CurveParameters newParams;
         newParams.drawPolygon = drawPolygon;
         controller.ChangeComponent<C0CurveParameters>(entity, newParams);
+    }
+}
+
+
+void GuiView::DisplayC2CurveParameters(Entity entity, const C2CurveParameters & params) const
+{
+    bool drawPolygon = params.drawBSplinePolygon;
+
+    ImGui::Checkbox("Draw BSpline polygon", &drawPolygon);
+
+    if (drawPolygon != params.drawBSplinePolygon) {
+        if (drawPolygon)
+            model.ShowC2BSplinePolygon(entity);
+        else
+            model.HideC2BSplinePolygon(entity);
     }
 }
 

@@ -122,6 +122,12 @@ public:
     inline const std::unordered_set<Entity>& GetAllC0Curves() const
         { return c0CurveSystem->GetEntities(); }
 
+    inline const void ShowC2BSplinePolygon(Entity entity) const
+        { return c2CurveSystem->ShowBSplinePolygon(entity); }
+
+    inline const void HideC2BSplinePolygon(Entity entity) const
+        { return c2CurveSystem->HideBSplinePolygon(entity); }
+
     template <typename Comp>
     static inline constexpr ComponentId GetComponentId()
         { return ComponentsManager::GetComponentId<Comp>(); }

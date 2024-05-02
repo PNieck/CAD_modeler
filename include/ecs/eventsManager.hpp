@@ -141,7 +141,6 @@ private:
         while (!handlersStack.empty()) {
             auto function = std::static_pointer_cast<EventHandler<Comp>>(handlersStack.top());
             function->HandleEvent(entity, component, type);
-            //(*function)();
 
             handlersStack.pop();
         }

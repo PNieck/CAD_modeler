@@ -7,6 +7,7 @@
 #include <CAD_modeler/model/components/position.hpp>
 #include <CAD_modeler/model/components/curveControlPoints.hpp>
 #include <CAD_modeler/model/components/c2CurveParameters.hpp>
+#include <CAD_modeler/model/components/bSplinePolygonMesh.hpp>
 
 #include <CAD_modeler/model/systems/cameraSystem.hpp>
 #include <CAD_modeler/model/systems/selectionSystem.hpp>
@@ -49,6 +50,38 @@ Entity C2CurveSystem::CreateC2Curve(const std::vector<Entity>& entities)
 }
 
 
+void C2CurveSystem::ShowBSplinePolygon(Entity entity)
+{
+    coordinator->EditComponent<C2CurveParameters>(entity,
+        [](C2CurveParameters& params) {
+            params.drawBSplinePolygon = true;
+        }
+    );
+
+    auto const& controlPoints = coordinator->GetComponent<CurveControlPoints>(entity);
+    BSplinePolygonMesh polygonMesh;
+
+    polygonMesh.Update(
+        GenerateBSplinePolygonVertices(controlPoints),
+        GenerateBSplinePolygonIndices(controlPoints)
+    );
+
+    coordinator->AddComponent<BSplinePolygonMesh>(entity, polygonMesh);
+}
+
+
+void C2CurveSystem::HideBSplinePolygon(Entity entity)
+{
+    coordinator->EditComponent<C2CurveParameters>(entity,
+        [](C2CurveParameters& params) {
+            params.drawBSplinePolygon = false;
+        }
+    );
+
+    coordinator->DeleteComponent<BSplinePolygonMesh>(entity);
+}
+
+
 void C2CurveSystem::Render() const
 {
      if (entities.empty()) {
@@ -57,7 +90,9 @@ void C2CurveSystem::Render() const
 
     auto const& cameraSystem = coordinator->GetSystem<CameraSystem>();
     auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
+
     auto const& shader = shaderRepo->GetBezierShader();
+    std::stack<Entity> bSplinePolygonsToDraw;
 
     UpdateEntities();
 
@@ -68,6 +103,10 @@ void C2CurveSystem::Render() const
     shader.SetMVP(cameraMtx);
 
     for (auto const entity: entities) {
+        auto const& params = coordinator->GetComponent<C2CurveParameters>(entity);
+        if (params.drawBSplinePolygon)
+            bSplinePolygonsToDraw.push(entity);
+
         bool selection = selectionSystem->IsSelected(entity);
 
         if (selection)
@@ -83,8 +122,8 @@ void C2CurveSystem::Render() const
             shader.SetColor(alg::Vec4(1.0f));
     }
 
-    // if (!polygonsToDraw.empty())
-    //     RenderCurvesPolygons(polygonsToDraw);
+    if (!bSplinePolygonsToDraw.empty())
+        RenderBSplinePolygons(bSplinePolygonsToDraw);
 }
 
 
@@ -97,6 +136,10 @@ void C2CurveSystem::UpdateEntities() const
     for (auto entity: toUpdate) {
         UpdateMesh(entity);
         coordinator->GetSystem<ToUpdateSystem>()->Unmark(entity);
+
+        if (coordinator->GetComponent<C2CurveParameters>(entity).drawBSplinePolygon) {
+            UpdateBSplinePolygon(entity);
+        }
     }
 }
 
@@ -113,6 +156,53 @@ void C2CurveSystem::UpdateMesh(Entity curve) const
             );
         }
     );
+}
+
+
+void C2CurveSystem::UpdateBSplinePolygon(Entity curve) const
+{
+    coordinator->EditComponent<BSplinePolygonMesh>(curve,
+        [curve, this](BSplinePolygonMesh& mesh) {
+            auto const& params = coordinator->GetComponent<CurveControlPoints>(curve);
+
+            mesh.Update(
+                GenerateBSplinePolygonVertices(params),
+                GenerateBSplinePolygonIndices(params)
+            );
+        }
+    );
+}
+
+
+void C2CurveSystem::RenderBSplinePolygons(std::stack<Entity>& entities) const
+{
+    auto const& cameraSystem = coordinator->GetSystem<CameraSystem>();
+    auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
+    auto const& shader = shaderRepo->GetStdShader();
+
+    alg::Mat4x4 cameraMtx = cameraSystem->PerspectiveMatrix() * cameraSystem->ViewMatrix();
+
+    shader.Use();
+    shader.SetColor(alg::Vec4(1.0f));
+    shader.SetMVP(cameraMtx);
+
+    while (!entities.empty()) {
+        Entity entity = entities.top();
+        entities.pop();
+
+        bool selection = selectionSystem->IsSelected(entity);
+
+        if (selection)
+            shader.SetColor(alg::Vec4(1.0f, 0.5f, 0.0f, 1.0f));
+
+        auto const& mesh = coordinator->GetComponent<BSplinePolygonMesh>(entity);
+        mesh.Use();
+
+	    glDrawElements(GL_LINE_STRIP, mesh.GetElementsCnt(), GL_UNSIGNED_INT, 0);
+
+        if (selection)
+            shader.SetColor(alg::Vec4(1.0f));
+    }
 }
 
 
@@ -167,6 +257,39 @@ std::vector<uint32_t> C2CurveSystem::GenerateCurveMeshIndices(const CurveControl
     auto const& controlPoints = params.ControlPoints();
     size_t segments = std::max<size_t>(controlPoints.size() - 3, 0);
     std::vector<uint32_t> result(4 * segments);
+
+    for (int i = 0; i < result.size(); ++i) {
+        result[i] = i;
+    }
+
+    return result;
+}
+
+
+std::vector<float> C2CurveSystem::GenerateBSplinePolygonVertices(const CurveControlPoints & params) const
+{
+    auto const& controlPoints = params.ControlPoints();
+
+    std::vector<float> result;
+    result.reserve(3 * controlPoints.size());
+
+    for (Entity entity: controlPoints) {
+        auto const& pos = coordinator->GetComponent<Position>(entity);
+
+        result.push_back(pos.GetX());
+        result.push_back(pos.GetY());
+        result.push_back(pos.GetZ());
+    }
+
+    return result;
+}
+
+
+std::vector<uint32_t> C2CurveSystem::GenerateBSplinePolygonIndices(const CurveControlPoints & params) const
+{
+    auto const& controlPoints = params.ControlPoints();
+
+    std::vector<uint32_t> result(3 * controlPoints.size());
 
     for (int i = 0; i < result.size(); ++i) {
         result[i] = i;

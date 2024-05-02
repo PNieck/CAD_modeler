@@ -27,6 +27,9 @@ public:
     inline void DeleteControlPoint(Entity bezierCurve, Entity entity)
         { coordinator->GetSystem<CurveControlPointsSystem>()->DeleteControlPoint(bezierCurve, entity); }
 
+    void ShowBSplinePolygon(Entity entity);
+    void HideBSplinePolygon(Entity entity);
+
     void Render() const;
 
 private:
@@ -35,7 +38,13 @@ private:
 
     void UpdateEntities() const;
     void UpdateMesh(Entity curve) const;
+    void UpdateBSplinePolygon(Entity curve) const;
+
+    void RenderBSplinePolygons(std::stack<Entity>& entities) const;
 
     std::vector<float> GenerateCurveMeshVertices(const CurveControlPoints& params) const;
     std::vector<uint32_t> GenerateCurveMeshIndices(const CurveControlPoints& params) const;
+
+    std::vector<float> GenerateBSplinePolygonVertices(const CurveControlPoints& params) const;
+    std::vector<uint32_t> GenerateBSplinePolygonIndices(const CurveControlPoints& params) const;
 };

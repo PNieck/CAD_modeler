@@ -51,4 +51,10 @@ public:
 
     inline void ChangeEntityName(Entity entity, const Name& name)
         { model.ChangeEntityName(entity, name); }
+
+    inline void ShowC2BSplinePolygon(Entity entity)
+        { model.ShowC2BSplinePolygon(entity); }
+
+    inline void HideC2BSplinePolygon(Entity entity)
+        { model.HideC2BSplinePolygon(entity); }
 };
