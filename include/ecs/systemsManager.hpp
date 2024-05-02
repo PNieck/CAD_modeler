@@ -24,8 +24,8 @@ public:
 
 
     template<typename Sys>
-    std::shared_ptr<Sys> GetSystem() {
-        return std::static_pointer_cast<Sys>(systems[GetSystemID<Sys>()]);
+    std::shared_ptr<Sys> GetSystem() const {
+        return std::static_pointer_cast<Sys>(systems.at(GetSystemID<Sys>()));
     }
 
 

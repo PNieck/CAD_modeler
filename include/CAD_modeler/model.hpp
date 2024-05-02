@@ -119,8 +119,8 @@ public:
     inline const std::unordered_set<Entity>& GetAllPoints() const
         { return pointsSystem->GetEntities(); }
 
-    inline const std::unordered_set<Entity>& GetAllC0Curves() const
-        { return c0CurveSystem->GetEntities(); }
+    inline const std::unordered_set<Entity>& GetAllCurves() const
+        { return coordinator.GetSystem<CurveControlPointsSystem>()->GetEntities(); }
 
     inline const void ShowC2BSplinePolygon(Entity entity) const
         { return c2CurveSystem->ShowBSplinePolygon(entity); }

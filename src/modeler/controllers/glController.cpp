@@ -50,7 +50,7 @@ void GlController::Add3DPoint() const
     Entity point = model.Add3DPointFromViewport(x, y);
 
     // Add control points to curves if selected
-    auto const& curves = model.GetAllC0Curves();
+    auto const& curves = model.GetAllCurves();
     auto const& selected = model.GetAllSelectedEntities();
 
     auto selectedCurves = intersect(curves, selected);
