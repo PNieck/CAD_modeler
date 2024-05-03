@@ -56,7 +56,7 @@ void GlController::Add3DPoint() const
     auto selectedCurves = intersect(curves, selected);
 
     for (auto curve: selectedCurves) {
-        model.AddC0CurveControlPoint(curve, point);
+        model.AddControlPointToCurve(curve, point);
     }
 }
 

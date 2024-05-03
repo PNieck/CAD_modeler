@@ -59,7 +59,11 @@ void GuiView::RenderGui() const
             break;
 
         case AppState::AddingC0Curve:
-            RenderAddingC0CurveGui();
+            RenderAddingCurveGui(CurveType::C0);
+            break;
+
+        case AppState::AddingC2Curve:
+            RenderAddingCurveGui(CurveType::C2);
             break;
 
         default:
@@ -87,6 +91,11 @@ void GuiView::RenderDefaultGui() const
 
     if (ImGui::Button("Add C0 curve")) {
         controller.SetAppState(AppState::AddingC0Curve);
+        controller.DeselectAllEntities();
+    }
+
+    if (ImGui::Button("Add C2 curve")) {
+        controller.SetAppState(AppState::AddingC2Curve);
         controller.DeselectAllEntities();
     }
 
@@ -127,7 +136,7 @@ void GuiView::RenderAdd3DPointsGui() const
 }
 
 
-void GuiView::RenderAddingC0CurveGui() const
+void GuiView::RenderAddingCurveGui(CurveType curveType) const
 {
     static std::unordered_set<Entity> controlPoints;
     static Entity curve;
@@ -157,9 +166,9 @@ void GuiView::RenderAddingC0CurveGui() const
             if (newSelected) {
                 controlPoints.insert(entity);
                 if (controlPoints.size() == 1)
-                    curve = controller.AddC0Curve({entity});
+                    curve = controller.AddCurve({entity}, curveType);
                 else 
-                    controller.AddC0CurveControlPoint(curve, entity);
+                    controller.AddControlPointToCurve(curve, entity);
                 controller.SelectEntity(entity);
             }
             else {
@@ -168,7 +177,7 @@ void GuiView::RenderAddingC0CurveGui() const
                 if (controlPoints.size() == 0)
                     controller.DeleteEntity(curve);
                 else
-                    controller.DeleteC0ControlPoint(curve, entity);
+                    controller.DeleteControlPointFromCurve(curve, entity);
                 controller.DeselectEntity(entity);
             }
         }
@@ -407,7 +416,7 @@ void GuiView::DisplayCurveControlPoints(Entity entity, const CurveControlPoints&
         if (ImGui::BeginPopupContextItem()) {
             selected = n;
             if (ImGui::Button("Delete control point")) {
-                controller.DeleteC0ControlPoint(entity, controlPoint);
+                controller.DeleteControlPointFromCurve(entity, controlPoint);
             }
             ImGui::EndPopup();
         }
@@ -425,7 +434,7 @@ void GuiView::DisplayCurveControlPoints(Entity entity, const CurveControlPoints&
             // TODO: rewrite with set intersection
             if (std::find(params.ControlPoints().begin(), params.ControlPoints().end(), point) == params.ControlPoints().end()) {
                 if (ImGui::Selectable(model.GetEntityName(point).c_str(), false)) {
-                    controller.AddC0CurveControlPoint(entity, point);
+                    controller.AddControlPointToCurve(entity, point);
                 }
             }
         }

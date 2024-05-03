@@ -24,7 +24,10 @@ private:
 
     void RenderDefaultGui() const;
     void RenderAdd3DPointsGui() const;
-    void RenderAddingC0CurveGui() const;
+
+    void RenderAddingCurveGui(CurveType curveType) const;
+    // void RenderAddingC0CurveGui() const;
+    // void RenderAddingC2CurveGui() const;
 
     void RenderObjectsNames() const;
     void RenderObjectsProperties() const;

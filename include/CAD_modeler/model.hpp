@@ -32,10 +32,13 @@ public:
     inline Entity AddC0Curve(const std::vector<Entity>& controlPoints) const
         { return c0CurveSystem->CreateC0Curve(controlPoints); }
 
-    inline void AddC0CurveControlPoint(Entity curve, Entity entity) const
+    inline Entity AddC2Curve(const std::vector<Entity>& controlPoints) const
+        { return c2CurveSystem->CreateC2Curve(controlPoints); }
+
+    inline void AddControlPointToCurve(Entity curve, Entity entity) const
         { c0CurveSystem->AddControlPoint(curve, entity); }
 
-    inline void DeleteC0CurveControlPoint(Entity curve, Entity controlPoint) const
+    inline void DeleteControlPointFromCurve(Entity curve, Entity controlPoint) const
         { c0CurveSystem->DeleteControlPoint(curve, controlPoint); }
 
     inline void RotateCamera(float x, float y) const

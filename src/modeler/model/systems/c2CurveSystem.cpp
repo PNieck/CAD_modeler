@@ -424,7 +424,7 @@ std::vector<float> C2CurveSystem::GenerateCurveMeshVertices(const CurveControlPo
 std::vector<uint32_t> C2CurveSystem::GenerateCurveMeshIndices(const CurveControlPoints& params) const
 {
     auto const& controlPoints = params.ControlPoints();
-    size_t segments = std::max<size_t>(controlPoints.size() - 3, 0);
+    int segments = std::max<int>(controlPoints.size() - 3, 0);
     std::vector<uint32_t> result(4 * segments);
 
     for (int i = 0; i < result.size(); ++i) {

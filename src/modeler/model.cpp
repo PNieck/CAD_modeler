@@ -68,18 +68,6 @@ Model::Model(int viewport_width, int viewport_height)
     glEnable(GL_BLEND);
     glDepthMask(GL_FALSE);
     glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-
-    Entity point1 = pointsSystem->CreatePoint(Position(1.f));
-    Entity point2 = pointsSystem->CreatePoint(Position(2.f));
-    Entity point3 = pointsSystem->CreatePoint(Position(3.f));
-    Entity point4 = pointsSystem->CreatePoint(Position(4.f));
-    Entity point5 = pointsSystem->CreatePoint(Position(5.f));
-
-    Entity c2Curve = c2CurveSystem->CreateC2Curve({
-        point1, point2, point3, point4, point5
-    });
-
-
 }
 
 
