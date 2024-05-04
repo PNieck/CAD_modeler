@@ -65,6 +65,8 @@ private:
     std::vector<float> GenerateBSplinePolygonVertices(const CurveControlPoints& params) const;
     std::vector<uint32_t> GenerateBSplinePolygonIndices(const CurveControlPoints& params) const;
 
+    inline size_t BezierControlPointsCnt(size_t bSplineCtrlPts) const
+        { return bSplineCtrlPts < MIN_CTRL_PTS_CNT ? 0 : 4 + 3 * (bSplineCtrlPts - 4); }
 
     class FirstBezierCtrlPtsMovedHandler: public EventHandler<Position> {
     public:
@@ -88,5 +90,19 @@ private:
     private:
         Coordinator& coordinator;
         Entity c2Curve;
+    };
+
+
+    class FirstInFullLineBezierCtrlPtsMovedHandler: public EventHandler<Position> {
+    public:
+        FirstInFullLineBezierCtrlPtsMovedHandler(Coordinator& coordinator, Entity c2Curve, int ctrPtNo):
+            coordinator(coordinator), c2Curve(c2Curve), bezierCtrlPtNo(ctrPtNo) {}
+
+        void HandleEvent(Entity entity, const Position& component, EventType eventType) override;
+
+    private:
+        Coordinator& coordinator;
+        Entity c2Curve;
+        int bezierCtrlPtNo;
     };
 };

@@ -423,26 +423,32 @@ std::vector<alg::Vec3> C2CurveSystem::CreateBezierControlPointsPositions(const C
 
     std::vector<alg::Vec3> result;
 
-    if (controlPoints.size() < MIN_CTRL_PTS_CNT)
+    int ctrlPtsCnt = BezierControlPointsCnt(controlPoints.size());
+    if (ctrlPtsCnt == 0)
         return result;
 
-    result.reserve(controlPoints.size() - 3);
+    result.reserve(ctrlPtsCnt);
 
-    for (int i=0; i < controlPoints.size() - 3 ; ++i) {
+    auto const& pos1 = coordinator->GetComponent<Position>(controlPoints[0]);
+    auto const& pos2 = coordinator->GetComponent<Position>(controlPoints[1]);
+    auto const& pos3 = coordinator->GetComponent<Position>(controlPoints[2]);
+
+    // Adding the first point
+    alg::Vec3 g0 = (1.f/3.f) * pos1.vec + (2.f/3.f) * pos2.vec;
+    alg::Vec3 f1 = (2.f/3.f) * pos2.vec + (1.f/3.f) * pos3.vec;
+    alg::Vec3 e0 = (g0 + f1) * 0.5f;
+    result.push_back(e0);
+
+    for (int i=1; i < controlPoints.size() - 2 ; ++i) {
         auto const& pos1 = coordinator->GetComponent<Position>(controlPoints[i]);
         auto const& pos2 = coordinator->GetComponent<Position>(controlPoints[i+1]);
         auto const& pos3 = coordinator->GetComponent<Position>(controlPoints[i+2]);
-        auto const& pos4 = coordinator->GetComponent<Position>(controlPoints[i+3]);
 
-        alg::Vec3 g0 = (1.f/3.f) * pos1.vec + (2.f/3.f) * pos2.vec;
-        alg::Vec3 f1 = (2.f/3.f) * pos2.vec + (1.f/3.f) * pos3.vec;
-        alg::Vec3 e0 = (g0 + f1) * 0.5f;
-
-        alg::Vec3 g1 = (1.f/3.f) * pos2.vec + (2.f/3.f) * pos3.vec;
-        alg::Vec3 f2 = (2.f/3.f) * pos3.vec + (1.f/3.f) * pos4.vec;
+        alg::Vec3 f1 = (2.f/3.f) * pos1.vec + (1.f/3.f) * pos2.vec;
+        alg::Vec3 g1 = (1.f/3.f) * pos1.vec + (2.f/3.f) * pos2.vec;
+        alg::Vec3 f2 = (2.f/3.f) * pos2.vec + (1.f/3.f) * pos3.vec;
         alg::Vec3 e1 = (g1 + f2) * 0.5f;
 
-        result.push_back(e0);
         result.push_back(f1);
         result.push_back(g1);
         result.push_back(e1);
@@ -474,10 +480,14 @@ std::vector<uint32_t> C2CurveSystem::GenerateCurveMeshIndices(const CurveControl
 {
     auto const& controlPoints = params.ControlPoints();
     int segments = std::max<int>(controlPoints.size() - 3, 0);
-    std::vector<uint32_t> result(4 * segments);
+    std::vector<uint32_t> result;
+    result.reserve(4*segments);
 
-    for (int i = 0; i < result.size(); ++i) {
-        result[i] = i;
+    for (int i = 0; i < segments*3; i += 3) {
+        result.push_back(i);
+        result.push_back(i+1);
+        result.push_back(i+2);
+        result.push_back(i+3);
     }
 
     return result;
@@ -554,4 +564,17 @@ void C2CurveSystem::SecondBezierCtrlPtsMovedHandler::HandleEvent(Entity entity, 
     // Setting second bSplinePos
     auto secondBSplinePos = (secondBezierCP.vec - thirdBSplineCP.vec) * 0.5f + secondBezierCP.vec;
     coordinator.SetComponent<Position>(bSplineCPs.at(1), Position(secondBSplinePos));
+}
+
+
+void C2CurveSystem::FirstInFullLineBezierCtrlPtsMovedHandler::HandleEvent(Entity entity, const Position & component, EventType eventType)
+{
+    // CP - control point
+    auto const& bSplineCPs = coordinator.GetComponent<CurveControlPoints>(c2Curve).ControlPoints();
+    auto const& bezierCPs = coordinator.GetComponent<BezierControlPoints>(c2Curve).ControlPoints();
+
+    if (bSplineCPs.size() < MIN_CTRL_PTS_CNT)
+        return;
+    
+    
 }
