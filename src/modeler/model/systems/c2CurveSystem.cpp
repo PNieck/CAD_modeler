@@ -385,12 +385,12 @@ std::vector<alg::Vec3> C2CurveSystem::CreateBezierControlPointsPositions(const C
         auto const& pos3 = coordinator->GetComponent<Position>(controlPoints[i+2]);
         auto const& pos4 = coordinator->GetComponent<Position>(controlPoints[i+3]);
 
-        alg::Vec3 g0 = (2.f/3.f) * pos1.vec + (1.f/3.f) * pos2.vec;
-        alg::Vec3 f1 = (1.f/3.f) * pos2.vec + (2.f/3.f) * pos3.vec;
+        alg::Vec3 g0 = (1.f/3.f) * pos1.vec + (2.f/3.f) * pos2.vec;
+        alg::Vec3 f1 = (2.f/3.f) * pos2.vec + (1.f/3.f) * pos3.vec;
         alg::Vec3 e0 = (g0 + f1) * 0.5f;
 
-        alg::Vec3 g1 = (2.f/3.f) * pos2.vec + (1.f/3.f) * pos3.vec;
-        alg::Vec3 f2 = (1.f/3.f) * pos3.vec + (2.f/3.f) * pos4.vec;
+        alg::Vec3 g1 = (1.f/3.f) * pos2.vec + (2.f/3.f) * pos3.vec;
+        alg::Vec3 f2 = (2.f/3.f) * pos3.vec + (1.f/3.f) * pos4.vec;
         alg::Vec3 e1 = (g1 + f2) * 0.5f;
 
         result.push_back(e0);
