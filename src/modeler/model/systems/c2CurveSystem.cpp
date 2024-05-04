@@ -306,6 +306,8 @@ void C2CurveSystem::UpdateBezierCtrlPtsHandlers(Entity curve, BezierControlPoint
     auto const& bSplineCtrlPts = coordinator->GetComponent<CurveControlPoints>(curve);
 
     // Adding new ones
+
+    // First handler
     Entity firstBezierCtrlPt = bezierCtrlPts.ControlPoints().at(0);
     auto handlerID = coordinator->Subscribe<Position>(
         firstBezierCtrlPt,
@@ -313,6 +315,13 @@ void C2CurveSystem::UpdateBezierCtrlPtsHandlers(Entity curve, BezierControlPoint
     );
 
     bezierCtrlPts.controlPointsHandlers.insert({ firstBezierCtrlPt, handlerID });
+
+    // Second handler
+    Entity secondBezierCtrlPt = bezierCtrlPts.ControlPoints().at(1);
+    handlerID = coordinator->Subscribe<Position>(
+        secondBezierCtrlPt,
+        std::make_shared<SecondBezierCtrlPtsMovedHandler>(*coordinator, curve)
+    );
 }
 
 
@@ -526,4 +535,23 @@ void C2CurveSystem::FirstBezierCtrlPtsMovedHandler::HandleEvent(Entity entity, c
     auto firstBSplinePos = (zeroBezierPos - secondBSplineCP.vec) * 3.f + secondBSplineCP.vec;
 
     coordinator.SetComponent<Position>(bSplineCPs.at(0), Position(firstBSplinePos));
+}
+
+
+void C2CurveSystem::SecondBezierCtrlPtsMovedHandler::HandleEvent(Entity entity, const Position & component, EventType eventType)
+{
+    // CP - control point
+    auto const& bSplineCPs = coordinator.GetComponent<CurveControlPoints>(c2Curve).ControlPoints();
+    auto const& bezierCPs = coordinator.GetComponent<BezierControlPoints>(c2Curve).ControlPoints();
+
+    if (bSplineCPs.size() < MIN_CTRL_PTS_CNT)
+        return;
+
+    auto const& secondBezierCP = coordinator.GetComponent<Position>(bezierCPs.at(1));
+
+    auto const& thirdBSplineCP = coordinator.GetComponent<Position>(bSplineCPs.at(2));
+
+    // Setting second bSplinePos
+    auto secondBSplinePos = (secondBezierCP.vec - thirdBSplineCP.vec) * 0.5f + secondBezierCP.vec;
+    coordinator.SetComponent<Position>(bSplineCPs.at(1), Position(secondBSplinePos));
 }

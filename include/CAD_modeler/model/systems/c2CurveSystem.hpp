@@ -77,4 +77,16 @@ private:
         Coordinator& coordinator;
         Entity c2Curve;
     };
+
+    class SecondBezierCtrlPtsMovedHandler: public EventHandler<Position> {
+    public:
+        SecondBezierCtrlPtsMovedHandler(Coordinator& coordinator, Entity c2Curve):
+            coordinator(coordinator), c2Curve(c2Curve) {}
+
+        void HandleEvent(Entity entity, const Position& component, EventType eventType) override;
+
+    private:
+        Coordinator& coordinator;
+        Entity c2Curve;
+    };
 };
