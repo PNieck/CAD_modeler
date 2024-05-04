@@ -15,6 +15,7 @@ public:
     }
 
     inline void Unmark(Entity entity) {
-        coordinator->DeleteComponent<ToUpdate>(entity);
+        if (entities.contains(entity))
+            coordinator->DeleteComponent<ToUpdate>(entity);
     }
 };
