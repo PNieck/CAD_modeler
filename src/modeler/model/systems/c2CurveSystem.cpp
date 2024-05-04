@@ -111,7 +111,11 @@ void C2CurveSystem::ShowBezierControlPoints(Entity entity)
         }
     );
 
-    auto bezierControlPoints = CreateBezierControlPoints(coordinator->GetComponent<CurveControlPoints>(entity));
+    auto bezierControlPoints = CreateBezierControlPoints(
+        coordinator->GetComponent<CurveControlPoints>(entity)
+    );
+
+    UpdateBezierCtrlPtsHandlers(entity, bezierControlPoints);
 
     coordinator->AddComponent<BezierControlPoints>(entity, bezierControlPoints);
 }
@@ -198,6 +202,9 @@ void C2CurveSystem::UpdateEntities() const
 
         if (params.showBezierControlPoints)
             UpdateBezierControlPoints(entity, params);
+
+        // Prevention from infinite update loop
+        coordinator->GetSystem<ToUpdateSystem>()->Unmark(entity);
     }
 }
 
@@ -241,25 +248,29 @@ void C2CurveSystem::UpdateBezierControlPoints(Entity curve, const C2CurveParamet
 
     if (controlPointsPositions.size() > bezierControlPoints.Size()) {
         coordinator->EditComponent<BezierControlPoints>(curve,
-            [&controlPointsPositions, this](BezierControlPoints& bezier) {
+            [&controlPointsPositions, curve, this](BezierControlPoints& bezier) {
                 auto pointsSystem = coordinator->GetSystem<PointsSystem>();
 
                 do {
                     Entity entity = pointsSystem->CreatePoint(Position(0.f), false);
                     bezier.AddControlPoint(entity);
                 } while (controlPointsPositions.size() > bezier.Size());
+
+                this->UpdateBezierCtrlPtsHandlers(curve, bezier);
             }
         );
     }
 
     if (controlPointsPositions.size() < bezierControlPoints.Size()) {
         coordinator->EditComponent<BezierControlPoints>(curve,
-            [&controlPointsPositions, this](BezierControlPoints& bezier) {
+            [&controlPointsPositions, curve, this](BezierControlPoints& bezier) {
                 do {
                     auto point = *bezier.ControlPoints().begin();
                     bezier.DeleteControlPoint(point);
                     coordinator->DestroyEntity(point);
                 } while (controlPointsPositions.size() < bezier.Size());
+
+                this->UpdateBezierCtrlPtsHandlers(curve, bezier);
             }
         );
     }
@@ -273,6 +284,35 @@ void C2CurveSystem::UpdateBezierControlPoints(Entity curve, const C2CurveParamet
             }
         }
     );
+}
+
+
+void C2CurveSystem::UpdateBezierCtrlPtsHandlers(Entity curve, BezierControlPoints& bezierCtrlPts) const
+{
+    // Removing all handlers
+    auto entitiesIt = bezierCtrlPts.ControlPoints().begin();
+    auto handlersIt = bezierCtrlPts.controlPointsHandlers.begin();
+
+    while (handlersIt != bezierCtrlPts.controlPointsHandlers.end() && entitiesIt != bezierCtrlPts.ControlPoints().end()) {
+        coordinator->Unsubscribe<Position>(*entitiesIt, (*handlersIt).second);
+
+        ++entitiesIt;
+        ++handlersIt;
+    }
+
+    if (bezierCtrlPts.Size() < MIN_CTRL_PTS_CNT)
+        return;
+
+    auto const& bSplineCtrlPts = coordinator->GetComponent<CurveControlPoints>(curve);
+
+    // Adding new ones
+    Entity firstBezierCtrlPt = bezierCtrlPts.ControlPoints().at(0);
+    auto handlerID = coordinator->Subscribe<Position>(
+        firstBezierCtrlPt,
+        std::make_shared<FirstBezierCtrlPtsMovedHandler>(*coordinator, curve)
+    );
+
+    bezierCtrlPts.controlPointsHandlers.insert({ firstBezierCtrlPt, handlerID });
 }
 
 
@@ -374,7 +414,7 @@ std::vector<alg::Vec3> C2CurveSystem::CreateBezierControlPointsPositions(const C
 
     std::vector<alg::Vec3> result;
 
-    if (controlPoints.size() < 4)
+    if (controlPoints.size() < MIN_CTRL_PTS_CNT)
         return result;
 
     result.reserve(controlPoints.size() - 3);
@@ -465,4 +505,25 @@ std::vector<uint32_t> C2CurveSystem::GenerateBSplinePolygonIndices(const CurveCo
     }
 
     return result;
+}
+
+
+void C2CurveSystem::FirstBezierCtrlPtsMovedHandler::HandleEvent(Entity entity, const Position& component, EventType eventType)
+{
+    // CP - control point
+    auto const& bSplineCPs = coordinator.GetComponent<CurveControlPoints>(c2Curve).ControlPoints();
+    auto const& bezierCPs = coordinator.GetComponent<BezierControlPoints>(c2Curve).ControlPoints();
+
+    if (bSplineCPs.size() < MIN_CTRL_PTS_CNT)
+        return;
+    
+    auto const& firstBezierCP = coordinator.GetComponent<Position>(bezierCPs.at(0));
+    auto const& secondBezierCP = coordinator.GetComponent<Position>(bezierCPs.at(1));
+
+    auto const& secondBSplineCP = coordinator.GetComponent<Position>(bSplineCPs.at(1));
+
+    auto zeroBezierPos = 2.f * firstBezierCP.vec - secondBezierCP.vec;
+    auto firstBSplinePos = (zeroBezierPos - secondBSplineCP.vec) * 3.f + secondBSplineCP.vec;
+
+    coordinator.SetComponent<Position>(bSplineCPs.at(0), Position(firstBSplinePos));
 }

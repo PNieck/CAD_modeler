@@ -2,6 +2,7 @@
 
 #include <ecs/system.hpp>
 #include <ecs/coordinator.hpp>
+#include <ecs/eventHandler.hpp>
 
 #include "shaders/shaderRepository.hpp"
 #include "../components/c2CurveParameters.hpp"
@@ -43,10 +44,13 @@ private:
     ShaderRepository* shaderRepo;
     NameGenerator nameGenerator;
 
+    static constexpr int MIN_CTRL_PTS_CNT = 4;
+
     void UpdateEntities() const;
     void UpdateCurveMesh(Entity curve) const;
     void UpdateBSplinePolygon(Entity curve) const;
     void UpdateBezierControlPoints(Entity curve, const C2CurveParameters& params) const;
+    void UpdateBezierCtrlPtsHandlers(Entity curve, BezierControlPoints& ctrlPts) const;
 
     void RenderBSplinePolygons(std::stack<Entity>& entities) const;
     void RenderBezierPolygons(std::stack<Entity>& entities) const;
@@ -60,4 +64,17 @@ private:
 
     std::vector<float> GenerateBSplinePolygonVertices(const CurveControlPoints& params) const;
     std::vector<uint32_t> GenerateBSplinePolygonIndices(const CurveControlPoints& params) const;
+
+
+    class FirstBezierCtrlPtsMovedHandler: public EventHandler<Position> {
+    public:
+        FirstBezierCtrlPtsMovedHandler(Coordinator& coordinator, Entity c2Curve):
+            coordinator(coordinator), c2Curve(c2Curve) {}
+
+        void HandleEvent(Entity entity, const Position& component, EventType eventType) override;
+
+    private:
+        Coordinator& coordinator;
+        Entity c2Curve;
+    };
 };
