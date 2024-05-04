@@ -17,7 +17,7 @@ void DeletionHandler::HandleEvent(Entity entity, const CurveControlPoints& compo
     auto entitiesIt = component.ControlPoints().begin();
     auto handlersIt = component.controlPointsHandlers.begin();
 
-    while (handlersIt != component.controlPointsHandlers.end() || entitiesIt != component.ControlPoints().end()) {
+    while (handlersIt != component.controlPointsHandlers.end() && entitiesIt != component.ControlPoints().end()) {
         coordinator.Unsubscribe<Position>(*entitiesIt, (*handlersIt).second);
 
         ++entitiesIt;
