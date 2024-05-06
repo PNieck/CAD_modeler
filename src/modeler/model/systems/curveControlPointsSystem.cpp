@@ -80,3 +80,28 @@ void CurveControlPointsSystem::DeleteControlPoint(Entity curve, Entity entity)
     if (!entityDeleted)
         coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(curve);
 }
+
+
+void CurveControlPointsSystem::ControlPointMovedHandler::HandleEvent(Entity entity, const Position & component, EventType eventType)
+{
+    coordinator.GetSystem<ToUpdateSystem>()->MarkAsToUpdate(curve);
+}
+
+
+void CurveControlPointsSystem::DeletionHandler::HandleEvent(Entity entity, const CurveControlPoints& component, EventType eventType)
+{
+    if (eventType != EventType::ComponentDeleted)
+        return;
+
+    auto entitiesIt = component.ControlPoints().begin();
+    auto handlersIt = component.controlPointsHandlers.begin();
+
+    while (handlersIt != component.controlPointsHandlers.end() && entitiesIt != component.ControlPoints().end()) {
+        coordinator.Unsubscribe<Position>(*entitiesIt, (*handlersIt).second);
+
+        ++entitiesIt;
+        ++handlersIt;
+    }
+
+    coordinator.Unsubscribe<CurveControlPoints>(entity, component.deletionHandler);
+}
