@@ -541,7 +541,11 @@ void C2CurveSystem::BezierCtrlPtMovedHandler::HandleEvent(Entity entity, const P
     switch (index % 3)
     {
     case 0:
-        MiddleFromFullLineMoved(bezierCPs, bSplineCPs, index);
+        SecondFromFullLineMoved(bezierCPs, bSplineCPs, index);
+        break;
+
+    case 1:
+        ThirdFromFullLineMoved(bezierCPs, bSplineCPs, index);
         break;
 
     case 2:
@@ -581,7 +585,7 @@ void C2CurveSystem::BezierCtrlPtMovedHandler::FirstFromFullLineMoved(const std::
 }
 
 
-void C2CurveSystem::BezierCtrlPtMovedHandler::MiddleFromFullLineMoved(const std::vector<Entity>& bezierCPs, const std::vector<Entity>& bSplineCPs, int bezierCtrlPtIndex) const
+void C2CurveSystem::BezierCtrlPtMovedHandler::SecondFromFullLineMoved(const std::vector<Entity>& bezierCPs, const std::vector<Entity>& bSplineCPs, int bezierCtrlPtIndex) const
 {
     int bSplineCPToModifyIndex = bezierCtrlPtIndex/3 + 1;
 
@@ -590,6 +594,19 @@ void C2CurveSystem::BezierCtrlPtMovedHandler::MiddleFromFullLineMoved(const std:
     auto const& newBezierPos = coordinator.GetComponent<Position>(bezierCPs[bezierCtrlPtIndex]);
 
     auto newPos = (3.f*newBezierPos.vec - 0.5f*(prevCP.vec + nextCP.vec)) * 0.5f;
+
+    coordinator.SetComponent<Position>(bSplineCPs.at(bSplineCPToModifyIndex), Position(newPos));
+}
+
+
+void C2CurveSystem::BezierCtrlPtMovedHandler::ThirdFromFullLineMoved(const std::vector<Entity>& bezierCPs, const std::vector<Entity>& bSplineCPs, int bezierCtrlPtIndex) const
+{
+    int bSplineCPToModifyIndex = (bezierCtrlPtIndex-1)/3 + 1;
+
+    auto const& bSplineCPToStay = coordinator.GetComponent<Position>(bSplineCPs[bSplineCPToModifyIndex + 1]);
+    auto const& newBezierPos = coordinator.GetComponent<Position>(bezierCPs[bezierCtrlPtIndex]);
+
+    auto newPos = (newBezierPos.vec - bSplineCPToStay.vec) * 0.5f + newBezierPos.vec;
 
     coordinator.SetComponent<Position>(bSplineCPs.at(bSplineCPToModifyIndex), Position(newPos));
 }
