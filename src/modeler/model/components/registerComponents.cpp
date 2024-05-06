@@ -14,6 +14,7 @@
 #include <CAD_modeler/model/components/c2CurveParameters.hpp>
 #include <CAD_modeler/model/components/bSplinePolygonMesh.hpp>
 #include <CAD_modeler/model/components/bezierControlPoints.hpp>
+#include <CAD_modeler/model/components/unremovable.hpp>
 
 
 void RegisterAllComponents(Coordinator& coordinator)
@@ -32,4 +33,5 @@ void RegisterAllComponents(Coordinator& coordinator)
     coordinator.RegisterComponent<C2CurveParameters>();
     coordinator.RegisterComponent<BSplinePolygonMesh>();
     coordinator.RegisterComponent<BezierControlPoints>();
+    coordinator.RegisterComponent<Unremovable>();
 }

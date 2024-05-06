@@ -5,6 +5,7 @@
 #include <CAD_modeler/model/components/position.hpp>
 #include <CAD_modeler/model/components/mesh.hpp>
 #include <CAD_modeler/model/components/name.hpp>
+#include <CAD_modeler/model/components/unremovable.hpp>
 
 #include <CAD_modeler/model/systems/cameraSystem.hpp>
 #include <CAD_modeler/model/systems/selectionSystem.hpp>
@@ -35,9 +36,10 @@ void CursorSystem::Init(ShaderRepository* shadersRepo)
     std::vector<uint32_t> indices { 0 };
     
     mesh.Update(vertices, indices);
+    
     coordinator->AddComponent<Mesh>(cursor, mesh);
-
     coordinator->AddComponent<Name>(cursor, "Cursor");
+    coordinator->AddComponent<Unremovable>(cursor, Unremovable());
 }
 
 

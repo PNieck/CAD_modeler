@@ -26,8 +26,6 @@ private:
     void RenderAdd3DPointsGui() const;
 
     void RenderAddingCurveGui(CurveType curveType) const;
-    // void RenderAddingC0CurveGui() const;
-    // void RenderAddingC2CurveGui() const;
 
     void RenderObjectsNames() const;
     void RenderObjectsProperties() const;
@@ -42,6 +40,7 @@ private:
     void DisplayCurveControlPoints(Entity entity, const CurveControlPoints& controlPoints) const;
     void DisplayC0CurveParameters(Entity entity, const C0CurveParameters& params) const;
     void DisplayC2CurveParameters(Entity entity, const C2CurveParameters& params) const;
+    void DisplayEntityDeletionOption(Entity entity) const;
 
     void DisplayNameEditor(Entity entity, const Name& name) const;
     

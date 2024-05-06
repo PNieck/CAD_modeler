@@ -8,6 +8,7 @@
 #include <CAD_modeler/model/components/curveControlPoints.hpp>
 #include <CAD_modeler/model/components/c2CurveParameters.hpp>
 #include <CAD_modeler/model/components/bSplinePolygonMesh.hpp>
+#include <CAD_modeler/model/components/unremovable.hpp>
 
 #include <CAD_modeler/model/systems/cameraSystem.hpp>
 #include <CAD_modeler/model/systems/selectionSystem.hpp>
@@ -398,6 +399,7 @@ BezierControlPoints C2CurveSystem::CreateBezierControlPoints(const CurveControlP
     for (auto& vec: pointsPositions) {
         Entity point = pointsSystem->CreatePoint(Position(vec), false);
         bezierControlPoints.AddControlPoint(point);
+        coordinator->AddComponent<Unremovable>(point, Unremovable());
     }
 
     return bezierControlPoints;

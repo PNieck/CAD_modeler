@@ -1,6 +1,7 @@
 #include <CAD_modeler/views/guiView.hpp>
 
 #include <CAD_modeler/utilities/angle.hpp>
+#include <CAD_modeler/model/components/unremovable.hpp>
 
 #include <imgui.h>
 #include <backends/imgui_impl_glfw.h>
@@ -246,9 +247,9 @@ void GuiView::RenderSingleObjectProperties(Entity entity) const
     if (it != components.end())
         DisplayC2CurveParameters(entity, model.GetComponent<C2CurveParameters>(entity));
 
-    if (ImGui::Button("Delete object")) {
-        controller.DeleteEntity(entity);
-    }
+    it = components.find(Model::GetComponentId<Unremovable>());
+    if (it == components.end())
+        DisplayEntityDeletionOption(entity);
 }
 
 
@@ -491,6 +492,14 @@ void GuiView::DisplayC2CurveParameters(Entity entity, const C2CurveParameters & 
             model.ShowC2BezierControlPoints(entity);
         else
             model.HideC2BezierControlPoints(entity);
+    }
+}
+
+
+void GuiView::DisplayEntityDeletionOption(Entity entity) const
+{
+    if (ImGui::Button("Delete object")) {
+        controller.DeleteEntity(entity);
     }
 }
 
