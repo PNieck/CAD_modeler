@@ -538,6 +538,9 @@ void C2CurveSystem::BezierCtrlPtMovedHandler::HandleEvent(Entity entity, const P
     if (index == 0)
         return FirstCPMoved(bezierCPs, bSplineCPs);
 
+    if (index == bezierCPs.size() - 1)
+        return LastCPMoved(bezierCPs, bSplineCPs);
+
     switch (index % 3)
     {
     case 0:
@@ -566,9 +569,23 @@ void C2CurveSystem::BezierCtrlPtMovedHandler::FirstCPMoved(const std::vector<Ent
     auto const& secondBSplineCP = coordinator.GetComponent<Position>(bSplineCPs.at(1));
 
     auto zeroBezierPos = 2.f * firstBezierCP.vec - secondBezierCP.vec;
-    auto firstBSplinePos = (zeroBezierPos - secondBSplineCP.vec) * 3.f + secondBSplineCP.vec;
+    auto firstBSplineNewPos = (zeroBezierPos - secondBSplineCP.vec) * 3.f + secondBSplineCP.vec;
 
-    coordinator.SetComponent<Position>(bSplineCPs.at(0), Position(firstBSplinePos));
+    coordinator.SetComponent<Position>(bSplineCPs.at(0), Position(firstBSplineNewPos));
+}
+
+
+void C2CurveSystem::BezierCtrlPtMovedHandler::LastCPMoved(const std::vector<Entity>& bezierCPs, const std::vector<Entity>& bSplineCPs) const
+{
+    auto const& lastBezierCP = coordinator.GetComponent<Position>(bezierCPs.at(bezierCPs.size() - 1));
+    auto const& secondToLastBezierCP = coordinator.GetComponent<Position>(bezierCPs.at(bezierCPs.size() - 2));
+
+    auto const& secondToLastBSplineCP = coordinator.GetComponent<Position>(bSplineCPs.at(bSplineCPs.size() - 2));
+
+    auto afterLastBezierPos = 2.f * lastBezierCP.vec - secondToLastBezierCP.vec;
+    auto lastBSplineNewPos = (afterLastBezierPos - secondToLastBSplineCP.vec) * 3.f + secondToLastBSplineCP.vec;
+
+    coordinator.SetComponent<Position>(bSplineCPs.at(bSplineCPs.size() - 1), Position(lastBSplineNewPos));
 }
 
 
