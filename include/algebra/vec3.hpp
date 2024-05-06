@@ -139,10 +139,17 @@ namespace alg
     inline Vector3<DataType> operator*(const Vector3<DataType>& v, DataType scalar)
         { return scalar * v; }
 
+
     template <typename DataType>
     bool operator==(const Vector3<DataType>& v1, const Vector3<DataType>& v2) {
         return v1.X() == v2.X() &&
                v1.Y() == v2.Y() &&
                v1.Z() == v2.Z();
+    }
+
+
+    template <typename DataType>
+    inline bool operator!=(const Vector3<DataType>& v1, const Vector3<DataType>& v2) {
+        return !(v1 == v2);
     }
 };
