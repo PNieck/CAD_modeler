@@ -280,7 +280,10 @@ void C2CurveSystem::UpdateBezierControlPoints(Entity curve, const C2CurveParamet
             auto& controlPoints = bezier.ControlPoints();
             
             for (int i=0; i < bezier.Size(); ++i) {
-                coordinator->SetComponent<Position>(controlPoints[i], Position(controlPointsPositions[i]));
+                auto const& oldPos = coordinator->GetComponent<Position>(controlPoints[i]);
+
+                if (oldPos.vec != controlPointsPositions[i])
+                    coordinator->SetComponent<Position>(controlPoints[i], Position(controlPointsPositions[i]));
             }
         }
     );
@@ -313,7 +316,6 @@ void C2CurveSystem::UpdateBezierCtrlPtsHandlers(Entity curve, BezierControlPoint
         firstBezierCtrlPt,
         std::make_shared<FirstBezierCtrlPtsMovedHandler>(*coordinator, curve)
     );
-
     bezierCtrlPts.controlPointsHandlers.insert({ firstBezierCtrlPt, handlerID });
 
     // Second handler
@@ -322,6 +324,17 @@ void C2CurveSystem::UpdateBezierCtrlPtsHandlers(Entity curve, BezierControlPoint
         secondBezierCtrlPt,
         std::make_shared<SecondBezierCtrlPtsMovedHandler>(*coordinator, curve)
     );
+    bezierCtrlPts.controlPointsHandlers.insert({ secondBezierCtrlPt, handlerID });
+
+    // First in line handlers
+    for (int i = 2; i < bezierCtrlPts.Size(); i += 3) {
+        Entity entity = bezierCtrlPts.ControlPoints().at(i);
+        handlerID = coordinator->Subscribe<Position>(
+            entity,
+            std::make_shared<FirstInFullLineBezierCtrlPtsMovedHandler>(*coordinator, curve, i)
+        );
+        bezierCtrlPts.controlPointsHandlers.insert({ entity, handlerID });
+    }
 }
 
 
@@ -576,5 +589,12 @@ void C2CurveSystem::FirstInFullLineBezierCtrlPtsMovedHandler::HandleEvent(Entity
     if (bSplineCPs.size() < MIN_CTRL_PTS_CNT)
         return;
     
-    
+    int bSplineCPToModifyIndex = bezierCtrlPtIndex - 2*(bezierCtrlPtIndex/3);
+
+    auto const& bSplineCPToStay = coordinator.GetComponent<Position>(bSplineCPs[bSplineCPToModifyIndex - 1]);
+    auto const& newBezierPos = coordinator.GetComponent<Position>(bezierCPs[bezierCtrlPtIndex]);
+
+    auto newPos = (newBezierPos.vec - bSplineCPToStay.vec) * 0.5f + newBezierPos.vec;
+
+    coordinator.SetComponent<Position>(bSplineCPs.at(bSplineCPToModifyIndex), Position(newPos));
 }

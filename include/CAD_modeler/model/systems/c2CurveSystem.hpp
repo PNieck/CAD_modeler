@@ -96,13 +96,13 @@ private:
     class FirstInFullLineBezierCtrlPtsMovedHandler: public EventHandler<Position> {
     public:
         FirstInFullLineBezierCtrlPtsMovedHandler(Coordinator& coordinator, Entity c2Curve, int ctrPtNo):
-            coordinator(coordinator), c2Curve(c2Curve), bezierCtrlPtNo(ctrPtNo) {}
+            coordinator(coordinator), c2Curve(c2Curve), bezierCtrlPtIndex(ctrPtNo) {}
 
         void HandleEvent(Entity entity, const Position& component, EventType eventType) override;
 
     private:
         Coordinator& coordinator;
         Entity c2Curve;
-        int bezierCtrlPtNo;
+        int bezierCtrlPtIndex;
     };
 };

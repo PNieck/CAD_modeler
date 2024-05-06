@@ -327,7 +327,7 @@ void GuiView::DisplayPositionProperty(Entity entity, const Position& pos) const
     valueChanged |= ImGui::DragFloat("Z##Pos", &z, DRAG_FLOAT_SPEED);
 
     if (valueChanged)
-        controller.ChangeComponent<Position>(entity, Position(x, y, z));  
+        controller.ChangeComponent<Position>(entity, Position(x, y, z));
 }
 
 
