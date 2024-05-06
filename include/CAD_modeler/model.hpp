@@ -9,7 +9,8 @@
 #include "model/systems/pointsSystem.hpp"
 #include "model/systems/nameSystem.hpp"
 #include "model/systems/selectionSystem.hpp"
-#include "model/systems/bezierCurveSystem.hpp"
+#include "model/systems/c0CurveSystem.hpp"
+#include "model/systems/c2CurveSystem.hpp"
 
 #include "model/systems/shaders/shaderRepository.hpp"
 
@@ -29,13 +30,16 @@ public:
     void AddTorus();
 
     inline Entity AddC0Curve(const std::vector<Entity>& controlPoints) const
-        { return bezierCurveSystem->CreateBezierCurve(controlPoints); }
+        { return c0CurveSystem->CreateC0Curve(controlPoints); }
 
-    inline void AddC0CurveControlPoint(Entity curve, Entity entity) const
-        { bezierCurveSystem->AddControlPoint(curve, entity); }
+    inline Entity AddC2Curve(const std::vector<Entity>& controlPoints) const
+        { return c2CurveSystem->CreateC2Curve(controlPoints); }
 
-    inline void DeleteC0CurveControlPoint(Entity curve, Entity controlPoint) const
-        { bezierCurveSystem->DeleteControlPoint(curve, controlPoint); }
+    inline void AddControlPointToCurve(Entity curve, Entity entity) const
+        { c0CurveSystem->AddControlPoint(curve, entity); }
+
+    inline void DeleteControlPointFromCurve(Entity curve, Entity controlPoint) const
+        { c0CurveSystem->DeleteControlPoint(curve, controlPoint); }
 
     inline void RotateCamera(float x, float y) const
         { cameraSys->RotateAroundTarget(x, y); }
@@ -118,8 +122,26 @@ public:
     inline const std::unordered_set<Entity>& GetAllPoints() const
         { return pointsSystem->GetEntities(); }
 
-    inline const std::unordered_set<Entity>& GetAllC0Curves() const
-        { return bezierCurveSystem->GetEntities(); }
+    inline const std::unordered_set<Entity>& GetAllCurves() const
+        { return coordinator.GetSystem<CurveControlPointsSystem>()->GetEntities(); }
+
+    inline const void ShowC2BSplinePolygon(Entity entity) const
+        { return c2CurveSystem->ShowBSplinePolygon(entity); }
+
+    inline const void HideC2BSplinePolygon(Entity entity) const
+        { return c2CurveSystem->HideBSplinePolygon(entity); }
+
+    inline const void ShowC2BezierPolygon(Entity entity) const
+        { return c2CurveSystem->ShowBezierPolygon(entity); }
+
+    inline const void HideC2BezierPolygon(Entity entity) const
+        { return c2CurveSystem->HideBezierPolygon(entity); }
+
+    inline const void ShowC2BezierControlPoints(Entity entity) const
+        { return c2CurveSystem->ShowBezierControlPoints(entity); }
+
+    inline const void HideC2BezierControlPoints(Entity entity) const
+        { return c2CurveSystem->HideBezierControlPoints(entity); }
 
     template <typename Comp>
     static inline constexpr ComponentId GetComponentId()
@@ -136,7 +158,8 @@ private:
     std::shared_ptr<PointsSystem> pointsSystem;
     std::shared_ptr<NameSystem> nameSystem;
     std::shared_ptr<SelectionSystem> selectionSystem;
-    std::shared_ptr<BezierCurveSystem> bezierCurveSystem;
+    std::shared_ptr<C0CurveSystem> c0CurveSystem;
+    std::shared_ptr<C2CurveSystem> c2CurveSystem;
 
     alg::Vec3 PointFromViewportCoordinates(float x, float y) const;
     Line LineFromViewportCoordinates(float x, float y) const;

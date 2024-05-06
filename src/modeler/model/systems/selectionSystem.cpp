@@ -86,8 +86,7 @@ void SelectionSystem::SelectFromLine(const Line& line)
         float t = alg::Dot(line.GetDirection(), position.vec - line.GetSamplePoint());
         alg::Vec3 projection = line.GetPointOnLine(t);
 
-        // TODO: change to distance Squared
-        float distance = alg::Distance(projection, position.vec);
+        float distance = alg::DistanceSquared(projection, position.vec);
 
         if (t < smallestT && distance < 0.5) {
             smallestT = t;

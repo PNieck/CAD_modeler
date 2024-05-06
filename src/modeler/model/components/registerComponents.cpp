@@ -8,7 +8,13 @@
 #include <CAD_modeler/model/components/scale.hpp>
 #include <CAD_modeler/model/components/selected.hpp>
 #include <CAD_modeler/model/components/torusParameters.hpp>
-#include <CAD_modeler/model/components/bezierCurveParameters.hpp>
+#include <CAD_modeler/model/components/toUpdate.hpp>
+#include <CAD_modeler/model/components/curveControlPoints.hpp>
+#include <CAD_modeler/model/components/c0CurveParameters.hpp>
+#include <CAD_modeler/model/components/c2CurveParameters.hpp>
+#include <CAD_modeler/model/components/bSplinePolygonMesh.hpp>
+#include <CAD_modeler/model/components/bezierControlPoints.hpp>
+#include <CAD_modeler/model/components/unremovable.hpp>
 
 
 void RegisterAllComponents(Coordinator& coordinator)
@@ -21,5 +27,11 @@ void RegisterAllComponents(Coordinator& coordinator)
     coordinator.RegisterComponent<Scale>();
     coordinator.RegisterComponent<Selected>();
     coordinator.RegisterComponent<TorusParameters>();
-    coordinator.RegisterComponent<BezierCurveParameter>();
+    coordinator.RegisterComponent<ToUpdate>();
+    coordinator.RegisterComponent<CurveControlPoints>();
+    coordinator.RegisterComponent<C0CurveParameters>();
+    coordinator.RegisterComponent<C2CurveParameters>();
+    coordinator.RegisterComponent<BSplinePolygonMesh>();
+    coordinator.RegisterComponent<BezierControlPoints>();
+    coordinator.RegisterComponent<Unremovable>();
 }

@@ -1,6 +1,7 @@
 #include <CAD_modeler/views/guiView.hpp>
 
 #include <CAD_modeler/utilities/angle.hpp>
+#include <CAD_modeler/model/components/unremovable.hpp>
 
 #include <imgui.h>
 #include <backends/imgui_impl_glfw.h>
@@ -59,7 +60,11 @@ void GuiView::RenderGui() const
             break;
 
         case AppState::AddingC0Curve:
-            RenderAddingC0CurveGui();
+            RenderAddingCurveGui(CurveType::C0);
+            break;
+
+        case AppState::AddingC2Curve:
+            RenderAddingCurveGui(CurveType::C2);
             break;
 
         default:
@@ -87,6 +92,11 @@ void GuiView::RenderDefaultGui() const
 
     if (ImGui::Button("Add C0 curve")) {
         controller.SetAppState(AppState::AddingC0Curve);
+        controller.DeselectAllEntities();
+    }
+
+    if (ImGui::Button("Add C2 curve")) {
+        controller.SetAppState(AppState::AddingC2Curve);
         controller.DeselectAllEntities();
     }
 
@@ -127,7 +137,7 @@ void GuiView::RenderAdd3DPointsGui() const
 }
 
 
-void GuiView::RenderAddingC0CurveGui() const
+void GuiView::RenderAddingCurveGui(CurveType curveType) const
 {
     static std::unordered_set<Entity> controlPoints;
     static Entity curve;
@@ -157,9 +167,9 @@ void GuiView::RenderAddingC0CurveGui() const
             if (newSelected) {
                 controlPoints.insert(entity);
                 if (controlPoints.size() == 1)
-                    curve = controller.AddC0Curve({entity});
+                    curve = controller.AddCurve({entity}, curveType);
                 else 
-                    controller.AddC0CurveControlPoint(curve, entity);
+                    controller.AddControlPointToCurve(curve, entity);
                 controller.SelectEntity(entity);
             }
             else {
@@ -168,7 +178,7 @@ void GuiView::RenderAddingC0CurveGui() const
                 if (controlPoints.size() == 0)
                     controller.DeleteEntity(curve);
                 else
-                    controller.DeleteC0ControlPoint(curve, entity);
+                    controller.DeleteControlPointFromCurve(curve, entity);
                 controller.DeselectEntity(entity);
             }
         }
@@ -225,13 +235,21 @@ void GuiView::RenderSingleObjectProperties(Entity entity) const
     if (it != components.end())
         DisplayNameEditor(entity, model.GetComponent<Name>(entity));
 
-    it = components.find(Model::GetComponentId<BezierCurveParameter>());
+    it = components.find(Model::GetComponentId<CurveControlPoints>());
     if (it != components.end())
-        DisplayBezierCurveProperty(entity, model.GetComponent<BezierCurveParameter>(entity));
+        DisplayCurveControlPoints(entity, model.GetComponent<CurveControlPoints>(entity));
 
-    if (ImGui::Button("Delete object")) {
-        controller.DeleteEntity(entity);
-    }
+    it = components.find(Model::GetComponentId<C0CurveParameters>());
+    if (it != components.end())
+        DisplayC0CurveParameters(entity, model.GetComponent<C0CurveParameters>(entity));
+
+    it = components.find(Model::GetComponentId<C2CurveParameters>());
+    if (it != components.end())
+        DisplayC2CurveParameters(entity, model.GetComponent<C2CurveParameters>(entity));
+
+    it = components.find(Model::GetComponentId<Unremovable>());
+    if (it == components.end())
+        DisplayEntityDeletionOption(entity);
 }
 
 
@@ -310,7 +328,7 @@ void GuiView::DisplayPositionProperty(Entity entity, const Position& pos) const
     valueChanged |= ImGui::DragFloat("Z##Pos", &z, DRAG_FLOAT_SPEED);
 
     if (valueChanged)
-        controller.ChangeComponent<Position>(entity, Position(x, y, z));  
+        controller.ChangeComponent<Position>(entity, Position(x, y, z));
 }
 
 
@@ -387,22 +405,8 @@ void GuiView::DisplayTorusProperty(Entity entity, const TorusParameters& params)
 }
 
 
-void GuiView::DisplayBezierCurveProperty(Entity entity, const BezierCurveParameter& params) const
+void GuiView::DisplayCurveControlPoints(Entity entity, const CurveControlPoints& params) const
 {
-    bool drawPolygon = params.drawPolygon;
-
-    ImGui::SeparatorText("Curve options");
-
-    ImGui::Checkbox("Draw polygon", &drawPolygon);
-
-    if (drawPolygon != params.drawPolygon) {
-
-        // TODO: change copying whole params
-        BezierCurveParameter newParams = params;
-        newParams.drawPolygon = drawPolygon;
-        controller.ChangeComponent<BezierCurveParameter>(entity, newParams);
-    }
-
     ImGui::SeparatorText("Control Points");
 
     int selected = -1;
@@ -413,7 +417,7 @@ void GuiView::DisplayBezierCurveProperty(Entity entity, const BezierCurveParamet
         if (ImGui::BeginPopupContextItem()) {
             selected = n;
             if (ImGui::Button("Delete control point")) {
-                controller.DeleteC0ControlPoint(entity, controlPoint);
+                controller.DeleteControlPointFromCurve(entity, controlPoint);
             }
             ImGui::EndPopup();
         }
@@ -428,14 +432,74 @@ void GuiView::DisplayBezierCurveProperty(Entity entity, const BezierCurveParamet
         auto const& points = model.GetAllPoints();
 
         for (auto point: points) {
+            // TODO: rewrite with set intersection
             if (std::find(params.ControlPoints().begin(), params.ControlPoints().end(), point) == params.ControlPoints().end()) {
                 if (ImGui::Selectable(model.GetEntityName(point).c_str(), false)) {
-                    controller.AddC0CurveControlPoint(entity, point);
+                    controller.AddControlPointToCurve(entity, point);
                 }
             }
         }
 
         ImGui::EndPopup();
+    }
+}
+
+
+void GuiView::DisplayC0CurveParameters(Entity entity, const C0CurveParameters & params) const
+{
+    bool drawPolygon = params.drawPolygon;
+
+    ImGui::Checkbox("Draw polygon", &drawPolygon);
+
+    if (drawPolygon != params.drawPolygon) {
+        C0CurveParameters newParams;
+        newParams.drawPolygon = drawPolygon;
+        controller.ChangeComponent<C0CurveParameters>(entity, newParams);
+    }
+}
+
+
+void GuiView::DisplayC2CurveParameters(Entity entity, const C2CurveParameters & params) const
+{
+    bool drawPolygon = params.drawBSplinePolygon;
+
+    ImGui::Checkbox("Draw BSpline polygon", &drawPolygon);
+
+    if (drawPolygon != params.drawBSplinePolygon) {
+        if (drawPolygon)
+            model.ShowC2BSplinePolygon(entity);
+        else
+            model.HideC2BSplinePolygon(entity);
+    }
+
+    drawPolygon = params.drawBezierPolygon;
+
+    ImGui::Checkbox("Draw Bezier polygon", &drawPolygon);
+
+    if (drawPolygon != params.drawBezierPolygon) {
+        if (drawPolygon)
+            model.ShowC2BezierPolygon(entity);
+        else
+            model.HideC2BezierPolygon(entity);
+    }
+
+    drawPolygon = params.showBezierControlPoints;
+
+    ImGui::Checkbox("Show Bezier control points", &drawPolygon);
+
+    if (drawPolygon != params.showBezierControlPoints) {
+        if (drawPolygon)
+            model.ShowC2BezierControlPoints(entity);
+        else
+            model.HideC2BezierControlPoints(entity);
+    }
+}
+
+
+void GuiView::DisplayEntityDeletionOption(Entity entity) const
+{
+    if (ImGui::Button("Delete object")) {
+        controller.DeleteEntity(entity);
     }
 }
 

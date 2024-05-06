@@ -3,6 +3,7 @@
 #include <imgui.h>
 
 #include "subController.hpp"
+#include "utils/curvesTypes.hpp"
 
 
 class GuiController: public SubController {
@@ -15,14 +16,13 @@ public:
     inline void AddTorus() const
         { model.AddTorus(); }
 
-    inline Entity AddC0Curve(const std::vector<Entity>& entities) const
-        { return model.AddC0Curve(entities); }
+    Entity AddCurve(const std::vector<Entity>& entities, CurveType curveType) const;
 
-    inline void AddC0CurveControlPoint(Entity curve, Entity entity) const
-        { model.AddC0CurveControlPoint(curve, entity); }
+    inline void AddControlPointToCurve(Entity curve, Entity entity) const
+        { model.AddControlPointToCurve(curve, entity); }
 
-    inline void DeleteC0ControlPoint(Entity curve, Entity controlPoint) const
-        { model.DeleteC0CurveControlPoint(curve, controlPoint); }
+    inline void DeleteControlPointFromCurve(Entity curve, Entity controlPoint) const
+        { model.DeleteControlPointFromCurve(curve, controlPoint); }
 
     inline void SelectEntity(Entity entity) const
         { model.Select(entity); }
@@ -51,4 +51,22 @@ public:
 
     inline void ChangeEntityName(Entity entity, const Name& name)
         { model.ChangeEntityName(entity, name); }
+
+    inline void ShowC2BSplinePolygon(Entity entity)
+        { model.ShowC2BSplinePolygon(entity); }
+
+    inline void HideC2BSplinePolygon(Entity entity)
+        { model.HideC2BSplinePolygon(entity); }
+
+    inline void ShowC2BezierPolygon(Entity entity)
+        { model.ShowC2BezierPolygon(entity); }
+
+    inline void HideC2BezierControlPoints(Entity entity)
+        { model.HideC2BezierControlPoints(entity); }
+
+    inline void ShowC2BezierControlPoints(Entity entity)
+        { model.ShowC2BezierControlPoints(entity); }
+
+    inline void HideC2BezierPolygon(Entity entity)
+        { model.HideC2BezierPolygon(entity); }
 };

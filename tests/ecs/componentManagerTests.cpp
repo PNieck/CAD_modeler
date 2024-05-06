@@ -55,3 +55,14 @@ TEST(ComponentsManagerTests, AddEntity) {
     EXPECT_EQ(r1.val, c1.val);
     EXPECT_EQ(r2.val, c2.val);
 }
+
+
+TEST(ComponentsManagerTests, DeleteNonExistingComponent) {
+    ComponentsManager manager;
+    EntitiesManager entitiesMgr;
+
+    manager.RegisterComponent<Component1>();
+    Entity e = entitiesMgr.CreateEntity();
+
+    manager.DeleteComponent<Component1>(e);
+}

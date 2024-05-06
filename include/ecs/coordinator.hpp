@@ -101,7 +101,7 @@ public:
         { return componentMgr.GetEntityComponents(entity); }
 
     template <typename Sys>
-    inline std::shared_ptr<Sys> GetSystem() {
+    inline std::shared_ptr<Sys> GetSystem() const {
         return systemsMgr.GetSystem<Sys>();
     }
 
