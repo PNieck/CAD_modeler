@@ -84,6 +84,17 @@ void CurveControlPointsSystem::DeleteControlPoint(Entity curve, Entity entity)
 
 void CurveControlPointsSystem::ControlPointMovedHandler::HandleEvent(Entity entity, const Position & component, EventType eventType)
 {
+    if (eventType == EventType::ComponentDeleted) {
+        coordinator.EditComponent<CurveControlPoints>(curve,
+            [this, entity](CurveControlPoints& ctrlPts) {
+                ctrlPts.DeleteControlPoint(entity);
+
+                coordinator.Unsubscribe<Position>(entity, ctrlPts.controlPointsHandlers.at(entity));
+                ctrlPts.controlPointsHandlers.erase(entity);
+            }
+        );
+    }
+
     coordinator.GetSystem<ToUpdateSystem>()->MarkAsToUpdate(curve);
 }
 
