@@ -536,10 +536,21 @@ void C2CurveSystem::BezierCtrlPtMovedHandler::HandleEvent(Entity entity, const P
         return;
 
     if (index == 0)
-        FirstCPMoved(bezierCPs, bSplineCPs);
-    else if (index % 3 == 2)
-        FirstFromFullLineMoved(bezierCPs, bSplineCPs, index);
+        return FirstCPMoved(bezierCPs, bSplineCPs);
 
+    switch (index % 3)
+    {
+    case 0:
+        MiddleFromFullLineMoved(bezierCPs, bSplineCPs, index);
+        break;
+
+    case 2:
+        FirstFromFullLineMoved(bezierCPs, bSplineCPs, index);
+        break;
+    
+    default:
+        break;
+    }
 }
 
 
@@ -559,12 +570,26 @@ void C2CurveSystem::BezierCtrlPtMovedHandler::FirstCPMoved(const std::vector<Ent
 
 void C2CurveSystem::BezierCtrlPtMovedHandler::FirstFromFullLineMoved(const std::vector<Entity>& bezierCPs, const std::vector<Entity>& bSplineCPs, int bezierCtrlPtIndex) const
 {
-    int bSplineCPToModifyIndex = bezierCtrlPtIndex - 2*(bezierCtrlPtIndex/3);
+    int bSplineCPToModifyIndex = (bezierCtrlPtIndex+1)/3 + 1;
 
     auto const& bSplineCPToStay = coordinator.GetComponent<Position>(bSplineCPs[bSplineCPToModifyIndex - 1]);
     auto const& newBezierPos = coordinator.GetComponent<Position>(bezierCPs[bezierCtrlPtIndex]);
 
     auto newPos = (newBezierPos.vec - bSplineCPToStay.vec) * 0.5f + newBezierPos.vec;
+
+    coordinator.SetComponent<Position>(bSplineCPs.at(bSplineCPToModifyIndex), Position(newPos));
+}
+
+
+void C2CurveSystem::BezierCtrlPtMovedHandler::MiddleFromFullLineMoved(const std::vector<Entity>& bezierCPs, const std::vector<Entity>& bSplineCPs, int bezierCtrlPtIndex) const
+{
+    int bSplineCPToModifyIndex = bezierCtrlPtIndex/3 + 1;
+
+    auto const& prevCP = coordinator.GetComponent<Position>(bSplineCPs[bSplineCPToModifyIndex - 1]);
+    auto const& nextCP = coordinator.GetComponent<Position>(bSplineCPs[bSplineCPToModifyIndex + 1]);
+    auto const& newBezierPos = coordinator.GetComponent<Position>(bezierCPs[bezierCtrlPtIndex]);
+
+    auto newPos = (3.f*newBezierPos.vec - 0.5f*(prevCP.vec + nextCP.vec)) * 0.5f;
 
     coordinator.SetComponent<Position>(bSplineCPs.at(bSplineCPToModifyIndex), Position(newPos));
 }
