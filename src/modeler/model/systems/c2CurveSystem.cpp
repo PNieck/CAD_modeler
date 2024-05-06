@@ -117,6 +117,12 @@ void C2CurveSystem::ShowBezierControlPoints(Entity entity)
 
     UpdateBezierCtrlPtsHandlers(entity, bezierControlPoints);
 
+    // FIXME
+    bezierControlPoints.deletionHandler = coordinator->Subscribe<BezierControlPoints>(
+        entity,
+        std::make_shared<DeletionHandler>(*coordinator)
+    );
+
     coordinator->AddComponent<BezierControlPoints>(entity, bezierControlPoints);
 }
 
@@ -290,6 +296,8 @@ void C2CurveSystem::UpdateBezierControlPoints(Entity curve, const C2CurveParamet
 
 void C2CurveSystem::UpdateBezierCtrlPtsHandlers(Entity curve, BezierControlPoints& bezierCtrlPts) const
 {
+    // FIXME: there is no need for handler deletion
+
     // Removing all handlers
     auto entitiesIt = bezierCtrlPts.ControlPoints().begin();
     auto handlersIt = bezierCtrlPts.controlPointsHandlers.begin();
@@ -626,4 +634,24 @@ void C2CurveSystem::BezierCtrlPtMovedHandler::ThirdFromFullLineMoved(const std::
     auto newPos = (newBezierPos.vec - bSplineCPToStay.vec) * 0.5f + newBezierPos.vec;
 
     coordinator.SetComponent<Position>(bSplineCPs.at(bSplineCPToModifyIndex), Position(newPos));
+}
+
+
+// FIXME: delete code duplication
+void C2CurveSystem::DeletionHandler::HandleEvent(Entity entity, const BezierControlPoints & component, EventType eventType)
+{
+    if (eventType != EventType::ComponentDeleted)
+        return;
+
+    auto entitiesIt = component.ControlPoints().begin();
+    auto handlersIt = component.controlPointsHandlers.begin();
+
+    while (handlersIt != component.controlPointsHandlers.end() && entitiesIt != component.ControlPoints().end()) {
+        coordinator.Unsubscribe<Position>(*entitiesIt, (*handlersIt).second);
+
+        ++entitiesIt;
+        ++handlersIt;
+    }
+
+    coordinator.Unsubscribe<CurveControlPoints>(entity, component.deletionHandler);
 }
