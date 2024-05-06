@@ -11,6 +11,8 @@
 #include "utils/nameGenerator.hpp"
 #include "curveControlPointsSystem.hpp"
 
+#include <vector>
+
 
 class C2CurveSystem: public System {
 public:
@@ -68,9 +70,10 @@ private:
     inline size_t BezierControlPointsCnt(size_t bSplineCtrlPts) const
         { return bSplineCtrlPts < MIN_CTRL_PTS_CNT ? 0 : 4 + 3 * (bSplineCtrlPts - 4); }
 
-    class FirstBezierCtrlPtsMovedHandler: public EventHandler<Position> {
+
+    class BezierCtrlPtMovedHandler: public EventHandler<Position> {
     public:
-        FirstBezierCtrlPtsMovedHandler(Coordinator& coordinator, Entity c2Curve):
+        BezierCtrlPtMovedHandler(Coordinator& coordinator, Entity c2Curve):
             coordinator(coordinator), c2Curve(c2Curve) {}
 
         void HandleEvent(Entity entity, const Position& component, EventType eventType) override;
@@ -78,31 +81,8 @@ private:
     private:
         Coordinator& coordinator;
         Entity c2Curve;
-    };
 
-    class SecondBezierCtrlPtsMovedHandler: public EventHandler<Position> {
-    public:
-        SecondBezierCtrlPtsMovedHandler(Coordinator& coordinator, Entity c2Curve):
-            coordinator(coordinator), c2Curve(c2Curve) {}
-
-        void HandleEvent(Entity entity, const Position& component, EventType eventType) override;
-
-    private:
-        Coordinator& coordinator;
-        Entity c2Curve;
-    };
-
-
-    class FirstInFullLineBezierCtrlPtsMovedHandler: public EventHandler<Position> {
-    public:
-        FirstInFullLineBezierCtrlPtsMovedHandler(Coordinator& coordinator, Entity c2Curve, int ctrPtNo):
-            coordinator(coordinator), c2Curve(c2Curve), bezierCtrlPtIndex(ctrPtNo) {}
-
-        void HandleEvent(Entity entity, const Position& component, EventType eventType) override;
-
-    private:
-        Coordinator& coordinator;
-        Entity c2Curve;
-        int bezierCtrlPtIndex;
+        void FirstCPMoved(const std::vector<Entity>& bezierCPs, const std::vector<Entity>& bSplineCPs) const;
+        void FirstFromFullLineMoved(const std::vector<Entity>& bezierCPs, const std::vector<Entity>& bSplineCPs, int bezierCtrlPtIndex) const;
     };
 };

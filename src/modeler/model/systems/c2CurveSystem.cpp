@@ -193,7 +193,6 @@ void C2CurveSystem::UpdateEntities() const
 
     for (auto entity: toUpdate) {
         UpdateCurveMesh(entity);
-        coordinator->GetSystem<ToUpdateSystem>()->Unmark(entity);
 
         auto const& params = coordinator->GetComponent<C2CurveParameters>(entity);
 
@@ -203,7 +202,6 @@ void C2CurveSystem::UpdateEntities() const
         if (params.showBezierControlPoints)
             UpdateBezierControlPoints(entity, params);
 
-        // Prevention from infinite update loop
         coordinator->GetSystem<ToUpdateSystem>()->Unmark(entity);
     }
 }
@@ -309,30 +307,10 @@ void C2CurveSystem::UpdateBezierCtrlPtsHandlers(Entity curve, BezierControlPoint
     auto const& bSplineCtrlPts = coordinator->GetComponent<CurveControlPoints>(curve);
 
     // Adding new ones
+    auto handler = std::make_shared<BezierCtrlPtMovedHandler>(*coordinator, curve);
 
-    // First handler
-    Entity firstBezierCtrlPt = bezierCtrlPts.ControlPoints().at(0);
-    auto handlerID = coordinator->Subscribe<Position>(
-        firstBezierCtrlPt,
-        std::make_shared<FirstBezierCtrlPtsMovedHandler>(*coordinator, curve)
-    );
-    bezierCtrlPts.controlPointsHandlers.insert({ firstBezierCtrlPt, handlerID });
-
-    // Second handler
-    Entity secondBezierCtrlPt = bezierCtrlPts.ControlPoints().at(1);
-    handlerID = coordinator->Subscribe<Position>(
-        secondBezierCtrlPt,
-        std::make_shared<SecondBezierCtrlPtsMovedHandler>(*coordinator, curve)
-    );
-    bezierCtrlPts.controlPointsHandlers.insert({ secondBezierCtrlPt, handlerID });
-
-    // First in line handlers
-    for (int i = 2; i < bezierCtrlPts.Size(); i += 3) {
-        Entity entity = bezierCtrlPts.ControlPoints().at(i);
-        handlerID = coordinator->Subscribe<Position>(
-            entity,
-            std::make_shared<FirstInFullLineBezierCtrlPtsMovedHandler>(*coordinator, curve, i)
-        );
+    for (auto entity: bezierCtrlPts.ControlPoints()) {
+        auto handlerID = coordinator->Subscribe<Position>(entity, handler);
         bezierCtrlPts.controlPointsHandlers.insert({ entity, handlerID });
     }
 }
@@ -540,15 +518,33 @@ std::vector<uint32_t> C2CurveSystem::GenerateBSplinePolygonIndices(const CurveCo
 }
 
 
-void C2CurveSystem::FirstBezierCtrlPtsMovedHandler::HandleEvent(Entity entity, const Position& component, EventType eventType)
+void C2CurveSystem::BezierCtrlPtMovedHandler::HandleEvent(Entity entity, const Position & component, EventType eventType)
 {
-    // CP - control point
+    // FIXME: remove this condition
+    if (coordinator.GetEntityComponents(c2Curve).contains(ComponentsManager::GetComponentId<ToUpdate>()))
+        return;
+
     auto const& bSplineCPs = coordinator.GetComponent<CurveControlPoints>(c2Curve).ControlPoints();
-    auto const& bezierCPs = coordinator.GetComponent<BezierControlPoints>(c2Curve).ControlPoints();
 
     if (bSplineCPs.size() < MIN_CTRL_PTS_CNT)
         return;
-    
+
+    auto const& bezierCPs = coordinator.GetComponent<BezierControlPoints>(c2Curve).ControlPoints();
+    auto index = std::find(bezierCPs.begin(), bezierCPs.end(), entity) - bezierCPs.begin();
+
+    if (index >= bezierCPs.size())
+        return;
+
+    if (index == 0)
+        FirstCPMoved(bezierCPs, bSplineCPs);
+    else if (index % 3 == 2)
+        FirstFromFullLineMoved(bezierCPs, bSplineCPs, index);
+
+}
+
+
+void C2CurveSystem::BezierCtrlPtMovedHandler::FirstCPMoved(const std::vector<Entity>& bezierCPs, const std::vector<Entity>& bSplineCPs) const
+{
     auto const& firstBezierCP = coordinator.GetComponent<Position>(bezierCPs.at(0));
     auto const& secondBezierCP = coordinator.GetComponent<Position>(bezierCPs.at(1));
 
@@ -561,34 +557,8 @@ void C2CurveSystem::FirstBezierCtrlPtsMovedHandler::HandleEvent(Entity entity, c
 }
 
 
-void C2CurveSystem::SecondBezierCtrlPtsMovedHandler::HandleEvent(Entity entity, const Position & component, EventType eventType)
+void C2CurveSystem::BezierCtrlPtMovedHandler::FirstFromFullLineMoved(const std::vector<Entity>& bezierCPs, const std::vector<Entity>& bSplineCPs, int bezierCtrlPtIndex) const
 {
-    // CP - control point
-    auto const& bSplineCPs = coordinator.GetComponent<CurveControlPoints>(c2Curve).ControlPoints();
-    auto const& bezierCPs = coordinator.GetComponent<BezierControlPoints>(c2Curve).ControlPoints();
-
-    if (bSplineCPs.size() < MIN_CTRL_PTS_CNT)
-        return;
-
-    auto const& secondBezierCP = coordinator.GetComponent<Position>(bezierCPs.at(1));
-
-    auto const& thirdBSplineCP = coordinator.GetComponent<Position>(bSplineCPs.at(2));
-
-    // Setting second bSplinePos
-    auto secondBSplinePos = (secondBezierCP.vec - thirdBSplineCP.vec) * 0.5f + secondBezierCP.vec;
-    coordinator.SetComponent<Position>(bSplineCPs.at(1), Position(secondBSplinePos));
-}
-
-
-void C2CurveSystem::FirstInFullLineBezierCtrlPtsMovedHandler::HandleEvent(Entity entity, const Position & component, EventType eventType)
-{
-    // CP - control point
-    auto const& bSplineCPs = coordinator.GetComponent<CurveControlPoints>(c2Curve).ControlPoints();
-    auto const& bezierCPs = coordinator.GetComponent<BezierControlPoints>(c2Curve).ControlPoints();
-
-    if (bSplineCPs.size() < MIN_CTRL_PTS_CNT)
-        return;
-    
     int bSplineCPToModifyIndex = bezierCtrlPtIndex - 2*(bezierCtrlPtIndex/3);
 
     auto const& bSplineCPToStay = coordinator.GetComponent<Position>(bSplineCPs[bSplineCPToModifyIndex - 1]);
