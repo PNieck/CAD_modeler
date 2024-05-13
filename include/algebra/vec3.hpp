@@ -73,6 +73,22 @@ namespace alg
             return *this;
         }
 
+        Vector3<DataType>& operator-=(const Vector3<DataType>& v) {
+            data[0] -= v.data[0];
+            data[1] -= v.data[1];
+            data[2] -= v.data[2];
+            
+            return *this;
+        }
+
+        Vector3<DataType>& operator*=(DataType scalar) {
+            data[0] *= scalar;
+            data[1] *= scalar;
+            data[2] *= scalar;
+            
+            return *this;
+        }
+
         Vector3<DataType> operator-(const Vector3<DataType>& v) const {
             return Vector3<DataType>(
                 data[0] - v.data[0],
@@ -80,6 +96,16 @@ namespace alg
                 data[2] - v.data[2]
             );
         }
+
+
+        Vector3<DataType> operator-() const {
+            return Vector3<DataType>(
+                -data[0],
+                -data[1],
+                -data[2]
+            );
+        }
+
 
         Vector3<DataType>& operator/=(DataType scalar) {
             data[0] /= scalar;
@@ -138,6 +164,11 @@ namespace alg
     template <typename DataType>
     inline Vector3<DataType> operator*(const Vector3<DataType>& v, DataType scalar)
         { return scalar * v; }
+
+
+    template <typename DataType>
+    inline Vector3<DataType> operator/(const Vector3<DataType>& v, DataType scalar)
+        { return v * (1.f / scalar); }
 
 
     template <typename DataType>
