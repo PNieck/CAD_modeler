@@ -11,6 +11,7 @@
 #include "model/systems/selectionSystem.hpp"
 #include "model/systems/c0CurveSystem.hpp"
 #include "model/systems/c2CurveSystem.hpp"
+#include "model/systems/interpolationCurveSystem.hpp"
 
 #include "model/systems/shaders/shaderRepository.hpp"
 
@@ -160,6 +161,7 @@ private:
     std::shared_ptr<SelectionSystem> selectionSystem;
     std::shared_ptr<C0CurveSystem> c0CurveSystem;
     std::shared_ptr<C2CurveSystem> c2CurveSystem;
+    std::shared_ptr<InterpolationCurveSystem> interpolationCurveSystem;
 
     alg::Vec3 PointFromViewportCoordinates(float x, float y) const;
     Line LineFromViewportCoordinates(float x, float y) const;
