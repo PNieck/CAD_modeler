@@ -6,4 +6,5 @@ enum class AppState {
     Adding3dPoints,
     AddingC0Curve,
     AddingC2Curve,
+    AddingInterpolationCurve,
 };

@@ -72,17 +72,17 @@ Model::Model(int viewport_width, int viewport_height)
     glDepthMask(GL_FALSE);
     glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
 
-    Entity point1 = pointsSystem->CreatePoint(Position(1.f, 2.f, 0.f));
-    Entity point2 = pointsSystem->CreatePoint(Position(4.f, 5.f, 0.f));
-    Entity point3 = pointsSystem->CreatePoint(Position(5.f, 7.f, 0.f));
-    Entity point4 = pointsSystem->CreatePoint(Position(8.f, 10.f, 0.f));
+    // Entity point1 = pointsSystem->CreatePoint(Position(1.f, 2.f, 0.f));
+    // Entity point2 = pointsSystem->CreatePoint(Position(4.f, 5.f, 0.f));
+    // Entity point3 = pointsSystem->CreatePoint(Position(5.f, 7.f, 0.f));
+    // Entity point4 = pointsSystem->CreatePoint(Position(8.f, 10.f, 0.f));
 
-    interpolationCurveSystem->CreateCurve({
-        point1,
-        point2,
-        point3,
-        point4
-    });
+    // interpolationCurveSystem->CreateCurve({
+    //     point1,
+    //     point2,
+    //     point3,
+    //     point4
+    // });
 }
 
 

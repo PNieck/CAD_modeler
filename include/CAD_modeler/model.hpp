@@ -36,6 +36,9 @@ public:
     inline Entity AddC2Curve(const std::vector<Entity>& controlPoints) const
         { return c2CurveSystem->CreateC2Curve(controlPoints); }
 
+    inline Entity AddInterpolationCurve(const std::vector<Entity>& controlPoints) const
+        { return interpolationCurveSystem->CreateCurve(controlPoints); }
+
     inline void AddControlPointToCurve(Entity curve, Entity entity) const
         { c0CurveSystem->AddControlPoint(curve, entity); }
 
