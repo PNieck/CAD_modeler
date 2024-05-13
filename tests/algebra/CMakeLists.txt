@@ -43,3 +43,33 @@ target_link_libraries(
 )
 
 gtest_discover_tests(quaternion_tests)
+
+
+add_executable(
+    linearEquations_tests
+    systemsOfLinearEquationsTests.cpp
+)
+
+target_link_libraries(
+    linearEquations_tests
+    PRIVATE
+    GTest::gtest_main
+    algebra
+)
+
+gtest_discover_tests(linearEquations_tests)
+
+
+add_executable(
+    cubicPolynomials_tests
+    cubicPolynomialsTests.cpp
+)
+
+target_link_libraries(
+    cubicPolynomials_tests
+    PRIVATE
+    GTest::gtest_main
+    algebra
+)
+
+gtest_discover_tests(cubicPolynomials_tests)
