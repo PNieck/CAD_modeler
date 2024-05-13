@@ -193,6 +193,10 @@ void InterpolationCurveSystem::ChangePolynomialInPowerBaseDomainFrom0To1(alg::Ve
 
 std::vector<alg::Vec3> InterpolationCurveSystem::SquareCoeffInPowerBasis(const CurveControlPoints& cps, const std::vector<float>& chordsLen) const
 {
+    if (cps.Size() == 2) {
+        return { alg::Vec3(0), alg::Vec3(0) };
+    }
+
     auto superDiagonal = SuperdiagonalElems(chordsLen);
     auto diagonal = DiagonalElems(chordsLen);
     auto subdiagonal = SubdiagonalElems(chordsLen);
