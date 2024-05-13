@@ -21,10 +21,11 @@ TEST(LinearEquationsSolvers, TridiagonalMtx) {
         results
     );
 
-    EXPECT_EQ(algResult.size(), expAlgResult.size());
+    ASSERT_TRUE(algResult.has_value());
+    EXPECT_EQ(algResult.value().size(), expAlgResult.size());
     
-    for (int i=0; i < algResult.size(); ++i) {
-        EXPECT_FLOAT_EQ(algResult[i], expAlgResult[i]);
+    for (int i=0; i < algResult.value().size(); ++i) {
+        EXPECT_FLOAT_EQ(algResult.value()[i], expAlgResult[i]);
     }
 }
 
@@ -35,7 +36,7 @@ TEST(LinearEquationsSolvers, TridiagonalMtxWithDifferentElements) {
     std::vector<float> subdiagonal = {8, 9, 10};
     std::vector<float> results = {11, 12, 13, 14};
 
-    std::vector<float> expAlgResult = {193.f/90.f, 109.f/45.f, -259.f/30.f, 43.f/3.f};
+    // std::vector<float> expAlgResult = {193.f/90.f, 109.f/45.f, -259.f/30.f, 43.f/3.f};
 
     auto algResult = SolveSystemOfLinearEquationsWithTridiagonalMtx(
         superdiagonal,
@@ -44,9 +45,5 @@ TEST(LinearEquationsSolvers, TridiagonalMtxWithDifferentElements) {
         results
     );
 
-    EXPECT_EQ(algResult.size(), expAlgResult.size());
-    
-    for (int i=0; i < algResult.size(); ++i) {
-        EXPECT_FLOAT_EQ(algResult[i], expAlgResult[i]);
-    }
+    ASSERT_FALSE(algResult.has_value());
 }

@@ -13,6 +13,8 @@
 #include <algebra/systemsOfLinearEquasions.hpp>
 #include <algebra/cubicPolynomials.hpp>
 
+#include <cassert>
+
 
 void InterpolationCurveSystem::RegisterSystem(Coordinator &coordinator)
 {
@@ -209,12 +211,14 @@ std::vector<alg::Vec3> InterpolationCurveSystem::SquareCoeffInPowerBasis(const C
         equationResults
     );
 
-    std::vector<alg::Vec3> result(coeff.size() + 2);
+    assert(coeff.has_value());
+
+    std::vector<alg::Vec3> result(coeff.value().size() + 2);
 
     result[0] = alg::Vec3(0);
 
     for (int i=1; i <= result.size() - 2; ++i) {
-        result[i] = coeff[i-1];
+        result[i] = coeff.value()[i-1];
     }
 
     result[result.size() - 1] = alg::Vec3(0);
