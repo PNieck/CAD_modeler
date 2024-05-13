@@ -103,9 +103,12 @@ void InterpolationCurveSystem::UpdateMesh(Entity entity) const
 
 std::vector<float> InterpolationCurveSystem::GenerateMeshVertices(const CurveControlPoints &cps) const
 {
-    auto powerBasis = FindInterpolationsPolynomialsInPowerBasis(cps);
-
     std::vector<float> result;
+
+    if (cps.Size() < 2)
+        return result;
+
+    auto powerBasis = FindInterpolationsPolynomialsInPowerBasis(cps);
     result.reserve(powerBasis.size() * 4 * 3);
 
     for (auto const& polynomial: powerBasis) {
