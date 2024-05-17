@@ -19,6 +19,9 @@ Entity GuiController::AddCurve(const std::vector<Entity>& entities, CurveType cu
     case CurveType::C2:
         return model.AddC2Curve(entities);
 
+    case CurveType::Interpolation:
+        return model.AddInterpolationCurve(entities);
+
     default:
         throw std::runtime_error("Unknown curve type");
     }

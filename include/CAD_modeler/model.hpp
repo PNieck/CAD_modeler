@@ -11,6 +11,7 @@
 #include "model/systems/selectionSystem.hpp"
 #include "model/systems/c0CurveSystem.hpp"
 #include "model/systems/c2CurveSystem.hpp"
+#include "model/systems/interpolationCurveSystem.hpp"
 
 #include "model/systems/shaders/shaderRepository.hpp"
 
@@ -34,6 +35,9 @@ public:
 
     inline Entity AddC2Curve(const std::vector<Entity>& controlPoints) const
         { return c2CurveSystem->CreateC2Curve(controlPoints); }
+
+    inline Entity AddInterpolationCurve(const std::vector<Entity>& controlPoints) const
+        { return interpolationCurveSystem->CreateCurve(controlPoints); }
 
     inline void AddControlPointToCurve(Entity curve, Entity entity) const
         { c0CurveSystem->AddControlPoint(curve, entity); }
@@ -160,6 +164,7 @@ private:
     std::shared_ptr<SelectionSystem> selectionSystem;
     std::shared_ptr<C0CurveSystem> c0CurveSystem;
     std::shared_ptr<C2CurveSystem> c2CurveSystem;
+    std::shared_ptr<InterpolationCurveSystem> interpolationCurveSystem;
 
     alg::Vec3 PointFromViewportCoordinates(float x, float y) const;
     Line LineFromViewportCoordinates(float x, float y) const;

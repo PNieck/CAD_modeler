@@ -90,10 +90,28 @@ namespace alg
             );
         }
 
+        Vector4<DataType> operator-() const {
+            return Vector4<DataType>(
+                -data[0],
+                -data[1],
+                -data[2],
+                -data[3]
+            );
+        }
+
     protected:
         std::array<DataType, 4> data;
     };
 
 
     using Vec4 = Vector4<float>;
+
+
+    template <typename DataType>
+    bool operator==(const Vector4<DataType>& v1, const Vector4<DataType>& v2) {
+        return v1.X() == v2.X() &&
+               v1.Y() == v2.Y() &&
+               v1.Z() == v2.Z() &&
+               v1.W() == v2.W();
+    }
 };

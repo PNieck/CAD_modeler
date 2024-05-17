@@ -67,6 +67,10 @@ void GuiView::RenderGui() const
             RenderAddingCurveGui(CurveType::C2);
             break;
 
+        case AppState::AddingInterpolationCurve:
+            RenderAddingCurveGui(CurveType::Interpolation);
+            break;
+
         default:
             throw std::runtime_error("Unknown app state");
     }
@@ -97,6 +101,11 @@ void GuiView::RenderDefaultGui() const
 
     if (ImGui::Button("Add C2 curve")) {
         controller.SetAppState(AppState::AddingC2Curve);
+        controller.DeselectAllEntities();
+    }
+
+    if (ImGui::Button("Add interpolation curve")) {
+        controller.SetAppState(AppState::AddingInterpolationCurve);
         controller.DeselectAllEntities();
     }
 

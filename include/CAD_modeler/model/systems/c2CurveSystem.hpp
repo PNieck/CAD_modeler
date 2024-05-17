@@ -21,9 +21,9 @@ public:
     inline void Init(ShaderRepository* shadersRepo)
         { this->shaderRepo = shadersRepo; }
 
-    Entity CreateC2Curve(const std::vector<Entity>& entities);
-    inline Entity CreateC2Curve(Entity entity)
-        { CreateC2Curve({entity}); }
+    Entity CreateC2Curve(const std::vector<Entity>& controlPoints);
+    inline Entity CreateC2Curve(Entity controlPoint)
+        { CreateC2Curve({controlPoint}); }
 
     inline void AddControlPoint(Entity bezierCurve, Entity entity)
         { coordinator->GetSystem<CurveControlPointsSystem>()->AddControlPoint(bezierCurve, entity); }
