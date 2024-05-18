@@ -7,7 +7,6 @@ uniform mat4 MVP;
 
 void main()
 {
-    // float t = gl_TessCoord.x;
     float t = gl_TessCoord.x / gl_TessLevelOuter[0] + gl_TessCoord.y;
     float oneMinusT = (1.0f - t);
 
