@@ -8,7 +8,7 @@ class CubicBezierCurveShader: private Shader {
 public:
     CubicBezierCurveShader():
         Shader(
-            "../../shaders/bezierCurveShader.vert",
+            "../../shaders/passThroughShader.vert",
             "../../shaders/stdShader.frag",
             "../../shaders/bezierCurveShader.tesc",
             "../../shaders/bezierCurveShader.tese"
