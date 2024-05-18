@@ -8,7 +8,7 @@
 #include <CAD_modeler/model/components/cameraParameters.hpp>
 
 #include <CAD_modeler/model/systems/toUpdateSystem.hpp>
-#include <CAD_modeler/model/systems/curveControlPointsSystem.hpp>
+#include <CAD_modeler/model/systems/controlPointsSystem.hpp>
 
 #include <stdexcept>
 
@@ -27,7 +27,7 @@ Model::Model(int viewport_width, int viewport_height)
     PointsSystem::RegisterSystem(coordinator);
     NameSystem::RegisterSystem(coordinator);
     SelectionSystem::RegisterSystem(coordinator);
-    CurveControlPointsSystem::RegisterSystem(coordinator);
+    ControlPointsSystem::RegisterSystem(coordinator);
     C0CurveSystem::RegisterSystem(coordinator);
     C2CurveSystem::RegisterSystem(coordinator);
     ToUpdateSystem::RegisterSystem(coordinator);
@@ -42,7 +42,7 @@ Model::Model(int viewport_width, int viewport_height)
     selectionSystem = coordinator.GetSystem<SelectionSystem>();
     c0CurveSystem = coordinator.GetSystem<C0CurveSystem>();
     c2CurveSystem = coordinator.GetSystem<C2CurveSystem>();
-    auto curveControlPointsSystem = coordinator.GetSystem<CurveControlPointsSystem>();
+    auto controlPointsSystem = coordinator.GetSystem<ControlPointsSystem>();
     interpolationCurveSystem = coordinator.GetSystem<InterpolationCurveSystem>();
 
     CameraParameters params {
@@ -62,7 +62,7 @@ Model::Model(int viewport_width, int viewport_height)
     toriSystem->Init(&shadersRepo);
     c0CurveSystem->Init(&shadersRepo);
     c2CurveSystem->Init(&shadersRepo);
-    curveControlPointsSystem->Init();
+    controlPointsSystem->Init();
     interpolationCurveSystem->Init(&shadersRepo);
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);

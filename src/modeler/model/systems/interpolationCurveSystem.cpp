@@ -24,7 +24,7 @@ void InterpolationCurveSystem::RegisterSystem(Coordinator &coordinator)
 
 Entity InterpolationCurveSystem::CreateCurve(const std::vector<Entity> &controlPoints)
 {
-    Entity curve = coordinator->GetSystem<CurveControlPointsSystem>()->CreateControlPoints(controlPoints);
+    Entity curve = coordinator->GetSystem<ControlPointsSystem>()->CreateControlPoints(controlPoints);
 
     coordinator->AddComponent<Name>(curve, nameGenerator.GenerateName("InterpolationCurve"));
     coordinator->AddComponent<Mesh>(curve, Mesh());
@@ -57,7 +57,7 @@ void InterpolationCurveSystem::Render() const
     shader.SetMVP(cameraMtx);
 
     for (auto const entity: entities) {
-        auto const& controlPoints = coordinator->GetComponent<CurveControlPoints>(entity);
+        auto const& controlPoints = coordinator->GetComponent<ControlPoints>(entity);
 
         bool selection = selectionSystem->IsSelected(entity);
 
@@ -92,7 +92,7 @@ void InterpolationCurveSystem::UpdateMesh(Entity entity) const
 {
     coordinator->EditComponent<Mesh>(entity,
         [this, entity](Mesh& mesh) {
-            auto const cps = coordinator->GetComponent<CurveControlPoints>(entity);
+            auto const cps = coordinator->GetComponent<ControlPoints>(entity);
 
             mesh.Update(
                 GenerateMeshVertices(cps),
@@ -103,7 +103,7 @@ void InterpolationCurveSystem::UpdateMesh(Entity entity) const
 }
 
 
-std::vector<float> InterpolationCurveSystem::GenerateMeshVertices(const CurveControlPoints &cps) const
+std::vector<float> InterpolationCurveSystem::GenerateMeshVertices(const ControlPoints &cps) const
 {
     std::vector<float> result;
 
@@ -145,7 +145,7 @@ std::vector<float> InterpolationCurveSystem::GenerateMeshVertices(const CurveCon
 }
 
 
-std::vector<uint32_t> InterpolationCurveSystem::GenerateMeshIndices(const CurveControlPoints &cps) const
+std::vector<uint32_t> InterpolationCurveSystem::GenerateMeshIndices(const ControlPoints &cps) const
 {
     std::vector<uint32_t> result((cps.Size() - 1) * 4);
 
@@ -157,7 +157,7 @@ std::vector<uint32_t> InterpolationCurveSystem::GenerateMeshIndices(const CurveC
 }
 
 
-std::vector<alg::Vector4<alg::Vec3>> InterpolationCurveSystem::FindInterpolationsPolynomialsInPowerBasis(const CurveControlPoints& cps) const
+std::vector<alg::Vector4<alg::Vec3>> InterpolationCurveSystem::FindInterpolationsPolynomialsInPowerBasis(const ControlPoints& cps) const
 {
     auto chordLengths = ChordLengthsBetweenControlPoints(cps);
 
@@ -193,7 +193,7 @@ void InterpolationCurveSystem::ChangePolynomialInPowerBaseDomainFrom0To1(alg::Ve
 }
 
 
-std::vector<alg::Vec3> InterpolationCurveSystem::SquareCoeffInPowerBasis(const CurveControlPoints& cps, const std::vector<float>& chordsLen) const
+std::vector<alg::Vec3> InterpolationCurveSystem::SquareCoeffInPowerBasis(const ControlPoints& cps, const std::vector<float>& chordsLen) const
 {
     if (cps.Size() == 2) {
         return { alg::Vec3(0), alg::Vec3(0) };
@@ -239,9 +239,9 @@ std::vector<alg::Vec3> InterpolationCurveSystem::CubicCoeffInPowerBasis(const st
 }
 
 
-std::vector<alg::Vec3> InterpolationCurveSystem::LinearCoeffInPowerBasis(const std::vector<alg::Vec3>& squarePowerCoeff, const std::vector<alg::Vec3> cubicPowerCoeff, const std::vector<float>& chordsLen, const CurveControlPoints &cps) const
+std::vector<alg::Vec3> InterpolationCurveSystem::LinearCoeffInPowerBasis(const std::vector<alg::Vec3>& squarePowerCoeff, const std::vector<alg::Vec3> cubicPowerCoeff, const std::vector<float>& chordsLen, const ControlPoints &cps) const
 {
-    auto const& controlPoints = cps.ControlPoints();
+    auto const& controlPoints = cps.GetPoints();
 
     std::vector<alg::Vec3> result(squarePowerCoeff.size() - 1);
 
@@ -261,9 +261,9 @@ std::vector<alg::Vec3> InterpolationCurveSystem::LinearCoeffInPowerBasis(const s
 }
 
 
-std::vector<alg::Vec3> InterpolationCurveSystem::ConstantCoeffInPowerBasis(const std::vector<alg::Vec3> &linearPowerCoeff, const std::vector<alg::Vec3> &squarePowerCoeff, const std::vector<alg::Vec3> cubicPowerCoeff, const std::vector<float> &chordsLen, const CurveControlPoints &cps) const
+std::vector<alg::Vec3> InterpolationCurveSystem::ConstantCoeffInPowerBasis(const std::vector<alg::Vec3> &linearPowerCoeff, const std::vector<alg::Vec3> &squarePowerCoeff, const std::vector<alg::Vec3> cubicPowerCoeff, const std::vector<float> &chordsLen, const ControlPoints &cps) const
 {
-    auto const& controlPoints = cps.ControlPoints();
+    auto const& controlPoints = cps.GetPoints();
 
     std::vector<alg::Vec3> result(squarePowerCoeff.size() - 1);
 
@@ -278,9 +278,9 @@ std::vector<alg::Vec3> InterpolationCurveSystem::ConstantCoeffInPowerBasis(const
 }
 
 
-std::vector<float> InterpolationCurveSystem::ChordLengthsBetweenControlPoints(const CurveControlPoints &cps) const
+std::vector<float> InterpolationCurveSystem::ChordLengthsBetweenControlPoints(const ControlPoints &cps) const
 {
-    auto const& controlPoints = cps.ControlPoints();
+    auto const& controlPoints = cps.GetPoints();
 
     std::vector<float> result;
 
@@ -330,9 +330,9 @@ std::vector<float> InterpolationCurveSystem::SuperdiagonalElems(const std::vecto
 }
 
 
-std::vector<alg::Vec3> InterpolationCurveSystem::EquationResultsElems(const std::vector<float> &chordLengths, const CurveControlPoints &cps) const
+std::vector<alg::Vec3> InterpolationCurveSystem::EquationResultsElems(const std::vector<float> &chordLengths, const ControlPoints &cps) const
 {
-    auto const& controlPoints = cps.ControlPoints();
+    auto const& controlPoints = cps.GetPoints();
     std::vector<alg::Vec3> result(chordLengths.size() - 1);
 
     for (int i=0; i < result.size(); ++i) {

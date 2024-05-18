@@ -1,10 +1,10 @@
 #pragma once
 
-#include "curveControlPoints.hpp"
+#include "controlPoints.hpp"
 
 
-class BezierControlPoints: public CurveControlPoints {
+class BezierControlPoints: public ControlPoints {
 public:
     BezierControlPoints():
-        CurveControlPoints({}) {}
+        ControlPoints({}) {}
 };

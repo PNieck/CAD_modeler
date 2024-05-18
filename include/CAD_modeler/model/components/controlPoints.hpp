@@ -9,9 +9,9 @@
 #include "position.hpp"
 
 
-class CurveControlPoints {
+class ControlPoints {
 public:
-    CurveControlPoints(const std::vector<Entity> controlPoints):
+    ControlPoints(const std::vector<Entity> controlPoints):
         controlPoints(controlPoints) {}
 
     inline void AddControlPoint(Entity entity)
@@ -20,7 +20,7 @@ public:
     inline void DeleteControlPoint(Entity entity)
         { controlPoints.erase(std::find(controlPoints.begin(), controlPoints.end(), entity)); }
 
-    inline const std::vector<Entity>& ControlPoints() const
+    inline const std::vector<Entity>& GetPoints() const
         { return controlPoints; }
 
     inline size_t Size() const

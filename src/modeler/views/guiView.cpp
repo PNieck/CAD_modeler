@@ -244,9 +244,9 @@ void GuiView::RenderSingleObjectProperties(Entity entity) const
     if (it != components.end())
         DisplayNameEditor(entity, model.GetComponent<Name>(entity));
 
-    it = components.find(Model::GetComponentId<CurveControlPoints>());
+    it = components.find(Model::GetComponentId<ControlPoints>());
     if (it != components.end())
-        DisplayCurveControlPoints(entity, model.GetComponent<CurveControlPoints>(entity));
+        DisplayCurveControlPoints(entity, model.GetComponent<ControlPoints>(entity));
 
     it = components.find(Model::GetComponentId<C0CurveParameters>());
     if (it != components.end())
@@ -414,13 +414,13 @@ void GuiView::DisplayTorusProperty(Entity entity, const TorusParameters& params)
 }
 
 
-void GuiView::DisplayCurveControlPoints(Entity entity, const CurveControlPoints& params) const
+void GuiView::DisplayCurveControlPoints(Entity entity, const ControlPoints& params) const
 {
     ImGui::SeparatorText("Control Points");
 
     int selected = -1;
     int n = 0;
-    for (auto controlPoint: params.ControlPoints()) {
+    for (auto controlPoint: params.GetPoints()) {
         if (ImGui::Selectable(model.GetEntityName(controlPoint).c_str(), selected == n))
             selected = n;
         if (ImGui::BeginPopupContextItem()) {
@@ -442,7 +442,7 @@ void GuiView::DisplayCurveControlPoints(Entity entity, const CurveControlPoints&
 
         for (auto point: points) {
             // TODO: rewrite with set intersection
-            if (std::find(params.ControlPoints().begin(), params.ControlPoints().end(), point) == params.ControlPoints().end()) {
+            if (std::find(params.GetPoints().begin(), params.GetPoints().end(), point) == params.GetPoints().end()) {
                 if (ImGui::Selectable(model.GetEntityName(point).c_str(), false)) {
                     controller.AddControlPointToCurve(entity, point);
                 }
