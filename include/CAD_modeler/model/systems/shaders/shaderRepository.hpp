@@ -13,11 +13,11 @@ public:
     inline const GridShader& GetGridShader() const
         { return gridShader; }
 
-    inline const CubicBezierShader& GetBezierShader() const
+    inline const CubicBezierCurveShader& GetBezierCurveShader() const
         { return bezierShader; }
 
 private:
     StdShader stdShader;
     GridShader gridShader;
-    CubicBezierShader bezierShader;
+    CubicBezierCurveShader bezierShader;
 };

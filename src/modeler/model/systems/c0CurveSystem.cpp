@@ -63,7 +63,7 @@ void C0CurveSystem::Render() const
     auto const& cameraSystem = coordinator->GetSystem<CameraSystem>();
     auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
 
-    auto const& shader = shaderRepo->GetBezierShader();
+    auto const& shader = shaderRepo->GetBezierCurveShader();
     std::stack<Entity> polygonsToDraw;
 
     UpdateEntities();
