@@ -2,7 +2,7 @@
 
 #include "stdShader.hpp"
 #include "gridShader.hpp"
-#include "cubicBezierShader.hpp"
+#include "cubicBezierCurveShader.hpp"
 
 
 class ShaderRepository {
