@@ -148,6 +148,25 @@ void C0SurfaceSystem::AddRowOfPatches(Entity surface) const
 
 void C0SurfaceSystem::AddColOfPatches(Entity surface) const
 {
+    coordinator->EditComponent<C0SurfacePatches>(surface,
+        [surface, this](C0SurfacePatches& patches) {
+            auto pointSys = coordinator->GetSystem<PointsSystem>();
+            
+            patches.AddCol();
+
+            for (int row=0; row < patches.PointsInRow(); row++) {
+                for (int col=patches.PointsInCol() - 3; col < patches.PointsInCol(); col++) {
+                    Entity prevPoint = patches.GetPoint(row, col - 1);
+                    auto const& prevPos = coordinator->GetComponent<Position>(prevPoint);
+
+                    alg::Vec3 newPos = prevPos.vec + offsetX;
+                    Entity newEntity = pointSys->CreatePoint(Position(newPos));
+
+                    patches.SetPoint(newEntity, row, col);
+                }
+            }
+        }
+    );
 }
 
 
