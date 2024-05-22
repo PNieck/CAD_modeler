@@ -264,12 +264,22 @@ std::vector<float> C0SurfaceSystem::GenerateVertices(const C0SurfacePatches& pat
 std::vector<uint32_t> C0SurfaceSystem::GenerateIndices(const C0SurfacePatches& patches) const
 {
     std::vector<uint32_t> result;
-    result.reserve(patches.Rows() * patches.Cols() * C0SurfacePatches::PointsInPatch);
+    result.reserve(patches.Rows() * patches.Cols() * C0SurfacePatches::PointsInPatch * 2);
 
     for (int patchRow=0; patchRow < patches.Rows(); patchRow++) {
         for (int patchCol=0; patchCol < patches.Cols(); patchCol++) {
             for (int rowInPatch=0; rowInPatch < C0SurfacePatches::RowsInPatch; rowInPatch++) {
                 for (int colInPatch=0; colInPatch < C0SurfacePatches::ColsInPatch; colInPatch++) {
+
+                    int globCol = patchCol * (C0SurfacePatches::ColsInPatch - 1) + colInPatch;
+                    int globRow = patchRow * (C0SurfacePatches::RowsInPatch - 1) + rowInPatch;
+
+                    result.push_back(globCol * patches.PointsInRow() + globRow);
+                }
+            }
+
+            for (int colInPatch=0; colInPatch < C0SurfacePatches::ColsInPatch; colInPatch++) {
+                for (int rowInPatch=0; rowInPatch < C0SurfacePatches::RowsInPatch; rowInPatch++) {
 
                     int globCol = patchCol * (C0SurfacePatches::ColsInPatch - 1) + colInPatch;
                     int globRow = patchRow * (C0SurfacePatches::RowsInPatch - 1) + rowInPatch;
