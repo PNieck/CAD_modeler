@@ -143,6 +143,8 @@ void C0SurfaceSystem::AddRowOfPatches(Entity surface) const
             }
         }
     );
+
+    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
 }
 
 
@@ -167,6 +169,8 @@ void C0SurfaceSystem::AddColOfPatches(Entity surface) const
             }
         }
     );
+
+    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
 }
 
 
@@ -184,6 +188,8 @@ void C0SurfaceSystem::DeleteRowOfPatches(Entity surface) const
             patches.DeleteRow();
         }
     );
+
+    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
 }
 
 
@@ -201,6 +207,8 @@ void C0SurfaceSystem::DeleteColOfPatches(Entity surface) const
             patches.DeleteCol();
         }
     );
+
+    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
 }
 
 
@@ -212,7 +220,7 @@ void C0SurfaceSystem::UpdateEntities() const
 
     for (auto entity: toUpdate) {
         UpdateMesh(entity);
-        coordinator->GetSystem<ToUpdateSystem>()->Unmark(entity);
+        toUpdateSystem->Unmark(entity);
     }
 }
 
@@ -237,9 +245,9 @@ std::vector<float> C0SurfaceSystem::GenerateVertices(const C0SurfacePatches& pat
     std::vector<float> result;
     result.reserve(patches.PointsCnt() * 3);
 
-    for (int row=0; row < C0SurfacePatches::RowsInPatch; row++) {
-        for (int col=0; col < C0SurfacePatches::ColsInPatch; col++) {
-            Entity point = patches.GetPoint(0, 0, row, col);
+    for (int col=0; col < patches.PointsInCol(); col++) {
+        for (int row=0; row < patches.PointsInRow(); row++) {
+            Entity point = patches.GetPoint(row, col);
 
             auto const& pos = coordinator->GetComponent<Position>(point);
 
@@ -255,10 +263,21 @@ std::vector<float> C0SurfaceSystem::GenerateVertices(const C0SurfacePatches& pat
 
 std::vector<uint32_t> C0SurfaceSystem::GenerateIndices(const C0SurfacePatches& patches) const
 {
-    std::vector<uint32_t> result(patches.PointsCnt());
+    std::vector<uint32_t> result;
+    result.reserve(patches.Rows() * patches.Cols() * C0SurfacePatches::PointsInPatch);
 
-    for (int i=0; i < patches.PointsCnt(); i++) {
-        result[i] = i;
+    for (int patchRow=0; patchRow < patches.Rows(); patchRow++) {
+        for (int patchCol=0; patchCol < patches.Cols(); patchCol++) {
+            for (int rowInPatch=0; rowInPatch < C0SurfacePatches::RowsInPatch; rowInPatch++) {
+                for (int colInPatch=0; colInPatch < C0SurfacePatches::ColsInPatch; colInPatch++) {
+
+                    int globCol = patchCol * (C0SurfacePatches::ColsInPatch - 1) + colInPatch;
+                    int globRow = patchRow * (C0SurfacePatches::RowsInPatch - 1) + rowInPatch;
+
+                    result.push_back(globCol * patches.PointsInRow() + globRow);
+                }
+            }
+        }
     }
 
     return result;

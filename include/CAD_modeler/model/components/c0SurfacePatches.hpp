@@ -9,6 +9,7 @@ class C0SurfacePatches {
 public:
     static constexpr int RowsInPatch = 4;
     static constexpr int ColsInPatch = 4;
+    static constexpr int PointsInPatch = RowsInPatch * ColsInPatch;
 
     C0SurfacePatches(int rows=1, int cols=1);
     
