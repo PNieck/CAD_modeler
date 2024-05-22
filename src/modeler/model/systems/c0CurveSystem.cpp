@@ -150,11 +150,11 @@ void C0CurveSystem::UpdateMesh(Entity curve) const
 {
     coordinator->EditComponent<Mesh>(curve,
         [curve, this](Mesh& mesh) {
-            auto const& params = coordinator->GetComponent<ControlPoints>(curve);
+            auto const& ops = coordinator->GetComponent<ControlPoints>(curve);
 
             mesh.Update(
-                GenerateBezierPolygonVertices(params),
-                GenerateBezierPolygonIndices(params)
+                GenerateBezierPolygonVertices(ops),
+                GenerateBezierPolygonIndices(ops)
             );
         }
     );
