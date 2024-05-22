@@ -9,6 +9,7 @@
 #include "CAD_modeler/model/systems/cameraSystem.hpp"
 #include "CAD_modeler/model/systems/selectionSystem.hpp"
 #include "CAD_modeler/model/systems/toUpdateSystem.hpp"
+#include "CAD_modeler/model/systems/controlPointsSystem.hpp"
 
 #include "CAD_modeler/model/components/c0SurfacePatches.hpp"
 #include "CAD_modeler/model/components/mesh.hpp"
@@ -17,6 +18,7 @@
 #include <CAD_modeler/utilities/setIntersection.hpp>
 
 #include <vector>
+#include <stack>
 
 
 const alg::Vec3 C0SurfaceSystem::offsetX = alg::Vec3(1.f/3.f, 0.f, 0.f);
@@ -109,10 +111,8 @@ void C0SurfaceSystem::Render() const
         mesh.Use();
 
         glPatchParameteri(GL_PATCH_VERTICES, 16);
-        float v[] = {5.f, 5.f, 5.f, 5.f};
+        float v[] = {5.f, 64.f, 64.f, 64.f};
         glPatchParameterfv(GL_PATCH_DEFAULT_OUTER_LEVEL, v);
-        float v2[] = {5.f, 5.f};
-        glPatchParameterfv(GL_PATCH_DEFAULT_INNER_LEVEL, v2);
 
 	    glDrawElements(GL_PATCHES, mesh.GetElementsCnt(), GL_UNSIGNED_INT, 0);
 
@@ -124,8 +124,10 @@ void C0SurfaceSystem::Render() const
 
 void C0SurfaceSystem::AddRowOfPatches(Entity surface) const
 {
+    std::stack<Entity> newEntities;
+
     coordinator->EditComponent<C0SurfacePatches>(surface,
-        [surface, this](C0SurfacePatches& patches) {
+        [surface, this, &newEntities](C0SurfacePatches& patches) {
             auto pointSys = coordinator->GetSystem<PointsSystem>();
             
             patches.AddRow();
@@ -139,10 +141,19 @@ void C0SurfaceSystem::AddRowOfPatches(Entity surface) const
                     Entity newEntity = pointSys->CreatePoint(Position(newPos));
 
                     patches.SetPoint(newEntity, row, col);
+                    newEntities.push(newEntity);
                 }
             }
         }
     );
+
+    // TODO: add adding multiple points at once
+    auto ctrlPointsSys = coordinator->GetSystem<ControlPointsSystem>();
+
+    while (!newEntities.empty()) {
+        ctrlPointsSys->AddControlPoint(surface, newEntities.top());
+        newEntities.pop();
+    }
 
     coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
 }
@@ -150,8 +161,10 @@ void C0SurfaceSystem::AddRowOfPatches(Entity surface) const
 
 void C0SurfaceSystem::AddColOfPatches(Entity surface) const
 {
+    std::stack<Entity> newEntities;
+
     coordinator->EditComponent<C0SurfacePatches>(surface,
-        [surface, this](C0SurfacePatches& patches) {
+        [surface, this, &newEntities](C0SurfacePatches& patches) {
             auto pointSys = coordinator->GetSystem<PointsSystem>();
             
             patches.AddCol();
@@ -165,10 +178,19 @@ void C0SurfaceSystem::AddColOfPatches(Entity surface) const
                     Entity newEntity = pointSys->CreatePoint(Position(newPos));
 
                     patches.SetPoint(newEntity, row, col);
+                    newEntities.push(newEntity);
                 }
             }
         }
     );
+
+    // TODO: add adding multiple points at once
+    auto ctrlPointsSys = coordinator->GetSystem<ControlPointsSystem>();
+
+    while (!newEntities.empty()) {
+        ctrlPointsSys->AddControlPoint(surface, newEntities.top());
+        newEntities.pop();
+    }
 
     coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
 }
