@@ -172,11 +172,35 @@ void C0SurfaceSystem::AddColOfPatches(Entity surface) const
 
 void C0SurfaceSystem::DeleteRowOfPatches(Entity surface) const
 {
+    coordinator->EditComponent<C0SurfacePatches>(surface,
+        [surface, this](C0SurfacePatches& patches) {
+            for (int col=0; col < patches.PointsInCol(); col++) {
+                for (int row=patches.PointsInRow() - 3; row < patches.PointsInRow(); row++) {
+                    Entity point = patches.GetPoint(row, col);
+                    coordinator->DestroyEntity(point);
+                }
+            }
+
+            patches.DeleteRow();
+        }
+    );
 }
 
 
 void C0SurfaceSystem::DeleteColOfPatches(Entity surface) const
 {
+    coordinator->EditComponent<C0SurfacePatches>(surface,
+        [surface, this](C0SurfacePatches& patches) {
+            for (int row=0; row < patches.PointsInRow(); row++) {
+                for (int col=patches.PointsInCol() - 3; col < patches.PointsInCol(); col++) {
+                    Entity point = patches.GetPoint(row, col);
+                    coordinator->DestroyEntity(point);
+                }
+            }
+
+            patches.DeleteCol();
+        }
+    );
 }
 
 

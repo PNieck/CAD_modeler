@@ -83,6 +83,9 @@ Model::Model(int viewport_width, int viewport_height)
 
     c0surfaceSystem->AddColOfPatches(surface);
     c0surfaceSystem->AddColOfPatches(surface);
+
+    c0surfaceSystem->DeleteRowOfPatches(surface);
+    c0surfaceSystem->DeleteColOfPatches(surface);
 }
 
 
