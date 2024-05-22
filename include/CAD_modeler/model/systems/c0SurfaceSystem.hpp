@@ -6,6 +6,7 @@
 #include "utils/nameGenerator.hpp"
 #include "../components/position.hpp"
 #include "../components/controlPoints.hpp"
+#include "../components/c0SurfacePatches.hpp"
 
 
 class C0SurfaceSystem: public System {
@@ -17,15 +18,24 @@ public:
 
     Entity CreateSurface(const Position& pos);
 
+    void AddPatchesInUDir(Entity surface) const;
+    void AddPatchesInVDir(Entity surface) const;
+
+    void DeletePatchesInUDir(Entity surface) const;
+    void DeletePatchesInVDir(Entity surface) const;
+
     void Render() const;
 
 private:
     ShaderRepository* shaderRepo;
     NameGenerator nameGenerator;
 
+    static const alg::Vec3 offsetX;
+    static const alg::Vec3 offsetZ;
+
     void UpdateEntities() const;
     void UpdateMesh(Entity surface) const;
 
-    std::vector<float> GenerateVertices(const ControlPoints& cps) const;
-    std::vector<uint32_t> GenerateIndices(const ControlPoints& cps) const;
+    std::vector<float> GenerateVertices(const C0SurfacePatches& patches) const;
+    std::vector<uint32_t> GenerateIndices(const C0SurfacePatches& patches) const;
 };

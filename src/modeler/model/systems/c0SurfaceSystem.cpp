@@ -19,6 +19,10 @@
 #include <vector>
 
 
+const alg::Vec3 C0SurfaceSystem::offsetX = alg::Vec3(1.f/3.f, 0.f, 0.f);
+const alg::Vec3 C0SurfaceSystem::offsetZ = alg::Vec3(0.f, 0.f, -1.f/3.f);
+
+
 void C0SurfaceSystem::RegisterSystem(Coordinator &coordinator)
 {
     coordinator.RegisterSystem<C0SurfaceSystem>();
@@ -35,18 +39,18 @@ Entity C0SurfaceSystem::CreateSurface(const Position& pos)
     static constexpr int controlPointsCnt = controlPointsInOneDir*controlPointsInOneDir;
 
     std::vector<Entity> controlPoints;
+    C0SurfacePatches patches(1, 1);
     controlPoints.reserve(controlPointsCnt);
 
     auto const pointsSystem = coordinator->GetSystem<PointsSystem>();
 
-    const alg::Vec3 offsetX(1.f/3.f, 0.f, 0.f);
-    const alg::Vec3 offsetZ(0.f, 0.f, -1.f/3.f);
     alg::Vec3 actPos = pos.vec;
 
     for (int i=0; i < controlPointsInOneDir; ++i) {
         for (int j=0; j < controlPointsInOneDir; ++j) {
             Entity cp = pointsSystem->CreatePoint(actPos);
             controlPoints.push_back(cp);
+            patches.SetPoint(cp, 0, 0, i, j);
 
             actPos += offsetX;
         }
@@ -57,19 +61,13 @@ Entity C0SurfaceSystem::CreateSurface(const Position& pos)
 
     auto const controlPointsSys = coordinator->GetSystem<ControlPointsSystem>();
     Entity surface = controlPointsSys->CreateControlPoints(controlPoints);
-    auto const& ctrlPts = coordinator->GetComponent<ControlPoints>(surface);
 
     Mesh mesh;
 
     mesh.Update(
-        GenerateVertices(ctrlPts),
-        GenerateIndices(ctrlPts)
+        GenerateVertices(patches),
+        GenerateIndices(patches)
     );
-
-    C0SurfacePatches patches{
-        .UDir = 1,
-        .VDir = 1
-    };
 
     coordinator->AddComponent<Name>(surface, nameGenerator.GenerateName("SurfaceC0_"));
     coordinator->AddComponent<Mesh>(surface, mesh);
@@ -124,6 +122,33 @@ void C0SurfaceSystem::Render() const
 }
 
 
+void C0SurfaceSystem::AddPatchesInUDir(Entity surface) const
+{
+    coordinator->EditComponent<ControlPoints>(surface,
+        [surface, this](ControlPoints& points) {
+            auto const& patches = coordinator->GetComponent<C0SurfacePatches>(surface);
+
+
+        }
+    );
+}
+
+
+void C0SurfaceSystem::AddPatchesInVDir(Entity surface) const
+{
+}
+
+
+void C0SurfaceSystem::DeletePatchesInUDir(Entity surface) const
+{
+}
+
+
+void C0SurfaceSystem::DeletePatchesInVDir(Entity surface) const
+{
+}
+
+
 void C0SurfaceSystem::UpdateEntities() const
 {
     auto const& toUpdateSystem = coordinator->GetSystem<ToUpdateSystem>();
@@ -141,39 +166,43 @@ void C0SurfaceSystem::UpdateMesh(Entity surface) const
 {
     coordinator->EditComponent<Mesh>(surface,
         [surface, this](Mesh& mesh) {
-            auto const& params = coordinator->GetComponent<ControlPoints>(surface);
+            auto const& patches = coordinator->GetComponent<C0SurfacePatches>(surface);
 
             mesh.Update(
-                GenerateVertices(params),
-                GenerateIndices(params)
+                GenerateVertices(patches),
+                GenerateIndices(patches)
             );
         }
     );
 }
 
 
-std::vector<float> C0SurfaceSystem::GenerateVertices(const ControlPoints &cps) const
+std::vector<float> C0SurfaceSystem::GenerateVertices(const C0SurfacePatches& patches) const
 {
     std::vector<float> result;
-    result.reserve(cps.Size() * 3);
+    result.reserve(patches.PointsCnt() * 3);
 
-    for (Entity entity: cps.GetPoints()) {
-        auto const& pos = coordinator->GetComponent<Position>(entity);
+    for (int row=0; row < C0SurfacePatches::RowsInPatch; row++) {
+        for (int col=0; col < C0SurfacePatches::ColsInPatch; col++) {
+            Entity point = patches.GetPoint(0, 0, row, col);
 
-        result.push_back(pos.GetX());
-        result.push_back(pos.GetY());
-        result.push_back(pos.GetZ());
+            auto const& pos = coordinator->GetComponent<Position>(point);
+
+            result.push_back(pos.GetX());
+            result.push_back(pos.GetY());
+            result.push_back(pos.GetZ());
+        }
     }
 
     return result;
 }
 
 
-std::vector<uint32_t> C0SurfaceSystem::GenerateIndices(const ControlPoints &cps) const
+std::vector<uint32_t> C0SurfaceSystem::GenerateIndices(const C0SurfacePatches& patches) const
 {
-    std::vector<uint32_t> result(cps.Size());
+    std::vector<uint32_t> result(patches.PointsCnt());
 
-    for (int i=0; i < cps.Size(); i++) {
+    for (int i=0; i < patches.PointsCnt(); i++) {
         result[i] = i;
     }
 

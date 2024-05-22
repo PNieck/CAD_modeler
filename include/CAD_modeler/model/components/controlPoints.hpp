@@ -30,5 +30,6 @@ public:
     HandlerId deletionHandler;
 
 private:
+    // TODO: rewrite  so it uses set
     std::vector<Entity> controlPoints;
 };
