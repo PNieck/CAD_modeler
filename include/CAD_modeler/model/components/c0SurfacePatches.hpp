@@ -15,8 +15,14 @@ public:
     inline void SetPoint(Entity pt, int patchRow, int patchCol, int ptRow, int ptCol)
         { controlPoints[3*patchRow + ptRow][3*patchCol + ptCol] = pt; }
 
+    inline void SetPoint(Entity pt, int row, int col)
+        { controlPoints[row][col] = pt; }
+
     inline Entity GetPoint(int patchRow, int patchCol, int ptRow, int ptCol) const
         { return controlPoints[3*patchRow + ptRow][3*patchCol + ptCol]; }
+
+    inline Entity GetPoint(int row, int col) const
+        { return controlPoints[row][col]; }
 
     void AddRow();
 

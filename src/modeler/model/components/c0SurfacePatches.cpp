@@ -2,10 +2,10 @@
 
 
 C0SurfacePatches::C0SurfacePatches(int rows, int cols):
-    patchesRows(3*rows + 1), patchesCols(3*cols + 1), controlPoints(patchesRows)
+    patchesRows(rows), patchesCols(cols), controlPoints(PointsInRow())
 {
     for (auto& row: controlPoints) {
-        row.resize(patchesCols);
+        row.resize(PointsInCol());
     }
 }
 

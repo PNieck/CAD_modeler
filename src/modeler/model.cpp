@@ -75,7 +75,10 @@ Model::Model(int viewport_width, int viewport_height)
     glDepthMask(GL_FALSE);
     glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
 
-    c0surfaceSystem->CreateSurface(Position(0.f));
+    Entity surface = c0surfaceSystem->CreateSurface(Position(0.f));
+    c0surfaceSystem->AddRowOfPatches(surface);
+    c0surfaceSystem->AddRowOfPatches(surface);
+    c0surfaceSystem->AddRowOfPatches(surface);
 }
 
 

@@ -18,11 +18,11 @@ public:
 
     Entity CreateSurface(const Position& pos);
 
-    void AddPatchesInUDir(Entity surface) const;
-    void AddPatchesInVDir(Entity surface) const;
+    void AddRowOfPatches(Entity surface) const;
+    void AddColOfPatches(Entity surface) const;
 
-    void DeletePatchesInUDir(Entity surface) const;
-    void DeletePatchesInVDir(Entity surface) const;
+    void DeleteRowOfPatches(Entity surface) const;
+    void DeleteColOfPatches(Entity surface) const;
 
     void Render() const;
 

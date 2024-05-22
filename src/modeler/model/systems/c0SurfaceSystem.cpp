@@ -122,29 +122,41 @@ void C0SurfaceSystem::Render() const
 }
 
 
-void C0SurfaceSystem::AddPatchesInUDir(Entity surface) const
+void C0SurfaceSystem::AddRowOfPatches(Entity surface) const
 {
-    coordinator->EditComponent<ControlPoints>(surface,
-        [surface, this](ControlPoints& points) {
-            auto const& patches = coordinator->GetComponent<C0SurfacePatches>(surface);
+    coordinator->EditComponent<C0SurfacePatches>(surface,
+        [surface, this](C0SurfacePatches& patches) {
+            auto pointSys = coordinator->GetSystem<PointsSystem>();
+            
+            patches.AddRow();
 
+            for (int col=0; col < patches.PointsInCol(); col++) {
+                for (int row=patches.PointsInRow() - 3; row < patches.PointsInRow(); row++) {
+                    Entity prevPoint = patches.GetPoint(row-1, col);
+                    auto const& prevPos = coordinator->GetComponent<Position>(prevPoint);
 
+                    alg::Vec3 newPos = prevPos.vec + offsetZ;
+                    Entity newEntity = pointSys->CreatePoint(Position(newPos));
+
+                    patches.SetPoint(newEntity, row, col);
+                }
+            }
         }
     );
 }
 
 
-void C0SurfaceSystem::AddPatchesInVDir(Entity surface) const
+void C0SurfaceSystem::AddColOfPatches(Entity surface) const
 {
 }
 
 
-void C0SurfaceSystem::DeletePatchesInUDir(Entity surface) const
+void C0SurfaceSystem::DeleteRowOfPatches(Entity surface) const
 {
 }
 
 
-void C0SurfaceSystem::DeletePatchesInVDir(Entity surface) const
+void C0SurfaceSystem::DeleteColOfPatches(Entity surface) const
 {
 }
 
