@@ -32,6 +32,7 @@ Model::Model(int viewport_width, int viewport_height)
     C2CurveSystem::RegisterSystem(coordinator);
     ToUpdateSystem::RegisterSystem(coordinator);
     InterpolationCurveSystem::RegisterSystem(coordinator);
+    C0SurfaceSystem::RegisterSystem(coordinator);
 
     cameraSys = coordinator.GetSystem<CameraSystem>();
     toriSystem = coordinator.GetSystem<ToriSystem>();
@@ -44,6 +45,7 @@ Model::Model(int viewport_width, int viewport_height)
     c2CurveSystem = coordinator.GetSystem<C2CurveSystem>();
     auto controlPointsSystem = coordinator.GetSystem<ControlPointsSystem>();
     interpolationCurveSystem = coordinator.GetSystem<InterpolationCurveSystem>();
+    c0surfaceSystem = coordinator.GetSystem<C0SurfaceSystem>();
 
     CameraParameters params {
         .target = Position(0.0f),
@@ -64,6 +66,7 @@ Model::Model(int viewport_width, int viewport_height)
     c2CurveSystem->Init(&shadersRepo);
     controlPointsSystem->Init();
     interpolationCurveSystem->Init(&shadersRepo);
+    c0surfaceSystem->Init(&shadersRepo);
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glEnable(GL_LINE_SMOOTH);
@@ -71,6 +74,8 @@ Model::Model(int viewport_width, int viewport_height)
     glEnable(GL_BLEND);
     glDepthMask(GL_FALSE);
     glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+
+    c0surfaceSystem->CreateSurface(Position(0.f));
 }
 
 
@@ -86,6 +91,7 @@ void Model::RenderFrame()
     c0CurveSystem->Render();
     c2CurveSystem->Render();
     interpolationCurveSystem->Render();
+    c0surfaceSystem->Render();
 }
 
 

@@ -3,6 +3,7 @@
 #include "stdShader.hpp"
 #include "gridShader.hpp"
 #include "cubicBezierCurveShader.hpp"
+#include "bicubicBezierSurfaceShader.hpp"
 
 
 class ShaderRepository {
@@ -14,10 +15,14 @@ public:
         { return gridShader; }
 
     inline const CubicBezierCurveShader& GetBezierCurveShader() const
-        { return bezierShader; }
+        { return bezierCurveShader; }
+
+    inline const BicubicBezierSurfaceShader& GetBezierSurfaceShader() const
+        { return bezierSurfaceShader; }
 
 private:
     StdShader stdShader;
     GridShader gridShader;
-    CubicBezierCurveShader bezierShader;
+    CubicBezierCurveShader bezierCurveShader;
+    BicubicBezierSurfaceShader bezierSurfaceShader;
 };
