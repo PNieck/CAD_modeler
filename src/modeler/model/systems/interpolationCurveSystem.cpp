@@ -84,6 +84,7 @@ void InterpolationCurveSystem::UpdateEntities() const
 
     for (auto entity: toUpdate) {
         UpdateMesh(entity);
+        toUpdateSystem->Unmark(entity);
     }
 }
 

@@ -141,7 +141,7 @@ void C0CurveSystem::UpdateEntities() const
 
     for (auto entity: toUpdate) {
         UpdateMesh(entity);
-        coordinator->GetSystem<ToUpdateSystem>()->Unmark(entity);
+        toUpdateSystem->Unmark(entity);
     }
 }
 

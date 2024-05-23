@@ -209,7 +209,7 @@ void C2CurveSystem::UpdateEntities() const
         if (params.showBezierControlPoints)
             UpdateBezierControlPoints(entity, params);
 
-        coordinator->GetSystem<ToUpdateSystem>()->Unmark(entity);
+        toUpdateSystem->Unmark(entity);
     }
 }
 
