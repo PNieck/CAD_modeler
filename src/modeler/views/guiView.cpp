@@ -256,6 +256,10 @@ void GuiView::RenderSingleObjectProperties(Entity entity) const
     if (it != components.end())
         DisplayC2CurveParameters(entity, model.GetComponent<C2CurveParameters>(entity));
 
+    it = components.find(Model::GetComponentId<C0SurfaceDensity>());
+    if (it != components.end())
+        DisplaySurfaceDensityParameter(entity, model.GetComponent<C0SurfaceDensity>(entity));
+
     it = components.find(Model::GetComponentId<Unremovable>());
     if (it == components.end())
         DisplayEntityDeletionOption(entity);
@@ -509,6 +513,18 @@ void GuiView::DisplayEntityDeletionOption(Entity entity) const
 {
     if (ImGui::Button("Delete object")) {
         controller.DeleteEntity(entity);
+    }
+}
+
+
+void GuiView::DisplaySurfaceDensityParameter(Entity entity, const C0SurfaceDensity &density) const
+{
+    int d = density.GetDensity();
+
+    ImGui::DragInt("Mesh density", &d, 1.f, C0SurfaceDensity::MinDensity, C0SurfaceDensity::MaxDensity);
+
+    if (d != density.GetDensity()) {
+        controller.SetNewSurfaceDensity(entity, C0SurfaceDensity(d));
     }
 }
 

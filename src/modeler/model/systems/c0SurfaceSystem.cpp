@@ -12,6 +12,7 @@
 #include "CAD_modeler/model/systems/controlPointsSystem.hpp"
 
 #include "CAD_modeler/model/components/c0SurfacePatches.hpp"
+#include "CAD_modeler/model/components/c0SurfaceDensity.hpp"
 #include "CAD_modeler/model/components/mesh.hpp"
 #include "CAD_modeler/model/components/name.hpp"
 
@@ -31,6 +32,7 @@ void C0SurfaceSystem::RegisterSystem(Coordinator &coordinator)
 
     coordinator.RegisterRequiredComponent<C0SurfaceSystem, C0SurfacePatches>();
     coordinator.RegisterRequiredComponent<C0SurfaceSystem, ControlPoints>();
+    coordinator.RegisterRequiredComponent<C0SurfaceSystem, C0SurfaceDensity>();
     coordinator.RegisterRequiredComponent<C0SurfaceSystem, Mesh>();
 }
 
@@ -71,9 +73,12 @@ Entity C0SurfaceSystem::CreateSurface(const Position& pos)
         GenerateIndices(patches)
     );
 
+    C0SurfaceDensity density(5);
+
     coordinator->AddComponent<Name>(surface, nameGenerator.GenerateName("SurfaceC0_"));
     coordinator->AddComponent<Mesh>(surface, mesh);
     coordinator->AddComponent<C0SurfacePatches>(surface, patches);
+    coordinator->AddComponent<C0SurfaceDensity>(surface, density);
 
     return surface;
 }
@@ -99,9 +104,9 @@ void C0SurfaceSystem::Render() const
     shader.SetColor(alg::Vec4(1.0f));
     shader.SetMVP(cameraMtx);
 
-    for (auto const entity: entities) {
-        auto const& controlPoints = coordinator->GetComponent<ControlPoints>(entity);
+    glPatchParameteri(GL_PATCH_VERTICES, 16);
 
+    for (auto const entity: entities) {
         bool selection = selectionSystem->IsSelected(entity);
 
         if (selection)
@@ -110,8 +115,9 @@ void C0SurfaceSystem::Render() const
         auto const& mesh = coordinator->GetComponent<Mesh>(entity);
         mesh.Use();
 
-        glPatchParameteri(GL_PATCH_VERTICES, 16);
+        auto const& density = coordinator->GetComponent<C0SurfaceDensity>(entity);
         float v[] = {5.f, 64.f, 64.f, 64.f};
+        v[0] = static_cast<float>(density.GetDensity());
         glPatchParameterfv(GL_PATCH_DEFAULT_OUTER_LEVEL, v);
 
 	    glDrawElements(GL_PATCHES, mesh.GetElementsCnt(), GL_UNSIGNED_INT, 0);

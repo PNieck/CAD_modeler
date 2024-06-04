@@ -7,6 +7,7 @@
 #include "../components/position.hpp"
 #include "../components/controlPoints.hpp"
 #include "../components/c0SurfacePatches.hpp"
+#include "../components/c0SurfaceDensity.hpp"
 
 
 class C0SurfaceSystem: public System {
@@ -23,6 +24,9 @@ public:
 
     void DeleteRowOfPatches(Entity surface) const;
     void DeleteColOfPatches(Entity surface) const;
+
+    inline void SetDensity(Entity entity, C0SurfaceDensity density) const
+        { coordinator->SetComponent<C0SurfaceDensity>(entity, density); }
 
     void Render() const;
 

@@ -81,6 +81,7 @@ Model::Model(int viewport_width, int viewport_height)
     c0surfaceSystem->AddRowOfPatches(surface);
 
     c0surfaceSystem->AddColOfPatches(surface);
+    c0surfaceSystem->SetDensity(surface, C0SurfaceDensity(30));
 }
 
 

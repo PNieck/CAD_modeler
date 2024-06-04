@@ -148,6 +148,9 @@ public:
     inline const void HideC2BezierControlPoints(Entity entity) const
         { return c2CurveSystem->HideBezierControlPoints(entity); }
 
+    inline const void SetSurfaceDensity(Entity entity, C0SurfaceDensity density) const
+        { c0surfaceSystem->SetDensity(entity, density); }
+
     template <typename Comp>
     static inline constexpr ComponentId GetComponentId()
         { return ComponentsManager::GetComponentId<Comp>(); }
