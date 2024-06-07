@@ -25,6 +25,12 @@ public:
     void DeleteRowOfPatches(Entity surface) const;
     void DeleteColOfPatches(Entity surface) const;
 
+    inline int GetRowsCnt(Entity surface) const
+        { return coordinator->GetComponent<C0SurfacePatches>(surface).Rows(); }
+
+    inline int GetColsCnt(Entity surface) const
+        { return coordinator->GetComponent<C0SurfacePatches>(surface).Cols(); }
+
     inline void SetDensity(Entity entity, C0SurfaceDensity density) const
         { coordinator->SetComponent<C0SurfaceDensity>(entity, density); }
 

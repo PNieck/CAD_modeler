@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <iterator>
 #include <stdexcept>
+#include <optional>
 
 
 GuiView::GuiView(GLFWwindow* window, GuiController& controller, const Model& model):
@@ -71,6 +72,10 @@ void GuiView::RenderGui() const
             RenderAddingCurveGui(CurveType::Interpolation);
             break;
 
+        case AppState::AddingC0Surface:
+            RenderAddingC0Surface();
+            break;
+
         default:
             throw std::runtime_error("Unknown app state");
     }
@@ -107,6 +112,10 @@ void GuiView::RenderDefaultGui() const
     if (ImGui::Button("Add interpolation curve")) {
         controller.SetAppState(AppState::AddingInterpolationCurve);
         controller.DeselectAllEntities();
+    }
+
+    if (ImGui::Button("Add C0 surface")) {
+        controller.SetAppState(AppState::AddingC0Surface);
     }
 
     ImGui::Separator();
@@ -192,6 +201,46 @@ void GuiView::RenderAddingCurveGui(CurveType curveType) const
             }
         }
     } 
+}
+
+
+void GuiView::RenderAddingC0Surface() const
+{
+    static std::optional<Entity> entity;
+    
+    if (!entity.has_value())
+        entity = controller.AddC0Surface();
+
+    int rows = model.GetRowsCntOfC0Patches(entity.value());
+    int cols = model.GetColsOfC0Patches(entity.value());
+
+    ImGui::InputInt("Rows", &rows);
+    ImGui::InputInt("Cols", &cols);
+
+    if (rows != model.GetRowsCntOfC0Patches(entity.value())) {
+        while (rows > model.GetRowsCntOfC0Patches(entity.value())) {
+            controller.AddRowOfC0SurfacePatches(entity.value());
+        }
+
+        while (rows < model.GetRowsCntOfC0Patches(entity.value())) {
+            controller.DeleteRowOfC0SurfacePatches(entity.value());
+        }
+    }
+
+    if (cols != model.GetColsOfC0Patches(entity.value())) {
+        while (cols > model.GetColsOfC0Patches(entity.value())) {
+            controller.AddColOfC0SurfacePatches(entity.value());
+        }
+
+        while (cols < model.GetColsOfC0Patches(entity.value())) {
+            controller.DeleteColOfC0SurfacePatches(entity.value());
+        }
+    }
+
+    if (ImGui::Button("Finish adding")) {
+        controller.SetAppState(AppState::Default);
+        entity.reset();
+    }
 }
 
 

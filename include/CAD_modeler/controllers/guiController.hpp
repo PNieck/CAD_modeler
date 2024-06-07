@@ -18,6 +18,21 @@ public:
 
     Entity AddCurve(const std::vector<Entity>& entities, CurveType curveType) const;
 
+    inline Entity AddC0Surface() const
+        { return model.AddC0Surface(); }
+
+    inline void AddRowOfC0SurfacePatches(Entity surface)
+        { return model.AddRowOfC0SurfacePatches(surface); }
+
+    inline void AddColOfC0SurfacePatches(Entity surface)
+        { return model.AddColOfC0SurfacePatches(surface); }
+
+    inline void DeleteRowOfC0SurfacePatches(Entity surface)
+        { return model.DeleteRowOfC0SurfacePatches(surface); }
+
+    inline void DeleteColOfC0SurfacePatches(Entity surface)
+        { return model.DeleteColOfC0SurfacePatches(surface); }
+
     inline void AddControlPointToCurve(Entity curve, Entity entity) const
         { model.AddControlPointToCurve(curve, entity); }
 

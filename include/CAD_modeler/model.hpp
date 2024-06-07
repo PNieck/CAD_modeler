@@ -40,8 +40,29 @@ public:
     inline Entity AddInterpolationCurve(const std::vector<Entity>& controlPoints) const
         { return interpolationCurveSystem->CreateCurve(controlPoints); }
 
+    inline Entity AddC0Surface() const
+        { return c0surfaceSystem->CreateSurface(cursorSystem->GetPosition()); }
+
     inline void AddControlPointToCurve(Entity curve, Entity entity) const
         { c0CurveSystem->AddControlPoint(curve, entity); }
+
+    inline void AddRowOfC0SurfacePatches(Entity surface) const
+        { c0surfaceSystem->AddRowOfPatches(surface); }
+
+    inline void AddColOfC0SurfacePatches(Entity surface) const
+        { c0surfaceSystem->AddColOfPatches(surface); }
+
+    inline void DeleteRowOfC0SurfacePatches(Entity surface) const
+        { c0surfaceSystem->DeleteRowOfPatches(surface); }
+
+    inline void DeleteColOfC0SurfacePatches(Entity surface) const
+        { c0surfaceSystem->DeleteColOfPatches(surface); }
+
+    inline int GetRowsCntOfC0Patches(Entity surface) const
+        { return c0surfaceSystem->GetRowsCnt(surface); }
+
+    inline int GetColsOfC0Patches(Entity surface) const
+        { return c0surfaceSystem->GetColsCnt(surface); }
 
     inline void DeleteControlPointFromCurve(Entity curve, Entity controlPoint) const
         { c0CurveSystem->DeleteControlPoint(curve, controlPoint); }

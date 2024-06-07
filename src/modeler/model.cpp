@@ -74,14 +74,6 @@ Model::Model(int viewport_width, int viewport_height)
     glEnable(GL_BLEND);
     glDepthMask(GL_FALSE);
     glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-
-    Entity surface = c0surfaceSystem->CreateSurface(Position(0.f));
-
-    c0surfaceSystem->AddRowOfPatches(surface);
-    c0surfaceSystem->AddRowOfPatches(surface);
-
-    c0surfaceSystem->AddColOfPatches(surface);
-    c0surfaceSystem->SetDensity(surface, C0SurfaceDensity(30));
 }
 
 
