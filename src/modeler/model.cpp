@@ -33,6 +33,7 @@ Model::Model(int viewport_width, int viewport_height)
     ToUpdateSystem::RegisterSystem(coordinator);
     InterpolationCurveSystem::RegisterSystem(coordinator);
     C0SurfaceSystem::RegisterSystem(coordinator);
+    C0CylinderSystem::RegisterSystem(coordinator);
 
     cameraSys = coordinator.GetSystem<CameraSystem>();
     toriSystem = coordinator.GetSystem<ToriSystem>();
@@ -46,6 +47,7 @@ Model::Model(int viewport_width, int viewport_height)
     auto controlPointsSystem = coordinator.GetSystem<ControlPointsSystem>();
     interpolationCurveSystem = coordinator.GetSystem<InterpolationCurveSystem>();
     c0surfaceSystem = coordinator.GetSystem<C0SurfaceSystem>();
+    c0CylinderSystem = coordinator.GetSystem<C0CylinderSystem>();
 
     CameraParameters params {
         .target = Position(0.0f),
@@ -74,6 +76,47 @@ Model::Model(int viewport_width, int viewport_height)
     glEnable(GL_BLEND);
     glDepthMask(GL_FALSE);
     glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+
+    Entity cylinder = c0CylinderSystem->CreateCylinder(
+        Position(alg::Vec3(0.f, 0.f, 0.f)),
+        alg::Vec3(0.f, 5.f, 0.f),
+        5.f
+    );
+
+    c0CylinderSystem->AddRowOfPatches(
+        cylinder,
+        Position(alg::Vec3(0.f, 0.f, 0.f)),
+        alg::Vec3(0.f, 5.f, 0.f),
+        5.f
+    );
+
+    c0CylinderSystem->AddRowOfPatches(
+        cylinder,
+        Position(alg::Vec3(0.f, 0.f, 0.f)),
+        alg::Vec3(0.f, 5.f, 0.f),
+        5.f
+    );
+
+    c0CylinderSystem->AddColOfPatches(
+        cylinder,
+        Position(alg::Vec3(0.f, 0.f, 0.f)),
+        alg::Vec3(0.f, 5.f, 0.f),
+        5.f
+    );
+
+    c0CylinderSystem->AddColOfPatches(
+        cylinder,
+        Position(alg::Vec3(0.f, 0.f, 0.f)),
+        alg::Vec3(0.f, 5.f, 0.f),
+        5.f
+    );
+
+    c0CylinderSystem->AddColOfPatches(
+        cylinder,
+        Position(alg::Vec3(0.f, 0.f, 0.f)),
+        alg::Vec3(0.f, 5.f, 0.f),
+        5.f
+    );
 }
 
 

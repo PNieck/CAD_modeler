@@ -13,6 +13,7 @@
 
 #include "CAD_modeler/model/components/c0SurfacePatches.hpp"
 #include "CAD_modeler/model/components/c0SurfaceDensity.hpp"
+#include "CAD_modeler/model/components/controlPoints.hpp"
 #include "CAD_modeler/model/components/mesh.hpp"
 #include "CAD_modeler/model/components/name.hpp"
 

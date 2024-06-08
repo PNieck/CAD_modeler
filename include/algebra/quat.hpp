@@ -22,6 +22,8 @@ namespace alg
 
         Quat(float pitch, float yaw, float roll);
 
+        Quat(const alg::Vec3& axis, float angle);
+
         inline float& X()
             { return data.X(); }
 

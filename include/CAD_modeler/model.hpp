@@ -13,6 +13,7 @@
 #include "model/systems/c2CurveSystem.hpp"
 #include "model/systems/interpolationCurveSystem.hpp"
 #include "model/systems/c0SurfaceSystem.hpp"
+#include "model/systems/c0CylinderSystem.hpp"
 
 #include "model/systems/shaders/shaderRepository.hpp"
 
@@ -191,6 +192,7 @@ private:
     std::shared_ptr<C2CurveSystem> c2CurveSystem;
     std::shared_ptr<InterpolationCurveSystem> interpolationCurveSystem;
     std::shared_ptr<C0SurfaceSystem>  c0surfaceSystem;
+    std::shared_ptr<C0CylinderSystem> c0CylinderSystem;
 
     alg::Vec3 PointFromViewportCoordinates(float x, float y) const;
     Line LineFromViewportCoordinates(float x, float y) const;

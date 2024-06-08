@@ -21,6 +21,17 @@ alg::Quat::Quat(float pitch, float yaw, float roll)
 }
 
 
+alg::Quat::Quat(const alg::Vec3 &axis, float angle)
+{
+    alg::Vec3 axisNorm = axis.Normalize();
+
+    X() = axisNorm.X() * sin(angle / 2.f);
+    Y() = axisNorm.Y() * sin(angle / 2.f);
+    Z() = axisNorm.Z() * sin(angle / 2.f);
+    W() = cos(angle / 2.f);
+}
+
+
 alg::Vec3 alg::Quat::Rotate(const alg::Vec3& v) const
 {
     alg::Quat tmp(v.X(), v.Y(), v.Z(), 0.0f);
