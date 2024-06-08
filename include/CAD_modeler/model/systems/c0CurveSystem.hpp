@@ -3,11 +3,11 @@
 #include <ecs/system.hpp>
 
 #include "shaders/shaderRepository.hpp"
-#include "../components/curveControlPoints.hpp"
+#include "../components/controlPoints.hpp"
 #include "../components/c0CurveParameters.hpp"
 #include "../components/position.hpp"
 #include "utils/nameGenerator.hpp"
-#include "curveControlPointsSystem.hpp"
+#include "controlPointsSystem.hpp"
 
 #include <vector>
 #include <tuple>
@@ -26,10 +26,10 @@ public:
         { CreateC0Curve({entity}); }
 
     inline void AddControlPoint(Entity bezierCurve, Entity entity)
-        { coordinator->GetSystem<CurveControlPointsSystem>()->AddControlPoint(bezierCurve, entity); }
+        { coordinator->GetSystem<ControlPointsSystem>()->AddControlPoint(bezierCurve, entity); }
 
     inline void DeleteControlPoint(Entity bezierCurve, Entity entity)
-        { coordinator->GetSystem<CurveControlPointsSystem>()->DeleteControlPoint(bezierCurve, entity); }
+        { coordinator->GetSystem<ControlPointsSystem>()->DeleteControlPoint(bezierCurve, entity); }
 
     void Render() const;
 
@@ -43,6 +43,6 @@ private:
     void UpdateEntities() const;
     void UpdateMesh(Entity curve) const;
 
-    std::vector<float> GenerateBezierPolygonVertices(const CurveControlPoints& params) const;
-    std::vector<uint32_t> GenerateBezierPolygonIndices(const CurveControlPoints& params) const;
+    std::vector<float> GenerateBezierPolygonVertices(const ControlPoints& cps) const;
+    std::vector<uint32_t> GenerateBezierPolygonIndices(const ControlPoints& cps) const;
 };

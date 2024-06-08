@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <iterator>
 #include <stdexcept>
+#include <optional>
 
 
 GuiView::GuiView(GLFWwindow* window, GuiController& controller, const Model& model):
@@ -71,6 +72,10 @@ void GuiView::RenderGui() const
             RenderAddingCurveGui(CurveType::Interpolation);
             break;
 
+        case AppState::AddingC0Surface:
+            RenderAddingC0Surface();
+            break;
+
         default:
             throw std::runtime_error("Unknown app state");
     }
@@ -107,6 +112,10 @@ void GuiView::RenderDefaultGui() const
     if (ImGui::Button("Add interpolation curve")) {
         controller.SetAppState(AppState::AddingInterpolationCurve);
         controller.DeselectAllEntities();
+    }
+
+    if (ImGui::Button("Add C0 surface")) {
+        controller.SetAppState(AppState::AddingC0Surface);
     }
 
     ImGui::Separator();
@@ -195,6 +204,46 @@ void GuiView::RenderAddingCurveGui(CurveType curveType) const
 }
 
 
+void GuiView::RenderAddingC0Surface() const
+{
+    static std::optional<Entity> entity;
+    
+    if (!entity.has_value())
+        entity = controller.AddC0Surface();
+
+    int rows = model.GetRowsCntOfC0Patches(entity.value());
+    int cols = model.GetColsOfC0Patches(entity.value());
+
+    ImGui::InputInt("Rows", &rows);
+    ImGui::InputInt("Cols", &cols);
+
+    if (rows != model.GetRowsCntOfC0Patches(entity.value())) {
+        while (rows > model.GetRowsCntOfC0Patches(entity.value())) {
+            controller.AddRowOfC0SurfacePatches(entity.value());
+        }
+
+        while (rows < model.GetRowsCntOfC0Patches(entity.value())) {
+            controller.DeleteRowOfC0SurfacePatches(entity.value());
+        }
+    }
+
+    if (cols != model.GetColsOfC0Patches(entity.value())) {
+        while (cols > model.GetColsOfC0Patches(entity.value())) {
+            controller.AddColOfC0SurfacePatches(entity.value());
+        }
+
+        while (cols < model.GetColsOfC0Patches(entity.value())) {
+            controller.DeleteColOfC0SurfacePatches(entity.value());
+        }
+    }
+
+    if (ImGui::Button("Finish adding")) {
+        controller.SetAppState(AppState::Default);
+        entity.reset();
+    }
+}
+
+
 void GuiView::RenderObjectsProperties() const
 {
     auto const& selectedEntities = model.GetAllSelectedEntities();
@@ -244,9 +293,9 @@ void GuiView::RenderSingleObjectProperties(Entity entity) const
     if (it != components.end())
         DisplayNameEditor(entity, model.GetComponent<Name>(entity));
 
-    it = components.find(Model::GetComponentId<CurveControlPoints>());
+    it = components.find(Model::GetComponentId<ControlPoints>());
     if (it != components.end())
-        DisplayCurveControlPoints(entity, model.GetComponent<CurveControlPoints>(entity));
+        DisplayCurveControlPoints(entity, model.GetComponent<ControlPoints>(entity));
 
     it = components.find(Model::GetComponentId<C0CurveParameters>());
     if (it != components.end())
@@ -255,6 +304,10 @@ void GuiView::RenderSingleObjectProperties(Entity entity) const
     it = components.find(Model::GetComponentId<C2CurveParameters>());
     if (it != components.end())
         DisplayC2CurveParameters(entity, model.GetComponent<C2CurveParameters>(entity));
+
+    it = components.find(Model::GetComponentId<C0SurfaceDensity>());
+    if (it != components.end())
+        DisplaySurfaceDensityParameter(entity, model.GetComponent<C0SurfaceDensity>(entity));
 
     it = components.find(Model::GetComponentId<Unremovable>());
     if (it == components.end())
@@ -414,13 +467,13 @@ void GuiView::DisplayTorusProperty(Entity entity, const TorusParameters& params)
 }
 
 
-void GuiView::DisplayCurveControlPoints(Entity entity, const CurveControlPoints& params) const
+void GuiView::DisplayCurveControlPoints(Entity entity, const ControlPoints& params) const
 {
     ImGui::SeparatorText("Control Points");
 
     int selected = -1;
     int n = 0;
-    for (auto controlPoint: params.ControlPoints()) {
+    for (auto controlPoint: params.GetPoints()) {
         if (ImGui::Selectable(model.GetEntityName(controlPoint).c_str(), selected == n))
             selected = n;
         if (ImGui::BeginPopupContextItem()) {
@@ -442,7 +495,7 @@ void GuiView::DisplayCurveControlPoints(Entity entity, const CurveControlPoints&
 
         for (auto point: points) {
             // TODO: rewrite with set intersection
-            if (std::find(params.ControlPoints().begin(), params.ControlPoints().end(), point) == params.ControlPoints().end()) {
+            if (std::find(params.GetPoints().begin(), params.GetPoints().end(), point) == params.GetPoints().end()) {
                 if (ImGui::Selectable(model.GetEntityName(point).c_str(), false)) {
                     controller.AddControlPointToCurve(entity, point);
                 }
@@ -509,6 +562,18 @@ void GuiView::DisplayEntityDeletionOption(Entity entity) const
 {
     if (ImGui::Button("Delete object")) {
         controller.DeleteEntity(entity);
+    }
+}
+
+
+void GuiView::DisplaySurfaceDensityParameter(Entity entity, const C0SurfaceDensity &density) const
+{
+    int d = density.GetDensity();
+
+    ImGui::DragInt("Mesh density", &d, 1.f, C0SurfaceDensity::MinDensity, C0SurfaceDensity::MaxDensity);
+
+    if (d != density.GetDensity()) {
+        controller.SetNewSurfaceDensity(entity, C0SurfaceDensity(d));
     }
 }
 

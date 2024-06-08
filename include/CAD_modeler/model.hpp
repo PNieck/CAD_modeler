@@ -12,6 +12,7 @@
 #include "model/systems/c0CurveSystem.hpp"
 #include "model/systems/c2CurveSystem.hpp"
 #include "model/systems/interpolationCurveSystem.hpp"
+#include "model/systems/c0SurfaceSystem.hpp"
 
 #include "model/systems/shaders/shaderRepository.hpp"
 
@@ -39,8 +40,29 @@ public:
     inline Entity AddInterpolationCurve(const std::vector<Entity>& controlPoints) const
         { return interpolationCurveSystem->CreateCurve(controlPoints); }
 
+    inline Entity AddC0Surface() const
+        { return c0surfaceSystem->CreateSurface(cursorSystem->GetPosition()); }
+
     inline void AddControlPointToCurve(Entity curve, Entity entity) const
         { c0CurveSystem->AddControlPoint(curve, entity); }
+
+    inline void AddRowOfC0SurfacePatches(Entity surface) const
+        { c0surfaceSystem->AddRowOfPatches(surface); }
+
+    inline void AddColOfC0SurfacePatches(Entity surface) const
+        { c0surfaceSystem->AddColOfPatches(surface); }
+
+    inline void DeleteRowOfC0SurfacePatches(Entity surface) const
+        { c0surfaceSystem->DeleteRowOfPatches(surface); }
+
+    inline void DeleteColOfC0SurfacePatches(Entity surface) const
+        { c0surfaceSystem->DeleteColOfPatches(surface); }
+
+    inline int GetRowsCntOfC0Patches(Entity surface) const
+        { return c0surfaceSystem->GetRowsCnt(surface); }
+
+    inline int GetColsOfC0Patches(Entity surface) const
+        { return c0surfaceSystem->GetColsCnt(surface); }
 
     inline void DeleteControlPointFromCurve(Entity curve, Entity controlPoint) const
         { c0CurveSystem->DeleteControlPoint(curve, controlPoint); }
@@ -127,7 +149,7 @@ public:
         { return pointsSystem->GetEntities(); }
 
     inline const std::unordered_set<Entity>& GetAllCurves() const
-        { return coordinator.GetSystem<CurveControlPointsSystem>()->GetEntities(); }
+        { return coordinator.GetSystem<ControlPointsSystem>()->GetEntities(); }
 
     inline const void ShowC2BSplinePolygon(Entity entity) const
         { return c2CurveSystem->ShowBSplinePolygon(entity); }
@@ -147,6 +169,9 @@ public:
     inline const void HideC2BezierControlPoints(Entity entity) const
         { return c2CurveSystem->HideBezierControlPoints(entity); }
 
+    inline const void SetSurfaceDensity(Entity entity, C0SurfaceDensity density) const
+        { c0surfaceSystem->SetDensity(entity, density); }
+
     template <typename Comp>
     static inline constexpr ComponentId GetComponentId()
         { return ComponentsManager::GetComponentId<Comp>(); }
@@ -165,6 +190,7 @@ private:
     std::shared_ptr<C0CurveSystem> c0CurveSystem;
     std::shared_ptr<C2CurveSystem> c2CurveSystem;
     std::shared_ptr<InterpolationCurveSystem> interpolationCurveSystem;
+    std::shared_ptr<C0SurfaceSystem>  c0surfaceSystem;
 
     alg::Vec3 PointFromViewportCoordinates(float x, float y) const;
     Line LineFromViewportCoordinates(float x, float y) const;

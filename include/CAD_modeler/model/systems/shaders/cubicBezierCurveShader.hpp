@@ -4,14 +4,14 @@
 #include "shader.hpp"
 
 
-class CubicBezierShader: private Shader {
+class CubicBezierCurveShader: private Shader {
 public:
-    CubicBezierShader():
+    CubicBezierCurveShader():
         Shader(
-            "../../shaders/bezierShader.vert",
+            "../../shaders/passThroughShader.vert",
             "../../shaders/stdShader.frag",
-            "../../shaders/bezierShader.tesc",
-            "../../shaders/bezierShader.tese"
+            "../../shaders/bezierCurveShader.tesc",
+            "../../shaders/bezierCurveShader.tese"
         ) {}
 
     inline void SetColor(const alg::Vec4& color) const

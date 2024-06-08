@@ -8,7 +8,7 @@
 #include <CAD_modeler/model/components/cameraParameters.hpp>
 
 #include <CAD_modeler/model/systems/toUpdateSystem.hpp>
-#include <CAD_modeler/model/systems/curveControlPointsSystem.hpp>
+#include <CAD_modeler/model/systems/controlPointsSystem.hpp>
 
 #include <stdexcept>
 
@@ -27,11 +27,12 @@ Model::Model(int viewport_width, int viewport_height)
     PointsSystem::RegisterSystem(coordinator);
     NameSystem::RegisterSystem(coordinator);
     SelectionSystem::RegisterSystem(coordinator);
-    CurveControlPointsSystem::RegisterSystem(coordinator);
+    ControlPointsSystem::RegisterSystem(coordinator);
     C0CurveSystem::RegisterSystem(coordinator);
     C2CurveSystem::RegisterSystem(coordinator);
     ToUpdateSystem::RegisterSystem(coordinator);
     InterpolationCurveSystem::RegisterSystem(coordinator);
+    C0SurfaceSystem::RegisterSystem(coordinator);
 
     cameraSys = coordinator.GetSystem<CameraSystem>();
     toriSystem = coordinator.GetSystem<ToriSystem>();
@@ -42,8 +43,9 @@ Model::Model(int viewport_width, int viewport_height)
     selectionSystem = coordinator.GetSystem<SelectionSystem>();
     c0CurveSystem = coordinator.GetSystem<C0CurveSystem>();
     c2CurveSystem = coordinator.GetSystem<C2CurveSystem>();
-    auto curveControlPointsSystem = coordinator.GetSystem<CurveControlPointsSystem>();
+    auto controlPointsSystem = coordinator.GetSystem<ControlPointsSystem>();
     interpolationCurveSystem = coordinator.GetSystem<InterpolationCurveSystem>();
+    c0surfaceSystem = coordinator.GetSystem<C0SurfaceSystem>();
 
     CameraParameters params {
         .target = Position(0.0f),
@@ -62,8 +64,9 @@ Model::Model(int viewport_width, int viewport_height)
     toriSystem->Init(&shadersRepo);
     c0CurveSystem->Init(&shadersRepo);
     c2CurveSystem->Init(&shadersRepo);
-    curveControlPointsSystem->Init();
+    controlPointsSystem->Init();
     interpolationCurveSystem->Init(&shadersRepo);
+    c0surfaceSystem->Init(&shadersRepo);
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glEnable(GL_LINE_SMOOTH);
@@ -71,18 +74,6 @@ Model::Model(int viewport_width, int viewport_height)
     glEnable(GL_BLEND);
     glDepthMask(GL_FALSE);
     glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-
-    // Entity point1 = pointsSystem->CreatePoint(Position(1.f, 2.f, 0.f));
-    // Entity point2 = pointsSystem->CreatePoint(Position(4.f, 5.f, 0.f));
-    // Entity point3 = pointsSystem->CreatePoint(Position(5.f, 7.f, 0.f));
-    // Entity point4 = pointsSystem->CreatePoint(Position(8.f, 10.f, 0.f));
-
-    // interpolationCurveSystem->CreateCurve({
-    //     point1,
-    //     point2,
-    //     point3,
-    //     point4
-    // });
 }
 
 
@@ -98,6 +89,7 @@ void Model::RenderFrame()
     c0CurveSystem->Render();
     c2CurveSystem->Render();
     interpolationCurveSystem->Render();
+    c0surfaceSystem->Render();
 }
 
 

@@ -3,10 +3,10 @@
 #include <ecs/system.hpp>
 
 #include <memory>
-#include "../components/curveControlPoints.hpp"
+#include "../components/controlPoints.hpp"
 
 
-class CurveControlPointsSystem: public System {
+class ControlPointsSystem: public System {
 public:
     static void RegisterSystem(Coordinator& coordinator);
 
@@ -38,12 +38,12 @@ private:
     };
 
 
-    class DeletionHandler: public EventHandler<CurveControlPoints> {
+    class DeletionHandler: public EventHandler<ControlPoints> {
     public:
         DeletionHandler(Coordinator& coordinator):
             coordinator(coordinator) {}
 
-        void HandleEvent(Entity entity, const CurveControlPoints& component, EventType eventType) override;
+        void HandleEvent(Entity entity, const ControlPoints& component, EventType eventType) override;
 
     private:
         Coordinator& coordinator;
