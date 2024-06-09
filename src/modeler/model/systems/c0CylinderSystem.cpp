@@ -5,6 +5,7 @@
 #include "CAD_modeler/model/systems/pointsSystem.hpp"
 #include "CAD_modeler/model/systems/controlPointsSystem.hpp"
 #include "CAD_modeler/model/systems/toUpdateSystem.hpp"
+#include "CAD_modeler/model/systems/c0PatchesSystem.hpp"
 
 #include "CAD_modeler/model/components/c0SurfacePatches.hpp"
 #include "CAD_modeler/model/components/c0SurfaceDensity.hpp"
@@ -66,6 +67,8 @@ Entity C0CylinderSystem::CreateCylinder(const Position &pos, const alg::Vec3 &di
     coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
 
     RecalculatePositions(surface, pos, direction, radius);
+
+    coordinator->GetSystem<C0PatchesSystem>()->AddPossibilityToHasPatchesPolygon(surface);
 
     return surface;
 }

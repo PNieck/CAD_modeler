@@ -17,6 +17,8 @@
 #include <CAD_modeler/model/components/unremovable.hpp>
 #include <CAD_modeler/model/components/c0SurfacePatches.hpp>
 #include <CAD_modeler/model/components/c0SurfaceDensity.hpp>
+#include <CAD_modeler/model/components/patchesPolygonMesh.hpp>
+#include <CAD_modeler/model/components/hasPatchesPolygon.hpp>
 
 
 void RegisterAllComponents(Coordinator& coordinator)
@@ -38,4 +40,6 @@ void RegisterAllComponents(Coordinator& coordinator)
     coordinator.RegisterComponent<Unremovable>();
     coordinator.RegisterComponent<C0SurfacePatches>();
     coordinator.RegisterComponent<C0SurfaceDensity>();
+    coordinator.RegisterComponent<PatchesPolygonMesh>();
+    coordinator.RegisterComponent<HasPatchesPolygon>();
 }

@@ -119,6 +119,8 @@ Model::Model(int viewport_width, int viewport_height)
     //     alg::Vec3(0.f, 5.f, 0.f),
     //     5.f
     // );
+
+    // c0CylinderSystem->ShowBezierPolygon(cylinder);
 }
 
 

@@ -1,11 +1,13 @@
 #pragma once
 
 #include <ecs/system.hpp>
+#include <ecs/coordinator.hpp>
 
 #include "shaders/shaderRepository.hpp"
 #include "utils/nameGenerator.hpp"
 #include "../components/position.hpp"
-#include "c0SurfaceSystem.hpp"
+#include "../components/c0SurfaceDensity.hpp"
+#include "c0PatchesSystem.hpp"
 
 
 class C0CylinderSystem: public System {
@@ -19,6 +21,15 @@ public:
 
     void DeleteRowOfPatches(Entity surface, const Position& pos, const alg::Vec3& direction, float radius) const;
     void DeleteColOfPatches(Entity surface, const Position& pos, const alg::Vec3& direction, float radius) const;
+
+    inline void ShowBezierPolygon(Entity cylinder) const
+        { coordinator->GetSystem<C0PatchesSystem>()->ShowPolygon(cylinder); }
+
+    inline void HideBezierPolygon(Entity cylinder) const
+        { coordinator->GetSystem<C0PatchesSystem>()->HidePolygon(cylinder); }
+
+    inline void SetDensity(Entity entity, C0SurfaceDensity density) const
+        { coordinator->SetComponent<C0SurfaceDensity>(entity, density); }
 
 private:
     NameGenerator nameGenerator;

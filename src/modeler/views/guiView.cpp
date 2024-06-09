@@ -309,6 +309,10 @@ void GuiView::RenderSingleObjectProperties(Entity entity) const
     if (it != components.end())
         DisplaySurfaceDensityParameter(entity, model.GetComponent<C0SurfaceDensity>(entity));
 
+    it = components.find(Model::GetComponentId<HasPatchesPolygon>());
+    if (it != components.end())
+        DisplayPatchesPolygonOption(entity, model.GetComponent<HasPatchesPolygon>(entity));
+
     it = components.find(Model::GetComponentId<Unremovable>());
     if (it == components.end())
         DisplayEntityDeletionOption(entity);
@@ -574,6 +578,21 @@ void GuiView::DisplaySurfaceDensityParameter(Entity entity, const C0SurfaceDensi
 
     if (d != density.GetDensity()) {
         controller.SetNewSurfaceDensity(entity, C0SurfaceDensity(d));
+    }
+}
+
+
+void GuiView::DisplayPatchesPolygonOption(Entity entity, const HasPatchesPolygon &patchesPolygon) const
+{
+    bool value = patchesPolygon.value;
+
+    ImGui::Checkbox("Draw Bezier Polygon", &value);
+
+    if (value != patchesPolygon.value) {
+        if (value)
+            controller.ShowPatchesPolygon(entity);
+        else
+            controller.HidePatchesPolygon(entity);
     }
 }
 

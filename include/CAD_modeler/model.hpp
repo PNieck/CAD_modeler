@@ -174,6 +174,12 @@ public:
     inline const void SetSurfaceDensity(Entity entity, C0SurfaceDensity density) const
         { c0surfaceSystem->SetDensity(entity, density); }
 
+    inline const void ShowPatchesPolygon(Entity entity) const
+        { c0PatchesSystem->ShowPolygon(entity); }
+
+    inline const void HidePatchesPolygon(Entity entity) const
+        { c0PatchesSystem->HidePolygon(entity); }
+
     template <typename Comp>
     static inline constexpr ComponentId GetComponentId()
         { return ComponentsManager::GetComponentId<Comp>(); }

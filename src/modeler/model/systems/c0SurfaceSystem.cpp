@@ -8,6 +8,7 @@
 #include "CAD_modeler/model/systems/controlPointsSystem.hpp"
 #include "CAD_modeler/model/systems/toUpdateSystem.hpp"
 #include "CAD_modeler/model/systems/controlPointsSystem.hpp"
+#include "CAD_modeler/model/systems/c0PatchesSystem.hpp"
 
 #include "CAD_modeler/model/components/c0SurfacePatches.hpp"
 #include "CAD_modeler/model/components/c0SurfaceDensity.hpp"
@@ -75,6 +76,8 @@ Entity C0SurfaceSystem::CreateSurface(const Position& pos)
     coordinator->AddComponent<C0SurfaceDensity>(surface, density);
 
     coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
+
+    coordinator->GetSystem<C0PatchesSystem>()->AddPossibilityToHasPatchesPolygon(surface);
 
     return surface;
 }

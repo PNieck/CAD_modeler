@@ -87,4 +87,10 @@ public:
 
     inline void SetNewSurfaceDensity(Entity entity, C0SurfaceDensity newDensity)
         { model.SetSurfaceDensity(entity, newDensity); }
+
+    inline void ShowPatchesPolygon(Entity entity)
+        { model.ShowPatchesPolygon(entity); }
+
+    inline void HidePatchesPolygon(Entity entity)
+        { model.HidePatchesPolygon(entity); }
 };
