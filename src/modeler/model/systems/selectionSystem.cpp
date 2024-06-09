@@ -77,7 +77,7 @@ void SelectionSystem::SelectFromLine(const Line& line)
 {
     auto const& pointsSystem = coordinator->GetSystem<PointsSystem>();
 
-    float smallestT = std::numeric_limits<float>::infinity();
+    float smallestDis = std::numeric_limits<float>::infinity();
     Entity actEntity;
 
     for (auto const entity: pointsSystem->GetEntities()) {
@@ -86,15 +86,15 @@ void SelectionSystem::SelectFromLine(const Line& line)
         float t = alg::Dot(line.GetDirection(), position.vec - line.GetSamplePoint());
         alg::Vec3 projection = line.GetPointOnLine(t);
 
-        float distance = alg::DistanceSquared(projection, position.vec);
+        float dis = alg::DistanceSquared(projection, position.vec);
 
-        if (t < smallestT && distance < 0.5) {
-            smallestT = t;
+        if (dis < smallestDis && dis < 0.5) {
+            smallestDis = dis;
             actEntity = entity;
         }
     }
 
-    if (smallestT != std::numeric_limits<float>::infinity()) {
+    if (smallestDis != std::numeric_limits<float>::infinity()) {
         if (IsSelected(actEntity))
             Deselect(actEntity);
         else
