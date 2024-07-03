@@ -15,6 +15,12 @@ public:
     inline void Init(ShaderRepository* shadersRepo)
         { this->shaderRepo = shadersRepo; }
 
+    inline int GetRowsCnt(Entity surface) const
+        { return coordinator->GetComponent<C0SurfacePatches>(surface).Rows(); }
+
+    inline int GetColsCnt(Entity surface) const
+        { return coordinator->GetComponent<C0SurfacePatches>(surface).Cols(); }
+
     void AddPossibilityToHasPatchesPolygon(Entity entity) const
         { coordinator->AddComponent<HasPatchesPolygon>(entity, HasPatchesPolygon()); }
 

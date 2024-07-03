@@ -27,6 +27,7 @@ private:
 
     void RenderAddingCurveGui(CurveType curveType) const;
     void RenderAddingC0Surface() const;
+    void RenderAddingC0Cylinder() const;
 
     void RenderObjectsNames() const;
     void RenderObjectsProperties() const;

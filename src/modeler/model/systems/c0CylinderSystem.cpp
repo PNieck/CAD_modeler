@@ -153,6 +153,46 @@ void C0CylinderSystem::AddColOfPatches(Entity surface, const Position &pos, cons
 }
 
 
+void C0CylinderSystem::DeleteRowOfPatches(Entity surface, const Position &pos, const alg::Vec3 &direction, float radius) const
+{
+    coordinator->EditComponent<C0SurfacePatches>(surface,
+        [surface, this](C0SurfacePatches& patches) {
+            for (int col=0; col < patches.PointsInCol(); col++) {
+                for (int row=patches.PointsInRow() - 3; row < patches.PointsInRow(); row++) {
+                    Entity point = patches.GetPoint(row, col);
+                    coordinator->DestroyEntity(point);
+                }
+            }
+
+            patches.DeleteRow();
+        }
+    );
+
+    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
+    RecalculatePositions(surface, pos, direction, radius);
+}
+
+
+void C0CylinderSystem::DeleteColOfPatches(Entity surface, const Position &pos, const alg::Vec3 &direction, float radius) const
+{
+    coordinator->EditComponent<C0SurfacePatches>(surface,
+        [surface, this](C0SurfacePatches& patches) {
+            for (int row=0; row < patches.PointsInRow(); row++) {
+                for (int col=patches.PointsInCol() - 3; col < patches.PointsInCol(); col++) {
+                    Entity point = patches.GetPoint(row, col);
+                    coordinator->DestroyEntity(point);
+                }
+            }
+
+            patches.DeleteCol();
+        }
+    );
+
+    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
+    RecalculatePositions(surface, pos, direction, radius);
+}
+
+
 void C0CylinderSystem::RecalculatePositions(Entity cylinder, const Position &pos, const alg::Vec3 &direction, float radius) const
 {
     auto const& patches = coordinator->GetComponent<C0SurfacePatches>(cylinder);

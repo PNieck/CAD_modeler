@@ -31,8 +31,8 @@ public:
     inline void SetDensity(Entity entity, C0SurfaceDensity density) const
         { coordinator->SetComponent<C0SurfaceDensity>(entity, density); }
 
+    void RecalculatePositions(Entity cylinder, const Position& pos, const alg::Vec3& direction, float radius) const;
+
 private:
     NameGenerator nameGenerator;
-
-    void RecalculatePositions(Entity cylinder, const Position& pos, const alg::Vec3& direction, float radius) const;
 };

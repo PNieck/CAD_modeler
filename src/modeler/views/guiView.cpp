@@ -76,6 +76,10 @@ void GuiView::RenderGui() const
             RenderAddingC0Surface();
             break;
 
+        case AppState::AddingC0Cylinder:
+            RenderAddingC0Cylinder();
+            break;
+
         default:
             throw std::runtime_error("Unknown app state");
     }
@@ -116,6 +120,10 @@ void GuiView::RenderDefaultGui() const
 
     if (ImGui::Button("Add C0 surface")) {
         controller.SetAppState(AppState::AddingC0Surface);
+    }
+
+    if (ImGui::Button("Add C0 cylinder")) {
+        controller.SetAppState(AppState::AddingC0Cylinder);
     }
 
     ImGui::Separator();
@@ -234,6 +242,60 @@ void GuiView::RenderAddingC0Surface() const
 
         while (cols < model.GetColsOfC0Patches(entity.value())) {
             controller.DeleteColOfC0SurfacePatches(entity.value());
+        }
+    }
+
+    if (ImGui::Button("Finish adding")) {
+        controller.SetAppState(AppState::Default);
+        entity.reset();
+    }
+}
+
+
+void GuiView::RenderAddingC0Cylinder() const
+{
+    static std::optional<Entity> entity;
+    static float oldRadius, newRadius;
+    static float oldLen, newLen;
+    static const alg::Vec3 dir(0.f, 1.f, 0.f);
+    
+    if (!entity.has_value()) {
+        entity = controller.AddC0Cylinder();
+        oldRadius = newRadius = 1.0f;
+        newLen = 1.f;
+    }
+
+    int rows = model.GetRowsCntOfC0Patches(entity.value());
+    int cols = model.GetColsOfC0Patches(entity.value());
+    bool valueChanged = false;
+
+    ImGui::InputInt("Rows", &rows);
+    ImGui::InputInt("Cols", &cols);
+
+    valueChanged |= ImGui::DragFloat("Radius", &newRadius, DRAG_FLOAT_SPEED);
+    valueChanged |= ImGui::DragFloat("Length", &newLen, DRAG_FLOAT_SPEED);
+
+    if (valueChanged) {
+        controller.RecalculateC0Cylinder(entity.value(), dir * newLen, newRadius);
+    }
+
+    if (rows != model.GetRowsCntOfC0Patches(entity.value())) {
+        while (rows > model.GetRowsCntOfC0Patches(entity.value())) {
+            controller.AddRowOfC0CylinderPatches(entity.value(), dir * newLen, newRadius);
+        }
+
+        while (rows < model.GetRowsCntOfC0Patches(entity.value())) {
+            controller.DeleteRowOfC0CylinderPatches(entity.value(), dir * newLen, newRadius);
+        }
+    }
+
+    if (cols != model.GetColsOfC0Patches(entity.value())) {
+        while (cols > model.GetColsOfC0Patches(entity.value())) {
+            controller.AddColOfC0CylinderPatches(entity.value(), dir * newLen, newRadius);
+        }
+
+        while (cols < model.GetColsOfC0Patches(entity.value())) {
+            controller.DeleteColOfC0CylinderPatches(entity.value(), dir * newLen, newRadius);
         }
     }
 

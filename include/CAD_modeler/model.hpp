@@ -45,6 +45,9 @@ public:
     inline Entity AddC0Surface() const
         { return c0surfaceSystem->CreateSurface(cursorSystem->GetPosition()); }
 
+    inline Entity AddC0Cylinder() const
+        { return c0CylinderSystem->CreateCylinder(cursorSystem->GetPosition(), alg::Vec3(0.f, 1.f, 0.f), 1.f); }
+
     inline void AddControlPointToCurve(Entity curve, Entity entity) const
         { c0CurveSystem->AddControlPoint(curve, entity); }
 
@@ -60,11 +63,26 @@ public:
     inline void DeleteColOfC0SurfacePatches(Entity surface) const
         { c0surfaceSystem->DeleteColOfPatches(surface); }
 
+    inline void AddRowOfC0CylinderPatches(Entity surface, float radius = 1.f, const alg::Vec3& dir = alg::Vec3(0.f, 1.f, 0.f)) const
+        { c0CylinderSystem->AddRowOfPatches(surface, cursorSystem->GetPosition(), dir, radius); }
+
+    inline void AddColOfC0CylinderPatches(Entity surface, float radius = 1.f, const alg::Vec3& dir = alg::Vec3(0.f, 1.f, 0.f)) const
+        { c0CylinderSystem->AddColOfPatches(surface, cursorSystem->GetPosition(), dir, radius); }
+
+    inline void DeleteRowOfC0CylinderPatches(Entity surface, float radius = 1.f, const alg::Vec3& dir = alg::Vec3(0.f, 1.f, 0.f)) const
+        { c0CylinderSystem->DeleteRowOfPatches(surface, cursorSystem->GetPosition(), dir, radius); }
+
+    inline void DeleteColOfC0CylinderPatches(Entity surface, float radius = 1.f, const alg::Vec3& dir = alg::Vec3(0.f, 1.f, 0.f)) const
+        { c0CylinderSystem->DeleteColOfPatches(surface, cursorSystem->GetPosition(), dir, radius); }
+
+    inline void RecalculateC0CylinderPatches(Entity surface, float radius = 1.f, const alg::Vec3& dir = alg::Vec3(0.f, 1.f, 0.f)) const
+        { c0CylinderSystem->RecalculatePositions(surface, cursorSystem->GetPosition(), dir, radius); }
+
     inline int GetRowsCntOfC0Patches(Entity surface) const
-        { return c0surfaceSystem->GetRowsCnt(surface); }
+        { return c0PatchesSystem->GetRowsCnt(surface); }
 
     inline int GetColsOfC0Patches(Entity surface) const
-        { return c0surfaceSystem->GetColsCnt(surface); }
+        { return c0PatchesSystem->GetColsCnt(surface); }
 
     inline void DeleteControlPointFromCurve(Entity curve, Entity controlPoint) const
         { c0CurveSystem->DeleteControlPoint(curve, controlPoint); }
@@ -198,7 +216,7 @@ private:
     std::shared_ptr<C0CurveSystem> c0CurveSystem;
     std::shared_ptr<C2CurveSystem> c2CurveSystem;
     std::shared_ptr<InterpolationCurveSystem> interpolationCurveSystem;
-    std::shared_ptr<C0SurfaceSystem>  c0surfaceSystem;
+    std::shared_ptr<C0SurfaceSystem> c0surfaceSystem;
     std::shared_ptr<C0CylinderSystem> c0CylinderSystem;
     std::shared_ptr<C0PatchesSystem> c0PatchesSystem;
 
