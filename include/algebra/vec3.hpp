@@ -190,4 +190,14 @@ namespace alg
     inline bool operator!=(const Vector3<DataType>& v1, const Vector3<DataType>& v2) {
         return !(v1 == v2);
     }
+
+    template <typename DataType>
+    Vector3<DataType> GetPerpendicularVec(const Vector3<DataType>& v) {
+        Vector3<DataType> cross = Cross(v, Vector3<DataType>(0, 0, 1));
+
+        if (cross.LengthSquared() == 0.0f)
+            cross = Cross(v, Vector3<DataType>(0, 1, 0));
+        
+        return cross.Normalize();
+    }
 };

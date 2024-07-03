@@ -12,6 +12,7 @@ public:
     Rotation(float pitch, float yaw, float roll):
         quat(pitch, yaw, roll) {}
     Rotation(const alg::Quat& rot): quat(rot) {}
+    Rotation(const alg::Vec3& axis, float angle): quat(axis, angle) {}
 
     inline void Rotate(alg::Vec3& vec) const
         { vec = quat.Rotate(vec); }

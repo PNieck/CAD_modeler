@@ -27,6 +27,7 @@ private:
 
     void RenderAddingCurveGui(CurveType curveType) const;
     void RenderAddingC0Surface() const;
+    void RenderAddingC0Cylinder() const;
 
     void RenderObjectsNames() const;
     void RenderObjectsProperties() const;
@@ -43,6 +44,7 @@ private:
     void DisplayC2CurveParameters(Entity entity, const C2CurveParameters& params) const;
     void DisplayEntityDeletionOption(Entity entity) const;
     void DisplaySurfaceDensityParameter(Entity entity, const C0SurfaceDensity& density) const;
+    void DisplayPatchesPolygonOption(Entity entity, const HasPatchesPolygon& patchesPolygon) const;
 
     void DisplayNameEditor(Entity entity, const Name& name) const;
     

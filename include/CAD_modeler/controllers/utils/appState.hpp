@@ -8,4 +8,5 @@ enum class AppState {
     AddingC2Curve,
     AddingInterpolationCurve,
     AddingC0Surface,
+    AddingC0Cylinder,
 };

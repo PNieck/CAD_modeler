@@ -33,6 +33,8 @@ Model::Model(int viewport_width, int viewport_height)
     ToUpdateSystem::RegisterSystem(coordinator);
     InterpolationCurveSystem::RegisterSystem(coordinator);
     C0SurfaceSystem::RegisterSystem(coordinator);
+    C0CylinderSystem::RegisterSystem(coordinator);
+    C0PatchesSystem::RegisterSystem(coordinator);
 
     cameraSys = coordinator.GetSystem<CameraSystem>();
     toriSystem = coordinator.GetSystem<ToriSystem>();
@@ -46,6 +48,8 @@ Model::Model(int viewport_width, int viewport_height)
     auto controlPointsSystem = coordinator.GetSystem<ControlPointsSystem>();
     interpolationCurveSystem = coordinator.GetSystem<InterpolationCurveSystem>();
     c0surfaceSystem = coordinator.GetSystem<C0SurfaceSystem>();
+    c0CylinderSystem = coordinator.GetSystem<C0CylinderSystem>();
+    c0PatchesSystem = coordinator.GetSystem<C0PatchesSystem>();
 
     CameraParameters params {
         .target = Position(0.0f),
@@ -66,7 +70,7 @@ Model::Model(int viewport_width, int viewport_height)
     c2CurveSystem->Init(&shadersRepo);
     controlPointsSystem->Init();
     interpolationCurveSystem->Init(&shadersRepo);
-    c0surfaceSystem->Init(&shadersRepo);
+    c0PatchesSystem->Init(&shadersRepo);
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glEnable(GL_LINE_SMOOTH);
@@ -74,6 +78,49 @@ Model::Model(int viewport_width, int viewport_height)
     glEnable(GL_BLEND);
     glDepthMask(GL_FALSE);
     glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+
+    // Entity cylinder = c0CylinderSystem->CreateCylinder(
+    //     Position(alg::Vec3(0.f, 0.f, 0.f)),
+    //     alg::Vec3(0.f, 5.f, 0.f),
+    //     5.f
+    // );
+
+    // c0CylinderSystem->AddRowOfPatches(
+    //     cylinder,
+    //     Position(alg::Vec3(0.f, 0.f, 0.f)),
+    //     alg::Vec3(0.f, 5.f, 0.f),
+    //     5.f
+    // );
+
+    // c0CylinderSystem->AddRowOfPatches(
+    //     cylinder,
+    //     Position(alg::Vec3(0.f, 0.f, 0.f)),
+    //     alg::Vec3(0.f, 5.f, 0.f),
+    //     5.f
+    // );
+
+    // c0CylinderSystem->AddColOfPatches(
+    //     cylinder,
+    //     Position(alg::Vec3(0.f, 0.f, 0.f)),
+    //     alg::Vec3(0.f, 5.f, 0.f),
+    //     5.f
+    // );
+
+    // c0CylinderSystem->AddColOfPatches(
+    //     cylinder,
+    //     Position(alg::Vec3(0.f, 0.f, 0.f)),
+    //     alg::Vec3(0.f, 5.f, 0.f),
+    //     5.f
+    // );
+
+    // c0CylinderSystem->AddColOfPatches(
+    //     cylinder,
+    //     Position(alg::Vec3(0.f, 0.f, 0.f)),
+    //     alg::Vec3(0.f, 5.f, 0.f),
+    //     5.f
+    // );
+
+    // c0CylinderSystem->ShowBezierPolygon(cylinder);
 }
 
 
@@ -89,7 +136,7 @@ void Model::RenderFrame()
     c0CurveSystem->Render();
     c2CurveSystem->Render();
     interpolationCurveSystem->Render();
-    c0surfaceSystem->Render();
+    c0PatchesSystem->Render();
 }
 
 

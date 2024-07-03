@@ -105,6 +105,11 @@ public:
         return systemsMgr.GetSystem<Sys>();
     }
 
+    template <typename Comp>
+    inline constexpr ComponentId GetComponentID() const {
+        return componentMgr.GetComponentId<Comp>();
+    }
+
 
 private:
     ComponentsManager componentMgr;
