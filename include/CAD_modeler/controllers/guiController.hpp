@@ -18,23 +18,23 @@ public:
 
     Entity AddCurve(const std::vector<Entity>& entities, CurveType curveType) const;
 
-    inline Entity AddC0Surface() const
-        { return model.AddC0Surface(); }
+    inline Entity AddC0Surface(const alg::Vec3& dir, float length, float width) const
+        { return model.AddC0Surface(dir, length, width); }
 
     inline Entity AddC0Cylinder() const
         { return model.AddC0Cylinder(); }
 
-    inline void AddRowOfC0SurfacePatches(Entity surface)
-        { return model.AddRowOfC0SurfacePatches(surface); }
+    inline void AddRowOfC0SurfacePatches(Entity surface, const alg::Vec3& dir, float length, float width)
+        { return model.AddRowOfC0SurfacePatches(surface, dir, length, width); }
 
-    inline void AddColOfC0SurfacePatches(Entity surface)
-        { return model.AddColOfC0SurfacePatches(surface); }
+    inline void AddColOfC0SurfacePatches(Entity surface, const alg::Vec3& dir, float length, float width)
+        { return model.AddColOfC0SurfacePatches(surface, dir, length, width); }
 
-    inline void DeleteRowOfC0SurfacePatches(Entity surface)
-        { return model.DeleteRowOfC0SurfacePatches(surface); }
+    inline void DeleteRowOfC0SurfacePatches(Entity surface, const alg::Vec3& dir, float length, float width)
+        { return model.DeleteRowOfC0SurfacePatches(surface, dir, length, width); }
 
-    inline void DeleteColOfC0SurfacePatches(Entity surface)
-        { return model.DeleteColOfC0SurfacePatches(surface); }
+    inline void DeleteColOfC0SurfacePatches(Entity surface, const alg::Vec3& dir, float length, float width)
+        { return model.DeleteColOfC0SurfacePatches(surface, dir, length, width); }
 
     inline void AddRowOfC0CylinderPatches(Entity surface, const alg::Vec3& dir, float radius)
         { return model.AddRowOfC0CylinderPatches(surface, radius, dir); }
@@ -50,6 +50,9 @@ public:
 
     inline void RecalculateC0Cylinder(Entity cylinder, const alg::Vec3& dir, float radius)
         { return model.RecalculateC0CylinderPatches(cylinder, radius, dir); }
+
+    inline void RecalculateC0Surface(Entity surface, const alg::Vec3& dir, float length, float width)
+        { return model.RecalculateC0Surface(surface, dir, length, width); }
 
     inline void AddControlPointToCurve(Entity curve, Entity entity) const
         { model.AddControlPointToCurve(curve, entity); }

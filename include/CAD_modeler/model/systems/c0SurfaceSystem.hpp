@@ -15,13 +15,13 @@ class C0SurfaceSystem: public System {
 public:
     static void RegisterSystem(Coordinator& coordinator);
 
-    Entity CreateSurface(const Position& pos);
+    Entity CreateSurface(const Position& pos, const alg::Vec3& direction, float length, float width);
 
-    void AddRowOfPatches(Entity surface) const;
-    void AddColOfPatches(Entity surface) const;
+    void AddRowOfPatches(Entity surface, const Position& pos, const alg::Vec3& direction, float length, float width) const;
+    void AddColOfPatches(Entity surface, const Position& pos, const alg::Vec3& direction, float length, float width) const;
 
-    void DeleteRowOfPatches(Entity surface) const;
-    void DeleteColOfPatches(Entity surface) const;
+    void DeleteRowOfPatches(Entity surface, const Position& pos, const alg::Vec3& direction, float length, float width) const;
+    void DeleteColOfPatches(Entity surface, const Position& pos, const alg::Vec3& direction, float length, float width) const;
 
     inline void SetDensity(Entity entity, C0SurfaceDensity density) const
         { coordinator->SetComponent<C0SurfaceDensity>(entity, density); }
@@ -31,6 +31,8 @@ public:
 
     inline void HideBezierPolygon(Entity cylinder) const
         { coordinator->GetSystem<C0PatchesSystem>()->HidePolygon(cylinder); }
+
+    void Recalculate(Entity surface, const Position& pos, const alg::Vec3& direction, float length, float width) const;
 
 private:
     NameGenerator nameGenerator;
