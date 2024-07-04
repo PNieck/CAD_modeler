@@ -22,10 +22,6 @@
 #include <stack>
 
 
-const alg::Vec3 C0SurfaceSystem::offsetX = alg::Vec3(1.f/3.f, 0.f, 0.f);
-const alg::Vec3 C0SurfaceSystem::offsetZ = alg::Vec3(0.f, 0.f, -1.f/3.f);
-
-
 void C0SurfaceSystem::RegisterSystem(Coordinator &coordinator)
 {
     coordinator.RegisterSystem<C0SurfaceSystem>();
@@ -48,19 +44,13 @@ Entity C0SurfaceSystem::CreateSurface(const Position& pos, const alg::Vec3& dire
 
     auto const pointsSystem = coordinator->GetSystem<PointsSystem>();
 
-    alg::Vec3 actPos = pos.vec;
-
     for (int i=0; i < controlPointsInOneDir; ++i) {
         for (int j=0; j < controlPointsInOneDir; ++j) {
-            Entity cp = pointsSystem->CreatePoint(actPos);
+            // Creating control points with temporary location
+            Entity cp = pointsSystem->CreatePoint(pos.vec);
             controlPoints.push_back(cp);
             patches.SetPoint(cp, 0, 0, i, j);
-
-            actPos += offsetX;
         }
-
-        actPos += offsetZ;
-        actPos -= static_cast<float>(controlPointsInOneDir) * offsetX;
     }
 
     auto const controlPointsSys = coordinator->GetSystem<ControlPointsSystem>();
@@ -97,11 +87,7 @@ void C0SurfaceSystem::AddRowOfPatches(Entity surface, const Position& pos, const
 
             for (int col=0; col < patches.PointsInCol(); col++) {
                 for (int row=patches.PointsInRow() - 3; row < patches.PointsInRow(); row++) {
-                    Entity prevPoint = patches.GetPoint(row-1, col);
-                    auto const& prevPos = coordinator->GetComponent<Position>(prevPoint);
-
-                    alg::Vec3 newPos = prevPos.vec + offsetZ;
-                    Entity newEntity = pointSys->CreatePoint(Position(newPos));
+                    Entity newEntity = pointSys->CreatePoint(Position());
 
                     patches.SetPoint(newEntity, row, col);
                     newEntities.push(newEntity);
@@ -136,11 +122,7 @@ void C0SurfaceSystem::AddColOfPatches(Entity surface, const Position& pos, const
 
             for (int row=0; row < patches.PointsInRow(); row++) {
                 for (int col=patches.PointsInCol() - 3; col < patches.PointsInCol(); col++) {
-                    Entity prevPoint = patches.GetPoint(row, col - 1);
-                    auto const& prevPos = coordinator->GetComponent<Position>(prevPoint);
-
-                    alg::Vec3 newPos = prevPos.vec + offsetX;
-                    Entity newEntity = pointSys->CreatePoint(Position(newPos));
+                    Entity newEntity = pointSys->CreatePoint(Position());
 
                     patches.SetPoint(newEntity, row, col);
                     newEntities.push(newEntity);

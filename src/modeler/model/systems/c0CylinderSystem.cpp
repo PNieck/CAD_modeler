@@ -41,7 +41,7 @@ Entity C0CylinderSystem::CreateCylinder(const Position &pos, const alg::Vec3 &di
 
     for (int i=0; i < controlPointsInOneDir; ++i) {
         for (int j=0; j < controlPointsInOneDir - 1; ++j) {
-            Entity cp = pointsSystem->CreatePoint(Position());
+            Entity cp = pointsSystem->CreatePoint();
             controlPoints.push_back(cp);
             patches.SetPoint(cp, 0, 0, i, j);
         }
@@ -86,7 +86,7 @@ void C0CylinderSystem::AddRowOfPatches(Entity surface, const Position &pos, cons
 
             for (int col=0; col < patches.PointsInCol() - 1; col++) {
                 for (int row=patches.PointsInRow() - 3; row < patches.PointsInRow(); row++) {
-                    Entity newEntity = pointSys->CreatePoint(Position());
+                    Entity newEntity = pointSys->CreatePoint();
 
                     patches.SetPoint(newEntity, row, col);
                     newEntities.push(newEntity);
@@ -130,7 +130,7 @@ void C0CylinderSystem::AddColOfPatches(Entity surface, const Position &pos, cons
 
             for (int row=0; row < patches.PointsInRow(); row++) {
                 for (int col=patches.PointsInCol() - 4; col < patches.PointsInCol() - 1; col++) {
-                    Entity newEntity = pointSys->CreatePoint(Position());
+                    Entity newEntity = pointSys->CreatePoint();
 
                     patches.SetPoint(newEntity, row, col);
                     newEntities.push(newEntity);

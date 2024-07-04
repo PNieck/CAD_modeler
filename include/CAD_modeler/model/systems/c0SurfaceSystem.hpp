@@ -36,7 +36,4 @@ public:
 
 private:
     NameGenerator nameGenerator;
-
-    static const alg::Vec3 offsetX;
-    static const alg::Vec3 offsetZ;
 };
