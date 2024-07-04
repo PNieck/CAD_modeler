@@ -215,33 +215,46 @@ void GuiView::RenderAddingCurveGui(CurveType curveType) const
 void GuiView::RenderAddingC0Surface() const
 {
     static std::optional<Entity> entity;
+    static const alg::Vec3 dir(0.f, 1.f, 0.f);
+    static float width, length;
     
-    if (!entity.has_value())
-        entity = controller.AddC0Surface();
+    if (!entity.has_value()) {
+        width = 1.0f;
+        length = 1.0f;
+
+        entity = controller.AddC0Surface(dir, length, width);
+    }
 
     int rows = model.GetRowsCntOfC0Patches(entity.value());
     int cols = model.GetColsOfC0Patches(entity.value());
+    bool valueChanged = false;
 
     ImGui::InputInt("Rows", &rows);
     ImGui::InputInt("Cols", &cols);
 
+    valueChanged |= ImGui::DragFloat("Length", &length, DRAG_FLOAT_SPEED);
+    valueChanged |= ImGui::DragFloat("Width", &width, DRAG_FLOAT_SPEED);
+
+    if (valueChanged)
+        controller.RecalculateC0Surface(entity.value(), dir, length, width);
+
     if (rows != model.GetRowsCntOfC0Patches(entity.value())) {
         while (rows > model.GetRowsCntOfC0Patches(entity.value())) {
-            controller.AddRowOfC0SurfacePatches(entity.value());
+            controller.AddRowOfC0SurfacePatches(entity.value(), dir, length, width);
         }
 
         while (rows < model.GetRowsCntOfC0Patches(entity.value())) {
-            controller.DeleteRowOfC0SurfacePatches(entity.value());
+            controller.DeleteRowOfC0SurfacePatches(entity.value(), dir, length, width);
         }
     }
 
     if (cols != model.GetColsOfC0Patches(entity.value())) {
         while (cols > model.GetColsOfC0Patches(entity.value())) {
-            controller.AddColOfC0SurfacePatches(entity.value());
+            controller.AddColOfC0SurfacePatches(entity.value(), dir, length, width);
         }
 
         while (cols < model.GetColsOfC0Patches(entity.value())) {
-            controller.DeleteColOfC0SurfacePatches(entity.value());
+            controller.DeleteColOfC0SurfacePatches(entity.value(), dir, length, width);
         }
     }
 

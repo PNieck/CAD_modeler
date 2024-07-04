@@ -22,10 +22,6 @@
 #include <stack>
 
 
-const alg::Vec3 C0SurfaceSystem::offsetX = alg::Vec3(1.f/3.f, 0.f, 0.f);
-const alg::Vec3 C0SurfaceSystem::offsetZ = alg::Vec3(0.f, 0.f, -1.f/3.f);
-
-
 void C0SurfaceSystem::RegisterSystem(Coordinator &coordinator)
 {
     coordinator.RegisterSystem<C0SurfaceSystem>();
@@ -37,7 +33,7 @@ void C0SurfaceSystem::RegisterSystem(Coordinator &coordinator)
 }
 
 
-Entity C0SurfaceSystem::CreateSurface(const Position& pos)
+Entity C0SurfaceSystem::CreateSurface(const Position& pos, const alg::Vec3& direction, float length, float width)
 {
     static constexpr int controlPointsInOneDir = 4;
     static constexpr int controlPointsCnt = controlPointsInOneDir*controlPointsInOneDir;
@@ -48,19 +44,13 @@ Entity C0SurfaceSystem::CreateSurface(const Position& pos)
 
     auto const pointsSystem = coordinator->GetSystem<PointsSystem>();
 
-    alg::Vec3 actPos = pos.vec;
-
     for (int i=0; i < controlPointsInOneDir; ++i) {
         for (int j=0; j < controlPointsInOneDir; ++j) {
-            Entity cp = pointsSystem->CreatePoint(actPos);
+            // Creating control points with temporary location
+            Entity cp = pointsSystem->CreatePoint(pos.vec);
             controlPoints.push_back(cp);
             patches.SetPoint(cp, 0, 0, i, j);
-
-            actPos += offsetX;
         }
-
-        actPos += offsetZ;
-        actPos -= static_cast<float>(controlPointsInOneDir) * offsetX;
     }
 
     auto const controlPointsSys = coordinator->GetSystem<ControlPointsSystem>();
@@ -79,11 +69,13 @@ Entity C0SurfaceSystem::CreateSurface(const Position& pos)
 
     coordinator->GetSystem<C0PatchesSystem>()->AddPossibilityToHasPatchesPolygon(surface);
 
+    Recalculate(surface, pos, direction, length, width);
+
     return surface;
 }
 
 
-void C0SurfaceSystem::AddRowOfPatches(Entity surface) const
+void C0SurfaceSystem::AddRowOfPatches(Entity surface, const Position& pos, const alg::Vec3& direction, float length, float width) const
 {
     std::stack<Entity> newEntities;
 
@@ -95,11 +87,7 @@ void C0SurfaceSystem::AddRowOfPatches(Entity surface) const
 
             for (int col=0; col < patches.PointsInCol(); col++) {
                 for (int row=patches.PointsInRow() - 3; row < patches.PointsInRow(); row++) {
-                    Entity prevPoint = patches.GetPoint(row-1, col);
-                    auto const& prevPos = coordinator->GetComponent<Position>(prevPoint);
-
-                    alg::Vec3 newPos = prevPos.vec + offsetZ;
-                    Entity newEntity = pointSys->CreatePoint(Position(newPos));
+                    Entity newEntity = pointSys->CreatePoint(Position());
 
                     patches.SetPoint(newEntity, row, col);
                     newEntities.push(newEntity);
@@ -117,10 +105,12 @@ void C0SurfaceSystem::AddRowOfPatches(Entity surface) const
     }
 
     coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
+
+    Recalculate(surface, pos, direction, length, width);
 }
 
 
-void C0SurfaceSystem::AddColOfPatches(Entity surface) const
+void C0SurfaceSystem::AddColOfPatches(Entity surface, const Position& pos, const alg::Vec3& direction, float length, float width) const
 {
     std::stack<Entity> newEntities;
 
@@ -132,11 +122,7 @@ void C0SurfaceSystem::AddColOfPatches(Entity surface) const
 
             for (int row=0; row < patches.PointsInRow(); row++) {
                 for (int col=patches.PointsInCol() - 3; col < patches.PointsInCol(); col++) {
-                    Entity prevPoint = patches.GetPoint(row, col - 1);
-                    auto const& prevPos = coordinator->GetComponent<Position>(prevPoint);
-
-                    alg::Vec3 newPos = prevPos.vec + offsetX;
-                    Entity newEntity = pointSys->CreatePoint(Position(newPos));
+                    Entity newEntity = pointSys->CreatePoint(Position());
 
                     patches.SetPoint(newEntity, row, col);
                     newEntities.push(newEntity);
@@ -154,10 +140,12 @@ void C0SurfaceSystem::AddColOfPatches(Entity surface) const
     }
 
     coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
+
+    Recalculate(surface, pos, direction, length, width);
 }
 
 
-void C0SurfaceSystem::DeleteRowOfPatches(Entity surface) const
+void C0SurfaceSystem::DeleteRowOfPatches(Entity surface, const Position& pos, const alg::Vec3& direction, float length, float width) const
 {
     coordinator->EditComponent<C0SurfacePatches>(surface,
         [surface, this](C0SurfacePatches& patches) {
@@ -173,10 +161,12 @@ void C0SurfaceSystem::DeleteRowOfPatches(Entity surface) const
     );
 
     coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
+
+    Recalculate(surface, pos, direction, length, width);
 }
 
 
-void C0SurfaceSystem::DeleteColOfPatches(Entity surface) const
+void C0SurfaceSystem::DeleteColOfPatches(Entity surface, const Position& pos, const alg::Vec3& direction, float length, float width) const
 {
     coordinator->EditComponent<C0SurfacePatches>(surface,
         [surface, this](C0SurfacePatches& patches) {
@@ -192,4 +182,28 @@ void C0SurfaceSystem::DeleteColOfPatches(Entity surface) const
     );
 
     coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
+
+    Recalculate(surface, pos, direction, length, width);
+}
+
+
+void C0SurfaceSystem::Recalculate(Entity surface, const Position &pos, const alg::Vec3 &direction, float length, float width) const
+{
+    auto const& patches = coordinator->GetComponent<C0SurfacePatches>(surface);
+
+    alg::Vec3 perpendicular1 = alg::GetPerpendicularVec(direction);
+    alg::Vec3 perpendicular2 = alg::Cross(perpendicular1, direction);
+
+    perpendicular1 *= length / float(patches.PointsInRow() - 1);
+    perpendicular2 *= width / float(patches.PointsInCol() - 1);
+
+    for (int i=0; i < patches.PointsInRow(); ++i) {
+        for (int j=0; j < patches.PointsInCol(); ++j) {
+            Entity cp = patches.GetPoint(i, j);
+
+            alg::Vec3 newPos = pos.vec + perpendicular1 * float(i) + perpendicular2 * float(j);
+
+            coordinator->SetComponent(cp, Position(newPos));
+        }
+    }
 }
