@@ -12,11 +12,12 @@ public:
 
     void Init();
 
+    // TODO: delete
     Entity CreateControlPoints(const std::vector<Entity>& entities);
 
-    void AddControlPoint(Entity curve, Entity entity);
+    void AddControlPoint(Entity object, Entity controlPoint);
 
-    void DeleteControlPoint(Entity curve, Entity entity);
+    void DeleteControlPoint(Entity object, Entity controlPoint);
 
 
 private:
@@ -27,14 +28,14 @@ private:
 
     class ControlPointMovedHandler: public EventHandler<Position> {
     public:
-        ControlPointMovedHandler(Entity curve, Coordinator& coordinator):
-            coordinator(coordinator), curve(curve) {}
+        ControlPointMovedHandler(Entity targetObject, Coordinator& coordinator):
+            coordinator(coordinator), targetObject(targetObject) {}
 
         void HandleEvent(Entity entity, const Position& component, EventType eventType) override;
 
     private:
         Coordinator& coordinator;
-        Entity curve;
+        Entity targetObject;
     };
 
 

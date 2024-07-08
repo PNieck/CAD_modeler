@@ -23,69 +23,69 @@ void ControlPointsSystem::Init()
 
 Entity ControlPointsSystem::CreateControlPoints(const std::vector<Entity>& entities)
 {
-    Entity curve = coordinator->CreateEntity();
+    Entity object = coordinator->CreateEntity();
 
     ControlPoints controlPoints(entities);
 
-    auto handler = std::make_shared<ControlPointMovedHandler>(curve, *coordinator);
+    auto handler = std::make_shared<ControlPointMovedHandler>(object, *coordinator);
 
     for (Entity entity: entities) {
         auto handlerId = coordinator->Subscribe<Position>(entity, std::static_pointer_cast<EventHandler<Position>>(handler));
         controlPoints.controlPointsHandlers.insert({ entity, handlerId });
     }
 
-    controlPoints.deletionHandler = coordinator->Subscribe<ControlPoints>(curve, std::static_pointer_cast<EventHandler<ControlPoints>>(deletionHandler));
+    controlPoints.deletionHandler = coordinator->Subscribe<ControlPoints>(object, std::static_pointer_cast<EventHandler<ControlPoints>>(deletionHandler));
 
-     coordinator->AddComponent<ControlPoints>(curve, controlPoints);
+     coordinator->AddComponent<ControlPoints>(object, controlPoints);
 
-    return curve;
+    return object;
 }
 
 
-void ControlPointsSystem::AddControlPoint(Entity curve, Entity entity)
+void ControlPointsSystem::AddControlPoint(Entity object, Entity controlPoint)
 {
-    coordinator->EditComponent<ControlPoints>(curve,
-        [entity, this](ControlPoints& params) {
+    coordinator->EditComponent<ControlPoints>(object,
+        [controlPoint, this](ControlPoints& params) {
             auto const& controlPoints = params.GetPoints();
-            Entity controlPoint = *controlPoints.begin();
-            HandlerId handlerId = params.controlPointsHandlers.at(controlPoint);
-            auto eventHandler = coordinator->GetEventHandler<Position>(controlPoint, handlerId);
+            Entity prevControlPoint = *controlPoints.begin();
+            HandlerId handlerId = params.controlPointsHandlers.at(prevControlPoint);
+            auto eventHandler = coordinator->GetEventHandler<Position>(prevControlPoint, handlerId);
 
-            params.AddControlPoint(entity);
-            params.controlPointsHandlers.insert({entity, coordinator->Subscribe<Position>(entity, eventHandler)});
+            params.AddControlPoint(controlPoint);
+            params.controlPointsHandlers.insert({controlPoint, coordinator->Subscribe<Position>(controlPoint, eventHandler)});
         }
     );
 
-    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(curve);
+    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(object);
 }
 
 
-void ControlPointsSystem::DeleteControlPoint(Entity curve, Entity entity)
+void ControlPointsSystem::DeleteControlPoint(Entity object, Entity controlPoint)
 {
     bool entityDeleted = false;
 
-    coordinator->EditComponent<ControlPoints>(curve,
-        [&entityDeleted, curve, entity, this](ControlPoints& params) {
-            params.DeleteControlPoint(entity);
-            coordinator->Unsubscribe<Position>(entity, params.controlPointsHandlers.at(entity));
-            params.controlPointsHandlers.erase(entity);
+    coordinator->EditComponent<ControlPoints>(object,
+        [&entityDeleted, object, controlPoint, this](ControlPoints& params) {
+            params.DeleteControlPoint(controlPoint);
+            coordinator->Unsubscribe<Position>(controlPoint, params.controlPointsHandlers.at(controlPoint));
+            params.controlPointsHandlers.erase(controlPoint);
 
             if (params.controlPointsHandlers.size() == 0) {
-                coordinator->DestroyEntity(curve);
+                coordinator->DestroyEntity(object);
                 entityDeleted = true;
             }
         }
     );
 
     if (!entityDeleted)
-        coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(curve);
+        coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(object);
 }
 
 
 void ControlPointsSystem::ControlPointMovedHandler::HandleEvent(Entity entity, const Position & component, EventType eventType)
 {
     if (eventType == EventType::ComponentDeleted) {
-        coordinator.EditComponent<ControlPoints>(curve,
+        coordinator.EditComponent<ControlPoints>(targetObject,
             [this, entity](ControlPoints& ctrlPts) {
                 ctrlPts.DeleteControlPoint(entity);
 
@@ -95,7 +95,7 @@ void ControlPointsSystem::ControlPointMovedHandler::HandleEvent(Entity entity, c
         );
     }
 
-    coordinator.GetSystem<ToUpdateSystem>()->MarkAsToUpdate(curve);
+    coordinator.GetSystem<ToUpdateSystem>()->MarkAsToUpdate(targetObject);
 }
 
 
