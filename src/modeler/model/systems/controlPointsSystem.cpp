@@ -32,6 +32,7 @@ Entity ControlPointsSystem::CreateControlPoints(const std::vector<Entity>& entit
     for (Entity entity: entities) {
         auto handlerId = coordinator->Subscribe<Position>(entity, std::static_pointer_cast<EventHandler<Position>>(handler));
         controlPoints.controlPointsHandlers.insert({ entity, handlerId });
+        RegisterControlPoint(entity);
     }
 
     controlPoints.deletionHandler = coordinator->Subscribe<ControlPoints>(object, std::static_pointer_cast<EventHandler<ControlPoints>>(deletionHandler));
@@ -57,28 +58,50 @@ void ControlPointsSystem::AddControlPoint(Entity object, Entity controlPoint)
     );
 
     coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(object);
+
+    RegisterControlPoint(controlPoint);
 }
 
 
 void ControlPointsSystem::DeleteControlPoint(Entity object, Entity controlPoint)
 {
-    bool entityDeleted = false;
-
     coordinator->EditComponent<ControlPoints>(object,
-        [&entityDeleted, object, controlPoint, this](ControlPoints& params) {
+        [object, controlPoint, this](ControlPoints& params) {
             params.DeleteControlPoint(controlPoint);
-            coordinator->Unsubscribe<Position>(controlPoint, params.controlPointsHandlers.at(controlPoint));
-            params.controlPointsHandlers.erase(controlPoint);
 
-            if (params.controlPointsHandlers.size() == 0) {
-                coordinator->DestroyEntity(object);
-                entityDeleted = true;
+            if (params.controlPointsHandlers.contains(controlPoint)) {
+                coordinator->Unsubscribe<Position>(controlPoint, params.controlPointsHandlers.at(controlPoint));
+                params.controlPointsHandlers.erase(controlPoint);
             }
         }
     );
 
-    if (!entityDeleted)
-        coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(object);
+    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(object);
+
+    UnregisterControlPoint(controlPoint);
+}
+
+
+void ControlPointsSystem::RegisterControlPoint(Entity controlPoint)
+{
+    if (numberOfObjectsConnectedToControlPoint.contains(controlPoint))
+        numberOfObjectsConnectedToControlPoint.at(controlPoint)++;
+    else
+        numberOfObjectsConnectedToControlPoint.insert( {controlPoint, 1u} );
+}
+
+
+void ControlPointsSystem::UnregisterControlPoint(Entity controlPoint)
+{
+    if (!numberOfObjectsConnectedToControlPoint.contains(controlPoint))
+        return;
+
+    unsigned int& cnt = numberOfObjectsConnectedToControlPoint.at(controlPoint);
+    
+    if (cnt == 1)
+        numberOfObjectsConnectedToControlPoint.erase(controlPoint);
+    else
+        cnt--;
 }
 
 
