@@ -68,11 +68,8 @@ void ControlPointsSystem::DeleteControlPoint(Entity object, Entity controlPoint)
     coordinator->EditComponent<ControlPoints>(object,
         [object, controlPoint, this](ControlPoints& params) {
             params.DeleteControlPoint(controlPoint);
-
-            if (params.controlPointsHandlers.contains(controlPoint)) {
-                coordinator->Unsubscribe<Position>(controlPoint, params.controlPointsHandlers.at(controlPoint));
-                params.controlPointsHandlers.erase(controlPoint);
-            }
+            coordinator->Unsubscribe<Position>(controlPoint, params.controlPointsHandlers.at(controlPoint));
+            params.controlPointsHandlers.erase(controlPoint);
         }
     );
 
