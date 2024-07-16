@@ -140,21 +140,26 @@ void C0CurveSystem::UpdateEntities() const
     auto toUpdate = intersect(toUpdateSystem->GetEntities(), entities);
 
     for (auto entity: toUpdate) {
-        UpdateMesh(entity);
-        toUpdateSystem->Unmark(entity);
+        auto const& cps = coordinator->GetComponent<ControlPoints>(entity);
+
+        if (cps.Size() != 0) {
+            UpdateMesh(entity, cps);
+            toUpdateSystem->Unmark(entity);
+        }
+        else {
+            coordinator->DestroyEntity(entity);
+        }
     }
 }
 
 
-void C0CurveSystem::UpdateMesh(Entity curve) const
+void C0CurveSystem::UpdateMesh(Entity curve, const ControlPoints& cps) const
 {
     coordinator->EditComponent<Mesh>(curve,
-        [curve, this](Mesh& mesh) {
-            auto const& ops = coordinator->GetComponent<ControlPoints>(curve);
-
+        [&cps, curve, this](Mesh& mesh) {
             mesh.Update(
-                GenerateBezierPolygonVertices(ops),
-                GenerateBezierPolygonIndices(ops)
+                GenerateBezierPolygonVertices(cps),
+                GenerateBezierPolygonIndices(cps)
             );
         }
     );

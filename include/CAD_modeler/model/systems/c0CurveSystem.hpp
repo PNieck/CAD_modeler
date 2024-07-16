@@ -41,7 +41,7 @@ private:
 
     void RenderCurvesPolygons(std::stack<Entity>& entities) const;
     void UpdateEntities() const;
-    void UpdateMesh(Entity curve) const;
+    void UpdateMesh(Entity curve, const ControlPoints& cps) const;
 
     std::vector<float> GenerateBezierPolygonVertices(const ControlPoints& cps) const;
     std::vector<uint32_t> GenerateBezierPolygonIndices(const ControlPoints& cps) const;
