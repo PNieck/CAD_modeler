@@ -168,12 +168,14 @@ std::vector<uint32_t> InterpolationCurveSystem::GenerateMeshIndices(const Contro
 
 std::vector<alg::Vector4<alg::Vec3>> InterpolationCurveSystem::FindInterpolationsPolynomialsInPowerBasis(const ControlPoints& cps) const
 {
-    auto chordLengths = ChordLengthsBetweenControlPoints(cps.GetPoints());
+    auto ctrlPts = PreprocessControlPoints(cps);
 
-    auto squareCoeff = SquareCoeffInPowerBasis(cps.GetPoints(), chordLengths);
+    auto chordLengths = ChordLengthsBetweenControlPoints(ctrlPts);
+
+    auto squareCoeff = SquareCoeffInPowerBasis(ctrlPts, chordLengths);
     auto cubicCoeff = CubicCoeffInPowerBasis(squareCoeff, chordLengths);
-    auto linearCoeff = LinearCoeffInPowerBasis(squareCoeff, cubicCoeff, chordLengths, cps.GetPoints());
-    auto constCoeff = ConstantCoeffInPowerBasis(linearCoeff, squareCoeff, cubicCoeff, chordLengths, cps.GetPoints());
+    auto linearCoeff = LinearCoeffInPowerBasis(squareCoeff, cubicCoeff, chordLengths, ctrlPts);
+    auto constCoeff = ConstantCoeffInPowerBasis(linearCoeff, squareCoeff, cubicCoeff, chordLengths, ctrlPts);
 
     std::vector<alg::Vector4<alg::Vec3>> result(constCoeff.size());
 
@@ -199,6 +201,30 @@ void InterpolationCurveSystem::ChangePolynomialInPowerBaseDomainFrom0To1(alg::Ve
     polynomial.Y() *= domain;
     polynomial.Z() *= domain*domain;
     polynomial.W() *= domain*domain*domain;
+}
+
+
+std::vector<Entity> InterpolationCurveSystem::PreprocessControlPoints(const ControlPoints &cps) const
+{
+    std::vector<Entity> result;
+    result.reserve(cps.Size());
+
+    // Add first control point
+    auto it = cps.GetPoints().begin();
+    result.push_back(*it);
+
+    auto prevPos = coordinator->GetComponent<Position>(*it);
+    
+    while (++it != cps.GetPoints().end()) {
+        auto actPos = coordinator->GetComponent<Position>(*it);
+
+        if (prevPos.vec != actPos.vec)
+            result.push_back(*it);
+        
+        prevPos = actPos;
+    }
+
+    return result;
 }
 
 

@@ -45,6 +45,9 @@ private:
 
     void ChangePolynomialInPowerBaseDomainFrom0To1(alg::Vector4<alg::Vec3>& polynomial, float domain) const;
 
+    /// @brief Function removes neighboring control points with the same positions
+    std::vector<Entity> PreprocessControlPoints(const ControlPoints& cps) const;
+
     std::vector<alg::Vec3> ConstantCoeffInPowerBasis(const std::vector<alg::Vec3>& linearPowerCoeff, const std::vector<alg::Vec3>& squarePowerCoeff, const std::vector<alg::Vec3>& cubicPowerCoeff, const std::vector<float>& chordsLen, const std::vector<Entity>& ctrlPts) const;
     std::vector<alg::Vec3> LinearCoeffInPowerBasis(const std::vector<alg::Vec3>& squarePowerCoeff, const std::vector<alg::Vec3>& cubicPowerCoeff, const std::vector<float>& chordsLen, const std::vector<Entity>& ctrlPts) const;
     std::vector<alg::Vec3> SquareCoeffInPowerBasis(const std::vector<Entity>& ctrlPts, const std::vector<float>& chordsLen) const;
