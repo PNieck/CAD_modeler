@@ -15,6 +15,8 @@ class C0SurfaceSystem: public System {
 public:
     static void RegisterSystem(Coordinator& coordinator);
 
+    void Init();
+
     Entity CreateSurface(const Position& pos, const alg::Vec3& direction, float length, float width);
 
     void AddRowOfPatches(Entity surface, const Position& pos, const alg::Vec3& direction, float length, float width) const;
@@ -35,5 +37,20 @@ public:
     void Recalculate(Entity surface, const Position& pos, const alg::Vec3& direction, float length, float width) const;
 
 private:
+    class DeletionHandler;
+
+    std::shared_ptr<DeletionHandler> deletionHandler;
     NameGenerator nameGenerator;
+
+
+    class DeletionHandler: public EventHandler<C0SurfacePatches> {
+    public:
+        DeletionHandler(Coordinator& coordinator):
+            coordinator(coordinator) {}
+
+        void HandleEvent(Entity entity, const C0SurfacePatches& component, EventType eventType) override;
+
+    private:
+        Coordinator& coordinator;
+    };
 };

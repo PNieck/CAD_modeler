@@ -71,6 +71,8 @@ Model::Model(int viewport_width, int viewport_height)
     controlPointsSystem->Init();
     interpolationCurveSystem->Init(&shadersRepo);
     c0PatchesSystem->Init(&shadersRepo);
+    c0surfaceSystem->Init();
+    c0CylinderSystem->Init();
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glEnable(GL_LINE_SMOOTH);

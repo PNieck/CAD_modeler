@@ -199,7 +199,13 @@ void C2CurveSystem::UpdateEntities() const
     auto toUpdate = intersect(toUpdateSystem->GetEntities(), entities);
 
     for (auto entity: toUpdate) {
-        UpdateCurveMesh(entity);
+        auto const& cps = coordinator->GetComponent<ControlPoints>(entity);
+        if (cps.Size() == 0) {
+            coordinator->DestroyEntity(entity);
+            continue;
+        }
+
+        UpdateCurveMesh(entity, cps);
 
         auto const& params = coordinator->GetComponent<C2CurveParameters>(entity);
 
@@ -214,15 +220,13 @@ void C2CurveSystem::UpdateEntities() const
 }
 
 
-void C2CurveSystem::UpdateCurveMesh(Entity curve) const
+void C2CurveSystem::UpdateCurveMesh(Entity curve, const ControlPoints& ctrlPts) const
 {
     coordinator->EditComponent<Mesh>(curve,
-        [curve, this](Mesh& mesh) {
-            auto const& params = coordinator->GetComponent<ControlPoints>(curve);
-
+        [&ctrlPts, curve, this](Mesh& mesh) {
             mesh.Update(
-                GenerateCurveMeshVertices(params),
-                GenerateCurveMeshIndices(params)
+                GenerateCurveMeshVertices(ctrlPts),
+                GenerateCurveMeshIndices(ctrlPts)
             );
         }
     );

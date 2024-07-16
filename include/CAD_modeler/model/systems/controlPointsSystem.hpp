@@ -3,6 +3,7 @@
 #include <ecs/system.hpp>
 
 #include <memory>
+#include <unordered_map>
 #include "../components/controlPoints.hpp"
 
 
@@ -12,29 +13,36 @@ public:
 
     void Init();
 
+    // TODO: delete
     Entity CreateControlPoints(const std::vector<Entity>& entities);
 
-    void AddControlPoint(Entity curve, Entity entity);
+    void AddControlPoint(Entity object, Entity controlPoint);
 
-    void DeleteControlPoint(Entity curve, Entity entity);
+    void DeleteControlPoint(Entity object, Entity controlPoint);
 
+    inline bool IsAControlPoint(Entity entity) const
+        { return numberOfObjectsConnectedToControlPoint.contains(entity); }
 
 private:
     class DeletionHandler;
 
     std::shared_ptr<DeletionHandler> deletionHandler;
+    std::unordered_map<Entity, unsigned int> numberOfObjectsConnectedToControlPoint;
 
+    void RegisterControlPoint(Entity controlPoint);
+
+    void UnregisterControlPoint(Entity controlPoint);
 
     class ControlPointMovedHandler: public EventHandler<Position> {
     public:
-        ControlPointMovedHandler(Entity curve, Coordinator& coordinator):
-            coordinator(coordinator), curve(curve) {}
+        ControlPointMovedHandler(Entity targetObject, Coordinator& coordinator):
+            coordinator(coordinator), targetObject(targetObject) {}
 
         void HandleEvent(Entity entity, const Position& component, EventType eventType) override;
 
     private:
         Coordinator& coordinator;
-        Entity curve;
+        Entity targetObject;
     };
 
 

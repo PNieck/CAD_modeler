@@ -28,6 +28,12 @@ void C0CylinderSystem::RegisterSystem(Coordinator &coordinator)
 }
 
 
+void C0CylinderSystem::Init()
+{
+    deletionHandler = std::make_shared<DeletionHandler>(*coordinator);
+}
+
+
 Entity C0CylinderSystem::CreateCylinder(const Position &pos, const alg::Vec3 &direction, float radius)
 {
     static constexpr int controlPointsInOneDir = 4;
@@ -65,10 +71,11 @@ Entity C0CylinderSystem::CreateCylinder(const Position &pos, const alg::Vec3 &di
     coordinator->AddComponent<C0SurfaceDensity>(surface, density);
 
     coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
+    coordinator->GetSystem<C0PatchesSystem>()->AddPossibilityToHasPatchesPolygon(surface);
+
+    coordinator->Subscribe<C0SurfacePatches>(surface, deletionHandler);
 
     RecalculatePositions(surface, pos, direction, radius);
-
-    coordinator->GetSystem<C0PatchesSystem>()->AddPossibilityToHasPatchesPolygon(surface);
 
     return surface;
 }
@@ -212,5 +219,25 @@ void C0CylinderSystem::RecalculatePositions(Entity cylinder, const Position &pos
         }
 
         v += offset;
+    }
+}
+
+
+void C0CylinderSystem::DeletionHandler::HandleEvent(Entity entity, const C0SurfacePatches& component, EventType eventType)
+{
+    if (eventType != EventType::ComponentDeleted)
+        return;
+
+    auto controlPointsSystem = coordinator.GetSystem<ControlPointsSystem>();
+
+    for (int col=0; col < component.PointsInCol() - 1; col++) {
+        for (int row=0; row < component.PointsInRow(); row++) {
+            Entity controlPoint = component.GetPoint(row, col);
+
+            controlPointsSystem->DeleteControlPoint(entity, controlPoint);
+
+            if (!controlPointsSystem->IsAControlPoint(controlPoint))
+                coordinator.DestroyEntity(controlPoint);
+        }
     }
 }

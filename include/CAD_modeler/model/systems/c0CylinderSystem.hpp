@@ -14,6 +14,8 @@ class C0CylinderSystem: public System {
 public:
     static void RegisterSystem(Coordinator& coordinator);
 
+    void Init();
+
     Entity CreateCylinder(const Position& pos, const alg::Vec3& direction, float radius);
     
     void AddRowOfPatches(Entity surface, const Position& pos, const alg::Vec3& direction, float radius) const;
@@ -34,5 +36,19 @@ public:
     void RecalculatePositions(Entity cylinder, const Position& pos, const alg::Vec3& direction, float radius) const;
 
 private:
+    class DeletionHandler;
+
+    std::shared_ptr<DeletionHandler> deletionHandler;
     NameGenerator nameGenerator;
+
+    class DeletionHandler: public EventHandler<C0SurfacePatches> {
+    public:
+        DeletionHandler(Coordinator& coordinator):
+            coordinator(coordinator) {}
+
+        void HandleEvent(Entity entity, const C0SurfacePatches& component, EventType eventType) override;
+
+    private:
+        Coordinator& coordinator;
+    };
 };

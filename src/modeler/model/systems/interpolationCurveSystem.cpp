@@ -29,7 +29,10 @@ Entity InterpolationCurveSystem::CreateCurve(const std::vector<Entity> &controlP
     coordinator->AddComponent<Name>(curve, nameGenerator.GenerateName("InterpolationCurve"));
     coordinator->AddComponent<Mesh>(curve, Mesh());
 
-    UpdateMesh(curve);
+    UpdateMesh(
+        curve,
+        coordinator->GetComponent<ControlPoints>(curve)
+    );
 
     entities.insert(curve);
 
@@ -83,18 +86,23 @@ void InterpolationCurveSystem::UpdateEntities() const
     auto toUpdate = intersect(toUpdateSystem->GetEntities(), entities);
 
     for (auto entity: toUpdate) {
-        UpdateMesh(entity);
-        toUpdateSystem->Unmark(entity);
+        auto const cps = coordinator->GetComponent<ControlPoints>(entity);
+
+        if (cps.Size() != 0) {
+            UpdateMesh(entity, cps);
+            toUpdateSystem->Unmark(entity);
+        }
+        else
+            coordinator->DestroyEntity(entity);
+        
     }
 }
 
 
-void InterpolationCurveSystem::UpdateMesh(Entity entity) const
+void InterpolationCurveSystem::UpdateMesh(Entity entity, const ControlPoints& cps) const
 {
     coordinator->EditComponent<Mesh>(entity,
-        [this, entity](Mesh& mesh) {
-            auto const cps = coordinator->GetComponent<ControlPoints>(entity);
-
+        [&cps, this, entity](Mesh& mesh) {
             mesh.Update(
                 GenerateMeshVertices(cps),
                 GenerateMeshIndices(cps)

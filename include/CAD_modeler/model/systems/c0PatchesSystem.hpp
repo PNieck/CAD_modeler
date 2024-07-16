@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ecs/system.hpp>
+#include <ecs/coordinator.hpp>
 
 #include "shaders/shaderRepository.hpp"
 #include "../components/c0SurfacePatches.hpp"
