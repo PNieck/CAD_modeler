@@ -80,49 +80,6 @@ Model::Model(int viewport_width, int viewport_height)
     glEnable(GL_BLEND);
     glDepthMask(GL_FALSE);
     glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-
-    // Entity cylinder = c0CylinderSystem->CreateCylinder(
-    //     Position(alg::Vec3(0.f, 0.f, 0.f)),
-    //     alg::Vec3(0.f, 5.f, 0.f),
-    //     5.f
-    // );
-
-    // c0CylinderSystem->AddRowOfPatches(
-    //     cylinder,
-    //     Position(alg::Vec3(0.f, 0.f, 0.f)),
-    //     alg::Vec3(0.f, 5.f, 0.f),
-    //     5.f
-    // );
-
-    // c0CylinderSystem->AddRowOfPatches(
-    //     cylinder,
-    //     Position(alg::Vec3(0.f, 0.f, 0.f)),
-    //     alg::Vec3(0.f, 5.f, 0.f),
-    //     5.f
-    // );
-
-    // c0CylinderSystem->AddColOfPatches(
-    //     cylinder,
-    //     Position(alg::Vec3(0.f, 0.f, 0.f)),
-    //     alg::Vec3(0.f, 5.f, 0.f),
-    //     5.f
-    // );
-
-    // c0CylinderSystem->AddColOfPatches(
-    //     cylinder,
-    //     Position(alg::Vec3(0.f, 0.f, 0.f)),
-    //     alg::Vec3(0.f, 5.f, 0.f),
-    //     5.f
-    // );
-
-    // c0CylinderSystem->AddColOfPatches(
-    //     cylinder,
-    //     Position(alg::Vec3(0.f, 0.f, 0.f)),
-    //     alg::Vec3(0.f, 5.f, 0.f),
-    //     5.f
-    // );
-
-    // c0CylinderSystem->ShowBezierPolygon(cylinder);
 }
 
 
