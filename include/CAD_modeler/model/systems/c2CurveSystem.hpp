@@ -49,23 +49,23 @@ private:
     static constexpr int MIN_CTRL_PTS_CNT = 4;
 
     void UpdateEntities() const;
-    void UpdateCurveMesh(Entity curve, const ControlPoints& ctrlPts) const;
+    void UpdateCurveMesh(Entity curve, const ControlPoints& cps) const;
     void UpdateBSplinePolygon(Entity curve) const;
     void UpdateBezierControlPoints(Entity curve, const C2CurveParameters& params) const;
-    void UpdateBezierCtrlPtsHandlers(Entity curve, BezierControlPoints& ctrlPts) const;
+    void UpdateBezierCtrlPtsHandlers(Entity curve, BezierControlPoints& cps) const;
 
     void RenderBSplinePolygons(std::stack<Entity>& entities) const;
     void RenderBezierPolygons(std::stack<Entity>& entities) const;
 
-    BezierControlPoints CreateBezierControlPoints(const ControlPoints& params) const;
+    BezierControlPoints CreateBezierControlPoints(const ControlPoints& cps) const;
     void DeleteBezierControlPoints(Entity entity) const;
-    std::vector<alg::Vec3> CreateBezierControlPointsPositions(const ControlPoints& params) const;
+    std::vector<alg::Vec3> CreateBezierControlPointsPositions(const ControlPoints& cps) const;
 
-    std::vector<float> GenerateCurveMeshVertices(const ControlPoints& params) const;
-    std::vector<uint32_t> GenerateCurveMeshIndices(const ControlPoints& params) const;
+    std::vector<float> GenerateCurveMeshVertices(const ControlPoints& cps) const;
+    std::vector<uint32_t> GenerateCurveMeshIndices(const ControlPoints& cps) const;
 
-    std::vector<float> GenerateBSplinePolygonVertices(const ControlPoints& params) const;
-    std::vector<uint32_t> GenerateBSplinePolygonIndices(const ControlPoints& params) const;
+    std::vector<float> GenerateBSplinePolygonVertices(const ControlPoints& cps) const;
+    std::vector<uint32_t> GenerateBSplinePolygonIndices(const ControlPoints& cps) const;
 
     inline size_t BezierControlPointsCnt(size_t bSplineCtrlPts) const
         { return bSplineCtrlPts < MIN_CTRL_PTS_CNT ? 0 : 4 + 3 * (bSplineCtrlPts - 4); }
