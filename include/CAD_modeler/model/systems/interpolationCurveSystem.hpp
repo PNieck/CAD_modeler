@@ -34,7 +34,7 @@ private:
 
     void UpdateEntities() const;
 
-    void UpdateMesh(Entity entity) const;
+    void UpdateMesh(Entity entity, const ControlPoints& cps) const;
 
     std::vector<float> GenerateMeshVertices(const ControlPoints& cps) const;
     std::vector<uint32_t> GenerateMeshIndices(const ControlPoints& cps) const;
