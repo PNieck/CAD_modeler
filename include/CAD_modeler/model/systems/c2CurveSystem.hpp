@@ -49,7 +49,7 @@ private:
     static constexpr int MIN_CTRL_PTS_CNT = 4;
 
     void UpdateEntities() const;
-    void UpdateCurveMesh(Entity curve) const;
+    void UpdateCurveMesh(Entity curve, const ControlPoints& ctrlPts) const;
     void UpdateBSplinePolygon(Entity curve) const;
     void UpdateBezierControlPoints(Entity curve, const C2CurveParameters& params) const;
     void UpdateBezierCtrlPtsHandlers(Entity curve, BezierControlPoints& ctrlPts) const;
