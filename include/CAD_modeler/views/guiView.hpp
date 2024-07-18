@@ -44,6 +44,7 @@ private:
     void DisplayC2CurveParameters(Entity entity, const C2CurveParameters& params) const;
     void DisplayEntityDeletionOption(Entity entity) const;
     void DisplaySurfaceDensityParameter(Entity entity, const C0SurfaceDensity& density) const;
+    void DisplaySurfacePatches(Entity entity, const C0SurfacePatches& patches) const;
     void DisplayPatchesPolygonOption(Entity entity, const HasPatchesPolygon& patchesPolygon) const;
 
     void DisplayNameEditor(Entity entity, const Name& name) const;

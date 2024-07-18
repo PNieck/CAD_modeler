@@ -53,4 +53,16 @@ private:
     private:
         Coordinator& coordinator;
     };
+
+    class ControlPointMovedHandler: public EventHandler<Position> {
+    public:
+        ControlPointMovedHandler(Entity targetObject, Coordinator& coordinator):
+            coordinator(coordinator), targetObject(targetObject) {}
+
+        void HandleEvent(Entity entity, const Position& component, EventType eventType) override;
+
+    private:
+        Coordinator& coordinator;
+        Entity targetObject;
+    };
 };

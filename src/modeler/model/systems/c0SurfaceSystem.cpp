@@ -26,7 +26,6 @@ void C0SurfaceSystem::RegisterSystem(Coordinator &coordinator)
     coordinator.RegisterSystem<C0SurfaceSystem>();
 
     coordinator.RegisterRequiredComponent<C0SurfaceSystem, C0SurfacePatches>();
-    coordinator.RegisterRequiredComponent<C0SurfaceSystem, CurveControlPoints>();
     coordinator.RegisterRequiredComponent<C0SurfaceSystem, C0SurfaceDensity>();
     coordinator.RegisterRequiredComponent<C0SurfaceSystem, Mesh>();
 }
@@ -49,21 +48,26 @@ Entity C0SurfaceSystem::CreateSurface(const Position& pos, const alg::Vec3& dire
 
     auto const pointsSystem = coordinator->GetSystem<PointsSystem>();
 
+    Entity surface = coordinator->CreateEntity();
+
+    auto handler = std::make_shared<ControlPointMovedHandler>(surface, *coordinator);
+
     for (int i=0; i < controlPointsInOneDir; ++i) {
         for (int j=0; j < controlPointsInOneDir; ++j) {
             // Creating control points with temporary location
             Entity cp = pointsSystem->CreatePoint(pos.vec);
             controlPoints.push_back(cp);
             patches.SetPoint(cp, 0, 0, i, j);
+
+            HandlerId cpHandler = coordinator->Subscribe(cp, std::static_pointer_cast<EventHandler<Position>>(handler));
+            patches.controlPointsHandlers.insert({cp, cpHandler});
         }
     }
 
-    auto const controlPointsSys = coordinator->GetSystem<CurveControlPointsSystem>();
-    Entity surface = controlPointsSys->CreateControlPoints(controlPoints);
-
     Mesh mesh;
-
     C0SurfaceDensity density(5);
+
+    patches.deletionHandler = coordinator->Subscribe<C0SurfacePatches>(surface, deletionHandler);
 
     coordinator->AddComponent<Name>(surface, nameGenerator.GenerateName("SurfaceC0_"));
     coordinator->AddComponent<Mesh>(surface, mesh);
@@ -73,8 +77,6 @@ Entity C0SurfaceSystem::CreateSurface(const Position& pos, const alg::Vec3& dire
     coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
     coordinator->GetSystem<C0PatchesSystem>()->AddPossibilityToHasPatchesPolygon(surface);
 
-    coordinator->Subscribe<C0SurfacePatches>(surface, deletionHandler);
-
     Recalculate(surface, pos, direction, length, width);
 
     return surface;
@@ -83,32 +85,28 @@ Entity C0SurfaceSystem::CreateSurface(const Position& pos, const alg::Vec3& dire
 
 void C0SurfaceSystem::AddRowOfPatches(Entity surface, const Position& pos, const alg::Vec3& direction, float length, float width) const
 {
-    std::stack<Entity> newEntities;
-
     coordinator->EditComponent<C0SurfacePatches>(surface,
-        [surface, this, &newEntities](C0SurfacePatches& patches) {
+        [surface, this](C0SurfacePatches& patches) {
             auto pointSys = coordinator->GetSystem<PointsSystem>();
             
             patches.AddRow();
+
+            Entity firstCP = patches.GetPoint(0,0);
+            HandlerId firstCpHandler = patches.controlPointsHandlers.at(firstCP);
+            auto eventHandler = coordinator->GetEventHandler<Position>(firstCP, firstCpHandler);
 
             for (int col=0; col < patches.PointsInCol(); col++) {
                 for (int row=patches.PointsInRow() - 3; row < patches.PointsInRow(); row++) {
                     Entity newEntity = pointSys->CreatePoint(Position());
 
                     patches.SetPoint(newEntity, row, col);
-                    newEntities.push(newEntity);
+
+                    HandlerId newHandler = coordinator->Subscribe<Position>(newEntity, eventHandler);
+                    patches.controlPointsHandlers.insert({ newEntity, newHandler });
                 }
             }
         }
     );
-
-    // TODO: add adding multiple points at once
-    auto ctrlPointsSys = coordinator->GetSystem<CurveControlPointsSystem>();
-
-    while (!newEntities.empty()) {
-        ctrlPointsSys->AddControlPoint(surface, newEntities.top());
-        newEntities.pop();
-    }
 
     coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
 
@@ -118,32 +116,28 @@ void C0SurfaceSystem::AddRowOfPatches(Entity surface, const Position& pos, const
 
 void C0SurfaceSystem::AddColOfPatches(Entity surface, const Position& pos, const alg::Vec3& direction, float length, float width) const
 {
-    std::stack<Entity> newEntities;
-
     coordinator->EditComponent<C0SurfacePatches>(surface,
-        [surface, this, &newEntities](C0SurfacePatches& patches) {
+        [surface, this](C0SurfacePatches& patches) {
             auto pointSys = coordinator->GetSystem<PointsSystem>();
             
             patches.AddCol();
+
+            Entity firstCP = patches.GetPoint(0,0);
+            HandlerId firstCpHandler = patches.controlPointsHandlers.at(firstCP);
+            auto eventHandler = coordinator->GetEventHandler<Position>(firstCP, firstCpHandler);
 
             for (int row=0; row < patches.PointsInRow(); row++) {
                 for (int col=patches.PointsInCol() - 3; col < patches.PointsInCol(); col++) {
                     Entity newEntity = pointSys->CreatePoint(Position());
 
                     patches.SetPoint(newEntity, row, col);
-                    newEntities.push(newEntity);
+
+                    HandlerId newHandler = coordinator->Subscribe<Position>(newEntity, eventHandler);
+                    patches.controlPointsHandlers.insert({ newEntity, newHandler });
                 }
             }
         }
     );
-
-    // TODO: add adding multiple points at once
-    auto ctrlPointsSys = coordinator->GetSystem<CurveControlPointsSystem>();
-
-    while (!newEntities.empty()) {
-        ctrlPointsSys->AddControlPoint(surface, newEntities.top());
-        newEntities.pop();
-    }
 
     coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
 
@@ -159,6 +153,8 @@ void C0SurfaceSystem::DeleteRowOfPatches(Entity surface, const Position& pos, co
                 for (int row=patches.PointsInRow() - 3; row < patches.PointsInRow(); row++) {
                     Entity point = patches.GetPoint(row, col);
                     coordinator->DestroyEntity(point);
+
+                    patches.controlPointsHandlers.erase(point);
                 }
             }
 
@@ -180,6 +176,8 @@ void C0SurfaceSystem::DeleteColOfPatches(Entity surface, const Position& pos, co
                 for (int col=patches.PointsInCol() - 3; col < patches.PointsInCol(); col++) {
                     Entity point = patches.GetPoint(row, col);
                     coordinator->DestroyEntity(point);
+
+                    patches.controlPointsHandlers.erase(point);
                 }
             }
 
@@ -220,16 +218,26 @@ void C0SurfaceSystem::DeletionHandler::HandleEvent(Entity entity, const C0Surfac
     if (eventType != EventType::ComponentDeleted)
         return;
 
-    auto controlPointsSystem = coordinator.GetSystem<CurveControlPointsSystem>();
+    coordinator.EditComponent<C0SurfacePatches>(entity,
+        [&component, this](C0SurfacePatches& patches) {
+            auto controlPointsSystem = coordinator.GetSystem<CurveControlPointsSystem>();
 
-    for (int col=0; col < component.PointsInCol(); col++) {
-        for (int row=0; row < component.PointsInRow(); row++) {
-            Entity controlPoint = component.GetPoint(row, col);
+            for (int col=0; col < component.PointsInCol(); col++) {
+                for (int row=0; row < component.PointsInRow(); row++) {
+                    Entity controlPoint = component.GetPoint(row, col);
 
-            controlPointsSystem->DeleteControlPoint(entity, controlPoint);
+                    coordinator.Unsubscribe<Position>(controlPoint, patches.controlPointsHandlers.at(controlPoint));
 
-            if (!controlPointsSystem->IsAControlPoint(controlPoint))
-                coordinator.DestroyEntity(controlPoint);
+                    if (!controlPointsSystem->IsAControlPoint(controlPoint))
+                        coordinator.DestroyEntity(controlPoint);
+                }
+            }
         }
-    }
+    );
+}
+
+
+void C0SurfaceSystem::ControlPointMovedHandler::HandleEvent(Entity entity, const Position& component, EventType eventType)
+{
+    coordinator.GetSystem<ToUpdateSystem>()->MarkAsToUpdate(targetObject);
 }

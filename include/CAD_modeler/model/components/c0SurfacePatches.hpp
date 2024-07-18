@@ -51,6 +51,9 @@ public:
     inline int PointsCnt() const
         { return PointsInCol() * PointsInRow(); }
 
+    std::unordered_map<Entity, HandlerId> controlPointsHandlers;
+    HandlerId deletionHandler;
+
 private:
     Vector2D<Entity> controlPoints;
 };

@@ -17,7 +17,6 @@ void C0PatchesSystem::RegisterSystem(Coordinator &coordinator)
     coordinator.RegisterSystem<C0PatchesSystem>();
 
     coordinator.RegisterRequiredComponent<C0PatchesSystem, C0SurfacePatches>();
-    coordinator.RegisterRequiredComponent<C0PatchesSystem, CurveControlPoints>();
     coordinator.RegisterRequiredComponent<C0PatchesSystem, C0SurfaceDensity>();
     coordinator.RegisterRequiredComponent<C0PatchesSystem, HasPatchesPolygon>();
     coordinator.RegisterRequiredComponent<C0PatchesSystem, Mesh>();
