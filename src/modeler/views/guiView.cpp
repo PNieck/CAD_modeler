@@ -368,9 +368,9 @@ void GuiView::RenderSingleObjectProperties(Entity entity) const
     if (it != components.end())
         DisplayNameEditor(entity, model.GetComponent<Name>(entity));
 
-    it = components.find(Model::GetComponentId<ControlPoints>());
+    it = components.find(Model::GetComponentId<CurveControlPoints>());
     if (it != components.end())
-        DisplayCurveControlPoints(entity, model.GetComponent<ControlPoints>(entity));
+        DisplayCurveControlPoints(entity, model.GetComponent<CurveControlPoints>(entity));
 
     it = components.find(Model::GetComponentId<C0CurveParameters>());
     if (it != components.end())
@@ -546,7 +546,7 @@ void GuiView::DisplayTorusProperty(Entity entity, const TorusParameters& params)
 }
 
 
-void GuiView::DisplayCurveControlPoints(Entity entity, const ControlPoints& params) const
+void GuiView::DisplayCurveControlPoints(Entity entity, const CurveControlPoints& params) const
 {
     ImGui::SeparatorText("Control Points");
 

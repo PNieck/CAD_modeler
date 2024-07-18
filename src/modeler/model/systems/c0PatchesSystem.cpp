@@ -1,7 +1,7 @@
 #include <CAD_modeler/model/systems/c0PatchesSystem.hpp>
 
 #include "CAD_modeler/model/components/c0SurfaceDensity.hpp"
-#include "CAD_modeler/model/components/controlPoints.hpp"
+#include "CAD_modeler/model/components/curveControlPoints.hpp"
 #include "CAD_modeler/model/components/mesh.hpp"
 #include "CAD_modeler/model/components/patchesPolygonMesh.hpp"
 
@@ -17,7 +17,7 @@ void C0PatchesSystem::RegisterSystem(Coordinator &coordinator)
     coordinator.RegisterSystem<C0PatchesSystem>();
 
     coordinator.RegisterRequiredComponent<C0PatchesSystem, C0SurfacePatches>();
-    coordinator.RegisterRequiredComponent<C0PatchesSystem, ControlPoints>();
+    coordinator.RegisterRequiredComponent<C0PatchesSystem, CurveControlPoints>();
     coordinator.RegisterRequiredComponent<C0PatchesSystem, C0SurfaceDensity>();
     coordinator.RegisterRequiredComponent<C0PatchesSystem, HasPatchesPolygon>();
     coordinator.RegisterRequiredComponent<C0PatchesSystem, Mesh>();

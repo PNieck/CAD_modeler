@@ -3,7 +3,7 @@
 #include <ecs/coordinator.hpp>
 
 #include "CAD_modeler/model/systems/pointsSystem.hpp"
-#include "CAD_modeler/model/systems/controlPointsSystem.hpp"
+#include "CAD_modeler/model/systems/curveControlPointsSystem.hpp"
 #include "CAD_modeler/model/systems/toUpdateSystem.hpp"
 #include "CAD_modeler/model/systems/c0PatchesSystem.hpp"
 
@@ -11,7 +11,7 @@
 #include "CAD_modeler/model/components/c0SurfaceDensity.hpp"
 #include "CAD_modeler/model/components/mesh.hpp"
 #include "CAD_modeler/model/components/name.hpp"
-#include "CAD_modeler/model/components/controlPoints.hpp"
+#include "CAD_modeler/model/components/curveControlPoints.hpp"
 #include "CAD_modeler/model/components/rotation.hpp"
 
 #include <numbers>
@@ -22,7 +22,7 @@ void C0CylinderSystem::RegisterSystem(Coordinator &coordinator)
     coordinator.RegisterSystem<C0CylinderSystem>();
 
     coordinator.RegisterRequiredComponent<C0CylinderSystem, C0SurfacePatches>();
-    coordinator.RegisterRequiredComponent<C0CylinderSystem, ControlPoints>();
+    coordinator.RegisterRequiredComponent<C0CylinderSystem, CurveControlPoints>();
     coordinator.RegisterRequiredComponent<C0CylinderSystem, C0SurfaceDensity>();
     coordinator.RegisterRequiredComponent<C0CylinderSystem, Mesh>();
 }
@@ -58,7 +58,7 @@ Entity C0CylinderSystem::CreateCylinder(const Position &pos, const alg::Vec3 &di
         patches.SetPoint(cp, i, controlPointsInOneDir - 1);
     }
 
-    auto const controlPointsSys = coordinator->GetSystem<ControlPointsSystem>();
+    auto const controlPointsSys = coordinator->GetSystem<CurveControlPointsSystem>();
     Entity surface = controlPointsSys->CreateControlPoints(controlPoints);
 
     Mesh mesh;
@@ -107,7 +107,7 @@ void C0CylinderSystem::AddRowOfPatches(Entity surface, const Position &pos, cons
         }
     );
 
-    auto ctrlPointsSys = coordinator->GetSystem<ControlPointsSystem>();
+    auto ctrlPointsSys = coordinator->GetSystem<CurveControlPointsSystem>();
 
     while (!newEntities.empty()) {
         ctrlPointsSys->AddControlPoint(surface, newEntities.top());
@@ -147,7 +147,7 @@ void C0CylinderSystem::AddColOfPatches(Entity surface, const Position &pos, cons
     );
 
     // TODO: add adding multiple points at once
-    auto ctrlPointsSys = coordinator->GetSystem<ControlPointsSystem>();
+    auto ctrlPointsSys = coordinator->GetSystem<CurveControlPointsSystem>();
 
     while (!newEntities.empty()) {
         ctrlPointsSys->AddControlPoint(surface, newEntities.top());
@@ -228,7 +228,7 @@ void C0CylinderSystem::DeletionHandler::HandleEvent(Entity entity, const C0Surfa
     if (eventType != EventType::ComponentDeleted)
         return;
 
-    auto controlPointsSystem = coordinator.GetSystem<ControlPointsSystem>();
+    auto controlPointsSystem = coordinator.GetSystem<CurveControlPointsSystem>();
 
     for (int col=0; col < component.PointsInCol() - 1; col++) {
         for (int row=0; row < component.PointsInRow(); row++) {

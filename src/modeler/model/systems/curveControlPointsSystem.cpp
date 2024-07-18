@@ -1,31 +1,31 @@
-#include <CAD_modeler/model/systems/controlPointsSystem.hpp>
+#include <CAD_modeler/model/systems/curveControlPointsSystem.hpp>
 
 #include <ecs/coordinator.hpp>
 
-#include <CAD_modeler/model/components/controlPoints.hpp>
+#include <CAD_modeler/model/components/curveControlPoints.hpp>
 
 #include <CAD_modeler/model/systems/toUpdateSystem.hpp>
 
 
-void ControlPointsSystem::RegisterSystem(Coordinator & coordinator)
+void CurveControlPointsSystem::RegisterSystem(Coordinator & coordinator)
 {
-    coordinator.RegisterSystem<ControlPointsSystem>();
+    coordinator.RegisterSystem<CurveControlPointsSystem>();
 
-    coordinator.RegisterRequiredComponent<ControlPointsSystem, ControlPoints>();
+    coordinator.RegisterRequiredComponent<CurveControlPointsSystem, CurveControlPoints>();
 }
 
 
-void ControlPointsSystem::Init()
+void CurveControlPointsSystem::Init()
 {
     deletionHandler = std::make_shared<DeletionHandler>(*coordinator);
 }
 
 
-Entity ControlPointsSystem::CreateControlPoints(const std::vector<Entity>& entities)
+Entity CurveControlPointsSystem::CreateControlPoints(const std::vector<Entity>& entities)
 {
     Entity object = coordinator->CreateEntity();
 
-    ControlPoints controlPoints(entities);
+    CurveControlPoints controlPoints(entities);
 
     auto handler = std::make_shared<ControlPointMovedHandler>(object, *coordinator);
 
@@ -35,18 +35,18 @@ Entity ControlPointsSystem::CreateControlPoints(const std::vector<Entity>& entit
         RegisterControlPoint(entity);
     }
 
-    controlPoints.deletionHandler = coordinator->Subscribe<ControlPoints>(object, std::static_pointer_cast<EventHandler<ControlPoints>>(deletionHandler));
+    controlPoints.deletionHandler = coordinator->Subscribe<CurveControlPoints>(object, std::static_pointer_cast<EventHandler<CurveControlPoints>>(deletionHandler));
 
-     coordinator->AddComponent<ControlPoints>(object, controlPoints);
+     coordinator->AddComponent<CurveControlPoints>(object, controlPoints);
 
     return object;
 }
 
 
-void ControlPointsSystem::AddControlPoint(Entity object, Entity controlPoint)
+void CurveControlPointsSystem::AddControlPoint(Entity object, Entity controlPoint)
 {
-    coordinator->EditComponent<ControlPoints>(object,
-        [controlPoint, this](ControlPoints& params) {
+    coordinator->EditComponent<CurveControlPoints>(object,
+        [controlPoint, this](CurveControlPoints& params) {
             auto const& controlPoints = params.GetPoints();
             Entity prevControlPoint = *controlPoints.begin();
             HandlerId handlerId = params.controlPointsHandlers.at(prevControlPoint);
@@ -63,10 +63,10 @@ void ControlPointsSystem::AddControlPoint(Entity object, Entity controlPoint)
 }
 
 
-void ControlPointsSystem::DeleteControlPoint(Entity object, Entity controlPoint)
+void CurveControlPointsSystem::DeleteControlPoint(Entity object, Entity controlPoint)
 {
-    coordinator->EditComponent<ControlPoints>(object,
-        [object, controlPoint, this](ControlPoints& params) {
+    coordinator->EditComponent<CurveControlPoints>(object,
+        [object, controlPoint, this](CurveControlPoints& params) {
             params.DeleteControlPoint(controlPoint);
             coordinator->Unsubscribe<Position>(controlPoint, params.controlPointsHandlers.at(controlPoint));
             params.controlPointsHandlers.erase(controlPoint);
@@ -79,7 +79,7 @@ void ControlPointsSystem::DeleteControlPoint(Entity object, Entity controlPoint)
 }
 
 
-void ControlPointsSystem::RegisterControlPoint(Entity controlPoint)
+void CurveControlPointsSystem::RegisterControlPoint(Entity controlPoint)
 {
     if (numberOfObjectsConnectedToControlPoint.contains(controlPoint))
         numberOfObjectsConnectedToControlPoint.at(controlPoint)++;
@@ -88,7 +88,7 @@ void ControlPointsSystem::RegisterControlPoint(Entity controlPoint)
 }
 
 
-void ControlPointsSystem::UnregisterControlPoint(Entity controlPoint)
+void CurveControlPointsSystem::UnregisterControlPoint(Entity controlPoint)
 {
     if (!numberOfObjectsConnectedToControlPoint.contains(controlPoint))
         return;
@@ -102,11 +102,11 @@ void ControlPointsSystem::UnregisterControlPoint(Entity controlPoint)
 }
 
 
-void ControlPointsSystem::ControlPointMovedHandler::HandleEvent(Entity entity, const Position & component, EventType eventType)
+void CurveControlPointsSystem::ControlPointMovedHandler::HandleEvent(Entity entity, const Position & component, EventType eventType)
 {
     if (eventType == EventType::ComponentDeleted) {
-        coordinator.EditComponent<ControlPoints>(targetObject,
-            [this, entity](ControlPoints& ctrlPts) {
+        coordinator.EditComponent<CurveControlPoints>(targetObject,
+            [this, entity](CurveControlPoints& ctrlPts) {
                 ctrlPts.DeleteControlPoint(entity);
 
                 coordinator.Unsubscribe<Position>(entity, ctrlPts.controlPointsHandlers.at(entity));
@@ -119,7 +119,7 @@ void ControlPointsSystem::ControlPointMovedHandler::HandleEvent(Entity entity, c
 }
 
 
-void ControlPointsSystem::DeletionHandler::HandleEvent(Entity entity, const ControlPoints& component, EventType eventType)
+void CurveControlPointsSystem::DeletionHandler::HandleEvent(Entity entity, const CurveControlPoints& component, EventType eventType)
 {
     if (eventType != EventType::ComponentDeleted)
         return;
@@ -134,5 +134,5 @@ void ControlPointsSystem::DeletionHandler::HandleEvent(Entity entity, const Cont
         ++handlersIt;
     }
 
-    coordinator.Unsubscribe<ControlPoints>(entity, component.deletionHandler);
+    coordinator.Unsubscribe<CurveControlPoints>(entity, component.deletionHandler);
 }

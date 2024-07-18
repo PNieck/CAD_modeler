@@ -5,7 +5,7 @@
 #include "shaders/shaderRepository.hpp"
 #include "utils/nameGenerator.hpp"
 #include "../components/position.hpp"
-#include "../components/controlPoints.hpp"
+#include "../components/curveControlPoints.hpp"
 #include "../components/c0SurfacePatches.hpp"
 #include "../components/c0SurfaceDensity.hpp"
 #include "c0PatchesSystem.hpp"

@@ -9,9 +9,9 @@
 #include "position.hpp"
 
 
-class ControlPoints {
+class CurveControlPoints {
 public:
-    ControlPoints(const std::vector<Entity> controlPoints):
+    CurveControlPoints(const std::vector<Entity> controlPoints):
         controlPoints(controlPoints) {}
 
     inline void AddControlPoint(Entity entity)
@@ -30,6 +30,5 @@ public:
     HandlerId deletionHandler;
 
 private:
-    // TODO: rewrite  so it uses set
     std::vector<Entity> controlPoints;
 };
