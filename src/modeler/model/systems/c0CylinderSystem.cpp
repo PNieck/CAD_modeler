@@ -7,8 +7,8 @@
 #include "CAD_modeler/model/systems/toUpdateSystem.hpp"
 #include "CAD_modeler/model/systems/c0PatchesSystem.hpp"
 
-#include "CAD_modeler/model/components/c0SurfacePatches.hpp"
-#include "CAD_modeler/model/components/c0SurfaceDensity.hpp"
+#include "CAD_modeler/model/components/c0Patches.hpp"
+#include "CAD_modeler/model/components/c0PatchesDensity.hpp"
 #include "CAD_modeler/model/components/mesh.hpp"
 #include "CAD_modeler/model/components/name.hpp"
 #include "CAD_modeler/model/components/rotation.hpp"
@@ -21,8 +21,8 @@ void C0CylinderSystem::RegisterSystem(Coordinator &coordinator)
 {
     coordinator.RegisterSystem<C0CylinderSystem>();
 
-    coordinator.RegisterRequiredComponent<C0CylinderSystem, C0SurfacePatches>();
-    coordinator.RegisterRequiredComponent<C0CylinderSystem, C0SurfaceDensity>();
+    coordinator.RegisterRequiredComponent<C0CylinderSystem, C0Patches>();
+    coordinator.RegisterRequiredComponent<C0CylinderSystem, C0PatchesDensity>();
     coordinator.RegisterRequiredComponent<C0CylinderSystem, Mesh>();
 }
 
@@ -38,7 +38,7 @@ Entity C0CylinderSystem::CreateCylinder(const Position &pos, const alg::Vec3 &di
     static constexpr int controlPointsInOneDir = 4;
     static constexpr int controlPointsCnt = controlPointsInOneDir*controlPointsInOneDir;
 
-    C0SurfacePatches patches(1, 1);
+    C0Patches patches(1, 1);
 
     auto const pointsSystem = coordinator->GetSystem<PointsSystem>();
 
@@ -64,14 +64,14 @@ Entity C0CylinderSystem::CreateCylinder(const Position &pos, const alg::Vec3 &di
     }
 
     Mesh mesh;
-    C0SurfaceDensity density(5);
+    C0PatchesDensity density(5);
 
-    patches.deletionHandler = coordinator->Subscribe<C0SurfacePatches>(surface, deletionHandler);
+    patches.deletionHandler = coordinator->Subscribe<C0Patches>(surface, deletionHandler);
 
     coordinator->AddComponent<Name>(surface, nameGenerator.GenerateName("CylinderC0_"));
     coordinator->AddComponent<Mesh>(surface, mesh);
-    coordinator->AddComponent<C0SurfacePatches>(surface, patches);
-    coordinator->AddComponent<C0SurfaceDensity>(surface, density);
+    coordinator->AddComponent<C0Patches>(surface, patches);
+    coordinator->AddComponent<C0PatchesDensity>(surface, density);
 
     coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
     coordinator->GetSystem<C0PatchesSystem>()->AddPossibilityToHasPatchesPolygon(surface);
@@ -84,8 +84,8 @@ Entity C0CylinderSystem::CreateCylinder(const Position &pos, const alg::Vec3 &di
 
 void C0CylinderSystem::AddRowOfPatches(Entity surface, const Position &pos, const alg::Vec3 &direction, float radius) const
 {
-    coordinator->EditComponent<C0SurfacePatches>(surface,
-        [surface, this](C0SurfacePatches& patches) {
+    coordinator->EditComponent<C0Patches>(surface,
+        [surface, this](C0Patches& patches) {
             auto pointSys = coordinator->GetSystem<PointsSystem>();
             
             patches.AddRow();
@@ -122,8 +122,8 @@ void C0CylinderSystem::AddRowOfPatches(Entity surface, const Position &pos, cons
 
 void C0CylinderSystem::AddColOfPatches(Entity surface, const Position &pos, const alg::Vec3 &direction, float radius) const
 {
-    coordinator->EditComponent<C0SurfacePatches>(surface,
-        [surface, this](C0SurfacePatches& patches) {
+    coordinator->EditComponent<C0Patches>(surface,
+        [surface, this](C0Patches& patches) {
             auto pointSys = coordinator->GetSystem<PointsSystem>();
             
             patches.AddCol();
@@ -160,8 +160,8 @@ void C0CylinderSystem::AddColOfPatches(Entity surface, const Position &pos, cons
 
 void C0CylinderSystem::DeleteRowOfPatches(Entity surface, const Position &pos, const alg::Vec3 &direction, float radius) const
 {
-    coordinator->EditComponent<C0SurfacePatches>(surface,
-        [surface, this](C0SurfacePatches& patches) {
+    coordinator->EditComponent<C0Patches>(surface,
+        [surface, this](C0Patches& patches) {
             for (int col=0; col < patches.PointsInCol() - 1; col++) {
                 for (int row=patches.PointsInRow() - 3; row < patches.PointsInRow(); row++) {
                     Entity point = patches.GetPoint(row, col);
@@ -182,8 +182,8 @@ void C0CylinderSystem::DeleteRowOfPatches(Entity surface, const Position &pos, c
 
 void C0CylinderSystem::DeleteColOfPatches(Entity surface, const Position &pos, const alg::Vec3 &direction, float radius) const
 {
-    coordinator->EditComponent<C0SurfacePatches>(surface,
-        [surface, this](C0SurfacePatches& patches) {
+    coordinator->EditComponent<C0Patches>(surface,
+        [surface, this](C0Patches& patches) {
             for (int row=0; row < patches.PointsInRow(); row++) {
                 for (int col=patches.PointsInCol() - 4; col < patches.PointsInCol() - 1; col++) {
                     Entity point = patches.GetPoint(row, col);
@@ -209,7 +209,7 @@ void C0CylinderSystem::DeleteColOfPatches(Entity surface, const Position &pos, c
 
 void C0CylinderSystem::RecalculatePositions(Entity cylinder, const Position &pos, const alg::Vec3 &direction, float radius) const
 {
-    auto const& patches = coordinator->GetComponent<C0SurfacePatches>(cylinder);
+    auto const& patches = coordinator->GetComponent<C0Patches>(cylinder);
 
     alg::Vec3 offset = direction / float(patches.PointsInRow());
 
@@ -230,13 +230,13 @@ void C0CylinderSystem::RecalculatePositions(Entity cylinder, const Position &pos
 }
 
 
-void C0CylinderSystem::DeletionHandler::HandleEvent(Entity entity, const C0SurfacePatches& component, EventType eventType)
+void C0CylinderSystem::DeletionHandler::HandleEvent(Entity entity, const C0Patches& component, EventType eventType)
 {
     if (eventType != EventType::ComponentDeleted)
         return;
 
-    coordinator.EditComponent<C0SurfacePatches>(entity,
-        [&component, this](C0SurfacePatches& patches) {
+    coordinator.EditComponent<C0Patches>(entity,
+        [&component, this](C0Patches& patches) {
             auto controlPointsSystem = coordinator.GetSystem<CurveControlPointsSystem>();
 
             for (int col=0; col < component.PointsInCol() - 1; col++) {

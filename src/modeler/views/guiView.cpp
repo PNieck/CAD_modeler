@@ -380,17 +380,17 @@ void GuiView::RenderSingleObjectProperties(Entity entity) const
     if (it != components.end())
         DisplayC2CurveParameters(entity, model.GetComponent<C2CurveParameters>(entity));
 
-    it = components.find(Model::GetComponentId<C0SurfaceDensity>());
+    it = components.find(Model::GetComponentId<C0PatchesDensity>());
     if (it != components.end())
-        DisplaySurfaceDensityParameter(entity, model.GetComponent<C0SurfaceDensity>(entity));
+        DisplaySurfaceDensityParameter(entity, model.GetComponent<C0PatchesDensity>(entity));
 
     it = components.find(Model::GetComponentId<HasPatchesPolygon>());
     if (it != components.end())
         DisplayPatchesPolygonOption(entity, model.GetComponent<HasPatchesPolygon>(entity));
 
-    it = components.find(Model::GetComponentId<C0SurfacePatches>());
+    it = components.find(Model::GetComponentId<C0Patches>());
     if (it != components.end())
-        DisplaySurfacePatches(entity, model.GetComponent<C0SurfacePatches>(entity));
+        DisplaySurfacePatches(entity, model.GetComponent<C0Patches>(entity));
 
     it = components.find(Model::GetComponentId<Unremovable>());
     if (it == components.end())
@@ -649,19 +649,19 @@ void GuiView::DisplayEntityDeletionOption(Entity entity) const
 }
 
 
-void GuiView::DisplaySurfaceDensityParameter(Entity entity, const C0SurfaceDensity &density) const
+void GuiView::DisplaySurfaceDensityParameter(Entity entity, const C0PatchesDensity &density) const
 {
     int d = density.GetDensity();
 
-    ImGui::DragInt("Mesh density", &d, 1.f, C0SurfaceDensity::MinDensity, C0SurfaceDensity::MaxDensity);
+    ImGui::DragInt("Mesh density", &d, 1.f, C0PatchesDensity::MinDensity, C0PatchesDensity::MaxDensity);
 
     if (d != density.GetDensity()) {
-        controller.SetNewSurfaceDensity(entity, C0SurfaceDensity(d));
+        controller.SetNewSurfaceDensity(entity, C0PatchesDensity(d));
     }
 }
 
 
-void GuiView::DisplaySurfacePatches(Entity entity, const C0SurfacePatches &patches) const
+void GuiView::DisplaySurfacePatches(Entity entity, const C0Patches &patches) const
 {
     ImGui::SeparatorText("Control Points");
 

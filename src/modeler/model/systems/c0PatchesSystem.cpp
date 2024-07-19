@@ -1,6 +1,6 @@
 #include <CAD_modeler/model/systems/c0PatchesSystem.hpp>
 
-#include "CAD_modeler/model/components/c0SurfaceDensity.hpp"
+#include "CAD_modeler/model/components/c0PatchesDensity.hpp"
 #include "CAD_modeler/model/components/curveControlPoints.hpp"
 #include "CAD_modeler/model/components/mesh.hpp"
 #include "CAD_modeler/model/components/patchesPolygonMesh.hpp"
@@ -16,8 +16,8 @@ void C0PatchesSystem::RegisterSystem(Coordinator &coordinator)
 {
     coordinator.RegisterSystem<C0PatchesSystem>();
 
-    coordinator.RegisterRequiredComponent<C0PatchesSystem, C0SurfacePatches>();
-    coordinator.RegisterRequiredComponent<C0PatchesSystem, C0SurfaceDensity>();
+    coordinator.RegisterRequiredComponent<C0PatchesSystem, C0Patches>();
+    coordinator.RegisterRequiredComponent<C0PatchesSystem, C0PatchesDensity>();
     coordinator.RegisterRequiredComponent<C0PatchesSystem, HasPatchesPolygon>();
     coordinator.RegisterRequiredComponent<C0PatchesSystem, Mesh>();
 }
@@ -27,7 +27,7 @@ void C0PatchesSystem::ShowPolygon(Entity entity) const
 {
     PatchesPolygonMesh polygonMesh;
 
-    auto const& patches = coordinator->GetComponent<C0SurfacePatches>(entity);
+    auto const& patches = coordinator->GetComponent<C0Patches>(entity);
 
     polygonMesh.Update(
         GeneratePolygonVertices(patches),
@@ -84,7 +84,7 @@ void C0PatchesSystem::Render() const
         auto const& mesh = coordinator->GetComponent<Mesh>(entity);
         mesh.Use();
 
-        auto const& density = coordinator->GetComponent<C0SurfaceDensity>(entity);
+        auto const& density = coordinator->GetComponent<C0PatchesDensity>(entity);
         float v[] = {5.f, 64.f, 64.f, 64.f};
         v[0] = static_cast<float>(density.GetDensity());
         glPatchParameterfv(GL_PATCH_DEFAULT_OUTER_LEVEL, v);
@@ -120,7 +120,7 @@ void C0PatchesSystem::UpdateMesh(Entity surface) const
 {
     coordinator->EditComponent<Mesh>(surface,
         [surface, this](Mesh& mesh) {
-            auto const& patches = coordinator->GetComponent<C0SurfacePatches>(surface);
+            auto const& patches = coordinator->GetComponent<C0Patches>(surface);
 
             mesh.Update(
                 GenerateVertices(patches),
@@ -135,7 +135,7 @@ void C0PatchesSystem::UpdatePolygonMesh(Entity entity) const
 {
     coordinator->EditComponent<PatchesPolygonMesh>(entity,
         [entity, this] (PatchesPolygonMesh& mesh) {
-            auto const& patches = coordinator->GetComponent<C0SurfacePatches>(entity);
+            auto const& patches = coordinator->GetComponent<C0Patches>(entity);
 
             mesh.Update(
                 GeneratePolygonVertices(patches),
@@ -178,7 +178,7 @@ void C0PatchesSystem::RenderPolygon(std::stack<Entity> &entities) const
 }
 
 
-std::vector<float> C0PatchesSystem::GenerateVertices(const C0SurfacePatches& patches) const
+std::vector<float> C0PatchesSystem::GenerateVertices(const C0Patches& patches) const
 {
     std::vector<float> result;
     result.reserve(patches.PointsCnt() * 3);
@@ -199,28 +199,28 @@ std::vector<float> C0PatchesSystem::GenerateVertices(const C0SurfacePatches& pat
 }
 
 
-std::vector<uint32_t> C0PatchesSystem::GenerateIndices(const C0SurfacePatches& patches) const
+std::vector<uint32_t> C0PatchesSystem::GenerateIndices(const C0Patches& patches) const
 {
     std::vector<uint32_t> result;
-    result.reserve(patches.Rows() * patches.Cols() * C0SurfacePatches::PointsInPatch * 2);
+    result.reserve(patches.Rows() * patches.Cols() * C0Patches::PointsInPatch * 2);
 
     for (int patchRow=0; patchRow < patches.Rows(); patchRow++) {
         for (int patchCol=0; patchCol < patches.Cols(); patchCol++) {
-            for (int rowInPatch=0; rowInPatch < C0SurfacePatches::RowsInPatch; rowInPatch++) {
-                for (int colInPatch=0; colInPatch < C0SurfacePatches::ColsInPatch; colInPatch++) {
+            for (int rowInPatch=0; rowInPatch < C0Patches::RowsInPatch; rowInPatch++) {
+                for (int colInPatch=0; colInPatch < C0Patches::ColsInPatch; colInPatch++) {
 
-                    int globCol = patchCol * (C0SurfacePatches::ColsInPatch - 1) + colInPatch;
-                    int globRow = patchRow * (C0SurfacePatches::RowsInPatch - 1) + rowInPatch;
+                    int globCol = patchCol * (C0Patches::ColsInPatch - 1) + colInPatch;
+                    int globRow = patchRow * (C0Patches::RowsInPatch - 1) + rowInPatch;
 
                     result.push_back(globCol * patches.PointsInRow() + globRow);
                 }
             }
 
-            for (int colInPatch=0; colInPatch < C0SurfacePatches::ColsInPatch; colInPatch++) {
-                for (int rowInPatch=0; rowInPatch < C0SurfacePatches::RowsInPatch; rowInPatch++) {
+            for (int colInPatch=0; colInPatch < C0Patches::ColsInPatch; colInPatch++) {
+                for (int rowInPatch=0; rowInPatch < C0Patches::RowsInPatch; rowInPatch++) {
 
-                    int globCol = patchCol * (C0SurfacePatches::ColsInPatch - 1) + colInPatch;
-                    int globRow = patchRow * (C0SurfacePatches::RowsInPatch - 1) + rowInPatch;
+                    int globCol = patchCol * (C0Patches::ColsInPatch - 1) + colInPatch;
+                    int globRow = patchRow * (C0Patches::RowsInPatch - 1) + rowInPatch;
 
                     result.push_back(globCol * patches.PointsInRow() + globRow);
                 }
@@ -232,7 +232,7 @@ std::vector<uint32_t> C0PatchesSystem::GenerateIndices(const C0SurfacePatches& p
 }
 
 
-std::vector<float> C0PatchesSystem::GeneratePolygonVertices(const C0SurfacePatches &patches) const
+std::vector<float> C0PatchesSystem::GeneratePolygonVertices(const C0Patches &patches) const
 {
     std::vector<float> result;
     result.reserve(patches.PointsInCol() * patches.PointsInRow() * 3);
@@ -252,7 +252,7 @@ std::vector<float> C0PatchesSystem::GeneratePolygonVertices(const C0SurfacePatch
 }
 
 
-std::vector<uint32_t> C0PatchesSystem::GeneratePolygonIndices(const C0SurfacePatches &patches) const
+std::vector<uint32_t> C0PatchesSystem::GeneratePolygonIndices(const C0Patches &patches) const
 {
     std::vector<uint32_t> result;
     result.reserve(patches.PointsInCol() * patches.PointsInRow() * 2 + patches.PointsInRow()*2);

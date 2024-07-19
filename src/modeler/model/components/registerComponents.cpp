@@ -15,8 +15,8 @@
 #include <CAD_modeler/model/components/bSplinePolygonMesh.hpp>
 #include <CAD_modeler/model/components/bezierControlPoints.hpp>
 #include <CAD_modeler/model/components/unremovable.hpp>
-#include <CAD_modeler/model/components/c0SurfacePatches.hpp>
-#include <CAD_modeler/model/components/c0SurfaceDensity.hpp>
+#include <CAD_modeler/model/components/c0Patches.hpp>
+#include <CAD_modeler/model/components/c0PatchesDensity.hpp>
 #include <CAD_modeler/model/components/patchesPolygonMesh.hpp>
 #include <CAD_modeler/model/components/hasPatchesPolygon.hpp>
 
@@ -38,8 +38,8 @@ void RegisterAllComponents(Coordinator& coordinator)
     coordinator.RegisterComponent<BSplinePolygonMesh>();
     coordinator.RegisterComponent<BezierControlPoints>();
     coordinator.RegisterComponent<Unremovable>();
-    coordinator.RegisterComponent<C0SurfacePatches>();
-    coordinator.RegisterComponent<C0SurfaceDensity>();
+    coordinator.RegisterComponent<C0Patches>();
+    coordinator.RegisterComponent<C0PatchesDensity>();
     coordinator.RegisterComponent<PatchesPolygonMesh>();
     coordinator.RegisterComponent<HasPatchesPolygon>();
 }
