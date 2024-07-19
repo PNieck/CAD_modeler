@@ -14,6 +14,7 @@
 #include "CAD_modeler/model/components/curveControlPoints.hpp"
 #include "CAD_modeler/model/components/mesh.hpp"
 #include "CAD_modeler/model/components/name.hpp"
+#include "CAD_modeler/model/components/unremovable.hpp"
 
 #include <CAD_modeler/utilities/setIntersection.hpp>
 
@@ -42,9 +43,7 @@ Entity C0SurfaceSystem::CreateSurface(const Position& pos, const alg::Vec3& dire
     static constexpr int controlPointsInOneDir = 4;
     static constexpr int controlPointsCnt = controlPointsInOneDir*controlPointsInOneDir;
 
-    std::vector<Entity> controlPoints;
     C0SurfacePatches patches(1, 1);
-    controlPoints.reserve(controlPointsCnt);
 
     auto const pointsSystem = coordinator->GetSystem<PointsSystem>();
 
@@ -56,11 +55,12 @@ Entity C0SurfaceSystem::CreateSurface(const Position& pos, const alg::Vec3& dire
         for (int j=0; j < controlPointsInOneDir; ++j) {
             // Creating control points with temporary location
             Entity cp = pointsSystem->CreatePoint(pos.vec);
-            controlPoints.push_back(cp);
             patches.SetPoint(cp, 0, 0, i, j);
 
             HandlerId cpHandler = coordinator->Subscribe(cp, std::static_pointer_cast<EventHandler<Position>>(handler));
             patches.controlPointsHandlers.insert({cp, cpHandler});
+
+            coordinator->AddComponent<Unremovable>(cp, Unremovable());
         }
     }
 
@@ -103,6 +103,8 @@ void C0SurfaceSystem::AddRowOfPatches(Entity surface, const Position& pos, const
 
                     HandlerId newHandler = coordinator->Subscribe<Position>(newEntity, eventHandler);
                     patches.controlPointsHandlers.insert({ newEntity, newHandler });
+
+                    coordinator->AddComponent<Unremovable>(newEntity, Unremovable());
                 }
             }
         }
@@ -134,6 +136,8 @@ void C0SurfaceSystem::AddColOfPatches(Entity surface, const Position& pos, const
 
                     HandlerId newHandler = coordinator->Subscribe<Position>(newEntity, eventHandler);
                     patches.controlPointsHandlers.insert({ newEntity, newHandler });
+
+                    coordinator->AddComponent<Unremovable>(newEntity, Unremovable());
                 }
             }
         }
