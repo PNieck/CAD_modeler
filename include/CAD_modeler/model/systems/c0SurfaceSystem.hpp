@@ -5,9 +5,9 @@
 #include "shaders/shaderRepository.hpp"
 #include "utils/nameGenerator.hpp"
 #include "../components/position.hpp"
-#include "../components/controlPoints.hpp"
-#include "../components/c0SurfacePatches.hpp"
-#include "../components/c0SurfaceDensity.hpp"
+#include "../components/curveControlPoints.hpp"
+#include "../components/c0Patches.hpp"
+#include "../components/c0PatchesDensity.hpp"
 #include "c0PatchesSystem.hpp"
 
 
@@ -25,8 +25,8 @@ public:
     void DeleteRowOfPatches(Entity surface, const Position& pos, const alg::Vec3& direction, float length, float width) const;
     void DeleteColOfPatches(Entity surface, const Position& pos, const alg::Vec3& direction, float length, float width) const;
 
-    inline void SetDensity(Entity entity, C0SurfaceDensity density) const
-        { coordinator->SetComponent<C0SurfaceDensity>(entity, density); }
+    inline void SetDensity(Entity entity, C0PatchesDensity density) const
+        { coordinator->SetComponent<C0PatchesDensity>(entity, density); }
 
     inline void ShowBezierPolygon(Entity cylinder) const
         { coordinator->GetSystem<C0PatchesSystem>()->ShowPolygon(cylinder); }
@@ -43,14 +43,26 @@ private:
     NameGenerator nameGenerator;
 
 
-    class DeletionHandler: public EventHandler<C0SurfacePatches> {
+    class DeletionHandler: public EventHandler<C0Patches> {
     public:
         DeletionHandler(Coordinator& coordinator):
             coordinator(coordinator) {}
 
-        void HandleEvent(Entity entity, const C0SurfacePatches& component, EventType eventType) override;
+        void HandleEvent(Entity entity, const C0Patches& component, EventType eventType) override;
 
     private:
         Coordinator& coordinator;
+    };
+
+    class ControlPointMovedHandler: public EventHandler<Position> {
+    public:
+        ControlPointMovedHandler(Entity targetObject, Coordinator& coordinator):
+            coordinator(coordinator), targetObject(targetObject) {}
+
+        void HandleEvent(Entity entity, const Position& component, EventType eventType) override;
+
+    private:
+        Coordinator& coordinator;
+        Entity targetObject;
     };
 };

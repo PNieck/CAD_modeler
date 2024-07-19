@@ -3,12 +3,12 @@
 #include <cassert>
 
 
-class C0SurfaceDensity {
+class C0PatchesDensity {
 public:
     static constexpr int MinDensity = 2;
     static constexpr int MaxDensity = 64;
 
-    C0SurfaceDensity(int density):
+    C0PatchesDensity(int density):
         density(density) {
             CheckDensity();
         }

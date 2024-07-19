@@ -5,7 +5,7 @@
 #include <algebra/vec4.hpp>
 
 #include "utils/nameGenerator.hpp"
-#include "controlPointsSystem.hpp"
+#include "curveControlPointsSystem.hpp"
 #include "shaders/shaderRepository.hpp"
 
 #include <vector>
@@ -21,10 +21,10 @@ public:
     Entity CreateCurve(const std::vector<Entity>& entities);
 
     inline void AddControlPoint(Entity bezierCurve, Entity entity)
-        { coordinator->GetSystem<ControlPointsSystem>()->AddControlPoint(bezierCurve, entity); }
+        { coordinator->GetSystem<CurveControlPointsSystem>()->AddControlPoint(bezierCurve, entity); }
 
     inline void DeleteControlPoint(Entity bezierCurve, Entity entity)
-        { coordinator->GetSystem<ControlPointsSystem>()->DeleteControlPoint(bezierCurve, entity); }
+        { coordinator->GetSystem<CurveControlPointsSystem>()->DeleteControlPoint(bezierCurve, entity); }
 
     void Render() const;
 
@@ -34,19 +34,19 @@ private:
 
     void UpdateEntities() const;
 
-    void UpdateMesh(Entity entity, const ControlPoints& cps) const;
+    void UpdateMesh(Entity entity, const CurveControlPoints& cps) const;
 
-    std::vector<float> GenerateMeshVertices(const ControlPoints& cps) const;
-    std::vector<uint32_t> GenerateMeshIndices(const ControlPoints& cps) const;
+    std::vector<float> GenerateMeshVertices(const CurveControlPoints& cps) const;
+    std::vector<uint32_t> GenerateMeshIndices(const CurveControlPoints& cps) const;
 
     using Polynomial = alg::Vec4;
 
-    std::vector<alg::Vector4<alg::Vec3>> FindInterpolationsPolynomialsInPowerBasis(const ControlPoints& cps) const;
+    std::vector<alg::Vector4<alg::Vec3>> FindInterpolationsPolynomialsInPowerBasis(const CurveControlPoints& cps) const;
 
     void ChangePolynomialInPowerBaseDomainFrom0To1(alg::Vector4<alg::Vec3>& polynomial, float domain) const;
 
     /// @brief Function removes neighboring control points with the same positions
-    std::vector<Entity> PreprocessControlPoints(const ControlPoints& cps) const;
+    std::vector<Entity> PreprocessControlPoints(const CurveControlPoints& cps) const;
 
     std::vector<alg::Vec3> ConstantCoeffInPowerBasis(const std::vector<alg::Vec3>& linearPowerCoeff, const std::vector<alg::Vec3>& squarePowerCoeff, const std::vector<alg::Vec3>& cubicPowerCoeff, const std::vector<float>& chordsLen, const std::vector<Entity>& ctrlPts) const;
     std::vector<alg::Vec3> LinearCoeffInPowerBasis(const std::vector<alg::Vec3>& squarePowerCoeff, const std::vector<alg::Vec3>& cubicPowerCoeff, const std::vector<float>& chordsLen, const std::vector<Entity>& ctrlPts) const;

@@ -6,7 +6,7 @@
 #include "shaders/shaderRepository.hpp"
 #include "utils/nameGenerator.hpp"
 #include "../components/position.hpp"
-#include "../components/c0SurfaceDensity.hpp"
+#include "../components/c0PatchesDensity.hpp"
 #include "c0PatchesSystem.hpp"
 
 
@@ -30,8 +30,8 @@ public:
     inline void HideBezierPolygon(Entity cylinder) const
         { coordinator->GetSystem<C0PatchesSystem>()->HidePolygon(cylinder); }
 
-    inline void SetDensity(Entity entity, C0SurfaceDensity density) const
-        { coordinator->SetComponent<C0SurfaceDensity>(entity, density); }
+    inline void SetDensity(Entity entity, C0PatchesDensity density) const
+        { coordinator->SetComponent<C0PatchesDensity>(entity, density); }
 
     void RecalculatePositions(Entity cylinder, const Position& pos, const alg::Vec3& direction, float radius) const;
 
@@ -41,14 +41,26 @@ private:
     std::shared_ptr<DeletionHandler> deletionHandler;
     NameGenerator nameGenerator;
 
-    class DeletionHandler: public EventHandler<C0SurfacePatches> {
+    class DeletionHandler: public EventHandler<C0Patches> {
     public:
         DeletionHandler(Coordinator& coordinator):
             coordinator(coordinator) {}
 
-        void HandleEvent(Entity entity, const C0SurfacePatches& component, EventType eventType) override;
+        void HandleEvent(Entity entity, const C0Patches& component, EventType eventType) override;
 
     private:
         Coordinator& coordinator;
+    };
+
+    class ControlPointMovedHandler: public EventHandler<Position> {
+    public:
+        ControlPointMovedHandler(Entity targetObject, Coordinator& coordinator):
+            coordinator(coordinator), targetObject(targetObject) {}
+
+        void HandleEvent(Entity entity, const Position& component, EventType eventType) override;
+
+    private:
+        Coordinator& coordinator;
+        Entity targetObject;
     };
 };

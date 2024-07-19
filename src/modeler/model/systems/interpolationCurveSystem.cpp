@@ -24,14 +24,14 @@ void InterpolationCurveSystem::RegisterSystem(Coordinator &coordinator)
 
 Entity InterpolationCurveSystem::CreateCurve(const std::vector<Entity> &controlPoints)
 {
-    Entity curve = coordinator->GetSystem<ControlPointsSystem>()->CreateControlPoints(controlPoints);
+    Entity curve = coordinator->GetSystem<CurveControlPointsSystem>()->CreateControlPoints(controlPoints);
 
     coordinator->AddComponent<Name>(curve, nameGenerator.GenerateName("InterpolationCurve"));
     coordinator->AddComponent<Mesh>(curve, Mesh());
 
     UpdateMesh(
         curve,
-        coordinator->GetComponent<ControlPoints>(curve)
+        coordinator->GetComponent<CurveControlPoints>(curve)
     );
 
     entities.insert(curve);
@@ -60,7 +60,7 @@ void InterpolationCurveSystem::Render() const
     shader.SetMVP(cameraMtx);
 
     for (auto const entity: entities) {
-        auto const& controlPoints = coordinator->GetComponent<ControlPoints>(entity);
+        auto const& controlPoints = coordinator->GetComponent<CurveControlPoints>(entity);
 
         bool selection = selectionSystem->IsSelected(entity);
 
@@ -86,7 +86,7 @@ void InterpolationCurveSystem::UpdateEntities() const
     auto toUpdate = intersect(toUpdateSystem->GetEntities(), entities);
 
     for (auto entity: toUpdate) {
-        auto const cps = coordinator->GetComponent<ControlPoints>(entity);
+        auto const cps = coordinator->GetComponent<CurveControlPoints>(entity);
 
         if (cps.Size() != 0) {
             UpdateMesh(entity, cps);
@@ -99,7 +99,7 @@ void InterpolationCurveSystem::UpdateEntities() const
 }
 
 
-void InterpolationCurveSystem::UpdateMesh(Entity entity, const ControlPoints& cps) const
+void InterpolationCurveSystem::UpdateMesh(Entity entity, const CurveControlPoints& cps) const
 {
     coordinator->EditComponent<Mesh>(entity,
         [&cps, this, entity](Mesh& mesh) {
@@ -112,7 +112,7 @@ void InterpolationCurveSystem::UpdateMesh(Entity entity, const ControlPoints& cp
 }
 
 
-std::vector<float> InterpolationCurveSystem::GenerateMeshVertices(const ControlPoints &cps) const
+std::vector<float> InterpolationCurveSystem::GenerateMeshVertices(const CurveControlPoints &cps) const
 {
     std::vector<float> result;
 
@@ -154,7 +154,7 @@ std::vector<float> InterpolationCurveSystem::GenerateMeshVertices(const ControlP
 }
 
 
-std::vector<uint32_t> InterpolationCurveSystem::GenerateMeshIndices(const ControlPoints &cps) const
+std::vector<uint32_t> InterpolationCurveSystem::GenerateMeshIndices(const CurveControlPoints &cps) const
 {
     std::vector<uint32_t> result((cps.Size() - 1) * 4);
 
@@ -166,7 +166,7 @@ std::vector<uint32_t> InterpolationCurveSystem::GenerateMeshIndices(const Contro
 }
 
 
-std::vector<alg::Vector4<alg::Vec3>> InterpolationCurveSystem::FindInterpolationsPolynomialsInPowerBasis(const ControlPoints& cps) const
+std::vector<alg::Vector4<alg::Vec3>> InterpolationCurveSystem::FindInterpolationsPolynomialsInPowerBasis(const CurveControlPoints& cps) const
 {
     auto ctrlPts = PreprocessControlPoints(cps);
 
@@ -204,7 +204,7 @@ void InterpolationCurveSystem::ChangePolynomialInPowerBaseDomainFrom0To1(alg::Ve
 }
 
 
-std::vector<Entity> InterpolationCurveSystem::PreprocessControlPoints(const ControlPoints &cps) const
+std::vector<Entity> InterpolationCurveSystem::PreprocessControlPoints(const CurveControlPoints &cps) const
 {
     std::vector<Entity> result;
     result.reserve(cps.Size());

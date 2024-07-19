@@ -368,9 +368,9 @@ void GuiView::RenderSingleObjectProperties(Entity entity) const
     if (it != components.end())
         DisplayNameEditor(entity, model.GetComponent<Name>(entity));
 
-    it = components.find(Model::GetComponentId<ControlPoints>());
+    it = components.find(Model::GetComponentId<CurveControlPoints>());
     if (it != components.end())
-        DisplayCurveControlPoints(entity, model.GetComponent<ControlPoints>(entity));
+        DisplayCurveControlPoints(entity, model.GetComponent<CurveControlPoints>(entity));
 
     it = components.find(Model::GetComponentId<C0CurveParameters>());
     if (it != components.end())
@@ -380,13 +380,17 @@ void GuiView::RenderSingleObjectProperties(Entity entity) const
     if (it != components.end())
         DisplayC2CurveParameters(entity, model.GetComponent<C2CurveParameters>(entity));
 
-    it = components.find(Model::GetComponentId<C0SurfaceDensity>());
+    it = components.find(Model::GetComponentId<C0PatchesDensity>());
     if (it != components.end())
-        DisplaySurfaceDensityParameter(entity, model.GetComponent<C0SurfaceDensity>(entity));
+        DisplaySurfaceDensityParameter(entity, model.GetComponent<C0PatchesDensity>(entity));
 
     it = components.find(Model::GetComponentId<HasPatchesPolygon>());
     if (it != components.end())
         DisplayPatchesPolygonOption(entity, model.GetComponent<HasPatchesPolygon>(entity));
+
+    it = components.find(Model::GetComponentId<C0Patches>());
+    if (it != components.end())
+        DisplaySurfacePatches(entity, model.GetComponent<C0Patches>(entity));
 
     it = components.find(Model::GetComponentId<Unremovable>());
     if (it == components.end())
@@ -546,7 +550,7 @@ void GuiView::DisplayTorusProperty(Entity entity, const TorusParameters& params)
 }
 
 
-void GuiView::DisplayCurveControlPoints(Entity entity, const ControlPoints& params) const
+void GuiView::DisplayCurveControlPoints(Entity entity, const CurveControlPoints& params) const
 {
     ImGui::SeparatorText("Control Points");
 
@@ -645,14 +649,28 @@ void GuiView::DisplayEntityDeletionOption(Entity entity) const
 }
 
 
-void GuiView::DisplaySurfaceDensityParameter(Entity entity, const C0SurfaceDensity &density) const
+void GuiView::DisplaySurfaceDensityParameter(Entity entity, const C0PatchesDensity &density) const
 {
     int d = density.GetDensity();
 
-    ImGui::DragInt("Mesh density", &d, 1.f, C0SurfaceDensity::MinDensity, C0SurfaceDensity::MaxDensity);
+    ImGui::DragInt("Mesh density", &d, 1.f, C0PatchesDensity::MinDensity, C0PatchesDensity::MaxDensity);
 
     if (d != density.GetDensity()) {
-        controller.SetNewSurfaceDensity(entity, C0SurfaceDensity(d));
+        controller.SetNewSurfaceDensity(entity, C0PatchesDensity(d));
+    }
+}
+
+
+void GuiView::DisplaySurfacePatches(Entity entity, const C0Patches &patches) const
+{
+    ImGui::SeparatorText("Control Points");
+
+    for (int row=0; row < patches.PointsInRow(); row++) {
+        for (int col=0; col < patches.PointsInCol(); col++) {
+            Entity entity = patches.GetPoint(row, col);
+
+            ImGui::Text(model.GetEntityName(entity).c_str());
+        }
     }
 }
 

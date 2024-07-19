@@ -5,7 +5,7 @@
 #include <CAD_modeler/model/components/mesh.hpp>
 #include <CAD_modeler/model/components/name.hpp>
 #include <CAD_modeler/model/components/position.hpp>
-#include <CAD_modeler/model/components/controlPoints.hpp>
+#include <CAD_modeler/model/components/curveControlPoints.hpp>
 #include <CAD_modeler/model/components/c2CurveParameters.hpp>
 #include <CAD_modeler/model/components/bSplinePolygonMesh.hpp>
 #include <CAD_modeler/model/components/unremovable.hpp>
@@ -14,7 +14,7 @@
 #include <CAD_modeler/model/systems/selectionSystem.hpp>
 #include <CAD_modeler/model/systems/toUpdateSystem.hpp>
 #include <CAD_modeler/model/systems/pointsSystem.hpp>
-#include <CAD_modeler/model/systems/controlPointsSystem.hpp>
+#include <CAD_modeler/model/systems/curveControlPointsSystem.hpp>
 
 #include <CAD_modeler/utilities/setIntersection.hpp>
 
@@ -26,15 +26,15 @@ void C2CurveSystem::RegisterSystem(Coordinator & coordinator)
     coordinator.RegisterSystem<C2CurveSystem>();
 
     coordinator.RegisterRequiredComponent<C2CurveSystem, C2CurveParameters>();
-    coordinator.RegisterRequiredComponent<C2CurveSystem, ControlPoints>();
+    coordinator.RegisterRequiredComponent<C2CurveSystem, CurveControlPoints>();
     coordinator.RegisterRequiredComponent<C2CurveSystem, Mesh>();
 }
 
 
 Entity C2CurveSystem::CreateC2Curve(const std::vector<Entity>& entities)
 {
-    Entity curve = coordinator->GetSystem<ControlPointsSystem>()->CreateControlPoints(entities);
-    auto const& controlPoints = coordinator->GetComponent<ControlPoints>(curve);
+    Entity curve = coordinator->GetSystem<CurveControlPointsSystem>()->CreateControlPoints(entities);
+    auto const& controlPoints = coordinator->GetComponent<CurveControlPoints>(curve);
 
     C2CurveParameters params;
 
@@ -60,7 +60,7 @@ void C2CurveSystem::ShowBSplinePolygon(Entity entity)
         }
     );
 
-    auto const& controlPoints = coordinator->GetComponent<ControlPoints>(entity);
+    auto const& controlPoints = coordinator->GetComponent<CurveControlPoints>(entity);
     BSplinePolygonMesh polygonMesh;
 
     polygonMesh.Update(
@@ -113,7 +113,7 @@ void C2CurveSystem::ShowBezierControlPoints(Entity entity)
     );
 
     auto bezierControlPoints = CreateBezierControlPoints(
-        coordinator->GetComponent<ControlPoints>(entity)
+        coordinator->GetComponent<CurveControlPoints>(entity)
     );
 
     UpdateBezierCtrlPtsHandlers(entity, bezierControlPoints);
@@ -199,7 +199,7 @@ void C2CurveSystem::UpdateEntities() const
     auto toUpdate = intersect(toUpdateSystem->GetEntities(), entities);
 
     for (auto entity: toUpdate) {
-        auto const& cps = coordinator->GetComponent<ControlPoints>(entity);
+        auto const& cps = coordinator->GetComponent<CurveControlPoints>(entity);
         if (cps.Size() == 0) {
             coordinator->DestroyEntity(entity);
             continue;
@@ -220,7 +220,7 @@ void C2CurveSystem::UpdateEntities() const
 }
 
 
-void C2CurveSystem::UpdateCurveMesh(Entity curve, const ControlPoints& ctrlPts) const
+void C2CurveSystem::UpdateCurveMesh(Entity curve, const CurveControlPoints& ctrlPts) const
 {
     coordinator->EditComponent<Mesh>(curve,
         [&ctrlPts, curve, this](Mesh& mesh) {
@@ -237,7 +237,7 @@ void C2CurveSystem::UpdateBSplinePolygon(Entity curve) const
 {
     coordinator->EditComponent<BSplinePolygonMesh>(curve,
         [curve, this](BSplinePolygonMesh& mesh) {
-            auto const& params = coordinator->GetComponent<ControlPoints>(curve);
+            auto const& params = coordinator->GetComponent<CurveControlPoints>(curve);
 
             mesh.Update(
                 GenerateBSplinePolygonVertices(params),
@@ -252,7 +252,7 @@ void C2CurveSystem::UpdateBezierControlPoints(Entity curve, const C2CurveParamet
 {
     auto const& bezierControlPoints = coordinator->GetComponent<BezierControlPoints>(curve);
 
-    auto const& controlPoints = coordinator->GetComponent<ControlPoints>(curve);
+    auto const& controlPoints = coordinator->GetComponent<CurveControlPoints>(curve);
     auto controlPointsPositions = CreateBezierControlPointsPositions(controlPoints);
 
     if (controlPointsPositions.size() > bezierControlPoints.Size()) {
@@ -317,7 +317,7 @@ void C2CurveSystem::UpdateBezierCtrlPtsHandlers(Entity curve, BezierControlPoint
     if (bezierCtrlPts.Size() < MIN_CTRL_PTS_CNT)
         return;
 
-    auto const& bSplineCtrlPts = coordinator->GetComponent<ControlPoints>(curve);
+    auto const& bSplineCtrlPts = coordinator->GetComponent<CurveControlPoints>(curve);
 
     // Adding new ones
     auto handler = std::make_shared<BezierCtrlPtMovedHandler>(*coordinator, curve);
@@ -393,7 +393,7 @@ void C2CurveSystem::RenderBezierPolygons(std::stack<Entity>& entities) const
 }
 
 
-BezierControlPoints C2CurveSystem::CreateBezierControlPoints(const ControlPoints & params) const
+BezierControlPoints C2CurveSystem::CreateBezierControlPoints(const CurveControlPoints & params) const
 {
     BezierControlPoints bezierControlPoints;
     auto pointsSystem = coordinator->GetSystem<PointsSystem>();
@@ -422,7 +422,7 @@ void C2CurveSystem::DeleteBezierControlPoints(Entity entity) const
 }
 
 
-std::vector<alg::Vec3> C2CurveSystem::CreateBezierControlPointsPositions(const ControlPoints & params) const
+std::vector<alg::Vec3> C2CurveSystem::CreateBezierControlPointsPositions(const CurveControlPoints & params) const
 {
     auto const& controlPoints = params.GetPoints();
 
@@ -463,7 +463,7 @@ std::vector<alg::Vec3> C2CurveSystem::CreateBezierControlPointsPositions(const C
 }
 
 
-std::vector<float> C2CurveSystem::GenerateCurveMeshVertices(const ControlPoints& params) const
+std::vector<float> C2CurveSystem::GenerateCurveMeshVertices(const CurveControlPoints& params) const
 {
     std::vector<float> result;
 
@@ -481,7 +481,7 @@ std::vector<float> C2CurveSystem::GenerateCurveMeshVertices(const ControlPoints&
 }
 
 
-std::vector<uint32_t> C2CurveSystem::GenerateCurveMeshIndices(const ControlPoints& params) const
+std::vector<uint32_t> C2CurveSystem::GenerateCurveMeshIndices(const CurveControlPoints& params) const
 {
     auto const& controlPoints = params.GetPoints();
     int segments = std::max<int>(controlPoints.size() - 3, 0);
@@ -499,7 +499,7 @@ std::vector<uint32_t> C2CurveSystem::GenerateCurveMeshIndices(const ControlPoint
 }
 
 
-std::vector<float> C2CurveSystem::GenerateBSplinePolygonVertices(const ControlPoints & params) const
+std::vector<float> C2CurveSystem::GenerateBSplinePolygonVertices(const CurveControlPoints & params) const
 {
     auto const& controlPoints = params.GetPoints();
 
@@ -518,7 +518,7 @@ std::vector<float> C2CurveSystem::GenerateBSplinePolygonVertices(const ControlPo
 }
 
 
-std::vector<uint32_t> C2CurveSystem::GenerateBSplinePolygonIndices(const ControlPoints & params) const
+std::vector<uint32_t> C2CurveSystem::GenerateBSplinePolygonIndices(const CurveControlPoints & params) const
 {
     auto const& controlPoints = params.GetPoints();
 
@@ -538,7 +538,7 @@ void C2CurveSystem::BezierCtrlPtMovedHandler::HandleEvent(Entity entity, const P
     if (coordinator.GetEntityComponents(c2Curve).contains(ComponentsManager::GetComponentId<ToUpdate>()))
         return;
 
-    auto const& bSplineCPs = coordinator.GetComponent<ControlPoints>(c2Curve).GetPoints();
+    auto const& bSplineCPs = coordinator.GetComponent<CurveControlPoints>(c2Curve).GetPoints();
 
     if (bSplineCPs.size() < MIN_CTRL_PTS_CNT)
         return;
@@ -659,5 +659,5 @@ void C2CurveSystem::DeletionHandler::HandleEvent(Entity entity, const BezierCont
         ++handlersIt;
     }
 
-    coordinator.Unsubscribe<ControlPoints>(entity, component.deletionHandler);
+    coordinator.Unsubscribe<CurveControlPoints>(entity, component.deletionHandler);
 }

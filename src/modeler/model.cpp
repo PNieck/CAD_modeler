@@ -8,7 +8,7 @@
 #include <CAD_modeler/model/components/cameraParameters.hpp>
 
 #include <CAD_modeler/model/systems/toUpdateSystem.hpp>
-#include <CAD_modeler/model/systems/controlPointsSystem.hpp>
+#include <CAD_modeler/model/systems/curveControlPointsSystem.hpp>
 
 #include <stdexcept>
 
@@ -27,7 +27,7 @@ Model::Model(int viewport_width, int viewport_height)
     PointsSystem::RegisterSystem(coordinator);
     NameSystem::RegisterSystem(coordinator);
     SelectionSystem::RegisterSystem(coordinator);
-    ControlPointsSystem::RegisterSystem(coordinator);
+    CurveControlPointsSystem::RegisterSystem(coordinator);
     C0CurveSystem::RegisterSystem(coordinator);
     C2CurveSystem::RegisterSystem(coordinator);
     ToUpdateSystem::RegisterSystem(coordinator);
@@ -45,7 +45,7 @@ Model::Model(int viewport_width, int viewport_height)
     selectionSystem = coordinator.GetSystem<SelectionSystem>();
     c0CurveSystem = coordinator.GetSystem<C0CurveSystem>();
     c2CurveSystem = coordinator.GetSystem<C2CurveSystem>();
-    auto controlPointsSystem = coordinator.GetSystem<ControlPointsSystem>();
+    auto controlPointsSystem = coordinator.GetSystem<CurveControlPointsSystem>();
     interpolationCurveSystem = coordinator.GetSystem<InterpolationCurveSystem>();
     c0surfaceSystem = coordinator.GetSystem<C0SurfaceSystem>();
     c0CylinderSystem = coordinator.GetSystem<C0CylinderSystem>();

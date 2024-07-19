@@ -172,7 +172,7 @@ public:
         { return pointsSystem->GetEntities(); }
 
     inline const std::unordered_set<Entity>& GetAllCurves() const
-        { return coordinator.GetSystem<ControlPointsSystem>()->GetEntities(); }
+        { return coordinator.GetSystem<CurveControlPointsSystem>()->GetEntities(); }
 
     inline const void ShowC2BSplinePolygon(Entity entity) const
         { return c2CurveSystem->ShowBSplinePolygon(entity); }
@@ -192,7 +192,7 @@ public:
     inline const void HideC2BezierControlPoints(Entity entity) const
         { return c2CurveSystem->HideBezierControlPoints(entity); }
 
-    inline const void SetSurfaceDensity(Entity entity, C0SurfaceDensity density) const
+    inline const void SetSurfaceDensity(Entity entity, C0PatchesDensity density) const
         { c0surfaceSystem->SetDensity(entity, density); }
 
     inline const void ShowPatchesPolygon(Entity entity) const

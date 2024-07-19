@@ -6,10 +6,10 @@
 
 #include "shaders/shaderRepository.hpp"
 #include "../components/c2CurveParameters.hpp"
-#include "../components/controlPoints.hpp"
+#include "../components/curveControlPoints.hpp"
 #include "../components/bezierControlPoints.hpp"
 #include "utils/nameGenerator.hpp"
-#include "controlPointsSystem.hpp"
+#include "curveControlPointsSystem.hpp"
 
 #include <vector>
 
@@ -26,10 +26,10 @@ public:
         { CreateC2Curve({controlPoint}); }
 
     inline void AddControlPoint(Entity bezierCurve, Entity entity)
-        { coordinator->GetSystem<ControlPointsSystem>()->AddControlPoint(bezierCurve, entity); }
+        { coordinator->GetSystem<CurveControlPointsSystem>()->AddControlPoint(bezierCurve, entity); }
 
     inline void DeleteControlPoint(Entity bezierCurve, Entity entity)
-        { coordinator->GetSystem<ControlPointsSystem>()->DeleteControlPoint(bezierCurve, entity); }
+        { coordinator->GetSystem<CurveControlPointsSystem>()->DeleteControlPoint(bezierCurve, entity); }
 
     void ShowBSplinePolygon(Entity entity);
     void HideBSplinePolygon(Entity entity);
@@ -49,7 +49,7 @@ private:
     static constexpr int MIN_CTRL_PTS_CNT = 4;
 
     void UpdateEntities() const;
-    void UpdateCurveMesh(Entity curve, const ControlPoints& cps) const;
+    void UpdateCurveMesh(Entity curve, const CurveControlPoints& cps) const;
     void UpdateBSplinePolygon(Entity curve) const;
     void UpdateBezierControlPoints(Entity curve, const C2CurveParameters& params) const;
     void UpdateBezierCtrlPtsHandlers(Entity curve, BezierControlPoints& cps) const;
@@ -57,15 +57,15 @@ private:
     void RenderBSplinePolygons(std::stack<Entity>& entities) const;
     void RenderBezierPolygons(std::stack<Entity>& entities) const;
 
-    BezierControlPoints CreateBezierControlPoints(const ControlPoints& cps) const;
+    BezierControlPoints CreateBezierControlPoints(const CurveControlPoints& cps) const;
     void DeleteBezierControlPoints(Entity entity) const;
-    std::vector<alg::Vec3> CreateBezierControlPointsPositions(const ControlPoints& cps) const;
+    std::vector<alg::Vec3> CreateBezierControlPointsPositions(const CurveControlPoints& cps) const;
 
-    std::vector<float> GenerateCurveMeshVertices(const ControlPoints& cps) const;
-    std::vector<uint32_t> GenerateCurveMeshIndices(const ControlPoints& cps) const;
+    std::vector<float> GenerateCurveMeshVertices(const CurveControlPoints& cps) const;
+    std::vector<uint32_t> GenerateCurveMeshIndices(const CurveControlPoints& cps) const;
 
-    std::vector<float> GenerateBSplinePolygonVertices(const ControlPoints& cps) const;
-    std::vector<uint32_t> GenerateBSplinePolygonIndices(const ControlPoints& cps) const;
+    std::vector<float> GenerateBSplinePolygonVertices(const CurveControlPoints& cps) const;
+    std::vector<uint32_t> GenerateBSplinePolygonIndices(const CurveControlPoints& cps) const;
 
     inline size_t BezierControlPointsCnt(size_t bSplineCtrlPts) const
         { return bSplineCtrlPts < MIN_CTRL_PTS_CNT ? 0 : 4 + 3 * (bSplineCtrlPts - 4); }

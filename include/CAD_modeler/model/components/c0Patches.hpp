@@ -1,15 +1,16 @@
 #pragma once
 
+#include <ecs/entitiesManager.hpp>
 #include "../../utilities/vector2D.hpp"
 
 
-class C0SurfacePatches {
+class C0Patches {
 public:
     static constexpr int RowsInPatch = 4;
     static constexpr int ColsInPatch = 4;
     static constexpr int PointsInPatch = RowsInPatch * ColsInPatch;
 
-    C0SurfacePatches(int rows=1, int cols=1):
+    C0Patches(int rows=1, int cols=1):
         controlPoints(3*rows+1, 3*cols+1) {}
     
     inline void SetPoint(Entity pt, int patchRow, int patchCol, int ptRow, int ptCol)
@@ -50,6 +51,9 @@ public:
 
     inline int PointsCnt() const
         { return PointsInCol() * PointsInRow(); }
+
+    std::unordered_map<Entity, HandlerId> controlPointsHandlers;
+    HandlerId deletionHandler;
 
 private:
     Vector2D<Entity> controlPoints;

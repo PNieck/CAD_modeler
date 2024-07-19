@@ -3,7 +3,7 @@
 #include <ecs/coordinator.hpp>
 
 #include <CAD_modeler/model/components/c0CurveParameters.hpp>
-#include <CAD_modeler/model/components/controlPoints.hpp>
+#include <CAD_modeler/model/components/curveControlPoints.hpp>
 #include <CAD_modeler/model/components/position.hpp>
 #include <CAD_modeler/model/components/toUpdate.hpp>
 #include <CAD_modeler/model/components/mesh.hpp>
@@ -27,18 +27,18 @@ void C0CurveSystem::RegisterSystem(Coordinator & coordinator)
     coordinator.RegisterSystem<C0CurveSystem>();
 
     coordinator.RegisterRequiredComponent<C0CurveSystem, C0CurveParameters>();
-    coordinator.RegisterRequiredComponent<C0CurveSystem, ControlPoints>();
+    coordinator.RegisterRequiredComponent<C0CurveSystem, CurveControlPoints>();
     coordinator.RegisterRequiredComponent<C0CurveSystem, Mesh>();
 }
 
 
 Entity C0CurveSystem::CreateC0Curve(const std::vector<Entity>& entities)
 {
-    Entity curve = coordinator->GetSystem<ControlPointsSystem>()->CreateControlPoints(entities);
+    Entity curve = coordinator->GetSystem<CurveControlPointsSystem>()->CreateControlPoints(entities);
 
     C0CurveParameters params;
 
-    auto const& controlPoints = coordinator->GetComponent<ControlPoints>(curve);
+    auto const& controlPoints = coordinator->GetComponent<CurveControlPoints>(curve);
 
     Mesh mesh;
     mesh.Update(
@@ -75,7 +75,7 @@ void C0CurveSystem::Render() const
     shader.SetMVP(cameraMtx);
 
     for (auto const entity: entities) {
-        auto const& controlPoints = coordinator->GetComponent<ControlPoints>(entity);
+        auto const& controlPoints = coordinator->GetComponent<CurveControlPoints>(entity);
         auto const& params = coordinator->GetComponent<C0CurveParameters>(entity);
 
         if (params.drawPolygon)
@@ -140,7 +140,7 @@ void C0CurveSystem::UpdateEntities() const
     auto toUpdate = intersect(toUpdateSystem->GetEntities(), entities);
 
     for (auto entity: toUpdate) {
-        auto const& cps = coordinator->GetComponent<ControlPoints>(entity);
+        auto const& cps = coordinator->GetComponent<CurveControlPoints>(entity);
 
         if (cps.Size() != 0) {
             UpdateMesh(entity, cps);
@@ -153,7 +153,7 @@ void C0CurveSystem::UpdateEntities() const
 }
 
 
-void C0CurveSystem::UpdateMesh(Entity curve, const ControlPoints& cps) const
+void C0CurveSystem::UpdateMesh(Entity curve, const CurveControlPoints& cps) const
 {
     coordinator->EditComponent<Mesh>(curve,
         [&cps, curve, this](Mesh& mesh) {
@@ -166,7 +166,7 @@ void C0CurveSystem::UpdateMesh(Entity curve, const ControlPoints& cps) const
 }
 
 
-std::vector<float> C0CurveSystem::GenerateBezierPolygonVertices(const ControlPoints& params) const
+std::vector<float> C0CurveSystem::GenerateBezierPolygonVertices(const CurveControlPoints& params) const
 {
     auto const& controlPoints = params.GetPoints();
 
@@ -192,7 +192,7 @@ int ceiling(int x, int y) {
 }
 
 
-std::vector<uint32_t> C0CurveSystem::GenerateBezierPolygonIndices(const ControlPoints& params) const
+std::vector<uint32_t> C0CurveSystem::GenerateBezierPolygonIndices(const CurveControlPoints& params) const
 {
     auto const& controlPoints = params.GetPoints();
 

@@ -39,11 +39,12 @@ private:
     void DisplayScaleProperty(Entity entity, const Scale& scale) const;
     void DisplayRotationProperty(Entity entity, const Rotation& rotation) const;
     void DisplayTorusProperty(Entity entity, const TorusParameters& params) const;
-    void DisplayCurveControlPoints(Entity entity, const ControlPoints& controlPoints) const;
+    void DisplayCurveControlPoints(Entity entity, const CurveControlPoints& controlPoints) const;
     void DisplayC0CurveParameters(Entity entity, const C0CurveParameters& params) const;
     void DisplayC2CurveParameters(Entity entity, const C2CurveParameters& params) const;
     void DisplayEntityDeletionOption(Entity entity) const;
-    void DisplaySurfaceDensityParameter(Entity entity, const C0SurfaceDensity& density) const;
+    void DisplaySurfaceDensityParameter(Entity entity, const C0PatchesDensity& density) const;
+    void DisplaySurfacePatches(Entity entity, const C0Patches& patches) const;
     void DisplayPatchesPolygonOption(Entity entity, const HasPatchesPolygon& patchesPolygon) const;
 
     void DisplayNameEditor(Entity entity, const Name& name) const;
