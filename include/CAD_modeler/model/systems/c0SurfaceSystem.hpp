@@ -2,7 +2,6 @@
 
 #include <ecs/system.hpp>
 
-#include "shaders/shaderRepository.hpp"
 #include "utils/nameGenerator.hpp"
 #include "../components/position.hpp"
 #include "../components/curveControlPoints.hpp"

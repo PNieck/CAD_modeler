@@ -3,7 +3,6 @@
 #include <ecs/system.hpp>
 #include <ecs/coordinator.hpp>
 
-#include "shaders/shaderRepository.hpp"
 #include "utils/nameGenerator.hpp"
 #include "../components/position.hpp"
 #include "../components/c0PatchesDensity.hpp"
