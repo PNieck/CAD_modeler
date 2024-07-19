@@ -11,8 +11,8 @@
 #include "CAD_modeler/model/components/c0SurfaceDensity.hpp"
 #include "CAD_modeler/model/components/mesh.hpp"
 #include "CAD_modeler/model/components/name.hpp"
-#include "CAD_modeler/model/components/curveControlPoints.hpp"
 #include "CAD_modeler/model/components/rotation.hpp"
+#include "CAD_modeler/model/components/unremovable.hpp"
 
 #include <numbers>
 
@@ -53,6 +53,8 @@ Entity C0CylinderSystem::CreateCylinder(const Position &pos, const alg::Vec3 &di
 
             HandlerId cpHandler = coordinator->Subscribe(cp, std::static_pointer_cast<EventHandler<Position>>(handler));
             patches.controlPointsHandlers.insert({cp, cpHandler});
+
+            coordinator->AddComponent<Unremovable>(cp, Unremovable());
         }
     }
 
@@ -100,6 +102,8 @@ void C0CylinderSystem::AddRowOfPatches(Entity surface, const Position &pos, cons
 
                     HandlerId newHandler = coordinator->Subscribe<Position>(newEntity, eventHandler);
                     patches.controlPointsHandlers.insert({ newEntity, newHandler });
+
+                    coordinator->AddComponent<Unremovable>(newEntity, Unremovable());
                 }
             }
 
@@ -140,7 +144,9 @@ void C0CylinderSystem::AddColOfPatches(Entity surface, const Position &pos, cons
                     patches.SetPoint(newEntity, row, col);
 
                     HandlerId newHandler = coordinator->Subscribe<Position>(newEntity, eventHandler);
-                patches.controlPointsHandlers.insert({ newEntity, newHandler });
+                    patches.controlPointsHandlers.insert({ newEntity, newHandler });
+
+                    coordinator->AddComponent<Unremovable>(newEntity, Unremovable());
                 }
             }
         }
