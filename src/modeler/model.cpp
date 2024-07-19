@@ -47,7 +47,7 @@ Model::Model(int viewport_width, int viewport_height)
     c2CurveSystem = coordinator.GetSystem<C2CurveSystem>();
     auto controlPointsSystem = coordinator.GetSystem<CurveControlPointsSystem>();
     interpolationCurveSystem = coordinator.GetSystem<InterpolationCurveSystem>();
-    c0surfaceSystem = coordinator.GetSystem<C0SurfaceSystem>();
+    c0SurfaceSystem = coordinator.GetSystem<C0SurfaceSystem>();
     c0CylinderSystem = coordinator.GetSystem<C0CylinderSystem>();
     c0PatchesSystem = coordinator.GetSystem<C0PatchesSystem>();
 
@@ -71,7 +71,7 @@ Model::Model(int viewport_width, int viewport_height)
     controlPointsSystem->Init();
     interpolationCurveSystem->Init(&shadersRepo);
     c0PatchesSystem->Init(&shadersRepo);
-    c0surfaceSystem->Init();
+    c0SurfaceSystem->Init();
     c0CylinderSystem->Init();
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
