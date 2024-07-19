@@ -575,11 +575,12 @@ void GuiView::DisplayCurveControlPoints(Entity entity, const CurveControlPoints&
     
     if (ImGui::BeginPopup("Add_c0_control_points_popup")) {
         auto const& points = model.GetAllPoints();
+        auto const& pointsWithNames = model.EntitiesWithNames();
 
         for (auto point: points) {
             // TODO: rewrite with set intersection
             if (std::find(params.GetPoints().begin(), params.GetPoints().end(), point) == params.GetPoints().end()) {
-                if (ImGui::Selectable(model.GetEntityName(point).c_str(), false)) {
+                if (pointsWithNames.contains(point) && ImGui::Selectable(model.GetEntityName(point).c_str(), false)) {
                     controller.AddControlPointToCurve(entity, point);
                 }
             }
