@@ -35,9 +35,6 @@ void C0CylinderSystem::Init()
 
 Entity C0CylinderSystem::CreateCylinder(const Position &pos, const alg::Vec3 &direction, float radius)
 {
-    static constexpr int controlPointsInOneDir = 4;
-    static constexpr int controlPointsCnt = controlPointsInOneDir*controlPointsInOneDir;
-
     C0Patches patches(1, 1);
 
     auto const pointsSystem = coordinator->GetSystem<PointsSystem>();
@@ -46,10 +43,10 @@ Entity C0CylinderSystem::CreateCylinder(const Position &pos, const alg::Vec3 &di
 
     auto handler = std::make_shared<ControlPointMovedHandler>(surface, *coordinator);
 
-    for (int i=0; i < controlPointsInOneDir; ++i) {
-        for (int j=0; j < controlPointsInOneDir - 1; ++j) {
+    for (int row=0; row < patches.PointsInRow(); ++row) {
+        for (int col=0; col < patches.PointsInCol(); ++col) {
             Entity cp = pointsSystem->CreatePoint();
-            patches.SetPoint(cp, i, j);
+            patches.SetPoint(cp, row, col);
 
             HandlerId cpHandler = coordinator->Subscribe(cp, std::static_pointer_cast<EventHandler<Position>>(handler));
             patches.controlPointsHandlers.insert({cp, cpHandler});
@@ -58,9 +55,9 @@ Entity C0CylinderSystem::CreateCylinder(const Position &pos, const alg::Vec3 &di
         }
     }
 
-    for (int i=0; i < controlPointsInOneDir; ++i) {
-        Entity cp = patches.GetPoint(i, 0);
-        patches.SetPoint(cp, i, controlPointsInOneDir - 1);
+    for (int row=0; row < patches.PointsInRow(); ++row) {
+        Entity cp = patches.GetPoint(row, 0);
+        patches.SetPoint(cp, row, patches.PointsInRow() - 1);
     }
 
     Mesh mesh;
