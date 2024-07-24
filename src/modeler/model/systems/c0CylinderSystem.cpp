@@ -76,7 +76,7 @@ Entity C0CylinderSystem::CreateCylinder(const Position &pos, const alg::Vec3 &di
     coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
     coordinator->GetSystem<C0PatchesSystem>()->AddPossibilityToHasPatchesPolygon(surface);
 
-    RecalculatePositions(surface, pos, direction, radius);
+    Recalculate(surface, pos, direction, radius);
 
     return surface;
 }
@@ -116,7 +116,7 @@ void C0CylinderSystem::AddRowOfPatches(Entity surface, const Position &pos, cons
 
     coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
 
-    RecalculatePositions(surface, pos, direction, radius);
+    Recalculate(surface, pos, direction, radius);
 }
 
 
@@ -154,7 +154,7 @@ void C0CylinderSystem::AddColOfPatches(Entity surface, const Position &pos, cons
 
     coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
 
-    RecalculatePositions(surface, pos, direction, radius);
+    Recalculate(surface, pos, direction, radius);
 }
 
 
@@ -176,7 +176,7 @@ void C0CylinderSystem::DeleteRowOfPatches(Entity surface, const Position &pos, c
     );
 
     coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
-    RecalculatePositions(surface, pos, direction, radius);
+    Recalculate(surface, pos, direction, radius);
 }
 
 
@@ -203,11 +203,11 @@ void C0CylinderSystem::DeleteColOfPatches(Entity surface, const Position &pos, c
     );
 
     coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
-    RecalculatePositions(surface, pos, direction, radius);
+    Recalculate(surface, pos, direction, radius);
 }
 
 
-void C0CylinderSystem::RecalculatePositions(Entity cylinder, const Position &pos, const alg::Vec3 &direction, float radius) const
+void C0CylinderSystem::Recalculate(Entity cylinder, const Position &pos, const alg::Vec3 &direction, float radius) const
 {
     auto const& patches = coordinator->GetComponent<C0Patches>(cylinder);
 

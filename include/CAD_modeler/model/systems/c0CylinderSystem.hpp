@@ -38,7 +38,7 @@ public:
     inline int GetColsCnt(Entity surface) const
         { return coordinator->GetSystem<C0PatchesSystem>()->GetColsCnt(surface); }
 
-    void RecalculatePositions(Entity cylinder, const Position& pos, const alg::Vec3& direction, float radius) const;
+    void Recalculate(Entity cylinder, const Position& pos, const alg::Vec3& direction, float radius) const;
 
 private:
     class DeletionHandler;

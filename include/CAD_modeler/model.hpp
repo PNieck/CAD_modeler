@@ -93,7 +93,7 @@ public:
         { c0CylinderSystem->DeleteColOfPatches(surface, cursorSystem->GetPosition(), dir, radius); }
 
     inline void RecalculateC0CylinderPatches(Entity surface, float radius = 1.f, const alg::Vec3& dir = alg::Vec3(0.f, 1.f, 0.f)) const
-        { c0CylinderSystem->RecalculatePositions(surface, cursorSystem->GetPosition(), dir, radius); }
+        { c0CylinderSystem->Recalculate(surface, cursorSystem->GetPosition(), dir, radius); }
 
     inline void RecalculateC0Surface(Entity surface, const alg::Vec3& direction, float length, float width) const
         { c0SurfaceSystem->Recalculate(surface, cursorSystem->GetPosition(), direction, length, width); }
