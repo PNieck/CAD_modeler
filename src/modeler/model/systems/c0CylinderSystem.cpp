@@ -49,7 +49,7 @@ Entity C0CylinderSystem::CreateCylinder(const Position &pos, const alg::Vec3 &di
     for (int i=0; i < controlPointsInOneDir; ++i) {
         for (int j=0; j < controlPointsInOneDir - 1; ++j) {
             Entity cp = pointsSystem->CreatePoint();
-            patches.SetPoint(cp, 0, 0, i, j);
+            patches.SetPoint(cp, i, j);
 
             HandlerId cpHandler = coordinator->Subscribe(cp, std::static_pointer_cast<EventHandler<Position>>(handler));
             patches.controlPointsHandlers.insert({cp, cpHandler});
@@ -88,7 +88,7 @@ void C0CylinderSystem::AddRowOfPatches(Entity surface, const Position &pos, cons
         [surface, this](C0Patches& patches) {
             auto pointSys = coordinator->GetSystem<PointsSystem>();
             
-            patches.AddRow();
+            patches.AddRowOfPatches();
 
             Entity firstCP = patches.GetPoint(0,0);
             HandlerId firstCpHandler = patches.controlPointsHandlers.at(firstCP);
@@ -126,7 +126,7 @@ void C0CylinderSystem::AddColOfPatches(Entity surface, const Position &pos, cons
         [surface, this](C0Patches& patches) {
             auto pointSys = coordinator->GetSystem<PointsSystem>();
             
-            patches.AddCol();
+            patches.AddColOfPatches();
 
             Entity firstCP = patches.GetPoint(0,0);
             HandlerId firstCpHandler = patches.controlPointsHandlers.at(firstCP);
@@ -171,7 +171,7 @@ void C0CylinderSystem::DeleteRowOfPatches(Entity surface, const Position &pos, c
                 }
             }
 
-            patches.DeleteRow();
+            patches.DeleteRowOfPatches();
         }
     );
 
@@ -198,7 +198,7 @@ void C0CylinderSystem::DeleteColOfPatches(Entity surface, const Position &pos, c
                 patches.SetPoint(point, row, patches.PointsInCol() - 4);
             }
 
-            patches.DeleteCol();
+            patches.DeleteColOfPatches();
         }
     );
 

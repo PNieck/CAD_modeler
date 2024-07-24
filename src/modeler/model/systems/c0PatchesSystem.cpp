@@ -202,10 +202,10 @@ std::vector<float> C0PatchesSystem::GenerateVertices(const C0Patches& patches) c
 std::vector<uint32_t> C0PatchesSystem::GenerateIndices(const C0Patches& patches) const
 {
     std::vector<uint32_t> result;
-    result.reserve(patches.Rows() * patches.Cols() * C0Patches::PointsInPatch * 2);
+    result.reserve(patches.PatchesInRow() * patches.PatchesInCol() * C0Patches::PointsInPatch * 2);
 
-    for (int patchRow=0; patchRow < patches.Rows(); patchRow++) {
-        for (int patchCol=0; patchCol < patches.Cols(); patchCol++) {
+    for (int patchRow=0; patchRow < patches.PatchesInRow(); patchRow++) {
+        for (int patchCol=0; patchCol < patches.PatchesInCol(); patchCol++) {
             for (int rowInPatch=0; rowInPatch < C0Patches::RowsInPatch; rowInPatch++) {
                 for (int colInPatch=0; colInPatch < C0Patches::ColsInPatch; colInPatch++) {
 

@@ -32,6 +32,12 @@ public:
     inline void SetDensity(Entity entity, C0PatchesDensity density) const
         { coordinator->SetComponent<C0PatchesDensity>(entity, density); }
 
+    inline int GetRowsCnt(Entity surface) const
+        { return coordinator->GetSystem<C0PatchesSystem>()->GetRowsCnt(surface); }
+
+    inline int GetColsCnt(Entity surface) const
+        { return coordinator->GetSystem<C0PatchesSystem>()->GetColsCnt(surface); }
+
     void RecalculatePositions(Entity cylinder, const Position& pos, const alg::Vec3& direction, float radius) const;
 
 private:

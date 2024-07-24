@@ -17,16 +17,16 @@ public:
         { this->shaderRepo = shadersRepo; }
 
     inline int GetRowsCnt(Entity surface) const
-        { return coordinator->GetComponent<C0Patches>(surface).Rows(); }
+        { return coordinator->GetComponent<C0Patches>(surface).PatchesInRow(); }
 
     inline int GetColsCnt(Entity surface) const
-        { return coordinator->GetComponent<C0Patches>(surface).Cols(); }
+        { return coordinator->GetComponent<C0Patches>(surface).PatchesInCol(); }
 
-    void AddPossibilityToHasPatchesPolygon(Entity entity) const
+    inline void AddPossibilityToHasPatchesPolygon(Entity entity) const
         { coordinator->AddComponent<HasPatchesPolygon>(entity, HasPatchesPolygon()); }
 
     void ShowPolygon(Entity entity) const;
-    void HidePolygon(Entity polygon) const;
+    void HidePolygon(Entity entity) const;
 
     void Render() const;
 

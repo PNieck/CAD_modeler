@@ -1,16 +1,16 @@
 #pragma once
 
 #include <ecs/system.hpp>
+#include <ecs/coordinator.hpp>
 
+#include "shaders/shaderRepository.hpp"
 #include "utils/nameGenerator.hpp"
 #include "../components/position.hpp"
-#include "../components/curveControlPoints.hpp"
-#include "../components/c0Patches.hpp"
+#include "../components/c2Patches.hpp"
 #include "../components/c0PatchesDensity.hpp"
-#include "c0PatchesSystem.hpp"
 
 
-class C0SurfaceSystem: public System {
+class C2SurfaceSystem: public System {
 public:
     static void RegisterSystem(Coordinator& coordinator);
 
@@ -27,17 +27,17 @@ public:
     inline void SetDensity(Entity entity, C0PatchesDensity density) const
         { coordinator->SetComponent<C0PatchesDensity>(entity, density); }
 
-    inline void ShowBezierPolygon(Entity cylinder) const
-        { coordinator->GetSystem<C0PatchesSystem>()->ShowPolygon(cylinder); }
-
-    inline void HideBezierPolygon(Entity cylinder) const
-        { coordinator->GetSystem<C0PatchesSystem>()->HidePolygon(cylinder); }
-
     inline int GetRowsCnt(Entity surface) const
-        { return coordinator->GetSystem<C0PatchesSystem>()->GetRowsCnt(surface); }
+        { return coordinator->GetComponent<C2Patches>(surface).PatchesInRow(); }
 
     inline int GetColsCnt(Entity surface) const
-        { return coordinator->GetSystem<C0PatchesSystem>()->GetColsCnt(surface); }
+        { return coordinator->GetComponent<C2Patches>(surface).PatchesInCol(); }
+
+    // inline void ShowBezierPolygon(Entity cylinder) const
+    //     { coordinator->GetSystem<C2PatchesSystem>()->ShowPolygon(cylinder); }
+
+    // inline void HideBezierPolygon(Entity cylinder) const
+    //     { coordinator->GetSystem<C2PatchesSystem>()->HidePolygon(cylinder); }
 
     void Recalculate(Entity surface, const Position& pos, const alg::Vec3& direction, float length, float width) const;
 
@@ -48,12 +48,12 @@ private:
     NameGenerator nameGenerator;
 
 
-    class DeletionHandler: public EventHandler<C0Patches> {
+    class DeletionHandler: public EventHandler<C2Patches> {
     public:
         DeletionHandler(Coordinator& coordinator):
             coordinator(coordinator) {}
 
-        void HandleEvent(Entity entity, const C0Patches& component, EventType eventType) override;
+        void HandleEvent(Entity entity, const C2Patches& component, EventType eventType) override;
 
     private:
         Coordinator& coordinator;

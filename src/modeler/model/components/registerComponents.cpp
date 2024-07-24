@@ -19,6 +19,7 @@
 #include <CAD_modeler/model/components/c0PatchesDensity.hpp>
 #include <CAD_modeler/model/components/patchesPolygonMesh.hpp>
 #include <CAD_modeler/model/components/hasPatchesPolygon.hpp>
+#include <CAD_modeler/model/components/c2Patches.hpp>
 
 
 void RegisterAllComponents(Coordinator& coordinator)
@@ -42,4 +43,5 @@ void RegisterAllComponents(Coordinator& coordinator)
     coordinator.RegisterComponent<C0PatchesDensity>();
     coordinator.RegisterComponent<PatchesPolygonMesh>();
     coordinator.RegisterComponent<HasPatchesPolygon>();
+    coordinator.RegisterComponent<C2Patches>();
 }

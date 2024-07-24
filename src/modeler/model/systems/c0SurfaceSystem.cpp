@@ -40,9 +40,6 @@ void C0SurfaceSystem::Init()
 
 Entity C0SurfaceSystem::CreateSurface(const Position& pos, const alg::Vec3& direction, float length, float width)
 {
-    static constexpr int controlPointsInOneDir = 4;
-    static constexpr int controlPointsCnt = controlPointsInOneDir*controlPointsInOneDir;
-
     C0Patches patches(1, 1);
 
     auto const pointsSystem = coordinator->GetSystem<PointsSystem>();
@@ -51,11 +48,11 @@ Entity C0SurfaceSystem::CreateSurface(const Position& pos, const alg::Vec3& dire
 
     auto handler = std::make_shared<ControlPointMovedHandler>(surface, *coordinator);
 
-    for (int i=0; i < controlPointsInOneDir; ++i) {
-        for (int j=0; j < controlPointsInOneDir; ++j) {
+    for (int i=0; i < patches.PointsInCol(); ++i) {
+        for (int j=0; j < patches.PointsInRow(); ++j) {
             // Creating control points with temporary location
             Entity cp = pointsSystem->CreatePoint(pos.vec);
-            patches.SetPoint(cp, 0, 0, i, j);
+            patches.SetPoint(cp, i, j);
 
             HandlerId cpHandler = coordinator->Subscribe(cp, std::static_pointer_cast<EventHandler<Position>>(handler));
             patches.controlPointsHandlers.insert({cp, cpHandler});
@@ -89,7 +86,7 @@ void C0SurfaceSystem::AddRowOfPatches(Entity surface, const Position& pos, const
         [surface, this](C0Patches& patches) {
             auto pointSys = coordinator->GetSystem<PointsSystem>();
             
-            patches.AddRow();
+            patches.AddRowOfPatches();
 
             Entity firstCP = patches.GetPoint(0,0);
             HandlerId firstCpHandler = patches.controlPointsHandlers.at(firstCP);
@@ -122,7 +119,7 @@ void C0SurfaceSystem::AddColOfPatches(Entity surface, const Position& pos, const
         [surface, this](C0Patches& patches) {
             auto pointSys = coordinator->GetSystem<PointsSystem>();
             
-            patches.AddCol();
+            patches.AddColOfPatches();
 
             Entity firstCP = patches.GetPoint(0,0);
             HandlerId firstCpHandler = patches.controlPointsHandlers.at(firstCP);
@@ -162,7 +159,7 @@ void C0SurfaceSystem::DeleteRowOfPatches(Entity surface, const Position& pos, co
                 }
             }
 
-            patches.DeleteRow();
+            patches.DeleteRowOfPatches();
         }
     );
 
@@ -185,7 +182,7 @@ void C0SurfaceSystem::DeleteColOfPatches(Entity surface, const Position& pos, co
                 }
             }
 
-            patches.DeleteCol();
+            patches.DeleteColOfPatches();
         }
     );
 
