@@ -219,7 +219,7 @@ void C2CylinderSystem::DeletionHandler::HandleEvent(Entity entity, const C2Cylin
         [&component, this](C2CylinderPatches& patches) {
             auto controlPointsSystem = coordinator.GetSystem<CurveControlPointsSystem>();
 
-            for (int col=0; col < component.PointsInCol() - 1; col++) {
+            for (int col=0; col < component.PointsInCol() - doublePointsCnt; col++) {
                 for (int row=0; row < component.PointsInRow(); row++) {
                     Entity controlPoint = component.GetPoint(row, col);
 
