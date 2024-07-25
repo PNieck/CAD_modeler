@@ -17,6 +17,7 @@
 #include "model/systems/c0PatchesSystem.hpp"
 #include "model/systems/c2SurfacesSystem.hpp"
 #include "model/systems/c2PatchesSystem.hpp"
+#include "model/systems/c2CylinderSystem.hpp"
 
 #include "model/systems/shaders/shaderRepository.hpp"
 
@@ -53,6 +54,9 @@ public:
     inline Entity AddC0Cylinder() const
         { return c0CylinderSystem->CreateCylinder(cursorSystem->GetPosition(), alg::Vec3(0.f, 1.f, 0.f), 1.f); }
 
+    inline Entity AddC2Cylinder() const
+        { return c2CylinderSystem->CreateCylinder(cursorSystem->GetPosition(), alg::Vec3(0.f, 1.f, 0.f), 1.f); }
+
     inline void AddControlPointToCurve(Entity curve, Entity entity) const
         { c0CurveSystem->AddControlPoint(curve, entity); }
 
@@ -86,14 +90,29 @@ public:
     inline void AddColOfC0CylinderPatches(Entity surface, float radius = 1.f, const alg::Vec3& dir = alg::Vec3(0.f, 1.f, 0.f)) const
         { c0CylinderSystem->AddColOfPatches(surface, cursorSystem->GetPosition(), dir, radius); }
 
+    inline void AddRowOfC2CylinderPatches(Entity surface, float radius = 1.f, const alg::Vec3& dir = alg::Vec3(0.f, 1.f, 0.f)) const
+        { c2CylinderSystem->AddRowOfPatches(surface, cursorSystem->GetPosition(), dir, radius); }
+
+    inline void AddColOfC2CylinderPatches(Entity surface, float radius = 1.f, const alg::Vec3& dir = alg::Vec3(0.f, 1.f, 0.f)) const
+        { c2CylinderSystem->AddColOfPatches(surface, cursorSystem->GetPosition(), dir, radius); }
+
     inline void DeleteRowOfC0CylinderPatches(Entity surface, float radius = 1.f, const alg::Vec3& dir = alg::Vec3(0.f, 1.f, 0.f)) const
         { c0CylinderSystem->DeleteRowOfPatches(surface, cursorSystem->GetPosition(), dir, radius); }
 
     inline void DeleteColOfC0CylinderPatches(Entity surface, float radius = 1.f, const alg::Vec3& dir = alg::Vec3(0.f, 1.f, 0.f)) const
         { c0CylinderSystem->DeleteColOfPatches(surface, cursorSystem->GetPosition(), dir, radius); }
 
-    inline void RecalculateC0CylinderPatches(Entity surface, float radius = 1.f, const alg::Vec3& dir = alg::Vec3(0.f, 1.f, 0.f)) const
+    inline void DeleteRowOfC2CylinderPatches(Entity surface, float radius = 1.f, const alg::Vec3& dir = alg::Vec3(0.f, 1.f, 0.f)) const
+        { c2CylinderSystem->DeleteRowOfPatches(surface, cursorSystem->GetPosition(), dir, radius); }
+
+    inline void DeleteColOfC2CylinderPatches(Entity surface, float radius = 1.f, const alg::Vec3& dir = alg::Vec3(0.f, 1.f, 0.f)) const
+        { c2CylinderSystem->DeleteColOfPatches(surface, cursorSystem->GetPosition(), dir, radius); }
+
+    inline void RecalculateC0Cylinder(Entity surface, float radius = 1.f, const alg::Vec3& dir = alg::Vec3(0.f, 1.f, 0.f)) const
         { c0CylinderSystem->Recalculate(surface, cursorSystem->GetPosition(), dir, radius); }
+
+    inline void RecalculateC2Cylinder(Entity surface, float radius = 1.f, const alg::Vec3& dir = alg::Vec3(0.f, 1.f, 0.f)) const
+        { c2CylinderSystem->Recalculate(surface, cursorSystem->GetPosition(), dir, radius); }
 
     inline void RecalculateC0Surface(Entity surface, const alg::Vec3& direction, float length, float width) const
         { c0SurfaceSystem->Recalculate(surface, cursorSystem->GetPosition(), direction, length, width); }
@@ -107,11 +126,17 @@ public:
     inline int GetColsOfC0Patches(Entity surface) const
         { return c0PatchesSystem->GetColsCnt(surface); }
 
-    inline int GetRowsCntOfC2Surface(Entity surface) const
-        { return c2SurfaceSystem->GetRowsCnt(surface); }
+    inline int GetRowsCntOfC2Patches(Entity surface) const
+        { return c2PatchesSystem->GetRowsCnt(surface); }
 
-    inline int GetColsCntOfC2Surface(Entity surface) const
-        { return c2SurfaceSystem->GetColsCnt(surface); }
+    inline int GetColsCntOfC2Patches(Entity surface) const
+        { return c2PatchesSystem->GetColsCnt(surface); }
+
+    inline int GetColsCntOfC2Cylinder(Entity cylinder) const
+        { return c2CylinderSystem->GetColsCnt(cylinder); }
+
+    inline int GetRowsCntOfC2Cylinder(Entity cylinder) const
+        { return c2CylinderSystem->GetRowsCnt(cylinder); }
 
     inline void DeleteControlPointFromCurve(Entity curve, Entity controlPoint) const
         { c0CurveSystem->DeleteControlPoint(curve, controlPoint); }
@@ -250,6 +275,7 @@ private:
     std::shared_ptr<C0PatchesSystem> c0PatchesSystem;
     std::shared_ptr<C2SurfaceSystem> c2SurfaceSystem;
     std::shared_ptr<C2PatchesSystem> c2PatchesSystem;
+    std::shared_ptr<C2CylinderSystem> c2CylinderSystem;
 
     alg::Vec3 PointFromViewportCoordinates(float x, float y) const;
     Line LineFromViewportCoordinates(float x, float y) const;

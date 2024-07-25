@@ -81,7 +81,11 @@ void GuiView::RenderGui() const
             break;
 
         case AppState::AddingC0Cylinder:
-            RenderAddingC0Cylinder();
+            RenderAddingCylinder(CylinderType::C0);
+            break;
+
+        case AppState::AddingC2Cylinder:
+            RenderAddingCylinder(CylinderType::C2);
             break;
 
         default:
@@ -132,6 +136,10 @@ void GuiView::RenderDefaultGui() const
 
     if (ImGui::Button("Add C0 cylinder")) {
         controller.SetAppState(AppState::AddingC0Cylinder);
+    }
+
+    if (ImGui::Button("Add C2 cylinder")) {
+        controller.SetAppState(AppState::AddingC2Cylinder);
     }
 
     ImGui::Separator();
@@ -229,7 +237,7 @@ int GetSurfaceRowsCnt(Entity surface, SurfaceType surfaceType, const Model& mode
         return model.GetRowsCntOfC0Patches(surface);
     
     case SurfaceType::C2:
-        return model.GetRowsCntOfC2Surface(surface);
+        return model.GetRowsCntOfC2Patches(surface);
     
     default:
         throw std::runtime_error("Unknown surface type");
@@ -246,7 +254,7 @@ int GetSurfaceColsCnt(Entity surface, SurfaceType surfaceType, const Model& mode
         return model.GetColsOfC0Patches(surface);
     
     case SurfaceType::C2:
-        return model.GetColsCntOfC2Surface(surface);
+        return model.GetColsCntOfC2Patches(surface);
     
     default:
         throw std::runtime_error("Unknown surface type");
@@ -306,8 +314,41 @@ void GuiView::RenderAddingSurface(SurfaceType surfaceType) const
     }
 }
 
+// TODO: delete this function
+int GetCylinderRowsCnt(Entity cylinder, CylinderType CylinderType, const Model& model)
+{
+    switch (CylinderType)
+    {
+    case CylinderType::C0:
+        return model.GetRowsCntOfC0Patches(cylinder);
+    
+    case CylinderType::C2:
+        return model.GetRowsCntOfC2Cylinder(cylinder);
+    
+    default:
+        throw std::runtime_error("Unknown surface type");
+    }
+}
 
-void GuiView::RenderAddingC0Cylinder() const
+
+// TODO: delete this function
+int GetCylinderColsCnt(Entity cylinder, CylinderType CylinderType, const Model& model)
+{
+    switch (CylinderType)
+    {
+    case CylinderType::C0:
+        return model.GetColsOfC0Patches(cylinder);
+    
+    case CylinderType::C2:
+        return model.GetColsCntOfC2Cylinder(cylinder);
+    
+    default:
+        throw std::runtime_error("Unknown surface type");
+    }
+}
+
+
+void GuiView::RenderAddingCylinder(CylinderType cylinderType) const
 {
     static std::optional<Entity> entity;
     static float oldRadius, newRadius;
@@ -315,13 +356,13 @@ void GuiView::RenderAddingC0Cylinder() const
     static const alg::Vec3 dir(0.f, 1.f, 0.f);
     
     if (!entity.has_value()) {
-        entity = controller.AddC0Cylinder();
+        entity = controller.AddCylinder(cylinderType);
         oldRadius = newRadius = 1.0f;
         newLen = 1.f;
     }
 
-    int rows = model.GetRowsCntOfC0Patches(entity.value());
-    int cols = model.GetColsOfC0Patches(entity.value());
+    int rows = GetCylinderRowsCnt(entity.value(), cylinderType, model);
+    int cols = GetCylinderColsCnt(entity.value(), cylinderType, model);
     bool valueChanged = false;
 
     ImGui::InputInt("Rows", &rows);
@@ -331,26 +372,26 @@ void GuiView::RenderAddingC0Cylinder() const
     valueChanged |= ImGui::DragFloat("Length", &newLen, DRAG_FLOAT_SPEED);
 
     if (valueChanged) {
-        controller.RecalculateC0Cylinder(entity.value(), dir * newLen, newRadius);
+        controller.RecalculateCylinder(entity.value(), cylinderType, dir * newLen, newRadius);
     }
 
-    if (rows != model.GetRowsCntOfC0Patches(entity.value())) {
-        while (rows > model.GetRowsCntOfC0Patches(entity.value())) {
-            controller.AddRowOfC0CylinderPatches(entity.value(), dir * newLen, newRadius);
+    if (rows != GetCylinderRowsCnt(entity.value(), cylinderType, model)) {
+        while (rows > GetCylinderRowsCnt(entity.value(), cylinderType, model)) {
+            controller.AddRowOfCylinderPatches(entity.value(), cylinderType, dir * newLen, newRadius);
         }
 
-        while (rows < model.GetRowsCntOfC0Patches(entity.value())) {
-            controller.DeleteRowOfC0CylinderPatches(entity.value(), dir * newLen, newRadius);
+        while (rows < GetCylinderRowsCnt(entity.value(), cylinderType, model)) {
+            controller.DeleteRowOfCylinderPatches(entity.value(), cylinderType, dir * newLen, newRadius);
         }
     }
 
-    if (cols != model.GetColsOfC0Patches(entity.value())) {
-        while (cols > model.GetColsOfC0Patches(entity.value())) {
-            controller.AddColOfC0CylinderPatches(entity.value(), dir * newLen, newRadius);
+    if (cols != GetCylinderColsCnt(entity.value(), cylinderType, model)) {
+        while (cols > GetCylinderColsCnt(entity.value(), cylinderType, model)) {
+            controller.AddColOfCylinderPatches(entity.value(), cylinderType, dir * newLen, newRadius);
         }
 
-        while (cols < model.GetColsOfC0Patches(entity.value())) {
-            controller.DeleteColOfC0CylinderPatches(entity.value(), dir * newLen, newRadius);
+        while (cols < GetCylinderColsCnt(entity.value(), cylinderType, model)) {
+            controller.DeleteColOfCylinderPatches(entity.value(), cylinderType, dir * newLen, newRadius);
         }
     }
 

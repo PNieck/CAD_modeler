@@ -37,6 +37,7 @@ Model::Model(int viewport_width, int viewport_height)
     C0PatchesSystem::RegisterSystem(coordinator);
     C2SurfaceSystem::RegisterSystem(coordinator);
     C2PatchesSystem::RegisterSystem(coordinator);
+    C2CylinderSystem::RegisterSystem(coordinator);
 
     cameraSys = coordinator.GetSystem<CameraSystem>();
     toriSystem = coordinator.GetSystem<ToriSystem>();
@@ -54,6 +55,7 @@ Model::Model(int viewport_width, int viewport_height)
     c0PatchesSystem = coordinator.GetSystem<C0PatchesSystem>();
     c2SurfaceSystem = coordinator.GetSystem<C2SurfaceSystem>();
     c2PatchesSystem = coordinator.GetSystem<C2PatchesSystem>();
+    c2CylinderSystem = coordinator.GetSystem<C2CylinderSystem>();
 
     CameraParameters params {
         .target = Position(0.0f),
@@ -79,6 +81,7 @@ Model::Model(int viewport_width, int viewport_height)
     c0CylinderSystem->Init();
     c2SurfaceSystem->Init();
     c2PatchesSystem->Init(&shadersRepo);
+    c2CylinderSystem->Init(&shadersRepo);
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glEnable(GL_LINE_SMOOTH);
@@ -103,6 +106,7 @@ void Model::RenderFrame()
     interpolationCurveSystem->Render();
     c0PatchesSystem->Render();
     c2PatchesSystem->Render();
+    c2CylinderSystem->Render();
 }
 
 

@@ -5,6 +5,7 @@
 #include "subController.hpp"
 #include "utils/curvesTypes.hpp"
 #include "utils/surfacesTypes.hpp"
+#include "utils/cylinderTypes.hpp"
 
 
 class GuiController: public SubController {
@@ -21,8 +22,7 @@ public:
 
     Entity AddSurface(SurfaceType surfaceType, const alg::Vec3& dir, float length, float width) const;
 
-    inline Entity AddC0Cylinder() const
-        { return model.AddC0Cylinder(); }
+    Entity AddCylinder(CylinderType cylinderType) const;
 
     void AddRowOfSurfacePatches(Entity surface, SurfaceType surfaceType, const alg::Vec3& dir, float length, float width);
 
@@ -32,20 +32,15 @@ public:
 
     void DeleteColOfSurfacePatches(Entity surface, SurfaceType surfaceType, const alg::Vec3& dir, float length, float width);
 
-    inline void AddRowOfC0CylinderPatches(Entity surface, const alg::Vec3& dir, float radius)
-        { return model.AddRowOfC0CylinderPatches(surface, radius, dir); }
+    void AddRowOfCylinderPatches(Entity cylinder, CylinderType cylinderType, const alg::Vec3& dir, float radius);
 
-    inline void AddColOfC0CylinderPatches(Entity surface, const alg::Vec3& dir, float radius)
-        { return model.AddColOfC0CylinderPatches(surface, radius, dir); }
+    void AddColOfCylinderPatches(Entity cylinder, CylinderType cylinderType, const alg::Vec3& dir, float radius);
 
-    inline void DeleteRowOfC0CylinderPatches(Entity surface, const alg::Vec3& dir, float radius)
-        { return model.DeleteRowOfC0CylinderPatches(surface, radius, dir); }
+    void DeleteRowOfCylinderPatches(Entity cylinder, CylinderType cylinderType, const alg::Vec3& dir, float radius);
 
-    inline void DeleteColOfC0CylinderPatches(Entity surface, const alg::Vec3& dir, float radius)
-        { return model.DeleteColOfC0CylinderPatches(surface, radius, dir); }
+    void DeleteColOfCylinderPatches(Entity cylinder, CylinderType cylinderType, const alg::Vec3& dir, float radius);
 
-    inline void RecalculateC0Cylinder(Entity cylinder, const alg::Vec3& dir, float radius)
-        { return model.RecalculateC0CylinderPatches(cylinder, radius, dir); }
+    void RecalculateCylinder(Entity cylinder, CylinderType cylinderType, const alg::Vec3& dir, float radius);
 
     void RecalculateSurface(Entity surface, SurfaceType surfaceType, const alg::Vec3& dir, float length, float width);
 

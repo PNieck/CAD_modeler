@@ -14,6 +14,12 @@ public:
     inline void Init(ShaderRepository* shadersRepo)
         { this->shaderRepo = shadersRepo; }
 
+    inline int GetRowsCnt(Entity surface) const
+        { return coordinator->GetComponent<C2Patches>(surface).PatchesInRow(); }
+
+    inline int GetColsCnt(Entity surface) const
+        { return coordinator->GetComponent<C2Patches>(surface).PatchesInCol(); }
+
     void Render() const;
 
 private:

@@ -29,7 +29,6 @@ void C2PatchesSystem::Render() const
     auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
 
     auto const& shader = shaderRepo->GetBSplineSurfaceShader();
-    std::stack<Entity> polygonsToDraw;
 
     UpdateEntities();
 

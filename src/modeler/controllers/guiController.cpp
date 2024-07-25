@@ -44,6 +44,22 @@ Entity GuiController::AddSurface(SurfaceType surfaceType, const alg::Vec3 &dir, 
 }
 
 
+Entity GuiController::AddCylinder(CylinderType cylinderType) const
+{
+    switch (cylinderType)
+    {
+    case CylinderType::C0:
+        return model.AddC0Cylinder();
+
+    case CylinderType::C2:
+        return model.AddC2Cylinder();
+    
+    default:
+        throw std::runtime_error("Unknown cylinder type");
+    }
+}
+
+
 void GuiController::AddRowOfSurfacePatches(Entity surface, SurfaceType surfaceType, const alg::Vec3 &dir, float length, float width)
 {
     switch (surfaceType)
@@ -130,5 +146,95 @@ void GuiController::RecalculateSurface(Entity surface, SurfaceType surfaceType, 
 
     default:
         throw std::runtime_error("Unknown surface type");
+    }
+}
+
+
+void GuiController::AddRowOfCylinderPatches(Entity cylinder, CylinderType cylinderType, const alg::Vec3 &dir, float radius)
+{
+    switch (cylinderType)
+    {
+    case CylinderType::C0:
+        model.AddRowOfC0CylinderPatches(cylinder, radius, dir);
+        break;
+
+    case CylinderType::C2:
+        model.AddRowOfC2CylinderPatches(cylinder, radius, dir);
+        break;
+
+    default:
+        throw std::runtime_error("Unknown cylinder type");
+    }
+}
+
+
+void GuiController::AddColOfCylinderPatches(Entity cylinder, CylinderType cylinderType, const alg::Vec3 &dir, float radius)
+{
+    switch (cylinderType)
+    {
+    case CylinderType::C0:
+        model.AddColOfC0CylinderPatches(cylinder, radius, dir);
+        break;
+
+    case CylinderType::C2:
+        model.AddColOfC2CylinderPatches(cylinder, radius, dir);
+        break;
+
+    default:
+        throw std::runtime_error("Unknown cylinder type");
+    }
+}
+
+
+void GuiController::DeleteRowOfCylinderPatches(Entity cylinder, CylinderType cylinderType, const alg::Vec3 &dir, float radius)
+{
+    switch (cylinderType)
+    {
+    case CylinderType::C0:
+        model.DeleteRowOfC0CylinderPatches(cylinder, radius, dir);
+        break;
+
+    case CylinderType::C2:
+        model.DeleteRowOfC2CylinderPatches(cylinder, radius, dir);
+        break;
+
+    default:
+        throw std::runtime_error("Unknown cylinder type");
+    }
+}
+
+
+void GuiController::DeleteColOfCylinderPatches(Entity cylinder, CylinderType cylinderType, const alg::Vec3 &dir, float radius)
+{
+    switch (cylinderType)
+    {
+    case CylinderType::C0:
+        model.DeleteColOfC0CylinderPatches(cylinder, radius, dir);
+        break;
+
+    case CylinderType::C2:
+        model.DeleteColOfC2CylinderPatches(cylinder, radius, dir);
+        break;
+
+    default:
+        throw std::runtime_error("Unknown cylinder type");
+    }
+}
+
+
+void GuiController::RecalculateCylinder(Entity cylinder, CylinderType cylinderType, const alg::Vec3 &dir, float radius)
+{
+    switch (cylinderType)
+    {
+    case CylinderType::C0:
+        model.RecalculateC0Cylinder(cylinder, radius, dir);
+        break;
+
+    case CylinderType::C2:
+        model.RecalculateC2Cylinder(cylinder, radius, dir);
+        break;
+
+    default:
+        throw std::runtime_error("Unknown cylinder type");
     }
 }

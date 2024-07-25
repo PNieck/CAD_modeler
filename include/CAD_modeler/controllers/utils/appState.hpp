@@ -10,4 +10,5 @@ enum class AppState {
     AddingC0Surface,
     AddingC2Surface,
     AddingC0Cylinder,
+    AddingC2Cylinder
 };
