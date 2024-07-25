@@ -243,7 +243,7 @@ public:
     inline const void HideC2BezierControlPoints(Entity entity) const
         { return c2CurveSystem->HideBezierControlPoints(entity); }
 
-    inline const void SetSurfaceDensity(Entity entity, C0PatchesDensity density) const
+    inline const void SetSurfaceDensity(Entity entity, PatchesDensity density) const
         { c0SurfaceSystem->SetDensity(entity, density); }
 
     inline const void ShowPatchesPolygon(Entity entity) const

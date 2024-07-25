@@ -10,7 +10,7 @@
 #include "CAD_modeler/model/systems/c0PatchesSystem.hpp"
 
 #include "CAD_modeler/model/components/c0Patches.hpp"
-#include "CAD_modeler/model/components/c0PatchesDensity.hpp"
+#include "CAD_modeler/model/components/patchesDensity.hpp"
 #include "CAD_modeler/model/components/curveControlPoints.hpp"
 #include "CAD_modeler/model/components/mesh.hpp"
 #include "CAD_modeler/model/components/name.hpp"
@@ -27,7 +27,7 @@ void C0SurfaceSystem::RegisterSystem(Coordinator &coordinator)
     coordinator.RegisterSystem<C0SurfaceSystem>();
 
     coordinator.RegisterRequiredComponent<C0SurfaceSystem, C0Patches>();
-    coordinator.RegisterRequiredComponent<C0SurfaceSystem, C0PatchesDensity>();
+    coordinator.RegisterRequiredComponent<C0SurfaceSystem, PatchesDensity>();
     coordinator.RegisterRequiredComponent<C0SurfaceSystem, Mesh>();
 }
 
@@ -62,14 +62,14 @@ Entity C0SurfaceSystem::CreateSurface(const Position& pos, const alg::Vec3& dire
     }
 
     Mesh mesh;
-    C0PatchesDensity density(5);
+    PatchesDensity density(5);
 
     patches.deletionHandler = coordinator->Subscribe<C0Patches>(surface, deletionHandler);
 
     coordinator->AddComponent<Name>(surface, nameGenerator.GenerateName("SurfaceC0_"));
     coordinator->AddComponent<Mesh>(surface, mesh);
     coordinator->AddComponent<C0Patches>(surface, patches);
-    coordinator->AddComponent<C0PatchesDensity>(surface, density);
+    coordinator->AddComponent<PatchesDensity>(surface, density);
 
     coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
     coordinator->GetSystem<C0PatchesSystem>()->AddPossibilityToHasPatchesPolygon(surface);

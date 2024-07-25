@@ -7,7 +7,7 @@
 #include "utils/nameGenerator.hpp"
 #include "../components/position.hpp"
 #include "../components/c2Patches.hpp"
-#include "../components/c0PatchesDensity.hpp"
+#include "../components/patchesDensity.hpp"
 
 
 class C2SurfaceSystem: public System {
@@ -24,8 +24,8 @@ public:
     void DeleteRowOfPatches(Entity surface, const Position& pos, const alg::Vec3& direction, float length, float width) const;
     void DeleteColOfPatches(Entity surface, const Position& pos, const alg::Vec3& direction, float length, float width) const;
 
-    inline void SetDensity(Entity entity, C0PatchesDensity density) const
-        { coordinator->SetComponent<C0PatchesDensity>(entity, density); }
+    inline void SetDensity(Entity entity, PatchesDensity density) const
+        { coordinator->SetComponent<PatchesDensity>(entity, density); }
 
     inline int GetRowsCnt(Entity surface) const
         { return coordinator->GetComponent<C2Patches>(surface).PatchesInRow(); }

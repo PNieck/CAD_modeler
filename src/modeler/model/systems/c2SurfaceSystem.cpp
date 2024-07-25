@@ -16,7 +16,7 @@ void C2SurfaceSystem::RegisterSystem(Coordinator &coordinator)
     coordinator.RegisterSystem<C2SurfaceSystem>();
 
     coordinator.RegisterRequiredComponent<C2SurfaceSystem, C2Patches>();
-    coordinator.RegisterRequiredComponent<C2SurfaceSystem, C0PatchesDensity>();
+    coordinator.RegisterRequiredComponent<C2SurfaceSystem, PatchesDensity>();
     coordinator.RegisterRequiredComponent<C2SurfaceSystem, Mesh>();
 }
 
@@ -51,14 +51,14 @@ Entity C2SurfaceSystem::CreateSurface(const Position &pos, const alg::Vec3 &dire
     }
 
     Mesh mesh;
-    C0PatchesDensity density(5);
+    PatchesDensity density(5);
 
     patches.deletionHandler = coordinator->Subscribe<C2Patches>(surface, deletionHandler);
 
     coordinator->AddComponent<Name>(surface, nameGenerator.GenerateName("SurfaceC2_"));
     coordinator->AddComponent<Mesh>(surface, mesh);
     coordinator->AddComponent<C2Patches>(surface, patches);
-    coordinator->AddComponent<C0PatchesDensity>(surface, density);
+    coordinator->AddComponent<PatchesDensity>(surface, density);
 
     coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
     //coordinator->GetSystem<C0PatchesSystem>()->AddPossibilityToHasPatchesPolygon(surface);

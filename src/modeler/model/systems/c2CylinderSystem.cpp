@@ -21,7 +21,7 @@ void C2CylinderSystem::RegisterSystem(Coordinator &coordinator)
     coordinator.RegisterSystem<C2CylinderSystem>();
 
     coordinator.RegisterRequiredComponent<C2CylinderSystem, C2CylinderPatches>();
-    coordinator.RegisterRequiredComponent<C2CylinderSystem, C0PatchesDensity>();
+    coordinator.RegisterRequiredComponent<C2CylinderSystem, PatchesDensity>();
     coordinator.RegisterRequiredComponent<C2CylinderSystem, Mesh>();
 }
 
@@ -58,14 +58,14 @@ Entity C2CylinderSystem::CreateCylinder(const Position &pos, const alg::Vec3 &di
     UpdateDoubleControlPoints(patches);
 
     Mesh mesh;
-    C0PatchesDensity density(5);
+    PatchesDensity density(5);
 
     patches.deletionHandler = coordinator->Subscribe<C2CylinderPatches>(surface, deletionHandler);
 
     coordinator->AddComponent<Name>(surface, nameGenerator.GenerateName("CylinderC2_"));
     coordinator->AddComponent<Mesh>(surface, mesh);
     coordinator->AddComponent<C2CylinderPatches>(surface, patches);
-    coordinator->AddComponent<C0PatchesDensity>(surface, density);
+    coordinator->AddComponent<PatchesDensity>(surface, density);
 
     coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
 
@@ -270,7 +270,7 @@ void C2CylinderSystem::Render() const
         auto const& mesh = coordinator->GetComponent<Mesh>(entity);
         mesh.Use();
 
-        auto const& density = coordinator->GetComponent<C0PatchesDensity>(entity);
+        auto const& density = coordinator->GetComponent<PatchesDensity>(entity);
         float v[] = {5.f, 64.f, 64.f, 64.f};
         v[0] = static_cast<float>(density.GetDensity());
         glPatchParameterfv(GL_PATCH_DEFAULT_OUTER_LEVEL, v);

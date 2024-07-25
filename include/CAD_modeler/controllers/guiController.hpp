@@ -96,7 +96,7 @@ public:
     inline void HideC2BezierPolygon(Entity entity)
         { model.HideC2BezierPolygon(entity); }
 
-    inline void SetNewSurfaceDensity(Entity entity, C0PatchesDensity newDensity)
+    inline void SetNewSurfaceDensity(Entity entity, PatchesDensity newDensity)
         { model.SetSurfaceDensity(entity, newDensity); }
 
     inline void ShowPatchesPolygon(Entity entity)

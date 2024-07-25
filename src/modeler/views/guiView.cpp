@@ -463,9 +463,9 @@ void GuiView::RenderSingleObjectProperties(Entity entity) const
     if (it != components.end())
         DisplayC2CurveParameters(entity, model.GetComponent<C2CurveParameters>(entity));
 
-    it = components.find(Model::GetComponentId<C0PatchesDensity>());
+    it = components.find(Model::GetComponentId<PatchesDensity>());
     if (it != components.end())
-        DisplaySurfaceDensityParameter(entity, model.GetComponent<C0PatchesDensity>(entity));
+        DisplaySurfaceDensityParameter(entity, model.GetComponent<PatchesDensity>(entity));
 
     it = components.find(Model::GetComponentId<HasPatchesPolygon>());
     if (it != components.end())
@@ -733,14 +733,14 @@ void GuiView::DisplayEntityDeletionOption(Entity entity) const
 }
 
 
-void GuiView::DisplaySurfaceDensityParameter(Entity entity, const C0PatchesDensity &density) const
+void GuiView::DisplaySurfaceDensityParameter(Entity entity, const PatchesDensity &density) const
 {
     int d = density.GetDensity();
 
-    ImGui::DragInt("Mesh density", &d, 1.f, C0PatchesDensity::MinDensity, C0PatchesDensity::MaxDensity);
+    ImGui::DragInt("Mesh density", &d, 1.f, PatchesDensity::MinDensity, PatchesDensity::MaxDensity);
 
     if (d != density.GetDensity()) {
-        controller.SetNewSurfaceDensity(entity, C0PatchesDensity(d));
+        controller.SetNewSurfaceDensity(entity, PatchesDensity(d));
     }
 }
 

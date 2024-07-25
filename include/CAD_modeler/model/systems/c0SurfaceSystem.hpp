@@ -6,7 +6,7 @@
 #include "../components/position.hpp"
 #include "../components/curveControlPoints.hpp"
 #include "../components/c0Patches.hpp"
-#include "../components/c0PatchesDensity.hpp"
+#include "../components/patchesDensity.hpp"
 #include "c0PatchesSystem.hpp"
 
 
@@ -24,8 +24,8 @@ public:
     void DeleteRowOfPatches(Entity surface, const Position& pos, const alg::Vec3& direction, float length, float width) const;
     void DeleteColOfPatches(Entity surface, const Position& pos, const alg::Vec3& direction, float length, float width) const;
 
-    inline void SetDensity(Entity entity, C0PatchesDensity density) const
-        { coordinator->SetComponent<C0PatchesDensity>(entity, density); }
+    inline void SetDensity(Entity entity, PatchesDensity density) const
+        { coordinator->SetComponent<PatchesDensity>(entity, density); }
 
     inline void ShowBezierPolygon(Entity cylinder) const
         { coordinator->GetSystem<C0PatchesSystem>()->ShowPolygon(cylinder); }

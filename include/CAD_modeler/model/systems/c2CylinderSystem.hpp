@@ -4,7 +4,7 @@
 
 #include "utils/nameGenerator.hpp"
 #include "../components/position.hpp"
-#include "../components/c0PatchesDensity.hpp"
+#include "../components/patchesDensity.hpp"
 #include "../components/c2CylinderPatches.hpp"
 #include "c2PatchesSystem.hpp"
 
@@ -23,8 +23,8 @@ public:
     void DeleteRowOfPatches(Entity surface, const Position& pos, const alg::Vec3& direction, float radius) const;
     void DeleteColOfPatches(Entity surface, const Position& pos, const alg::Vec3& direction, float radius) const;
 
-    inline void SetDensity(Entity entity, C0PatchesDensity density) const
-        { coordinator->SetComponent<C0PatchesDensity>(entity, density); }
+    inline void SetDensity(Entity entity, PatchesDensity density) const
+        { coordinator->SetComponent<PatchesDensity>(entity, density); }
 
     inline int GetRowsCnt(Entity cylinder) const
         { return coordinator->GetComponent<C2CylinderPatches>(cylinder).PatchesInRow(); }

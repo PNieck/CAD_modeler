@@ -8,7 +8,7 @@
 #include "CAD_modeler/model/systems/c0PatchesSystem.hpp"
 
 #include "CAD_modeler/model/components/c0Patches.hpp"
-#include "CAD_modeler/model/components/c0PatchesDensity.hpp"
+#include "CAD_modeler/model/components/patchesDensity.hpp"
 #include "CAD_modeler/model/components/mesh.hpp"
 #include "CAD_modeler/model/components/name.hpp"
 #include "CAD_modeler/model/components/rotation.hpp"
@@ -22,7 +22,7 @@ void C0CylinderSystem::RegisterSystem(Coordinator &coordinator)
     coordinator.RegisterSystem<C0CylinderSystem>();
 
     coordinator.RegisterRequiredComponent<C0CylinderSystem, C0Patches>();
-    coordinator.RegisterRequiredComponent<C0CylinderSystem, C0PatchesDensity>();
+    coordinator.RegisterRequiredComponent<C0CylinderSystem, PatchesDensity>();
     coordinator.RegisterRequiredComponent<C0CylinderSystem, Mesh>();
 }
 
@@ -61,14 +61,14 @@ Entity C0CylinderSystem::CreateCylinder(const Position &pos, const alg::Vec3 &di
     }
 
     Mesh mesh;
-    C0PatchesDensity density(5);
+    PatchesDensity density(5);
 
     patches.deletionHandler = coordinator->Subscribe<C0Patches>(surface, deletionHandler);
 
     coordinator->AddComponent<Name>(surface, nameGenerator.GenerateName("CylinderC0_"));
     coordinator->AddComponent<Mesh>(surface, mesh);
     coordinator->AddComponent<C0Patches>(surface, patches);
-    coordinator->AddComponent<C0PatchesDensity>(surface, density);
+    coordinator->AddComponent<PatchesDensity>(surface, density);
 
     coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
     coordinator->GetSystem<C0PatchesSystem>()->AddPossibilityToHasPatchesPolygon(surface);

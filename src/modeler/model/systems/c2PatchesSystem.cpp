@@ -1,6 +1,6 @@
 #include <CAD_modeler/model/systems/c2PatchesSystem.hpp>
 
-#include "CAD_modeler/model/components/c0PatchesDensity.hpp"
+#include "CAD_modeler/model/components/patchesDensity.hpp"
 
 #include "CAD_modeler/model/systems/cameraSystem.hpp"
 #include "CAD_modeler/model/systems/selectionSystem.hpp"
@@ -14,7 +14,7 @@ void C2PatchesSystem::RegisterSystem(Coordinator &coordinator)
     coordinator.RegisterSystem<C2PatchesSystem>();
 
     coordinator.RegisterRequiredComponent<C2PatchesSystem, C2Patches>();
-    coordinator.RegisterRequiredComponent<C2PatchesSystem, C0PatchesDensity>();
+    coordinator.RegisterRequiredComponent<C2PatchesSystem, PatchesDensity>();
     coordinator.RegisterRequiredComponent<C2PatchesSystem, Mesh>();
 }
 
@@ -49,7 +49,7 @@ void C2PatchesSystem::Render() const
         auto const& mesh = coordinator->GetComponent<Mesh>(entity);
         mesh.Use();
 
-        auto const& density = coordinator->GetComponent<C0PatchesDensity>(entity);
+        auto const& density = coordinator->GetComponent<PatchesDensity>(entity);
         float v[] = {5.f, 64.f, 64.f, 64.f};
         v[0] = static_cast<float>(density.GetDensity());
         glPatchParameterfv(GL_PATCH_DEFAULT_OUTER_LEVEL, v);

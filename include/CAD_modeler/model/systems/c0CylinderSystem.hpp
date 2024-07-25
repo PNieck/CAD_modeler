@@ -5,7 +5,7 @@
 
 #include "utils/nameGenerator.hpp"
 #include "../components/position.hpp"
-#include "../components/c0PatchesDensity.hpp"
+#include "../components/patchesDensity.hpp"
 #include "c0PatchesSystem.hpp"
 
 
@@ -29,8 +29,8 @@ public:
     inline void HideBezierPolygon(Entity cylinder) const
         { coordinator->GetSystem<C0PatchesSystem>()->HidePolygon(cylinder); }
 
-    inline void SetDensity(Entity entity, C0PatchesDensity density) const
-        { coordinator->SetComponent<C0PatchesDensity>(entity, density); }
+    inline void SetDensity(Entity entity, PatchesDensity density) const
+        { coordinator->SetComponent<PatchesDensity>(entity, density); }
 
     inline int GetRowsCnt(Entity surface) const
         { return coordinator->GetSystem<C0PatchesSystem>()->GetRowsCnt(surface); }
