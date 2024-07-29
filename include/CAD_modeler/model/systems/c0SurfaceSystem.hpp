@@ -8,6 +8,7 @@
 #include "../components/c0Patches.hpp"
 #include "../components/patchesDensity.hpp"
 #include "c0PatchesSystem.hpp"
+#include "controlNetSystem.hpp"
 
 
 class C0SurfaceSystem: public System {
@@ -27,11 +28,10 @@ public:
     inline void SetDensity(Entity entity, PatchesDensity density) const
         { coordinator->SetComponent<PatchesDensity>(entity, density); }
 
-    inline void ShowBezierPolygon(Entity cylinder) const
-        { coordinator->GetSystem<C0PatchesSystem>()->ShowPolygon(cylinder); }
+    void ShowBezierNet(Entity cylinder) const;
 
-    inline void HideBezierPolygon(Entity cylinder) const
-        { coordinator->GetSystem<C0PatchesSystem>()->HidePolygon(cylinder); }
+    inline void HideBezierNet(Entity surface) const
+        { coordinator->GetSystem<ControlNetSystem>()->DeleteControlPointsNet(surface); }
 
     inline int GetRowsCnt(Entity surface) const
         { return coordinator->GetSystem<C0PatchesSystem>()->GetRowsCnt(surface); }

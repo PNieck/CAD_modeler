@@ -7,6 +7,7 @@
 #include "../components/position.hpp"
 #include "../components/patchesDensity.hpp"
 #include "c0PatchesSystem.hpp"
+#include "controlNetSystem.hpp"
 
 
 class C0CylinderSystem: public System {
@@ -23,11 +24,10 @@ public:
     void DeleteRowOfPatches(Entity surface, const Position& pos, const alg::Vec3& direction, float radius) const;
     void DeleteColOfPatches(Entity surface, const Position& pos, const alg::Vec3& direction, float radius) const;
 
-    inline void ShowBezierPolygon(Entity cylinder) const
-        { coordinator->GetSystem<C0PatchesSystem>()->ShowPolygon(cylinder); }
+    void ShowBezierPolygon(Entity cylinder) const;
 
     inline void HideBezierPolygon(Entity cylinder) const
-        { coordinator->GetSystem<C0PatchesSystem>()->HidePolygon(cylinder); }
+        { coordinator->GetSystem<ControlNetSystem>()->DeleteControlPointsNet(cylinder); }
 
     inline void SetDensity(Entity entity, PatchesDensity density) const
         { coordinator->SetComponent<PatchesDensity>(entity, density); }

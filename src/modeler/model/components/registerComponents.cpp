@@ -17,10 +17,9 @@
 #include <CAD_modeler/model/components/unremovable.hpp>
 #include <CAD_modeler/model/components/c0Patches.hpp>
 #include <CAD_modeler/model/components/patchesDensity.hpp>
-#include <CAD_modeler/model/components/patchesPolygonMesh.hpp>
-#include <CAD_modeler/model/components/hasPatchesPolygon.hpp>
 #include <CAD_modeler/model/components/c2Patches.hpp>
 #include <CAD_modeler/model/components/c2CylinderPatches.hpp>
+#include <CAD_modeler/model/components/controlNetMesh.hpp>
 
 
 void RegisterAllComponents(Coordinator& coordinator)
@@ -42,8 +41,7 @@ void RegisterAllComponents(Coordinator& coordinator)
     coordinator.RegisterComponent<Unremovable>();
     coordinator.RegisterComponent<C0Patches>();
     coordinator.RegisterComponent<PatchesDensity>();
-    coordinator.RegisterComponent<PatchesPolygonMesh>();
-    coordinator.RegisterComponent<HasPatchesPolygon>();
     coordinator.RegisterComponent<C2Patches>();
     coordinator.RegisterComponent<C2CylinderPatches>();
+    coordinator.RegisterComponent<ControlNetMesh>();
 }

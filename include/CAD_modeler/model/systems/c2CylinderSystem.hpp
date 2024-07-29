@@ -8,6 +8,7 @@
 #include "../components/patchesDensity.hpp"
 #include "../components/c2CylinderPatches.hpp"
 #include "shaders/shaderRepository.hpp"
+#include "controlNetSystem.hpp"
 
 
 class C2CylinderSystem: public System {
@@ -33,6 +34,11 @@ public:
     inline int GetColsCnt(Entity cylinder) const
         { return coordinator->GetComponent<C2CylinderPatches>(cylinder).PatchesInCol(); }
 
+    void ShowDeBoorNet(Entity cylinder);
+
+    inline void HideDeBoorNet(Entity cylinder)
+        { coordinator->GetSystem<ControlNetSystem>()->DeleteControlPointsNet(cylinder); }
+
     void Recalculate(Entity cylinder, const Position& pos, const alg::Vec3& direction, float radius) const;
 
     void Render() const;
@@ -48,7 +54,7 @@ private:
     ShaderRepository* shaderRepo;
 
     void UpdateEntities() const;
-    void UpdateMesh(Entity surface) const;
+    void UpdateMesh(Entity surface, const C2CylinderPatches& patches) const;
 
     void UpdateDoubleControlPoints(C2CylinderPatches& patches) const;
 

@@ -467,13 +467,17 @@ void GuiView::RenderSingleObjectProperties(Entity entity) const
     if (it != components.end())
         DisplaySurfaceDensityParameter(entity, model.GetComponent<PatchesDensity>(entity));
 
-    it = components.find(Model::GetComponentId<HasPatchesPolygon>());
-    if (it != components.end())
-        DisplayPatchesPolygonOption(entity, model.GetComponent<HasPatchesPolygon>(entity));
-
     it = components.find(Model::GetComponentId<C0Patches>());
     if (it != components.end())
         DisplaySurfacePatches(entity, model.GetComponent<C0Patches>(entity));
+
+    it = components.find(Model::GetComponentId<C2Patches>());
+    if (it != components.end())
+        DisplaySurfacePatches(entity, model.GetComponent<C2Patches>(entity));
+
+    it = components.find(Model::GetComponentId<C2CylinderPatches>());
+    if (it != components.end())
+        DisplaySurfacePatches(entity, model.GetComponent<C2CylinderPatches>(entity));
 
     it = components.find(Model::GetComponentId<Unremovable>());
     if (it == components.end())
@@ -745,7 +749,7 @@ void GuiView::DisplaySurfaceDensityParameter(Entity entity, const PatchesDensity
 }
 
 
-void GuiView::DisplaySurfacePatches(Entity entity, const C0Patches &patches) const
+void GuiView::DisplaySurfacePatches(Entity entity, const Patches &patches) const
 {
     ImGui::SeparatorText("Control Points");
 
@@ -756,18 +760,12 @@ void GuiView::DisplaySurfacePatches(Entity entity, const C0Patches &patches) con
             ImGui::Text(model.GetEntityName(entity).c_str());
         }
     }
-}
 
+    bool hasNet = model.HasPatchesPolygon(entity);
 
-void GuiView::DisplayPatchesPolygonOption(Entity entity, const HasPatchesPolygon &patchesPolygon) const
-{
-    bool value = patchesPolygon.value;
-
-    ImGui::Checkbox("Draw Bezier Polygon", &value);
-
-    if (value != patchesPolygon.value) {
-        if (value)
-            controller.ShowPatchesPolygon(entity);
+    if (ImGui::Checkbox("Draw Control Points Net", &hasNet)) {
+        if (hasNet)
+            controller.ShowPatchesPolygon(entity, patches);
         else
             controller.HidePatchesPolygon(entity);
     }

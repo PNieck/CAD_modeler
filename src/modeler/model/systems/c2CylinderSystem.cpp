@@ -10,6 +10,7 @@
 #include "CAD_modeler/model/systems/curveControlPointsSystem.hpp"
 #include "CAD_modeler/model/systems/cameraSystem.hpp"
 #include "CAD_modeler/model/systems/selectionSystem.hpp"
+#include "CAD_modeler/model/systems/controlNetSystem.hpp"
 
 #include <numbers>
 
@@ -185,6 +186,15 @@ void C2CylinderSystem::DeleteColOfPatches(Entity surface, const Position &pos, c
 }
 
 
+void C2CylinderSystem::ShowDeBoorNet(Entity cylinder)
+{
+    auto const& patches = coordinator->GetComponent<C2CylinderPatches>(cylinder);
+    auto const& netSystem = coordinator->GetSystem<ControlNetSystem>();
+
+    netSystem->AddControlPointsNet(cylinder, patches);
+}
+
+
 void C2CylinderSystem::Recalculate(Entity cylinder, const Position &pos, const alg::Vec3 &direction, float radius) const
 {
     constexpr int doubleControlPoints = 3;
@@ -286,11 +296,17 @@ void C2CylinderSystem::Render() const
 void C2CylinderSystem::UpdateEntities() const
 {
     auto const& toUpdateSystem = coordinator->GetSystem<ToUpdateSystem>();
+    auto const& netSystem = coordinator->GetSystem<ControlNetSystem>();
 
     auto toUpdate = intersect(toUpdateSystem->GetEntities(), entities);
 
     for (auto entity: toUpdate) {
-        UpdateMesh(entity);
+        auto const& patches = coordinator->GetComponent<C2CylinderPatches>(entity);
+
+        UpdateMesh(entity, patches);
+
+        if (netSystem->HasControlPointsNet(entity))
+            netSystem->Update(entity, patches);
 
         toUpdateSystem->Unmark(entity);
     }
@@ -309,12 +325,10 @@ void C2CylinderSystem::UpdateDoubleControlPoints(C2CylinderPatches &patches) con
 }
 
 
-void C2CylinderSystem::UpdateMesh(Entity surface) const
+void C2CylinderSystem::UpdateMesh(Entity surface, const C2CylinderPatches& patches) const
 {
     coordinator->EditComponent<Mesh>(surface,
-        [surface, this](Mesh& mesh) {
-            auto const& patches = coordinator->GetComponent<C2CylinderPatches>(surface);
-
+        [surface, &patches, this](Mesh& mesh) {
             mesh.Update(
                 GenerateVertices(patches),
                 GenerateIndices(patches)

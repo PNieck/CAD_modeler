@@ -71,7 +71,6 @@ Entity C0CylinderSystem::CreateCylinder(const Position &pos, const alg::Vec3 &di
     coordinator->AddComponent<PatchesDensity>(surface, density);
 
     coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
-    coordinator->GetSystem<C0PatchesSystem>()->AddPossibilityToHasPatchesPolygon(surface);
 
     Recalculate(surface, pos, direction, radius);
 
@@ -201,6 +200,15 @@ void C0CylinderSystem::DeleteColOfPatches(Entity surface, const Position &pos, c
 
     coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
     Recalculate(surface, pos, direction, radius);
+}
+
+
+void C0CylinderSystem::ShowBezierPolygon(Entity cylinder) const
+{
+    auto const& patches = coordinator->GetComponent<C0Patches>(cylinder);
+    auto const& netSystem = coordinator->GetSystem<ControlNetSystem>();
+
+    netSystem->AddControlPointsNet(cylinder, patches);
 }
 
 

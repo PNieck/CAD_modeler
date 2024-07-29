@@ -99,8 +99,8 @@ public:
     inline void SetNewSurfaceDensity(Entity entity, PatchesDensity newDensity)
         { model.SetSurfaceDensity(entity, newDensity); }
 
-    inline void ShowPatchesPolygon(Entity entity)
-        { model.ShowPatchesPolygon(entity); }
+    inline void ShowPatchesPolygon(Entity entity, const Patches& patches)
+        { model.ShowPatchesPolygon(entity, patches); }
 
     inline void HidePatchesPolygon(Entity entity)
         { model.HidePatchesPolygon(entity); }

@@ -8,6 +8,7 @@
 #include "CAD_modeler/model/systems/curveControlPointsSystem.hpp"
 #include "CAD_modeler/model/systems/toUpdateSystem.hpp"
 #include "CAD_modeler/model/systems/c0PatchesSystem.hpp"
+#include "CAD_modeler/model/systems/controlNetSystem.hpp"
 
 #include "CAD_modeler/model/components/c0Patches.hpp"
 #include "CAD_modeler/model/components/patchesDensity.hpp"
@@ -72,7 +73,6 @@ Entity C0SurfaceSystem::CreateSurface(const Position& pos, const alg::Vec3& dire
     coordinator->AddComponent<PatchesDensity>(surface, density);
 
     coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
-    coordinator->GetSystem<C0PatchesSystem>()->AddPossibilityToHasPatchesPolygon(surface);
 
     Recalculate(surface, pos, direction, length, width);
 
@@ -189,6 +189,15 @@ void C0SurfaceSystem::DeleteColOfPatches(Entity surface, const Position& pos, co
     coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
 
     Recalculate(surface, pos, direction, length, width);
+}
+
+
+void C0SurfaceSystem::ShowBezierNet(Entity surface) const
+{
+    auto const& patches = coordinator->GetComponent<C0Patches>(surface);
+    auto const& netSystem = coordinator->GetSystem<ControlNetSystem>();
+
+    netSystem->AddControlPointsNet(surface, patches);
 }
 
 

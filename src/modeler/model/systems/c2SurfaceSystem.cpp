@@ -176,6 +176,15 @@ void C2SurfaceSystem::DeleteColOfPatches(Entity surface, const Position &pos, co
 }
 
 
+void C2SurfaceSystem::ShowDeBoorNet(Entity surface)
+{
+    auto const& patches = coordinator->GetComponent<C2Patches>(surface);
+    auto const& netSystem = coordinator->GetSystem<ControlNetSystem>();
+
+    netSystem->AddControlPointsNet(surface, patches);
+}
+
+
 void C2SurfaceSystem::Recalculate(Entity surface, const Position &pos, const alg::Vec3 &direction, float length, float width) const
 {
     auto const& patches = coordinator->GetComponent<C2Patches>(surface);

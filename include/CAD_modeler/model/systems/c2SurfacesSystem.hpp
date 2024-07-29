@@ -8,6 +8,7 @@
 #include "../components/position.hpp"
 #include "../components/c2Patches.hpp"
 #include "../components/patchesDensity.hpp"
+#include "controlNetSystem.hpp"
 
 
 class C2SurfaceSystem: public System {
@@ -33,11 +34,10 @@ public:
     inline int GetColsCnt(Entity surface) const
         { return coordinator->GetComponent<C2Patches>(surface).PatchesInCol(); }
 
-    // inline void ShowBezierPolygon(Entity cylinder) const
-    //     { coordinator->GetSystem<C2PatchesSystem>()->ShowPolygon(cylinder); }
+    void ShowDeBoorNet(Entity surface);
 
-    // inline void HideBezierPolygon(Entity cylinder) const
-    //     { coordinator->GetSystem<C2PatchesSystem>()->HidePolygon(cylinder); }
+    inline void HideDeBoorNet(Entity surface)
+        { coordinator->GetSystem<ControlNetSystem>()->DeleteControlPointsNet(surface); }
 
     void Recalculate(Entity surface, const Position& pos, const alg::Vec3& direction, float length, float width) const;
 

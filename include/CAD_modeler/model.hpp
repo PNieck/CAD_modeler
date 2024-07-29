@@ -17,6 +17,7 @@
 #include "model/systems/c0PatchesSystem.hpp"
 #include "model/systems/c2SurfacesSystem.hpp"
 #include "model/systems/c2CylinderSystem.hpp"
+#include "model/systems/controlNetSystem.hpp"
 
 #include "model/systems/shaders/shaderRepository.hpp"
 
@@ -245,11 +246,14 @@ public:
     inline const void SetSurfaceDensity(Entity entity, PatchesDensity density) const
         { c0SurfaceSystem->SetDensity(entity, density); }
 
-    inline const void ShowPatchesPolygon(Entity entity) const
-        { c0PatchesSystem->ShowPolygon(entity); }
+    inline const void ShowPatchesPolygon(Entity entity, const Patches& patches) const
+        { controlNetSystem->AddControlPointsNet(entity, patches); }
 
     inline const void HidePatchesPolygon(Entity entity) const
-        { c0PatchesSystem->HidePolygon(entity); }
+        { controlNetSystem->DeleteControlPointsNet(entity); }
+
+    inline bool HasPatchesPolygon(Entity entity) const
+        { return controlNetSystem->HasControlPointsNet(entity); }
 
     template <typename Comp>
     static inline constexpr ComponentId GetComponentId()
@@ -274,6 +278,7 @@ private:
     std::shared_ptr<C0PatchesSystem> c0PatchesSystem;
     std::shared_ptr<C2SurfaceSystem> c2SurfaceSystem;
     std::shared_ptr<C2CylinderSystem> c2CylinderSystem;
+    std::shared_ptr<ControlNetSystem> controlNetSystem;
 
     alg::Vec3 PointFromViewportCoordinates(float x, float y) const;
     Line LineFromViewportCoordinates(float x, float y) const;
