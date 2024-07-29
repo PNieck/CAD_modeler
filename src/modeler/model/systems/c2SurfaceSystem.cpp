@@ -10,6 +10,8 @@
 #include "CAD_modeler/model/systems/toUpdateSystem.hpp"
 #include "CAD_modeler/model/systems/curveControlPointsSystem.hpp"
 
+#include <CAD_modeler/utilities/setIntersection.hpp>
+
 
 void C2SurfaceSystem::RegisterSystem(Coordinator &coordinator)
 {
@@ -21,9 +23,10 @@ void C2SurfaceSystem::RegisterSystem(Coordinator &coordinator)
 }
 
 
-void C2SurfaceSystem::Init()
+void C2SurfaceSystem::Init(ShaderRepository* shadersRepo)
 {
     deletionHandler = std::make_shared<DeletionHandler>(*coordinator);
+    this->shaderRepo = shadersRepo;
 }
 
 
@@ -192,6 +195,136 @@ void C2SurfaceSystem::Recalculate(Entity surface, const Position &pos, const alg
             coordinator->SetComponent(cp, Position(newPos));
         }
     }
+}
+
+
+void C2SurfaceSystem::Render() const
+{
+    if (entities.empty()) {
+        return;
+    }
+
+    auto const& cameraSystem = coordinator->GetSystem<CameraSystem>();
+    auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
+
+    auto const& shader = shaderRepo->GetBSplineSurfaceShader();
+
+    UpdateEntities();
+
+    alg::Mat4x4 cameraMtx = cameraSystem->PerspectiveMatrix() * cameraSystem->ViewMatrix();
+
+    shader.Use();
+    shader.SetColor(alg::Vec4(1.0f));
+    shader.SetMVP(cameraMtx);
+
+    glPatchParameteri(GL_PATCH_VERTICES, 16);
+
+    for (auto const entity: entities) {
+        bool selection = selectionSystem->IsSelected(entity);
+
+        if (selection)
+            shader.SetColor(alg::Vec4(1.0f, 0.5f, 0.0f, 1.0f));
+
+        auto const& mesh = coordinator->GetComponent<Mesh>(entity);
+        mesh.Use();
+
+        auto const& density = coordinator->GetComponent<PatchesDensity>(entity);
+        float v[] = {5.f, 64.f, 64.f, 64.f};
+        v[0] = static_cast<float>(density.GetDensity());
+        glPatchParameterfv(GL_PATCH_DEFAULT_OUTER_LEVEL, v);
+
+	    glDrawElements(GL_PATCHES, mesh.GetElementsCnt(), GL_UNSIGNED_INT, 0);
+
+        if (selection)
+            shader.SetColor(alg::Vec4(1.0f));
+    }
+}
+
+
+void C2SurfaceSystem::UpdateEntities() const
+{
+    auto const& toUpdateSystem = coordinator->GetSystem<ToUpdateSystem>();
+    auto const& netSystem = coordinator->GetSystem<ControlNetSystem>();
+
+    auto toUpdate = intersect(toUpdateSystem->GetEntities(), entities);
+
+    for (auto entity: toUpdate) {
+        auto const& patches = coordinator->GetComponent<C2Patches>(entity);
+
+        UpdateMesh(entity, patches);
+
+        if (netSystem->HasControlPointsNet(entity))
+            netSystem->Update(entity, patches);
+
+        toUpdateSystem->Unmark(entity);
+    }
+}
+
+
+void C2SurfaceSystem::UpdateMesh(Entity surface, const C2Patches& patches) const
+{
+    coordinator->EditComponent<Mesh>(surface,
+        [surface, &patches, this](Mesh& mesh) {
+            mesh.Update(
+                GenerateVertices(patches),
+                GenerateIndices(patches)
+            );
+        }
+    );
+}
+
+
+std::vector<float> C2SurfaceSystem::GenerateVertices(const C2Patches &patches) const
+{
+    std::vector<float> result;
+    result.reserve(patches.PointsCnt() * 3);
+
+    for (int col=0; col < patches.PointsInCol(); col++) {
+        for (int row=0; row < patches.PointsInRow(); row++) {
+            Entity point = patches.GetPoint(row, col);
+
+            auto const& pos = coordinator->GetComponent<Position>(point);
+
+            result.push_back(pos.GetX());
+            result.push_back(pos.GetY());
+            result.push_back(pos.GetZ());
+        }
+    }
+
+    return result;
+}
+
+
+std::vector<uint32_t> C2SurfaceSystem::GenerateIndices(const C2Patches &patches) const
+{
+    std::vector<uint32_t> result;
+    result.reserve(patches.PatchesInRow() * patches.PatchesInCol() * C2Patches::PointsInPatch * 2);
+
+    for (int patchRow=0; patchRow < patches.PatchesInRow(); patchRow++) {
+        for (int patchCol=0; patchCol < patches.PatchesInCol(); patchCol++) {
+            for (int rowInPatch=0; rowInPatch < C2Patches::RowsInPatch; rowInPatch++) {
+                for (int colInPatch=0; colInPatch < C2Patches::ColsInPatch; colInPatch++) {
+
+                    int globCol = patchCol + colInPatch;
+                    int globRow = patchRow + rowInPatch;
+
+                    result.push_back(globCol * patches.PointsInRow() + globRow);
+                }
+            }
+
+            for (int colInPatch=0; colInPatch < C2Patches::ColsInPatch; colInPatch++) {
+                for (int rowInPatch=0; rowInPatch < C2Patches::RowsInPatch; rowInPatch++) {
+
+                    int globCol = patchCol + colInPatch;
+                    int globRow = patchRow + rowInPatch;
+
+                    result.push_back(globCol * patches.PointsInRow() + globRow);
+                }
+            }
+        }
+    }
+
+    return result;
 }
 
 

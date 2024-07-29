@@ -14,7 +14,7 @@ class C2SurfaceSystem: public System {
 public:
     static void RegisterSystem(Coordinator& coordinator);
 
-    void Init();
+    void Init(ShaderRepository* shadersRepo);
 
     Entity CreateSurface(const Position& pos, const alg::Vec3& direction, float length, float width);
 
@@ -41,11 +41,20 @@ public:
 
     void Recalculate(Entity surface, const Position& pos, const alg::Vec3& direction, float length, float width) const;
 
+    void Render() const;
+
 private:
     class DeletionHandler;
 
     std::shared_ptr<DeletionHandler> deletionHandler;
     NameGenerator nameGenerator;
+    ShaderRepository* shaderRepo;
+
+    void UpdateEntities() const;
+    void UpdateMesh(Entity surface, const C2Patches& patches) const;
+
+    std::vector<float> GenerateVertices(const C2Patches& patches) const;
+    std::vector<uint32_t> GenerateIndices(const C2Patches& patches) const;
 
 
     class DeletionHandler: public EventHandler<C2Patches> {

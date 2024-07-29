@@ -1,12 +1,13 @@
 #pragma once
 
 #include <ecs/system.hpp>
+#include <ecs/coordinator.hpp>
 
 #include "utils/nameGenerator.hpp"
 #include "../components/position.hpp"
 #include "../components/patchesDensity.hpp"
 #include "../components/c2CylinderPatches.hpp"
-#include "c2PatchesSystem.hpp"
+#include "shaders/shaderRepository.hpp"
 
 
 class C2CylinderSystem: public System {

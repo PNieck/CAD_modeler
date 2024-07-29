@@ -16,7 +16,6 @@
 #include "model/systems/c0CylinderSystem.hpp"
 #include "model/systems/c0PatchesSystem.hpp"
 #include "model/systems/c2SurfacesSystem.hpp"
-#include "model/systems/c2PatchesSystem.hpp"
 #include "model/systems/c2CylinderSystem.hpp"
 
 #include "model/systems/shaders/shaderRepository.hpp"
@@ -127,10 +126,10 @@ public:
         { return c0PatchesSystem->GetColsCnt(surface); }
 
     inline int GetRowsCntOfC2Patches(Entity surface) const
-        { return c2PatchesSystem->GetRowsCnt(surface); }
+        { return c2SurfaceSystem->GetRowsCnt(surface); }
 
     inline int GetColsCntOfC2Patches(Entity surface) const
-        { return c2PatchesSystem->GetColsCnt(surface); }
+        { return c2SurfaceSystem->GetColsCnt(surface); }
 
     inline int GetColsCntOfC2Cylinder(Entity cylinder) const
         { return c2CylinderSystem->GetColsCnt(cylinder); }
@@ -274,7 +273,6 @@ private:
     std::shared_ptr<C0CylinderSystem> c0CylinderSystem;
     std::shared_ptr<C0PatchesSystem> c0PatchesSystem;
     std::shared_ptr<C2SurfaceSystem> c2SurfaceSystem;
-    std::shared_ptr<C2PatchesSystem> c2PatchesSystem;
     std::shared_ptr<C2CylinderSystem> c2CylinderSystem;
 
     alg::Vec3 PointFromViewportCoordinates(float x, float y) const;
