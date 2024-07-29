@@ -35,6 +35,9 @@ Model::Model(int viewport_width, int viewport_height)
     C0SurfaceSystem::RegisterSystem(coordinator);
     C0CylinderSystem::RegisterSystem(coordinator);
     C0PatchesSystem::RegisterSystem(coordinator);
+    C2SurfaceSystem::RegisterSystem(coordinator);
+    C2CylinderSystem::RegisterSystem(coordinator);
+    ControlNetSystem::RegisterSystem(coordinator);
 
     cameraSys = coordinator.GetSystem<CameraSystem>();
     toriSystem = coordinator.GetSystem<ToriSystem>();
@@ -47,9 +50,12 @@ Model::Model(int viewport_width, int viewport_height)
     c2CurveSystem = coordinator.GetSystem<C2CurveSystem>();
     auto controlPointsSystem = coordinator.GetSystem<CurveControlPointsSystem>();
     interpolationCurveSystem = coordinator.GetSystem<InterpolationCurveSystem>();
-    c0surfaceSystem = coordinator.GetSystem<C0SurfaceSystem>();
+    c0SurfaceSystem = coordinator.GetSystem<C0SurfaceSystem>();
     c0CylinderSystem = coordinator.GetSystem<C0CylinderSystem>();
     c0PatchesSystem = coordinator.GetSystem<C0PatchesSystem>();
+    c2SurfaceSystem = coordinator.GetSystem<C2SurfaceSystem>();
+    c2CylinderSystem = coordinator.GetSystem<C2CylinderSystem>();
+    controlNetSystem = coordinator.GetSystem<ControlNetSystem>();
 
     CameraParameters params {
         .target = Position(0.0f),
@@ -71,8 +77,11 @@ Model::Model(int viewport_width, int viewport_height)
     controlPointsSystem->Init();
     interpolationCurveSystem->Init(&shadersRepo);
     c0PatchesSystem->Init(&shadersRepo);
-    c0surfaceSystem->Init();
+    c0SurfaceSystem->Init();
     c0CylinderSystem->Init();
+    c2SurfaceSystem->Init(&shadersRepo);
+    c2CylinderSystem->Init(&shadersRepo);
+    controlNetSystem->Init(&shadersRepo);
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glEnable(GL_LINE_SMOOTH);
@@ -96,6 +105,9 @@ void Model::RenderFrame()
     c2CurveSystem->Render();
     interpolationCurveSystem->Render();
     c0PatchesSystem->Render();
+    c2SurfaceSystem->Render();
+    c2CylinderSystem->Render();
+    controlNetSystem->Render();
 }
 
 

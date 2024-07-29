@@ -8,9 +8,10 @@
 #include "CAD_modeler/model/systems/curveControlPointsSystem.hpp"
 #include "CAD_modeler/model/systems/toUpdateSystem.hpp"
 #include "CAD_modeler/model/systems/c0PatchesSystem.hpp"
+#include "CAD_modeler/model/systems/controlNetSystem.hpp"
 
 #include "CAD_modeler/model/components/c0Patches.hpp"
-#include "CAD_modeler/model/components/c0PatchesDensity.hpp"
+#include "CAD_modeler/model/components/patchesDensity.hpp"
 #include "CAD_modeler/model/components/curveControlPoints.hpp"
 #include "CAD_modeler/model/components/mesh.hpp"
 #include "CAD_modeler/model/components/name.hpp"
@@ -27,7 +28,7 @@ void C0SurfaceSystem::RegisterSystem(Coordinator &coordinator)
     coordinator.RegisterSystem<C0SurfaceSystem>();
 
     coordinator.RegisterRequiredComponent<C0SurfaceSystem, C0Patches>();
-    coordinator.RegisterRequiredComponent<C0SurfaceSystem, C0PatchesDensity>();
+    coordinator.RegisterRequiredComponent<C0SurfaceSystem, PatchesDensity>();
     coordinator.RegisterRequiredComponent<C0SurfaceSystem, Mesh>();
 }
 
@@ -40,9 +41,6 @@ void C0SurfaceSystem::Init()
 
 Entity C0SurfaceSystem::CreateSurface(const Position& pos, const alg::Vec3& direction, float length, float width)
 {
-    static constexpr int controlPointsInOneDir = 4;
-    static constexpr int controlPointsCnt = controlPointsInOneDir*controlPointsInOneDir;
-
     C0Patches patches(1, 1);
 
     auto const pointsSystem = coordinator->GetSystem<PointsSystem>();
@@ -51,11 +49,11 @@ Entity C0SurfaceSystem::CreateSurface(const Position& pos, const alg::Vec3& dire
 
     auto handler = std::make_shared<ControlPointMovedHandler>(surface, *coordinator);
 
-    for (int i=0; i < controlPointsInOneDir; ++i) {
-        for (int j=0; j < controlPointsInOneDir; ++j) {
+    for (int i=0; i < patches.PointsInCol(); ++i) {
+        for (int j=0; j < patches.PointsInRow(); ++j) {
             // Creating control points with temporary location
             Entity cp = pointsSystem->CreatePoint(pos.vec);
-            patches.SetPoint(cp, 0, 0, i, j);
+            patches.SetPoint(cp, i, j);
 
             HandlerId cpHandler = coordinator->Subscribe(cp, std::static_pointer_cast<EventHandler<Position>>(handler));
             patches.controlPointsHandlers.insert({cp, cpHandler});
@@ -65,17 +63,16 @@ Entity C0SurfaceSystem::CreateSurface(const Position& pos, const alg::Vec3& dire
     }
 
     Mesh mesh;
-    C0PatchesDensity density(5);
+    PatchesDensity density(5);
 
     patches.deletionHandler = coordinator->Subscribe<C0Patches>(surface, deletionHandler);
 
     coordinator->AddComponent<Name>(surface, nameGenerator.GenerateName("SurfaceC0_"));
     coordinator->AddComponent<Mesh>(surface, mesh);
     coordinator->AddComponent<C0Patches>(surface, patches);
-    coordinator->AddComponent<C0PatchesDensity>(surface, density);
+    coordinator->AddComponent<PatchesDensity>(surface, density);
 
     coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
-    coordinator->GetSystem<C0PatchesSystem>()->AddPossibilityToHasPatchesPolygon(surface);
 
     Recalculate(surface, pos, direction, length, width);
 
@@ -89,7 +86,7 @@ void C0SurfaceSystem::AddRowOfPatches(Entity surface, const Position& pos, const
         [surface, this](C0Patches& patches) {
             auto pointSys = coordinator->GetSystem<PointsSystem>();
             
-            patches.AddRow();
+            patches.AddRowOfPatches();
 
             Entity firstCP = patches.GetPoint(0,0);
             HandlerId firstCpHandler = patches.controlPointsHandlers.at(firstCP);
@@ -122,7 +119,7 @@ void C0SurfaceSystem::AddColOfPatches(Entity surface, const Position& pos, const
         [surface, this](C0Patches& patches) {
             auto pointSys = coordinator->GetSystem<PointsSystem>();
             
-            patches.AddCol();
+            patches.AddColOfPatches();
 
             Entity firstCP = patches.GetPoint(0,0);
             HandlerId firstCpHandler = patches.controlPointsHandlers.at(firstCP);
@@ -162,7 +159,7 @@ void C0SurfaceSystem::DeleteRowOfPatches(Entity surface, const Position& pos, co
                 }
             }
 
-            patches.DeleteRow();
+            patches.DeleteRowOfPatches();
         }
     );
 
@@ -185,13 +182,22 @@ void C0SurfaceSystem::DeleteColOfPatches(Entity surface, const Position& pos, co
                 }
             }
 
-            patches.DeleteCol();
+            patches.DeleteColOfPatches();
         }
     );
 
     coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
 
     Recalculate(surface, pos, direction, length, width);
+}
+
+
+void C0SurfaceSystem::ShowBezierNet(Entity surface) const
+{
+    auto const& patches = coordinator->GetComponent<C0Patches>(surface);
+    auto const& netSystem = coordinator->GetSystem<ControlNetSystem>();
+
+    netSystem->AddControlPointsNet(surface, patches);
 }
 
 

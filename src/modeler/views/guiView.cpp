@@ -73,11 +73,19 @@ void GuiView::RenderGui() const
             break;
 
         case AppState::AddingC0Surface:
-            RenderAddingC0Surface();
+            RenderAddingSurface(SurfaceType::C0);
+            break;
+
+        case AppState::AddingC2Surface:
+            RenderAddingSurface(SurfaceType::C2);
             break;
 
         case AppState::AddingC0Cylinder:
-            RenderAddingC0Cylinder();
+            RenderAddingCylinder(CylinderType::C0);
+            break;
+
+        case AppState::AddingC2Cylinder:
+            RenderAddingCylinder(CylinderType::C2);
             break;
 
         default:
@@ -122,8 +130,16 @@ void GuiView::RenderDefaultGui() const
         controller.SetAppState(AppState::AddingC0Surface);
     }
 
+    if (ImGui::Button("Add C2 surface")) {
+        controller.SetAppState(AppState::AddingC2Surface);
+    }
+
     if (ImGui::Button("Add C0 cylinder")) {
         controller.SetAppState(AppState::AddingC0Cylinder);
+    }
+
+    if (ImGui::Button("Add C2 cylinder")) {
+        controller.SetAppState(AppState::AddingC2Cylinder);
     }
 
     ImGui::Separator();
@@ -212,7 +228,41 @@ void GuiView::RenderAddingCurveGui(CurveType curveType) const
 }
 
 
-void GuiView::RenderAddingC0Surface() const
+// TODO: delete this function
+int GetSurfaceRowsCnt(Entity surface, SurfaceType surfaceType, const Model& model)
+{
+    switch (surfaceType)
+    {
+    case SurfaceType::C0:
+        return model.GetRowsCntOfC0Patches(surface);
+    
+    case SurfaceType::C2:
+        return model.GetRowsCntOfC2Patches(surface);
+    
+    default:
+        throw std::runtime_error("Unknown surface type");
+    }
+}
+
+
+// TODO: delete this function
+int GetSurfaceColsCnt(Entity surface, SurfaceType surfaceType, const Model& model)
+{
+    switch (surfaceType)
+    {
+    case SurfaceType::C0:
+        return model.GetColsOfC0Patches(surface);
+    
+    case SurfaceType::C2:
+        return model.GetColsCntOfC2Patches(surface);
+    
+    default:
+        throw std::runtime_error("Unknown surface type");
+    }
+}
+
+
+void GuiView::RenderAddingSurface(SurfaceType surfaceType) const
 {
     static std::optional<Entity> entity;
     static const alg::Vec3 dir(0.f, 1.f, 0.f);
@@ -222,11 +272,11 @@ void GuiView::RenderAddingC0Surface() const
         width = 1.0f;
         length = 1.0f;
 
-        entity = controller.AddC0Surface(dir, length, width);
+        entity = controller.AddSurface(surfaceType, dir, length, width);
     }
 
-    int rows = model.GetRowsCntOfC0Patches(entity.value());
-    int cols = model.GetColsOfC0Patches(entity.value());
+    int rows = GetSurfaceRowsCnt(entity.value(), surfaceType, model);
+    int cols = GetSurfaceColsCnt(entity.value(), surfaceType, model);
     bool valueChanged = false;
 
     ImGui::InputInt("Rows", &rows);
@@ -236,25 +286,25 @@ void GuiView::RenderAddingC0Surface() const
     valueChanged |= ImGui::DragFloat("Width", &width, DRAG_FLOAT_SPEED);
 
     if (valueChanged)
-        controller.RecalculateC0Surface(entity.value(), dir, length, width);
+        controller.RecalculateSurface(entity.value(), surfaceType,  dir, length, width);
 
-    if (rows != model.GetRowsCntOfC0Patches(entity.value())) {
-        while (rows > model.GetRowsCntOfC0Patches(entity.value())) {
-            controller.AddRowOfC0SurfacePatches(entity.value(), dir, length, width);
+    if (rows != GetSurfaceRowsCnt(entity.value(), surfaceType, model)) {
+        while (rows > GetSurfaceRowsCnt(entity.value(), surfaceType, model)) {
+            controller.AddRowOfSurfacePatches(entity.value(), surfaceType, dir, length, width);
         }
 
-        while (rows < model.GetRowsCntOfC0Patches(entity.value())) {
-            controller.DeleteRowOfC0SurfacePatches(entity.value(), dir, length, width);
+        while (rows < GetSurfaceRowsCnt(entity.value(), surfaceType, model)) {
+            controller.DeleteRowOfSurfacePatches(entity.value(), surfaceType, dir, length, width);
         }
     }
 
-    if (cols != model.GetColsOfC0Patches(entity.value())) {
-        while (cols > model.GetColsOfC0Patches(entity.value())) {
-            controller.AddColOfC0SurfacePatches(entity.value(), dir, length, width);
+    if (cols != GetSurfaceColsCnt(entity.value(), surfaceType, model)) {
+        while (cols > GetSurfaceColsCnt(entity.value(), surfaceType, model)) {
+            controller.AddColOfSurfacePatches(entity.value(), surfaceType, dir, length, width);
         }
 
-        while (cols < model.GetColsOfC0Patches(entity.value())) {
-            controller.DeleteColOfC0SurfacePatches(entity.value(), dir, length, width);
+        while (cols < GetSurfaceColsCnt(entity.value(), surfaceType, model)) {
+            controller.DeleteColOfSurfacePatches(entity.value(), surfaceType, dir, length, width);
         }
     }
 
@@ -264,8 +314,41 @@ void GuiView::RenderAddingC0Surface() const
     }
 }
 
+// TODO: delete this function
+int GetCylinderRowsCnt(Entity cylinder, CylinderType CylinderType, const Model& model)
+{
+    switch (CylinderType)
+    {
+    case CylinderType::C0:
+        return model.GetRowsCntOfC0Patches(cylinder);
+    
+    case CylinderType::C2:
+        return model.GetRowsCntOfC2Cylinder(cylinder);
+    
+    default:
+        throw std::runtime_error("Unknown surface type");
+    }
+}
 
-void GuiView::RenderAddingC0Cylinder() const
+
+// TODO: delete this function
+int GetCylinderColsCnt(Entity cylinder, CylinderType CylinderType, const Model& model)
+{
+    switch (CylinderType)
+    {
+    case CylinderType::C0:
+        return model.GetColsOfC0Patches(cylinder);
+    
+    case CylinderType::C2:
+        return model.GetColsCntOfC2Cylinder(cylinder);
+    
+    default:
+        throw std::runtime_error("Unknown surface type");
+    }
+}
+
+
+void GuiView::RenderAddingCylinder(CylinderType cylinderType) const
 {
     static std::optional<Entity> entity;
     static float oldRadius, newRadius;
@@ -273,13 +356,13 @@ void GuiView::RenderAddingC0Cylinder() const
     static const alg::Vec3 dir(0.f, 1.f, 0.f);
     
     if (!entity.has_value()) {
-        entity = controller.AddC0Cylinder();
+        entity = controller.AddCylinder(cylinderType);
         oldRadius = newRadius = 1.0f;
         newLen = 1.f;
     }
 
-    int rows = model.GetRowsCntOfC0Patches(entity.value());
-    int cols = model.GetColsOfC0Patches(entity.value());
+    int rows = GetCylinderRowsCnt(entity.value(), cylinderType, model);
+    int cols = GetCylinderColsCnt(entity.value(), cylinderType, model);
     bool valueChanged = false;
 
     ImGui::InputInt("Rows", &rows);
@@ -289,26 +372,26 @@ void GuiView::RenderAddingC0Cylinder() const
     valueChanged |= ImGui::DragFloat("Length", &newLen, DRAG_FLOAT_SPEED);
 
     if (valueChanged) {
-        controller.RecalculateC0Cylinder(entity.value(), dir * newLen, newRadius);
+        controller.RecalculateCylinder(entity.value(), cylinderType, dir * newLen, newRadius);
     }
 
-    if (rows != model.GetRowsCntOfC0Patches(entity.value())) {
-        while (rows > model.GetRowsCntOfC0Patches(entity.value())) {
-            controller.AddRowOfC0CylinderPatches(entity.value(), dir * newLen, newRadius);
+    if (rows != GetCylinderRowsCnt(entity.value(), cylinderType, model)) {
+        while (rows > GetCylinderRowsCnt(entity.value(), cylinderType, model)) {
+            controller.AddRowOfCylinderPatches(entity.value(), cylinderType, dir * newLen, newRadius);
         }
 
-        while (rows < model.GetRowsCntOfC0Patches(entity.value())) {
-            controller.DeleteRowOfC0CylinderPatches(entity.value(), dir * newLen, newRadius);
+        while (rows < GetCylinderRowsCnt(entity.value(), cylinderType, model)) {
+            controller.DeleteRowOfCylinderPatches(entity.value(), cylinderType, dir * newLen, newRadius);
         }
     }
 
-    if (cols != model.GetColsOfC0Patches(entity.value())) {
-        while (cols > model.GetColsOfC0Patches(entity.value())) {
-            controller.AddColOfC0CylinderPatches(entity.value(), dir * newLen, newRadius);
+    if (cols != GetCylinderColsCnt(entity.value(), cylinderType, model)) {
+        while (cols > GetCylinderColsCnt(entity.value(), cylinderType, model)) {
+            controller.AddColOfCylinderPatches(entity.value(), cylinderType, dir * newLen, newRadius);
         }
 
-        while (cols < model.GetColsOfC0Patches(entity.value())) {
-            controller.DeleteColOfC0CylinderPatches(entity.value(), dir * newLen, newRadius);
+        while (cols < GetCylinderColsCnt(entity.value(), cylinderType, model)) {
+            controller.DeleteColOfCylinderPatches(entity.value(), cylinderType, dir * newLen, newRadius);
         }
     }
 
@@ -380,17 +463,21 @@ void GuiView::RenderSingleObjectProperties(Entity entity) const
     if (it != components.end())
         DisplayC2CurveParameters(entity, model.GetComponent<C2CurveParameters>(entity));
 
-    it = components.find(Model::GetComponentId<C0PatchesDensity>());
+    it = components.find(Model::GetComponentId<PatchesDensity>());
     if (it != components.end())
-        DisplaySurfaceDensityParameter(entity, model.GetComponent<C0PatchesDensity>(entity));
-
-    it = components.find(Model::GetComponentId<HasPatchesPolygon>());
-    if (it != components.end())
-        DisplayPatchesPolygonOption(entity, model.GetComponent<HasPatchesPolygon>(entity));
+        DisplaySurfaceDensityParameter(entity, model.GetComponent<PatchesDensity>(entity));
 
     it = components.find(Model::GetComponentId<C0Patches>());
     if (it != components.end())
         DisplaySurfacePatches(entity, model.GetComponent<C0Patches>(entity));
+
+    it = components.find(Model::GetComponentId<C2Patches>());
+    if (it != components.end())
+        DisplaySurfacePatches(entity, model.GetComponent<C2Patches>(entity));
+
+    it = components.find(Model::GetComponentId<C2CylinderPatches>());
+    if (it != components.end())
+        DisplaySurfacePatches(entity, model.GetComponent<C2CylinderPatches>(entity));
 
     it = components.find(Model::GetComponentId<Unremovable>());
     if (it == components.end())
@@ -650,19 +737,19 @@ void GuiView::DisplayEntityDeletionOption(Entity entity) const
 }
 
 
-void GuiView::DisplaySurfaceDensityParameter(Entity entity, const C0PatchesDensity &density) const
+void GuiView::DisplaySurfaceDensityParameter(Entity entity, const PatchesDensity &density) const
 {
     int d = density.GetDensity();
 
-    ImGui::DragInt("Mesh density", &d, 1.f, C0PatchesDensity::MinDensity, C0PatchesDensity::MaxDensity);
+    ImGui::DragInt("Mesh density", &d, 1.f, PatchesDensity::MinDensity, PatchesDensity::MaxDensity);
 
     if (d != density.GetDensity()) {
-        controller.SetNewSurfaceDensity(entity, C0PatchesDensity(d));
+        controller.SetNewSurfaceDensity(entity, PatchesDensity(d));
     }
 }
 
 
-void GuiView::DisplaySurfacePatches(Entity entity, const C0Patches &patches) const
+void GuiView::DisplaySurfacePatches(Entity entity, const Patches &patches) const
 {
     ImGui::SeparatorText("Control Points");
 
@@ -673,18 +760,12 @@ void GuiView::DisplaySurfacePatches(Entity entity, const C0Patches &patches) con
             ImGui::Text(model.GetEntityName(entity).c_str());
         }
     }
-}
 
+    bool hasNet = model.HasPatchesPolygon(entity);
 
-void GuiView::DisplayPatchesPolygonOption(Entity entity, const HasPatchesPolygon &patchesPolygon) const
-{
-    bool value = patchesPolygon.value;
-
-    ImGui::Checkbox("Draw Bezier Polygon", &value);
-
-    if (value != patchesPolygon.value) {
-        if (value)
-            controller.ShowPatchesPolygon(entity);
+    if (ImGui::Checkbox("Draw Control Points Net", &hasNet)) {
+        if (hasNet)
+            controller.ShowPatchesPolygon(entity, patches);
         else
             controller.HidePatchesPolygon(entity);
     }

@@ -1,21 +1,21 @@
 #pragma once
 
 #include <ecs/system.hpp>
+#include <ecs/coordinator.hpp>
 
+#include "shaders/shaderRepository.hpp"
 #include "utils/nameGenerator.hpp"
 #include "../components/position.hpp"
-#include "../components/curveControlPoints.hpp"
-#include "../components/c0Patches.hpp"
+#include "../components/c2Patches.hpp"
 #include "../components/patchesDensity.hpp"
-#include "c0PatchesSystem.hpp"
 #include "controlNetSystem.hpp"
 
 
-class C0SurfaceSystem: public System {
+class C2SurfaceSystem: public System {
 public:
     static void RegisterSystem(Coordinator& coordinator);
 
-    void Init();
+    void Init(ShaderRepository* shadersRepo);
 
     Entity CreateSurface(const Position& pos, const alg::Vec3& direction, float length, float width);
 
@@ -28,32 +28,41 @@ public:
     inline void SetDensity(Entity entity, PatchesDensity density) const
         { coordinator->SetComponent<PatchesDensity>(entity, density); }
 
-    void ShowBezierNet(Entity cylinder) const;
-
-    inline void HideBezierNet(Entity surface) const
-        { coordinator->GetSystem<ControlNetSystem>()->DeleteControlPointsNet(surface); }
-
     inline int GetRowsCnt(Entity surface) const
-        { return coordinator->GetSystem<C0PatchesSystem>()->GetRowsCnt(surface); }
+        { return coordinator->GetComponent<C2Patches>(surface).PatchesInRow(); }
 
     inline int GetColsCnt(Entity surface) const
-        { return coordinator->GetSystem<C0PatchesSystem>()->GetColsCnt(surface); }
+        { return coordinator->GetComponent<C2Patches>(surface).PatchesInCol(); }
+
+    void ShowDeBoorNet(Entity surface);
+
+    inline void HideDeBoorNet(Entity surface)
+        { coordinator->GetSystem<ControlNetSystem>()->DeleteControlPointsNet(surface); }
 
     void Recalculate(Entity surface, const Position& pos, const alg::Vec3& direction, float length, float width) const;
+
+    void Render() const;
 
 private:
     class DeletionHandler;
 
     std::shared_ptr<DeletionHandler> deletionHandler;
     NameGenerator nameGenerator;
+    ShaderRepository* shaderRepo;
+
+    void UpdateEntities() const;
+    void UpdateMesh(Entity surface, const C2Patches& patches) const;
+
+    std::vector<float> GenerateVertices(const C2Patches& patches) const;
+    std::vector<uint32_t> GenerateIndices(const C2Patches& patches) const;
 
 
-    class DeletionHandler: public EventHandler<C0Patches> {
+    class DeletionHandler: public EventHandler<C2Patches> {
     public:
         DeletionHandler(Coordinator& coordinator):
             coordinator(coordinator) {}
 
-        void HandleEvent(Entity entity, const C0Patches& component, EventType eventType) override;
+        void HandleEvent(Entity entity, const C2Patches& component, EventType eventType) override;
 
     private:
         Coordinator& coordinator;

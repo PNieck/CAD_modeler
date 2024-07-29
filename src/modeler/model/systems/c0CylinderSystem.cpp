@@ -8,7 +8,7 @@
 #include "CAD_modeler/model/systems/c0PatchesSystem.hpp"
 
 #include "CAD_modeler/model/components/c0Patches.hpp"
-#include "CAD_modeler/model/components/c0PatchesDensity.hpp"
+#include "CAD_modeler/model/components/patchesDensity.hpp"
 #include "CAD_modeler/model/components/mesh.hpp"
 #include "CAD_modeler/model/components/name.hpp"
 #include "CAD_modeler/model/components/rotation.hpp"
@@ -22,7 +22,7 @@ void C0CylinderSystem::RegisterSystem(Coordinator &coordinator)
     coordinator.RegisterSystem<C0CylinderSystem>();
 
     coordinator.RegisterRequiredComponent<C0CylinderSystem, C0Patches>();
-    coordinator.RegisterRequiredComponent<C0CylinderSystem, C0PatchesDensity>();
+    coordinator.RegisterRequiredComponent<C0CylinderSystem, PatchesDensity>();
     coordinator.RegisterRequiredComponent<C0CylinderSystem, Mesh>();
 }
 
@@ -35,9 +35,6 @@ void C0CylinderSystem::Init()
 
 Entity C0CylinderSystem::CreateCylinder(const Position &pos, const alg::Vec3 &direction, float radius)
 {
-    static constexpr int controlPointsInOneDir = 4;
-    static constexpr int controlPointsCnt = controlPointsInOneDir*controlPointsInOneDir;
-
     C0Patches patches(1, 1);
 
     auto const pointsSystem = coordinator->GetSystem<PointsSystem>();
@@ -46,10 +43,10 @@ Entity C0CylinderSystem::CreateCylinder(const Position &pos, const alg::Vec3 &di
 
     auto handler = std::make_shared<ControlPointMovedHandler>(surface, *coordinator);
 
-    for (int i=0; i < controlPointsInOneDir; ++i) {
-        for (int j=0; j < controlPointsInOneDir - 1; ++j) {
+    for (int row=0; row < patches.PointsInRow(); ++row) {
+        for (int col=0; col < patches.PointsInCol(); ++col) {
             Entity cp = pointsSystem->CreatePoint();
-            patches.SetPoint(cp, 0, 0, i, j);
+            patches.SetPoint(cp, row, col);
 
             HandlerId cpHandler = coordinator->Subscribe(cp, std::static_pointer_cast<EventHandler<Position>>(handler));
             patches.controlPointsHandlers.insert({cp, cpHandler});
@@ -58,25 +55,24 @@ Entity C0CylinderSystem::CreateCylinder(const Position &pos, const alg::Vec3 &di
         }
     }
 
-    for (int i=0; i < controlPointsInOneDir; ++i) {
-        Entity cp = patches.GetPoint(i, 0);
-        patches.SetPoint(cp, i, controlPointsInOneDir - 1);
+    for (int row=0; row < patches.PointsInRow(); ++row) {
+        Entity cp = patches.GetPoint(row, 0);
+        patches.SetPoint(cp, row, patches.PointsInRow() - 1);
     }
 
     Mesh mesh;
-    C0PatchesDensity density(5);
+    PatchesDensity density(5);
 
     patches.deletionHandler = coordinator->Subscribe<C0Patches>(surface, deletionHandler);
 
     coordinator->AddComponent<Name>(surface, nameGenerator.GenerateName("CylinderC0_"));
     coordinator->AddComponent<Mesh>(surface, mesh);
     coordinator->AddComponent<C0Patches>(surface, patches);
-    coordinator->AddComponent<C0PatchesDensity>(surface, density);
+    coordinator->AddComponent<PatchesDensity>(surface, density);
 
     coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
-    coordinator->GetSystem<C0PatchesSystem>()->AddPossibilityToHasPatchesPolygon(surface);
 
-    RecalculatePositions(surface, pos, direction, radius);
+    Recalculate(surface, pos, direction, radius);
 
     return surface;
 }
@@ -88,7 +84,7 @@ void C0CylinderSystem::AddRowOfPatches(Entity surface, const Position &pos, cons
         [surface, this](C0Patches& patches) {
             auto pointSys = coordinator->GetSystem<PointsSystem>();
             
-            patches.AddRow();
+            patches.AddRowOfPatches();
 
             Entity firstCP = patches.GetPoint(0,0);
             HandlerId firstCpHandler = patches.controlPointsHandlers.at(firstCP);
@@ -116,7 +112,7 @@ void C0CylinderSystem::AddRowOfPatches(Entity surface, const Position &pos, cons
 
     coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
 
-    RecalculatePositions(surface, pos, direction, radius);
+    Recalculate(surface, pos, direction, radius);
 }
 
 
@@ -126,7 +122,7 @@ void C0CylinderSystem::AddColOfPatches(Entity surface, const Position &pos, cons
         [surface, this](C0Patches& patches) {
             auto pointSys = coordinator->GetSystem<PointsSystem>();
             
-            patches.AddCol();
+            patches.AddColOfPatches();
 
             Entity firstCP = patches.GetPoint(0,0);
             HandlerId firstCpHandler = patches.controlPointsHandlers.at(firstCP);
@@ -154,7 +150,7 @@ void C0CylinderSystem::AddColOfPatches(Entity surface, const Position &pos, cons
 
     coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
 
-    RecalculatePositions(surface, pos, direction, radius);
+    Recalculate(surface, pos, direction, radius);
 }
 
 
@@ -171,12 +167,12 @@ void C0CylinderSystem::DeleteRowOfPatches(Entity surface, const Position &pos, c
                 }
             }
 
-            patches.DeleteRow();
+            patches.DeleteRowOfPatches();
         }
     );
 
     coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
-    RecalculatePositions(surface, pos, direction, radius);
+    Recalculate(surface, pos, direction, radius);
 }
 
 
@@ -198,16 +194,25 @@ void C0CylinderSystem::DeleteColOfPatches(Entity surface, const Position &pos, c
                 patches.SetPoint(point, row, patches.PointsInCol() - 4);
             }
 
-            patches.DeleteCol();
+            patches.DeleteColOfPatches();
         }
     );
 
     coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
-    RecalculatePositions(surface, pos, direction, radius);
+    Recalculate(surface, pos, direction, radius);
 }
 
 
-void C0CylinderSystem::RecalculatePositions(Entity cylinder, const Position &pos, const alg::Vec3 &direction, float radius) const
+void C0CylinderSystem::ShowBezierPolygon(Entity cylinder) const
+{
+    auto const& patches = coordinator->GetComponent<C0Patches>(cylinder);
+    auto const& netSystem = coordinator->GetSystem<ControlNetSystem>();
+
+    netSystem->AddControlPointsNet(cylinder, patches);
+}
+
+
+void C0CylinderSystem::Recalculate(Entity cylinder, const Position &pos, const alg::Vec3 &direction, float radius) const
 {
     auto const& patches = coordinator->GetComponent<C0Patches>(cylinder);
 

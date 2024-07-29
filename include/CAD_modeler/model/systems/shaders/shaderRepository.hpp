@@ -4,6 +4,7 @@
 #include "gridShader.hpp"
 #include "cubicBezierCurveShader.hpp"
 #include "bicubicBezierSurfaceShader.hpp"
+#include "bicubicBSplineSurfaceShader.hpp"
 
 
 class ShaderRepository {
@@ -20,9 +21,13 @@ public:
     inline const BicubicBezierSurfaceShader& GetBezierSurfaceShader() const
         { return bezierSurfaceShader; }
 
+    inline const BicubicBSplineSurfaceShader& GetBSplineSurfaceShader() const
+        { return bSplineSurfaceShader; }
+
 private:
     StdShader stdShader;
     GridShader gridShader;
     CubicBezierCurveShader bezierCurveShader;
     BicubicBezierSurfaceShader bezierSurfaceShader;
+    BicubicBSplineSurfaceShader bSplineSurfaceShader;
 };

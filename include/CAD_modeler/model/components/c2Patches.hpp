@@ -3,30 +3,30 @@
 #include "patches.hpp"
 
 
-class C0Patches: public Patches {
+class C2Patches: public Patches {
 public:
     static constexpr int RowsInPatch = 4;
     static constexpr int ColsInPatch = 4;
     static constexpr int PointsInPatch = RowsInPatch * ColsInPatch;
 
-    C0Patches(int rows=1, int cols=1):
-        Patches(3*rows+1, 3*cols+1) {}
+    C2Patches(int rows=1, int cols=1):
+        Patches(RowsInPatch + rows - 1, ColsInPatch + cols - 1) {}
 
     void AddRowOfPatches() override
-        { controlPoints.AddRows(3); }
+        { controlPoints.AddRow(); }
 
     void AddColOfPatches() override
-        { controlPoints.AddCols(3); }
+        { controlPoints.AddCol(); }
 
     void DeleteRowOfPatches() override
-        { controlPoints.DeleteRows(3); }
+        { controlPoints.DeleteRow(); }
 
     void DeleteColOfPatches() override
-        { controlPoints.DeleteCols(3); }
+        { controlPoints.DeleteCol(); }
 
     int PatchesInRow() const override
-        { return (controlPoints.Rows() - 1) / 3; }
+        { return controlPoints.Rows() - 3; }
 
     int PatchesInCol() const override
-        {  return (controlPoints.Cols() - 1) / 3; }
+        { return controlPoints.Cols() - 3; }
 };

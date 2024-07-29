@@ -4,6 +4,8 @@
 
 #include "subController.hpp"
 #include "utils/curvesTypes.hpp"
+#include "utils/surfacesTypes.hpp"
+#include "utils/cylinderTypes.hpp"
 
 
 class GuiController: public SubController {
@@ -18,41 +20,29 @@ public:
 
     Entity AddCurve(const std::vector<Entity>& entities, CurveType curveType) const;
 
-    inline Entity AddC0Surface(const alg::Vec3& dir, float length, float width) const
-        { return model.AddC0Surface(dir, length, width); }
+    Entity AddSurface(SurfaceType surfaceType, const alg::Vec3& dir, float length, float width) const;
 
-    inline Entity AddC0Cylinder() const
-        { return model.AddC0Cylinder(); }
+    Entity AddCylinder(CylinderType cylinderType) const;
 
-    inline void AddRowOfC0SurfacePatches(Entity surface, const alg::Vec3& dir, float length, float width)
-        { return model.AddRowOfC0SurfacePatches(surface, dir, length, width); }
+    void AddRowOfSurfacePatches(Entity surface, SurfaceType surfaceType, const alg::Vec3& dir, float length, float width);
 
-    inline void AddColOfC0SurfacePatches(Entity surface, const alg::Vec3& dir, float length, float width)
-        { return model.AddColOfC0SurfacePatches(surface, dir, length, width); }
+    void AddColOfSurfacePatches(Entity surface, SurfaceType surfaceType, const alg::Vec3& dir, float length, float width);
 
-    inline void DeleteRowOfC0SurfacePatches(Entity surface, const alg::Vec3& dir, float length, float width)
-        { return model.DeleteRowOfC0SurfacePatches(surface, dir, length, width); }
+    void DeleteRowOfSurfacePatches(Entity surface, SurfaceType surfaceType, const alg::Vec3& dir, float length, float width);
 
-    inline void DeleteColOfC0SurfacePatches(Entity surface, const alg::Vec3& dir, float length, float width)
-        { return model.DeleteColOfC0SurfacePatches(surface, dir, length, width); }
+    void DeleteColOfSurfacePatches(Entity surface, SurfaceType surfaceType, const alg::Vec3& dir, float length, float width);
 
-    inline void AddRowOfC0CylinderPatches(Entity surface, const alg::Vec3& dir, float radius)
-        { return model.AddRowOfC0CylinderPatches(surface, radius, dir); }
+    void AddRowOfCylinderPatches(Entity cylinder, CylinderType cylinderType, const alg::Vec3& dir, float radius);
 
-    inline void AddColOfC0CylinderPatches(Entity surface, const alg::Vec3& dir, float radius)
-        { return model.AddColOfC0CylinderPatches(surface, radius, dir); }
+    void AddColOfCylinderPatches(Entity cylinder, CylinderType cylinderType, const alg::Vec3& dir, float radius);
 
-    inline void DeleteRowOfC0CylinderPatches(Entity surface, const alg::Vec3& dir, float radius)
-        { return model.DeleteRowOfC0CylinderPatches(surface, radius, dir); }
+    void DeleteRowOfCylinderPatches(Entity cylinder, CylinderType cylinderType, const alg::Vec3& dir, float radius);
 
-    inline void DeleteColOfC0CylinderPatches(Entity surface, const alg::Vec3& dir, float radius)
-        { return model.DeleteColOfC0CylinderPatches(surface, radius, dir); }
+    void DeleteColOfCylinderPatches(Entity cylinder, CylinderType cylinderType, const alg::Vec3& dir, float radius);
 
-    inline void RecalculateC0Cylinder(Entity cylinder, const alg::Vec3& dir, float radius)
-        { return model.RecalculateC0CylinderPatches(cylinder, radius, dir); }
+    void RecalculateCylinder(Entity cylinder, CylinderType cylinderType, const alg::Vec3& dir, float radius);
 
-    inline void RecalculateC0Surface(Entity surface, const alg::Vec3& dir, float length, float width)
-        { return model.RecalculateC0Surface(surface, dir, length, width); }
+    void RecalculateSurface(Entity surface, SurfaceType surfaceType, const alg::Vec3& dir, float length, float width);
 
     inline void AddControlPointToCurve(Entity curve, Entity entity) const
         { model.AddControlPointToCurve(curve, entity); }
@@ -106,11 +96,11 @@ public:
     inline void HideC2BezierPolygon(Entity entity)
         { model.HideC2BezierPolygon(entity); }
 
-    inline void SetNewSurfaceDensity(Entity entity, C0PatchesDensity newDensity)
+    inline void SetNewSurfaceDensity(Entity entity, PatchesDensity newDensity)
         { model.SetSurfaceDensity(entity, newDensity); }
 
-    inline void ShowPatchesPolygon(Entity entity)
-        { model.ShowPatchesPolygon(entity); }
+    inline void ShowPatchesPolygon(Entity entity, const Patches& patches)
+        { model.ShowPatchesPolygon(entity, patches); }
 
     inline void HidePatchesPolygon(Entity entity)
         { model.HidePatchesPolygon(entity); }
