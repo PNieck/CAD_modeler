@@ -24,7 +24,7 @@ public:
     inline void DeleteControlPointsNet(Entity entity)
         { coordinator->DeleteComponent<ControlNetMesh>(entity); }
 
-    void Render() const;
+    void Render(const alg::Mat4x4& cameraMtx) const;
 
     void Update(Entity entity, const Patches& patches);
 

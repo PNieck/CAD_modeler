@@ -4,7 +4,6 @@
 #include "CAD_modeler/model/components/unremovable.hpp"
 #include "CAD_modeler/model/components/name.hpp"
 
-#include "CAD_modeler/model/systems/cameraSystem.hpp"
 #include "CAD_modeler/model/systems/selectionSystem.hpp"
 #include "CAD_modeler/model/systems/pointsSystem.hpp"
 #include "CAD_modeler/model/systems/toUpdateSystem.hpp"
@@ -207,20 +206,16 @@ void C2SurfaceSystem::Recalculate(Entity surface, const Position &pos, const alg
 }
 
 
-void C2SurfaceSystem::Render() const
+void C2SurfaceSystem::Render(const alg::Mat4x4& cameraMtx) const
 {
     if (entities.empty()) {
         return;
     }
 
-    auto const& cameraSystem = coordinator->GetSystem<CameraSystem>();
     auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
-
     auto const& shader = shaderRepo->GetBSplineSurfaceShader();
 
     UpdateEntities();
-
-    alg::Mat4x4 cameraMtx = cameraSystem->PerspectiveMatrix() * cameraSystem->ViewMatrix();
 
     shader.Use();
     shader.SetColor(alg::Vec4(1.0f));

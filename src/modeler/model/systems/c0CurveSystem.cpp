@@ -10,7 +10,6 @@
 #include <CAD_modeler/model/components/name.hpp>
 
 #include <CAD_modeler/model/systems/toUpdateSystem.hpp>
-#include <CAD_modeler/model/systems/cameraSystem.hpp>
 #include <CAD_modeler/model/systems/selectionSystem.hpp>
 
 #include <CAD_modeler/utilities/setIntersection.hpp>
@@ -54,21 +53,18 @@ Entity C0CurveSystem::CreateC0Curve(const std::vector<Entity>& entities)
 }
 
 
-void C0CurveSystem::Render() const
+void C0CurveSystem::Render(const alg::Mat4x4& cameraMtx) const
 {
     if (entities.empty()) {
         return;
     }
 
-    auto const& cameraSystem = coordinator->GetSystem<CameraSystem>();
     auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
 
     auto const& shader = shaderRepo->GetBezierCurveShader();
     std::stack<Entity> polygonsToDraw;
 
     UpdateEntities();
-
-    alg::Mat4x4 cameraMtx = cameraSystem->PerspectiveMatrix() * cameraSystem->ViewMatrix();
 
     shader.Use();
     shader.SetColor(alg::Vec4(1.0f));
@@ -97,17 +93,14 @@ void C0CurveSystem::Render() const
     }
 
     if (!polygonsToDraw.empty())
-        RenderCurvesPolygons(polygonsToDraw);
+        RenderCurvesPolygons(polygonsToDraw, cameraMtx);
 }
 
 
-void C0CurveSystem::RenderCurvesPolygons(std::stack<Entity>& entities) const
+void C0CurveSystem::RenderCurvesPolygons(std::stack<Entity>& entities, const alg::Mat4x4& cameraMtx) const
 {
-    auto const& cameraSystem = coordinator->GetSystem<CameraSystem>();
     auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
     auto const& shader = shaderRepo->GetStdShader();
-
-    alg::Mat4x4 cameraMtx = cameraSystem->PerspectiveMatrix() * cameraSystem->ViewMatrix();
 
     shader.Use();
     shader.SetColor(alg::Vec4(1.0f));

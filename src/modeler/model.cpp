@@ -92,22 +92,29 @@ Model::Model(int viewport_width, int viewport_height)
 }
 
 
-void Model::RenderFrame()
+void Model::RenderDefaultFrame()
 {
+    alg::Mat4x4 persMtx = cameraSys->PerspectiveMatrix();
+    alg::Mat4x4 viewMtx = cameraSys->ViewMatrix();
+    float nearPlane = cameraSys->GetNearPlane();
+    float farPlane = cameraSys->GetFarPlane();
+
+    alg::Mat4x4 cameraMtx = persMtx * viewMtx;
+
     glClear(GL_COLOR_BUFFER_BIT);
 
-    gridSystem->Render();
-    toriSystem->Render();
-    cursorSystem->Render();
-    pointsSystem->Render();
-    selectionSystem->RenderMiddlePoint();
-    c0CurveSystem->Render();
-    c2CurveSystem->Render();
-    interpolationCurveSystem->Render();
-    c0PatchesSystem->Render();
-    c2SurfaceSystem->Render();
-    c2CylinderSystem->Render();
-    controlNetSystem->Render();
+    gridSystem->Render(viewMtx, persMtx, nearPlane, farPlane);
+    toriSystem->Render(cameraMtx);
+    cursorSystem->Render(cameraMtx);
+    pointsSystem->Render(cameraMtx);
+    selectionSystem->RenderMiddlePoint(cameraMtx);
+    c0CurveSystem->Render(cameraMtx);
+    c2CurveSystem->Render(cameraMtx);
+    interpolationCurveSystem->Render(cameraMtx);
+    c0PatchesSystem->Render(cameraMtx);
+    c2SurfaceSystem->Render(cameraMtx);
+    c2CylinderSystem->Render(cameraMtx);
+    controlNetSystem->Render(cameraMtx);
 }
 
 

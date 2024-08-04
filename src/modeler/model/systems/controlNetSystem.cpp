@@ -23,13 +23,13 @@ void ControlNetSystem::AddControlPointsNet(Entity entity, const Patches &patches
 }
 
 
-void ControlNetSystem::Render() const
+void ControlNetSystem::Render(const alg::Mat4x4& cameraMtx) const
 {
-    auto const& cameraSystem = coordinator->GetSystem<CameraSystem>();
+    if (entities.empty())
+        return;
+
     auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
     auto const& shader = shaderRepo->GetStdShader();
-
-    alg::Mat4x4 cameraMtx = cameraSystem->PerspectiveMatrix() * cameraSystem->ViewMatrix();
 
     shader.Use();
     shader.SetColor(alg::Vec4(1.0f));

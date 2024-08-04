@@ -26,7 +26,7 @@ public:
     inline void HideBezierNet(Entity surface)
         { coordinator->GetSystem<ControlNetSystem>()->DeleteControlPointsNet(surface); }
 
-    void Render() const;
+    void Render(const alg::Mat4x4& cameraMtx) const;
 
 private:
     ShaderRepository* shaderRepo;

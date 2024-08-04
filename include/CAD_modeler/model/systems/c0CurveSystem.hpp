@@ -31,7 +31,7 @@ public:
     inline void DeleteControlPoint(Entity bezierCurve, Entity entity)
         { coordinator->GetSystem<CurveControlPointsSystem>()->DeleteControlPoint(bezierCurve, entity); }
 
-    void Render() const;
+    void Render(const alg::Mat4x4& cameraMtx) const;
 
 private:
     ShaderRepository* shaderRepo;
@@ -39,7 +39,7 @@ private:
 
     static constexpr int CONTROL_POINTS_PER_SEGMENT = 4;
 
-    void RenderCurvesPolygons(std::stack<Entity>& entities) const;
+    void RenderCurvesPolygons(std::stack<Entity>& entities, const alg::Mat4x4& cameraMtx) const;
     void UpdateEntities() const;
     void UpdateMesh(Entity curve, const CurveControlPoints& cps) const;
 
