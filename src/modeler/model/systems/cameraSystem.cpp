@@ -32,19 +32,8 @@ alg::Mat4x4 CameraSystem::ViewMatrix() const
     CameraParameters const& params = coordinator->GetComponent<CameraParameters>(camera);
 
     alg::Vec3 direction = (position.vec - params.target.vec).Normalize();
-    alg::Vec3 right = alg::Cross(globalUp, direction).Normalize();
-    alg::Vec3 up = alg::Cross(direction, right).Normalize();
-
-    alg::Mat4x4 result(
-            right.X(),     right.Y(),     right.Z(),     -position.GetX()*right.X() -     position.GetY()*right.Y() -     position.GetZ()*right.Z(),
-               up.X(),        up.Y(),        up.Z(),        -position.GetX()*up.X() -        position.GetY()*up.Y() -        position.GetZ()*up.Z(),
-        direction.X(), direction.Y(), direction.Z(), -position.GetX()*direction.X() - position.GetY()*direction.Y() - position.GetZ()*direction.Z(),
-                 0.0f,          0.0f,          0.0f,                                                                                           1.0f
-    );
-
-    result.TransposeSelf();
-
-    return result;
+    
+    return alg::LookAt(position.vec, direction, globalUp);
 }
 
 
