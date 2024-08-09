@@ -2,7 +2,8 @@
 
 #include <ecs/coordinator.hpp>
 
-#include "model/systems/cameraSystem.hpp"
+#include "model/cameraManager.hpp"
+
 #include "model/systems/toriSystem.hpp"
 #include "model/systems/gridSystem.hpp"
 #include "model/systems/cursorSystem.hpp"
@@ -141,17 +142,16 @@ public:
     inline void DeleteControlPointFromCurve(Entity curve, Entity controlPoint) const
         { c0CurveSystem->DeleteControlPoint(curve, controlPoint); }
 
-    inline void RotateCamera(float x, float y) const
-        { cameraSys->RotateAroundTarget(x, y); }
+    inline void RotateCamera(float x, float y)
+        { cameraManager.RotateCamera(x, y); }
 
     inline float GetCameraDistanceFromTarget() const
-        { return cameraSys->GetDistanceToTarget(); }
+        { return cameraManager.GetDistanceFromTarget(); }
 
-    inline void SetCameraDistance(float newDist) const
-        { cameraSys->SetDistanceToTarget(newDist); }
+    inline void SetCameraDistance(float newDist)
+        { cameraManager.SetDistanceFromTarget(newDist); }
 
-    inline void MultiplyCameraDistanceFromTarget(float coefficient) const
-        { cameraSys->MultiplyDistanceToTarget(coefficient); }
+    void MultiplyCameraDistanceFromTarget(float coefficient);
 
     void ChangeViewportSize(int width, int height);
 
@@ -159,9 +159,10 @@ public:
         { cursorSystem->SetPosition(alg::Vec3(x, y, z)); }
 
     // TODO; Change to normal coordinates
-    void SetCursorPositionFromViewport(float x, float y) const;
+    inline void SetCursorPositionFromViewport(float x, float y)
+        { cursorSystem->SetPosition(PointFromViewportCoordinates(x, y)); }
 
-    Entity Add3DPointFromViewport(float x, float y) const;
+    Entity Add3DPointFromViewport(float x, float y);
 
     inline const std::unordered_set<Entity> EntitiesWithNames() const
         { return nameSystem->EntitiesWithNames(); }
@@ -175,7 +176,7 @@ public:
     inline void Select(Entity entity)
         { return selectionSystem->Select(entity); }
 
-    void TryToSelectFromViewport(float x, float y) const;
+    void TryToSelectFromViewport(float x, float y);
 
     inline void Deselect(Entity entity)
         { return selectionSystem->Deselect(entity); }
@@ -263,7 +264,8 @@ private:
     Coordinator coordinator;
     ShaderRepository shadersRepo;
 
-    std::shared_ptr<CameraSystem> cameraSys;
+    CameraManager cameraManager;
+
     std::shared_ptr<ToriSystem> toriSystem;
     std::shared_ptr<GridSystem> gridSystem;
     std::shared_ptr<CursorSystem> cursorSystem;
@@ -280,6 +282,12 @@ private:
     std::shared_ptr<C2CylinderSystem> c2CylinderSystem;
     std::shared_ptr<ControlNetSystem> controlNetSystem;
 
-    alg::Vec3 PointFromViewportCoordinates(float x, float y) const;
-    Line LineFromViewportCoordinates(float x, float y) const;
+    alg::Vec3 PointFromViewportCoordinates(float x, float y);
+    Line LineFromViewportCoordinates(float x, float y);
+
+    void RenderAnaglyphsFrame();
+
+    void RenderPerspectiveFrame();
+
+    void RenderSystemsObjects(const alg::Mat4x4& viewMtx, const alg::Mat4x4& persMtx, float nearPlane, float farPlane) const;
 };

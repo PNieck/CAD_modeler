@@ -53,4 +53,7 @@ namespace alg
 
 
     alg::Mat4x4 LookAt(const Vec3& cameraPos, const Vec3& direction, const Vec3& upVector);
+
+
+    alg::Mat4x4 Frustum(float near, float far, float left, float right, float top, float bottom);
 }

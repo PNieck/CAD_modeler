@@ -241,3 +241,18 @@ alg::Mat4x4 alg::LookAt(const Vec3 &camPos, const Vec3 &dir, const Vec3 &upVecto
 
     return coordTransform * translation;
 }
+
+
+alg::Mat4x4 alg::Frustum(float near, float far, float left, float right, float top, float bottom)
+{
+    alg::Mat4x4 result(
+        2.f*near/(right-left), 0.f, (right + left)/(right-left), 0.f,
+        0.f, 2*near/(top-bottom), (top+bottom)/(top-bottom), 0.f,
+        0.f, 0.f, -(far+near)/(far-near), -2*far*near/(far-near),
+        0.f, 0.f, -1.f, 0.f
+    );
+
+    result.TransposeSelf();
+
+    return result;
+}
