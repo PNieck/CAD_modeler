@@ -44,7 +44,7 @@ alg::Mat4x4 AnaglyphsCameraSystem::PerspectiveMatrix() const
 {
     auto const& params = coordinator->GetComponent<AnaglyphsCameraParameters>(camera);
 
-    float aspectRatio = static_cast<float>(params.viewportWidth) / static_cast<float>(params.viewportHeight);
+    float aspectRatio = params.GetAspectRatio();
 
     float top = std::tan(params.fov / 2.0f) * params.near_plane;
     float bottom = -top;

@@ -39,7 +39,7 @@ alg::Mat4x4 CameraSystem::PerspectiveMatrix() const
 {
     CameraParameters const& params = coordinator->GetComponent<CameraParameters>(camera);
 
-    float aspectRatio = static_cast<float>(params.viewportWidth) / static_cast<float>(params.viewportHeight);
+    float aspectRatio = params.GetAspectRatio();
 
     float v1 = 1.0f/std::tan(params.fov/2.0);
     float v2 = v1/aspectRatio;
