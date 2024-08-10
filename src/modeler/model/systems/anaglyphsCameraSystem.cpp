@@ -49,25 +49,22 @@ alg::Mat4x4 AnaglyphsCameraSystem::PerspectiveMatrix() const
     float top = std::tan(params.fov / 2.0f) * params.near_plane;
     float bottom = -top;
 
-    float a = aspectRatio * std::tan(params.fov / 2.0f) * params.convergence;
-    float b = a - params.eyeSeparation/2.0f;
-    float c = a + params.eyeSeparation/2.0f;
+    float convPlaneWidth = 2.f * params.convergence * aspectRatio * std::tan(params.fov / 2.0f);
 
     float left, right;
 
     switch (currentEye)
     {
     case Eye::Left:
-        left = -b * params.near_plane/params.convergence;
-        right = c * params.near_plane/params.convergence;
+        left = params.near_plane * (convPlaneWidth + params.eyeSeparation) / (2.f * params.convergence);
+        right = -params.near_plane * (convPlaneWidth - params.eyeSeparation) / (2.f * params.convergence);
         break;
 
     case Eye::Right:
-        left = -c * params.near_plane/params.convergence;
-        right = b * params.near_plane/params.convergence;
+        left = params.near_plane * (convPlaneWidth - params.eyeSeparation) / (2.f * params.convergence);
+        right = -params.near_plane * (convPlaneWidth + params.eyeSeparation) / (2.f * params.convergence);
         break;
     }
-
 
     return alg::Frustum(
         params.near_plane,
