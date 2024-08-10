@@ -61,7 +61,8 @@ private:
 
     std::variant<PerspectiveSys, AnaglyphsSys> currentCameraSys;
 
-    float eyeSeparation, convergence;
+    float eyeSeparation = 1.0f;
+    float convergence = 20.f;
 
     void SwitchToPerspectiveCameraType();
 
