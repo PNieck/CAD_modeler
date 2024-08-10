@@ -74,7 +74,10 @@ void GlController::MouseMove(int x, int y)
 
     if (mouseState.IsButtonClicked(MouseButton::Middle)) {
         auto offset = mouseState.TranslationGet();
-        model.RotateCamera(offset.Y() * 0.02f, offset.X() * 0.02f);
+        model.cameraManager.RotateCamera(
+            offset.Y() * ROTATION_COEFF,
+            offset.X() * ROTATION_COEFF
+        );
     }
 }
 
@@ -104,5 +107,6 @@ void GlController::ScrollMoved(int offset)
         val = (-1.0f) / val;
     }
 
-    model.MultiplyCameraDistanceFromTarget(val);
+    float dist = model.cameraManager.GetDistanceFromTarget();
+    model.cameraManager.SetDistanceFromTarget(dist*val);
 }

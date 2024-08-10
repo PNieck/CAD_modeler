@@ -142,17 +142,6 @@ public:
     inline void DeleteControlPointFromCurve(Entity curve, Entity controlPoint) const
         { c0CurveSystem->DeleteControlPoint(curve, controlPoint); }
 
-    inline void RotateCamera(float x, float y)
-        { cameraManager.RotateCamera(x, y); }
-
-    inline float GetCameraDistanceFromTarget() const
-        { return cameraManager.GetDistanceFromTarget(); }
-
-    inline void SetCameraDistance(float newDist)
-        { cameraManager.SetDistanceFromTarget(newDist); }
-
-    void MultiplyCameraDistanceFromTarget(float coefficient);
-
     void ChangeViewportSize(int width, int height);
 
     inline void SetCursorPosition(float x, float y, float z) const

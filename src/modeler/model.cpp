@@ -116,13 +116,6 @@ void Model::AddTorus()
 }
 
 
-void Model::MultiplyCameraDistanceFromTarget(float coefficient)
-{
-    float act = cameraManager.GetDistanceFromTarget();
-    cameraManager.SetDistanceFromTarget(act * coefficient);
-}
-
-
 void Model::ChangeViewportSize(int width, int height)
 {
     glViewport(0, 0, width, height);
