@@ -215,7 +215,7 @@ void Model::RenderAnaglyphsFrame()
     auto camParams = cameraManager.GetBaseParams();
 
     glColorMask(true, false, false, false);
-    RenderSystemsObjects(viewMtx, persMtx, camParams.near_plane, camParams.far_plane);
+    RenderSystemsObjects(viewMtx, persMtx, camParams.nearPlane, camParams.farPlane);
 
     // Render picture for right eye
     cameraManager.SetCurrentEye(CameraManager::Eye::Right);
@@ -223,7 +223,7 @@ void Model::RenderAnaglyphsFrame()
     viewMtx = cameraManager.ViewMtx();
 
     glColorMask(false, true, true, false);
-    RenderSystemsObjects(viewMtx, persMtx, camParams.near_plane, camParams.far_plane);
+    RenderSystemsObjects(viewMtx, persMtx, camParams.nearPlane, camParams.farPlane);
 
     // Setting mask back to normal
     glColorMask(true, true, true, true);
@@ -238,7 +238,7 @@ void Model::RenderPerspectiveFrame()
 
     glClear(GL_COLOR_BUFFER_BIT);
 
-    RenderSystemsObjects(viewMtx, persMtx, camParams.near_plane, camParams.far_plane);
+    RenderSystemsObjects(viewMtx, persMtx, camParams.nearPlane, camParams.farPlane);
 }
 
 
