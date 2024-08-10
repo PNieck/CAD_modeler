@@ -260,11 +260,12 @@ public:
     static inline constexpr ComponentId GetComponentId()
         { return ComponentsManager::GetComponentId<Comp>(); }
 
+    CameraManager cameraManager;
+
 private:
+    
     Coordinator coordinator;
     ShaderRepository shadersRepo;
-
-    CameraManager cameraManager;
 
     std::shared_ptr<ToriSystem> toriSystem;
     std::shared_ptr<GridSystem> gridSystem;

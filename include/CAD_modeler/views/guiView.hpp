@@ -2,6 +2,7 @@
 
 #include "../controllers/guiController.hpp"
 #include "../model.hpp"
+#include "mainMenuBar.hpp"
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
@@ -18,6 +19,8 @@ private:
     GuiController& controller;
     const Model& model;
 
+    MainMenuBar menuBar;
+
     static constexpr float DRAG_FLOAT_SPEED = 0.01f;
     static constexpr float DRAG_ANGLE_SPEED = 0.5f;
     static constexpr float MIN_SCALE = 0.01f;
@@ -28,6 +31,8 @@ private:
     void RenderAddingCurveGui(CurveType curveType) const;
     void RenderAddingSurface(SurfaceType surfaceType) const;
     void RenderAddingCylinder(CylinderType CylinderType) const;
+
+    void RenderAnaglyphsCameraSettings() const;
 
     void RenderObjectsNames() const;
     void RenderObjectsProperties() const;

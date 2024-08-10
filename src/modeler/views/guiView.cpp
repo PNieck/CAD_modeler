@@ -15,7 +15,7 @@
 
 
 GuiView::GuiView(GLFWwindow* window, GuiController& controller, const Model& model):
-    controller(controller), model(model)
+    controller(controller), model(model), menuBar(controller, model)
 {
     // FIXME: function, which generates glsl version string
     const char* glsl_version = "#version 410";
@@ -49,6 +49,8 @@ void GuiView::RenderGui() const
     ImGui::NewFrame();
 
     ImGui::Begin("Modeler");
+
+    menuBar.Render();
     
     switch (controller.GetAppState())
     {
@@ -86,6 +88,10 @@ void GuiView::RenderGui() const
 
         case AppState::AddingC2Cylinder:
             RenderAddingCylinder(CylinderType::C2);
+            break;
+
+        case AppState::AnaglyphsSettings:
+            RenderAnaglyphsCameraSettings();
             break;
 
         default:
@@ -399,6 +405,24 @@ void GuiView::RenderAddingCylinder(CylinderType cylinderType) const
         controller.SetAppState(AppState::Default);
         entity.reset();
     }
+}
+
+
+void GuiView::RenderAnaglyphsCameraSettings() const
+{
+    float eyeSeparation = model.cameraManager.GetEyeSeparation();
+    float convergence = model.cameraManager.GetConvergence();
+
+    ImGui::Text("Anaglyphs camera settings");
+
+    if (ImGui::DragFloat("Eye separation", &eyeSeparation, DRAG_FLOAT_SPEED))
+        controller.SetEyeSeparation(eyeSeparation);
+    
+    if (ImGui::DragFloat("Convergence", &convergence, DRAG_FLOAT_SPEED))
+        controller.SetConvergence(convergence);
+
+    if (ImGui::Button("Ok"))
+        controller.SetAppState(AppState::Default);
 }
 
 
