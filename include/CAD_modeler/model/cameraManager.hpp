@@ -26,12 +26,6 @@ public:
     alg::Mat4x4 PerspectiveMtx() const;
     alg::Mat4x4 ViewMtx() const;
 
-    inline float GetNearPlane() const
-        { return GetBaseParams().near_plane; }
-
-    inline float GetFarPlane() const
-        { return GetBaseParams().far_plane; }
-
     void RotateCamera(float x, float y);
 
     float GetDistanceFromTarget() const;

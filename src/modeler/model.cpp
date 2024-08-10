@@ -212,21 +212,18 @@ void Model::RenderAnaglyphsFrame()
     cameraManager.SetCurrentEye(CameraManager::Eye::Left);
     alg::Mat4x4 persMtx = cameraManager.PerspectiveMtx();
     alg::Mat4x4 viewMtx = cameraManager.ViewMtx();
-    float nearPlane = cameraManager.GetNearPlane();
-    float farPlane = cameraManager.GetFarPlane();
+    auto camParams = cameraManager.GetBaseParams();
 
     glColorMask(true, false, false, false);
-    RenderSystemsObjects(viewMtx, persMtx, nearPlane, farPlane);
+    RenderSystemsObjects(viewMtx, persMtx, camParams.near_plane, camParams.far_plane);
 
     // Render picture for right eye
     cameraManager.SetCurrentEye(CameraManager::Eye::Right);
     persMtx = cameraManager.PerspectiveMtx();
     viewMtx = cameraManager.ViewMtx();
-    nearPlane = cameraManager.GetNearPlane();
-    farPlane = cameraManager.GetFarPlane();
 
     glColorMask(false, true, true, false);
-    RenderSystemsObjects(viewMtx, persMtx, nearPlane, farPlane);
+    RenderSystemsObjects(viewMtx, persMtx, camParams.near_plane, camParams.far_plane);
 
     // Setting mask back to normal
     glColorMask(true, true, true, true);
@@ -237,12 +234,11 @@ void Model::RenderPerspectiveFrame()
 {
     alg::Mat4x4 persMtx = cameraManager.PerspectiveMtx();
     alg::Mat4x4 viewMtx = cameraManager.ViewMtx();
-    float nearPlane = cameraManager.GetNearPlane();
-    float farPlane = cameraManager.GetFarPlane();
+    auto camParams = cameraManager.GetBaseParams();
 
     glClear(GL_COLOR_BUFFER_BIT);
 
-    RenderSystemsObjects(viewMtx, persMtx, nearPlane, farPlane);
+    RenderSystemsObjects(viewMtx, persMtx, camParams.near_plane, camParams.far_plane);
 }
 
 
