@@ -20,7 +20,7 @@ void GridSystem::Init(ShaderRepository * shaderRepo)
 
     Mesh mesh;
     std::vector<float> vertices = {
-         1.0f,  1.0f, 0.0f,  //
+         1.0f,  1.0f, 0.0f,
          1.0f, -1.0f, 0.0f,
         -1.0f, -1.0f, 0.0f,
         -1.0f,  1.0f, 0.0f
@@ -40,20 +40,16 @@ void GridSystem::Init(ShaderRepository * shaderRepo)
 }
 
 
-void GridSystem::Render() const
+void GridSystem::Render(const alg::Mat4x4& viewMtx, const alg::Mat4x4& projMtx, float nearPlane, float farPlane) const
 {
-    auto const& cameraSystem = coordinator->GetSystem<CameraSystem>();
     auto const& gridMesh = coordinator->GetComponent<Mesh>(grid);
     auto const& gridShader = shaderRepo->GetGridShader();
 
-    alg::Mat4x4 viewMtx = cameraSystem->ViewMatrix();
-    alg::Mat4x4 projectionMtx = cameraSystem->PerspectiveMatrix();
-
     gridShader.Use();
-    gridShader.SetFarPlane(cameraSystem->GetFarPlane());
-    gridShader.SetNearPlane(cameraSystem->GetNearPlane());
+    gridShader.SetFarPlane(farPlane);
+    gridShader.SetNearPlane(nearPlane);
     gridShader.SetViewMatrix(viewMtx);
-    gridShader.SetProjectionMatrix(projectionMtx);
+    gridShader.SetProjectionMatrix(projMtx);
     
     gridMesh.Use();
     glDrawElements(GL_TRIANGLES, gridMesh.GetElementsCnt(), GL_UNSIGNED_INT, 0);

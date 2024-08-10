@@ -4,7 +4,6 @@
 #include "CAD_modeler/model/components/curveControlPoints.hpp"
 #include "CAD_modeler/model/components/mesh.hpp"
 
-#include "CAD_modeler/model/systems/cameraSystem.hpp"
 #include "CAD_modeler/model/systems/selectionSystem.hpp"
 #include "CAD_modeler/model/systems/toUpdateSystem.hpp"
 
@@ -30,20 +29,17 @@ void C0PatchesSystem::ShowBezierNet(Entity surface)
 }
 
 
-void C0PatchesSystem::Render() const
+void C0PatchesSystem::Render(const alg::Mat4x4& cameraMtx) const
 {
     if (entities.empty()) {
         return;
     }
 
-    auto const& cameraSystem = coordinator->GetSystem<CameraSystem>();
     auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
 
     auto const& shader = shaderRepo->GetBezierSurfaceShader();
 
     UpdateEntities();
-
-    alg::Mat4x4 cameraMtx = cameraSystem->PerspectiveMatrix() * cameraSystem->ViewMatrix();
 
     shader.Use();
     shader.SetColor(alg::Vec4(1.0f));

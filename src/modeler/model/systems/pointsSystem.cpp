@@ -2,7 +2,6 @@
 
 #include <ecs/coordinator.hpp>
 
-#include <CAD_modeler/model/systems/cameraSystem.hpp>
 #include <CAD_modeler/model/systems/selectionSystem.hpp>
 
 #include <CAD_modeler/model/components/name.hpp>
@@ -42,17 +41,14 @@ Entity PointsSystem::CreatePoint(const Position& pos, bool createName)
 }
 
 
-void PointsSystem::Render() const
+void PointsSystem::Render(const alg::Mat4x4& cameraMtx) const
 {
     if (entities.empty()) {
         return;
     }
 
-    auto const& cameraSystem = coordinator->GetSystem<CameraSystem>();
     auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
     auto const& shader = shaderRepo->GetStdShader();
-
-    alg::Mat4x4 cameraMtx = cameraSystem->PerspectiveMatrix() * cameraSystem->ViewMatrix();
 
     shader.Use();
     shader.SetColor(alg::Vec4(1.0f));

@@ -1,6 +1,7 @@
 #include <algebra/mat4x4.hpp>
 
 #include <algorithm>
+#include <cassert>
 
 
 alg::Mat4x4::Mat4x4(float _00, float _01, float _02, float _03, float _10, float _11, float _12, float _13, float _20, float _21, float _22, float _23, float _30, float _31, float _32, float _33)
@@ -47,6 +48,7 @@ std::optional<alg::Mat4x4> alg::Mat4x4::Inverse() const
 
     det = data[0] * result.data[0] + data[1] * result.data[4] + data[2] * result.data[8] + data[3] * result.data[12];
 
+    // Checking if matrix can be inverted
     if (det == 0)
         return {};
 
@@ -203,6 +205,54 @@ alg::Mat4x4 alg::operator*(const Mat4x4 & mat1, const Mat4x4 & mat2)
             }
         }
     }
+
+    return result;
+}
+
+
+alg::Mat4x4 alg::TranslationMtx(const Vec3 &vec)
+{
+    return alg::Mat4x4(
+           1.0f,    0.0f,    0.0f, 0.0f,
+           0.0f,    1.0f,    0.0f, 0.0f,
+           0.0f,    0.0f,    1.0f, 0.0f,
+        vec.X(), vec.Y(), vec.Z(), 1.0f
+    );
+}
+
+
+alg::Mat4x4 alg::LookAt(const Vec3 &camPos, const Vec3 &dir, const Vec3 &upVector)
+{
+    assert(dir.LengthSquared() != 0.f);
+    assert(upVector.LengthSquared() != 0.f);
+
+    alg::Vec3 right = Cross(upVector, dir).Normalize();
+    alg::Vec3 up = Cross(dir, right).Normalize();
+
+    alg::Mat4x4 translation = TranslationMtx(-camPos);
+
+    // Matrix which translates canonical coordinate system to camera one
+    alg::Mat4x4 coordTransform(
+        right.X(), up.X(), dir.X(), 0.f,
+        right.Y(), up.Y(), dir.Y(), 0.f,
+        right.Z(), up.Z(), dir.Z(), 0.f,
+              0.f,    0.f,     0.f, 1.f
+    );
+
+    return coordTransform * translation;
+}
+
+
+alg::Mat4x4 alg::Frustum(float near, float far, float left, float right, float top, float bottom)
+{
+    alg::Mat4x4 result(
+        2.f*near/(right-left), 0.f, (right + left)/(right-left), 0.f,
+        0.f, 2*near/(top-bottom), (top+bottom)/(top-bottom), 0.f,
+        0.f, 0.f, -(far+near)/(far-near), -2*far*near/(far-near),
+        0.f, 0.f, -1.f, 0.f
+    );
+
+    result.TransposeSelf();
 
     return result;
 }

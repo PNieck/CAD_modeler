@@ -10,7 +10,6 @@
 #include <CAD_modeler/model/components/bSplinePolygonMesh.hpp>
 #include <CAD_modeler/model/components/unremovable.hpp>
 
-#include <CAD_modeler/model/systems/cameraSystem.hpp>
 #include <CAD_modeler/model/systems/selectionSystem.hpp>
 #include <CAD_modeler/model/systems/toUpdateSystem.hpp>
 #include <CAD_modeler/model/systems/pointsSystem.hpp>
@@ -140,13 +139,12 @@ void C2CurveSystem::HideBezierControlPoints(Entity entity)
 }
 
 
-void C2CurveSystem::Render() const
+void C2CurveSystem::Render(const alg::Mat4x4& cameraMtx) const
 {
      if (entities.empty()) {
         return;
     }
 
-    auto const& cameraSystem = coordinator->GetSystem<CameraSystem>();
     auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
 
     auto const& shader = shaderRepo->GetBezierCurveShader();
@@ -154,8 +152,6 @@ void C2CurveSystem::Render() const
     std::stack<Entity> bezierPolygonsToDraw;
 
     UpdateEntities();
-
-    alg::Mat4x4 cameraMtx = cameraSystem->PerspectiveMatrix() * cameraSystem->ViewMatrix();
 
     shader.Use();
     shader.SetColor(alg::Vec4(1.0f));
@@ -185,10 +181,10 @@ void C2CurveSystem::Render() const
     }
 
     if (!bSplinePolygonsToDraw.empty())
-        RenderBSplinePolygons(bSplinePolygonsToDraw);
+        RenderBSplinePolygons(bSplinePolygonsToDraw, cameraMtx);
 
     if (!bezierPolygonsToDraw.empty())
-        RenderBezierPolygons(bezierPolygonsToDraw);
+        RenderBezierPolygons(bezierPolygonsToDraw, cameraMtx);
 }
 
 
@@ -329,13 +325,10 @@ void C2CurveSystem::UpdateBezierCtrlPtsHandlers(Entity curve, BezierControlPoint
 }
 
 
-void C2CurveSystem::RenderBSplinePolygons(std::stack<Entity>& entities) const
+void C2CurveSystem::RenderBSplinePolygons(std::stack<Entity>& entities, const alg::Mat4x4& cameraMtx) const
 {
-    auto const& cameraSystem = coordinator->GetSystem<CameraSystem>();
     auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
     auto const& shader = shaderRepo->GetStdShader();
-
-    alg::Mat4x4 cameraMtx = cameraSystem->PerspectiveMatrix() * cameraSystem->ViewMatrix();
 
     shader.Use();
     shader.SetColor(alg::Vec4(1.0f));
@@ -361,13 +354,10 @@ void C2CurveSystem::RenderBSplinePolygons(std::stack<Entity>& entities) const
 }
 
 
-void C2CurveSystem::RenderBezierPolygons(std::stack<Entity>& entities) const
+void C2CurveSystem::RenderBezierPolygons(std::stack<Entity>& entities, const alg::Mat4x4& cameraMtx) const
 {
-    auto const& cameraSystem = coordinator->GetSystem<CameraSystem>();
     auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
     auto const& shader = shaderRepo->GetStdShader();
-
-    alg::Mat4x4 cameraMtx = cameraSystem->PerspectiveMatrix() * cameraSystem->ViewMatrix();
 
     shader.Use();
     shader.SetColor(alg::Vec4(1.0f));

@@ -29,7 +29,7 @@ TEST(CameraSystemsTests, Initialization) {
 
     cameraSystem->Init(params, Position(0.0f, 0.0f, 10.0f));
 
-    EXPECT_EQ(0.1f, cameraSystem->GetNearPlane());
+    EXPECT_EQ(0.1f, cameraSystem->GetParameters().near_plane);
 }
 
 
@@ -53,13 +53,11 @@ TEST(CameraSystemsTests, SimplePerspectiveMatrixCompareWithGLM) {
 
     auto systemProjectionMatrix = cameraSystem->PerspectiveMatrix();
     auto glmMatrix = glm::perspective(
-        cameraSystem->GetFov(),
-        (float)cameraSystem->GetViewportWidth()/(float)cameraSystem->GetViewportHeight(),
-        cameraSystem->GetNearPlane(),
-        cameraSystem->GetFarPlane()
+        params.fov,
+        params.GetAspectRatio(),
+        params.near_plane,
+        params.far_plane
     );
-
-    std::cout << glm::to_string(glmMatrix) << "\n\n";
 
     for (int row=0; row < 4; row++) {
         for (int col=0; col < 4; col++) {

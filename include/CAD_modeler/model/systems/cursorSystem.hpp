@@ -13,7 +13,7 @@ public:
 
     void Init(ShaderRepository* shadersRepo);
 
-    void Render();
+    void Render(const alg::Mat4x4& cameraMtx);
 
     void SetPosition(const alg::Vec3& position);
 

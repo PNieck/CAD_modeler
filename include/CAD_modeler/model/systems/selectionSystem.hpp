@@ -26,9 +26,10 @@ public:
 
     void DeselectAllEntities();
 
+    // TODO: change to ray
     void SelectFromLine(const Line& line);
 
-    void RenderMiddlePoint();
+    void RenderMiddlePoint(const alg::Mat4x4& cameraMtx);
 
     inline Entity GetMiddlePoint() const
         { return middlePoint; }

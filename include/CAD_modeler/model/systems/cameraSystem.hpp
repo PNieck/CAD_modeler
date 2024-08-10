@@ -1,6 +1,8 @@
 #pragma once
 
 #include <ecs/system.hpp>
+#include <ecs/coordinator.hpp>
+
 #include "../components/position.hpp"
 #include "../components/cameraParameters.hpp"
 
@@ -16,29 +18,18 @@ public:
     alg::Mat4x4 ViewMatrix() const;
     alg::Mat4x4 PerspectiveMatrix() const;
 
-    void RotateAroundTarget(float x, float y) const;
 
-    Position GetPosition() const;
+    inline Position GetCameraPos() const
+        { return coordinator->GetComponent<Position>(camera); }
 
-    Position GetTargetPosition() const;
+    inline void SetCameraPos(const Position& pos)
+        { coordinator->SetComponent<Position>(camera, pos); }
 
-    float GetDistanceToTarget() const;
+    inline CameraParameters GetParameters() const
+        { return coordinator->GetComponent<CameraParameters>(camera); }
 
-    void SetDistanceToTarget(float newDist) const;
-
-    void MultiplyDistanceToTarget(float coefficient) const;
-
-    float GetNearPlane() const;
-
-    float GetFarPlane() const;
-
-    int GetViewportWidth() const;
-
-    int GetViewportHeight() const;
-
-    float GetFov() const;
-
-    void ChangeViewportSize(int width, int height) const;
+    inline void SetParameters(const CameraParameters& params)
+        { coordinator->SetComponent<CameraParameters>(camera, params); }
 
     inline Entity GetCameraEntity() const
         { return camera; }

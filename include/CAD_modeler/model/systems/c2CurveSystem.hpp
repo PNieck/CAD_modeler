@@ -40,7 +40,7 @@ public:
     void ShowBezierControlPoints(Entity entity);
     void HideBezierControlPoints(Entity entity);
 
-    void Render() const;
+    void Render(const alg::Mat4x4& cameraMtx) const;
 
 private:
     ShaderRepository* shaderRepo;
@@ -54,8 +54,8 @@ private:
     void UpdateBezierControlPoints(Entity curve, const C2CurveParameters& params) const;
     void UpdateBezierCtrlPtsHandlers(Entity curve, BezierControlPoints& cps) const;
 
-    void RenderBSplinePolygons(std::stack<Entity>& entities) const;
-    void RenderBezierPolygons(std::stack<Entity>& entities) const;
+    void RenderBSplinePolygons(std::stack<Entity>& entities, const alg::Mat4x4& cameraMtx) const;
+    void RenderBezierPolygons(std::stack<Entity>& entities, const alg::Mat4x4& cameraMtx) const;
 
     BezierControlPoints CreateBezierControlPoints(const CurveControlPoints& cps) const;
     void DeleteBezierControlPoints(Entity entity) const;

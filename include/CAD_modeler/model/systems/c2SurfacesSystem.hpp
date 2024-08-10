@@ -41,7 +41,7 @@ public:
 
     void Recalculate(Entity surface, const Position& pos, const alg::Vec3& direction, float length, float width) const;
 
-    void Render() const;
+    void Render(const alg::Mat4x4& cameraMtx) const;
 
 private:
     class DeletionHandler;

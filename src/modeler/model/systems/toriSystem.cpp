@@ -7,7 +7,6 @@
 #include <CAD_modeler/model/components/mesh.hpp>
 #include <CAD_modeler/model/components/name.hpp>
 
-#include <CAD_modeler/model/systems/cameraSystem.hpp>
 #include <CAD_modeler/model/systems/selectionSystem.hpp>
 
 #include <vector>
@@ -70,17 +69,14 @@ void ToriSystem::SetTorusParameter(Entity entity, const TorusParameters& params)
 }
 
 
-void ToriSystem::Render()
+void ToriSystem::Render(const alg::Mat4x4& cameraMtx)
 {
     if (entities.empty()) {
         return;
     }
 
-    auto const& cameraSystem = coordinator->GetSystem<CameraSystem>();
     auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
     auto const& shader = shadersRepo->GetStdShader();
-
-    alg::Mat4x4 cameraMtx = cameraSystem->PerspectiveMatrix() * cameraSystem->ViewMatrix();
 
     shader.Use();
     shader.SetColor(alg::Vec4(1.0f));

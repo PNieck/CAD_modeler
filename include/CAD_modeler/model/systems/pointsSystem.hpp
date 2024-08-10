@@ -18,7 +18,7 @@ public:
 
     Entity CreatePoint(const Position& pos = Position(), bool createName = true);
 
-    void Render() const;
+    void Render(const alg::Mat4x4& cameraMtx) const;
 
 private:
     Mesh pointsMesh;

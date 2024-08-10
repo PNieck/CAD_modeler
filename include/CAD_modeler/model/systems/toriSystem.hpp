@@ -17,7 +17,7 @@ public:
 
     void SetTorusParameter(Entity entity, const TorusParameters& params);
 
-    void Render();
+    void Render(const alg::Mat4x4& cameraMtx);
 
 private:
     NameGenerator nameGenerator;

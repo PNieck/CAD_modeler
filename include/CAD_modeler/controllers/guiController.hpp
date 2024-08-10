@@ -15,6 +15,16 @@ public:
     inline bool WantCaptureMouse()
         { return ImGui::GetIO().WantCaptureMouse; }
 
+    inline void SetEyeSeparation(float newValue)
+        { model.cameraManager.SetEyeSeparation(newValue); }
+
+    inline void SetConvergence(float newValue)
+        { model.cameraManager.SetConvergence(newValue); }
+
+    using CameraType = CameraManager::CameraType;
+    inline void SetCameraType(CameraType type)
+        { model.cameraManager.SetCameraType(type); }
+
     inline void AddTorus() const
         { model.AddTorus(); }
 

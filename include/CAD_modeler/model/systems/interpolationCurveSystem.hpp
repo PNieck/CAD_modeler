@@ -26,7 +26,7 @@ public:
     inline void DeleteControlPoint(Entity bezierCurve, Entity entity)
         { coordinator->GetSystem<CurveControlPointsSystem>()->DeleteControlPoint(bezierCurve, entity); }
 
-    void Render() const;
+    void Render(const alg::Mat4x4& cameraMtx) const;
 
 private:
     ShaderRepository* shaderRepo;

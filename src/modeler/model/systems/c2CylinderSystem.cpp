@@ -8,7 +8,6 @@
 #include "CAD_modeler/model/systems/pointsSystem.hpp"
 #include "CAD_modeler/model/systems/toUpdateSystem.hpp"
 #include "CAD_modeler/model/systems/curveControlPointsSystem.hpp"
-#include "CAD_modeler/model/systems/cameraSystem.hpp"
 #include "CAD_modeler/model/systems/selectionSystem.hpp"
 #include "CAD_modeler/model/systems/controlNetSystem.hpp"
 
@@ -250,20 +249,16 @@ void C2CylinderSystem::ControlPointMovedHandler::HandleEvent(Entity entity, cons
 }
 
 
-void C2CylinderSystem::Render() const
+void C2CylinderSystem::Render(const alg::Mat4x4& cameraMtx) const
 {
     if (entities.empty()) {
         return;
     }
 
-    auto const& cameraSystem = coordinator->GetSystem<CameraSystem>();
     auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
-
     auto const& shader = shaderRepo->GetBSplineSurfaceShader();
 
     UpdateEntities();
-
-    alg::Mat4x4 cameraMtx = cameraSystem->PerspectiveMatrix() * cameraSystem->ViewMatrix();
 
     shader.Use();
     shader.SetColor(alg::Vec4(1.0f));

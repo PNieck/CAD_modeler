@@ -172,3 +172,23 @@ TEST(MatrixTests, MatrixInversion) {
         }
     }
 }
+
+
+TEST(MatrixTests, FrustumMatrixComparison)
+{
+    float near = 0.1f;
+    float far = 100.0f;
+    float top = 5.0f;
+    float bottom = -2.0f;
+    float right = 2.0f;
+    float left = -4.0f;
+
+    auto algMtx = alg::Frustum(near, far, left, right, top, bottom);
+    auto glmMtx = glm::frustum(left, right, bottom, top, near, far);
+
+    for (int row=0; row < 4; row++) {
+        for (int col=0; col < 4; col++) {
+            ASSERT_EQ(algMtx(row, col), glmMtx[row][col]);
+        }
+    }
+}

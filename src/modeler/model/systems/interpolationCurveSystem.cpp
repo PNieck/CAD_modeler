@@ -5,7 +5,6 @@
 #include <CAD_modeler/model/components/name.hpp>
 
 #include <CAD_modeler/model/systems/toUpdateSystem.hpp>
-#include <CAD_modeler/model/systems/cameraSystem.hpp>
 #include <CAD_modeler/model/systems/selectionSystem.hpp>
 
 #include <CAD_modeler/utilities/setIntersection.hpp>
@@ -40,20 +39,17 @@ Entity InterpolationCurveSystem::CreateCurve(const std::vector<Entity> &controlP
 }
 
 
-void InterpolationCurveSystem::Render() const
+void InterpolationCurveSystem::Render(const alg::Mat4x4& cameraMtx) const
 {
     if (entities.empty()) {
         return;
     }
 
-    auto const& cameraSystem = coordinator->GetSystem<CameraSystem>();
     auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
 
     auto const& shader = shaderRepo->GetBezierCurveShader();
 
     UpdateEntities();
-
-    alg::Mat4x4 cameraMtx = cameraSystem->PerspectiveMatrix() * cameraSystem->ViewMatrix();
 
     shader.Use();
     shader.SetColor(alg::Vec4(1.0f));

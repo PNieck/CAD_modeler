@@ -10,7 +10,7 @@ public:
 
     void Init(ShaderRepository* shaderRepo);
 
-    void Render() const;
+    void Render(const alg::Mat4x4& viewMtx, const alg::Mat4x4& projMtx, float nearPlane, float farPlane) const;
 
 private:
     Entity grid;

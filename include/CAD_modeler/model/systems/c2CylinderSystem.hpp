@@ -41,7 +41,7 @@ public:
 
     void Recalculate(Entity cylinder, const Position& pos, const alg::Vec3& direction, float radius) const;
 
-    void Render() const;
+    void Render(const alg::Mat4x4& cameraMtx) const;
 
 private:
     static constexpr int doublePointsCnt = 3;

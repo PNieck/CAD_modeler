@@ -8,7 +8,6 @@
 
 #include <CAD_modeler/model/systems/pointsSystem.hpp>
 #include <CAD_modeler/model/systems/toriSystem.hpp>
-#include <CAD_modeler/model/systems/cameraSystem.hpp>
 
 #include <stdexcept>
 
@@ -103,16 +102,13 @@ void SelectionSystem::SelectFromLine(const Line& line)
 }
 
 
-void SelectionSystem::RenderMiddlePoint()
+void SelectionSystem::RenderMiddlePoint(const alg::Mat4x4& cameraMtx)
 {
     if (entities.size() < 2)
         return;
 
-    auto const& cameraSystem = coordinator->GetSystem<CameraSystem>();
     auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
     auto const& shader = shadersRepo->GetStdShader();
-
-    alg::Mat4x4 cameraMtx = cameraSystem->PerspectiveMatrix() * cameraSystem->ViewMatrix();
 
     auto const& mesh = coordinator->GetComponent<Mesh>(middlePoint);
     auto const& position = coordinator->GetComponent<Position>(middlePoint);

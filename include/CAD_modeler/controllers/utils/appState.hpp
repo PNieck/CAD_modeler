@@ -3,6 +3,7 @@
 
 enum class AppState {
     Default,
+
     Adding3dPoints,
     AddingC0Curve,
     AddingC2Curve,
@@ -10,5 +11,7 @@ enum class AppState {
     AddingC0Surface,
     AddingC2Surface,
     AddingC0Cylinder,
-    AddingC2Cylinder
+    AddingC2Cylinder,
+
+    AnaglyphsSettings
 };

@@ -43,13 +43,11 @@ void CursorSystem::Init(ShaderRepository* shadersRepo)
 }
 
 
-void CursorSystem::Render()
+void CursorSystem::Render(const alg::Mat4x4& cameraMtx)
 {
-    auto const& cameraSystem = coordinator->GetSystem<CameraSystem>();
+
     auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
     auto const& shader = shaderRepo->GetStdShader();
-
-    alg::Mat4x4 cameraMtx = cameraSystem->PerspectiveMatrix() * cameraSystem->ViewMatrix();
 
     auto const& mesh = coordinator->GetComponent<Mesh>(cursor);
     auto const& position = coordinator->GetComponent<Position>(cursor);

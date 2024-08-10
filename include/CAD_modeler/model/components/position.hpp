@@ -11,7 +11,8 @@ public:
     Position(const alg::Vec3& vec): vec(vec) {}
     Position(float x, float y, float z): vec(x, y, z) {}
 
-    alg::Mat4x4 TranslationMatrix() const;
+    inline alg::Mat4x4 TranslationMatrix() const
+        { return alg::TranslationMtx(vec); }
 
     inline float GetX() const { return vec.X(); }
     inline float GetY() const { return vec.Y(); } 
