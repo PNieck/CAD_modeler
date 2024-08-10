@@ -38,6 +38,6 @@ void PositionSystem::SetDistance(float newDist, Entity target, Position pivot)
 {
     Position const& position = coordinator->GetComponent<Position>(target);
 
-    Position newPos((pivot.vec - position.vec).Normalize() * newDist + pivot.vec);
+    Position newPos((position.vec - pivot.vec).Normalize() * newDist + pivot.vec);
     coordinator->SetComponent<Position>(target, newPos);
 }
