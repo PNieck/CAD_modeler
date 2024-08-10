@@ -8,7 +8,7 @@ public:
     Position target;
     int viewportWidth;
     int viewportHeight;
-    float fov;
+    float fov;          // Vertical fov
     float near_plane;
     float far_plane;
 
