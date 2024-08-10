@@ -8,16 +8,16 @@
 
 
 CameraManager::CameraManager(Coordinator &coordinator):
-    coordinator(coordinator)
-{
-    CameraSystem::RegisterSystem(coordinator);
-    AnaglyphsCameraSystem::RegisterSystem(coordinator);
-    PositionSystem::RegisterSystem(coordinator);
-}
+    coordinator(coordinator) {}
 
 
 void CameraManager::Init(int viewportWidth, int viewportHeight)
 {
+    // Register all systems needed by this module
+    CameraSystem::RegisterSystem(coordinator);
+    AnaglyphsCameraSystem::RegisterSystem(coordinator);
+    PositionSystem::RegisterSystem(coordinator);
+
     auto perspectiveCamSys = coordinator.GetSystem<CameraSystem>();
     auto anaglyphsCamSys = coordinator.GetSystem<AnaglyphsCameraSystem>();
 
