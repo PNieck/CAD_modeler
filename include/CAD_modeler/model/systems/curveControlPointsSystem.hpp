@@ -13,25 +13,20 @@ public:
 
     void Init();
 
-    // TODO: delete
-    Entity CreateControlPoints(const std::vector<Entity>& entities);
+    // TODO: delete dependency with controlPointsRegistry
+    Entity CreateControlPoints(const std::vector<Entity>& entities, SystemId system);
 
-    void AddControlPoint(Entity object, Entity controlPoint);
+    void AddControlPoint(Entity object, Entity controlPoint, SystemId system);
 
-    void DeleteControlPoint(Entity object, Entity controlPoint);
+    void DeleteControlPoint(Entity object, Entity controlPoint, SystemId system);
 
-    inline bool IsAControlPoint(Entity entity) const
-        { return numberOfObjectsConnectedToControlPoint.contains(entity); }
 
 private:
     class DeletionHandler;
 
     std::shared_ptr<DeletionHandler> deletionHandler;
-    std::unordered_map<Entity, unsigned int> numberOfObjectsConnectedToControlPoint;
 
-    void RegisterControlPoint(Entity controlPoint);
 
-    void UnregisterControlPoint(Entity controlPoint);
 
     class ControlPointMovedHandler: public EventHandler<Position> {
     public:

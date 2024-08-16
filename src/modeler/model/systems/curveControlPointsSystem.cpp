@@ -5,6 +5,7 @@
 #include <CAD_modeler/model/components/curveControlPoints.hpp>
 
 #include <CAD_modeler/model/systems/toUpdateSystem.hpp>
+#include <CAD_modeler/model/systems/controlPointsRegistrySystem.hpp>
 
 
 void CurveControlPointsSystem::RegisterSystem(Coordinator & coordinator)
@@ -21,18 +22,18 @@ void CurveControlPointsSystem::Init()
 }
 
 
-Entity CurveControlPointsSystem::CreateControlPoints(const std::vector<Entity>& entities)
+Entity CurveControlPointsSystem::CreateControlPoints(const std::vector<Entity>& entities, SystemId system)
 {
     Entity object = coordinator->CreateEntity();
-
     CurveControlPoints controlPoints(entities);
 
     auto handler = std::make_shared<ControlPointMovedHandler>(object, *coordinator);
+    auto registry = coordinator->GetSystem<ControlPointsRegistrySystem>();
 
     for (Entity entity: entities) {
         auto handlerId = coordinator->Subscribe<Position>(entity, std::static_pointer_cast<EventHandler<Position>>(handler));
         controlPoints.controlPointsHandlers.insert({ entity, handlerId });
-        RegisterControlPoint(entity);
+        registry->RegisterControlPoint(object, entity, system);
     }
 
     controlPoints.deletionHandler = coordinator->Subscribe<CurveControlPoints>(object, std::static_pointer_cast<EventHandler<CurveControlPoints>>(deletionHandler));
@@ -43,7 +44,7 @@ Entity CurveControlPointsSystem::CreateControlPoints(const std::vector<Entity>& 
 }
 
 
-void CurveControlPointsSystem::AddControlPoint(Entity object, Entity controlPoint)
+void CurveControlPointsSystem::AddControlPoint(Entity object, Entity controlPoint, SystemId system)
 {
     coordinator->EditComponent<CurveControlPoints>(object,
         [controlPoint, this](CurveControlPoints& params) {
@@ -59,11 +60,12 @@ void CurveControlPointsSystem::AddControlPoint(Entity object, Entity controlPoin
 
     coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(object);
 
-    RegisterControlPoint(controlPoint);
+    auto registry = coordinator->GetSystem<ControlPointsRegistrySystem>();
+    registry->RegisterControlPoint(object, controlPoint, system);
 }
 
 
-void CurveControlPointsSystem::DeleteControlPoint(Entity object, Entity controlPoint)
+void CurveControlPointsSystem::DeleteControlPoint(Entity object, Entity controlPoint, SystemId system)
 {
     coordinator->EditComponent<CurveControlPoints>(object,
         [object, controlPoint, this](CurveControlPoints& params) {
@@ -75,30 +77,8 @@ void CurveControlPointsSystem::DeleteControlPoint(Entity object, Entity controlP
 
     coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(object);
 
-    UnregisterControlPoint(controlPoint);
-}
-
-
-void CurveControlPointsSystem::RegisterControlPoint(Entity controlPoint)
-{
-    if (numberOfObjectsConnectedToControlPoint.contains(controlPoint))
-        numberOfObjectsConnectedToControlPoint.at(controlPoint)++;
-    else
-        numberOfObjectsConnectedToControlPoint.insert( {controlPoint, 1u} );
-}
-
-
-void CurveControlPointsSystem::UnregisterControlPoint(Entity controlPoint)
-{
-    if (!numberOfObjectsConnectedToControlPoint.contains(controlPoint))
-        return;
-
-    unsigned int& cnt = numberOfObjectsConnectedToControlPoint.at(controlPoint);
-    
-    if (cnt == 1)
-        numberOfObjectsConnectedToControlPoint.erase(controlPoint);
-    else
-        cnt--;
+    auto registry = coordinator->GetSystem<ControlPointsRegistrySystem>();
+    registry->UnregisterControlPoint(object, controlPoint, system);
 }
 
 

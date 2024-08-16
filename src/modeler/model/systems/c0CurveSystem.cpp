@@ -33,7 +33,7 @@ void C0CurveSystem::RegisterSystem(Coordinator & coordinator)
 
 Entity C0CurveSystem::CreateC0Curve(const std::vector<Entity>& entities)
 {
-    Entity curve = coordinator->GetSystem<CurveControlPointsSystem>()->CreateControlPoints(entities);
+    Entity curve = coordinator->GetSystem<CurveControlPointsSystem>()->CreateControlPoints(entities, Coordinator::GetSystemID<C0CurveSystem>());
 
     C0CurveParameters params;
 

@@ -9,6 +9,7 @@
 
 #include <CAD_modeler/model/systems/toUpdateSystem.hpp>
 #include <CAD_modeler/model/systems/curveControlPointsSystem.hpp>
+#include <CAD_modeler/model/systems/controlPointsRegistrySystem.hpp>
 
 #include <stdexcept>
 
@@ -38,6 +39,7 @@ Model::Model(int viewport_width, int viewport_height):
     C2SurfaceSystem::RegisterSystem(coordinator);
     C2CylinderSystem::RegisterSystem(coordinator);
     ControlNetSystem::RegisterSystem(coordinator);
+    ControlPointsRegistrySystem::RegisterSystem(coordinator);
 
     toriSystem = coordinator.GetSystem<ToriSystem>();
     gridSystem = coordinator.GetSystem<GridSystem>();

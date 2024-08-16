@@ -32,7 +32,7 @@ void C2CurveSystem::RegisterSystem(Coordinator & coordinator)
 
 Entity C2CurveSystem::CreateC2Curve(const std::vector<Entity>& entities)
 {
-    Entity curve = coordinator->GetSystem<CurveControlPointsSystem>()->CreateControlPoints(entities);
+    Entity curve = coordinator->GetSystem<CurveControlPointsSystem>()->CreateControlPoints(entities, Coordinator::GetSystemID<C2CurveSystem>());
     auto const& controlPoints = coordinator->GetComponent<CurveControlPoints>(curve);
 
     C2CurveParameters params;

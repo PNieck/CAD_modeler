@@ -5,7 +5,7 @@
 #include <algebra/vec3.hpp>
 
 #include "CAD_modeler/model/systems/pointsSystem.hpp"
-#include "CAD_modeler/model/systems/curveControlPointsSystem.hpp"
+#include "CAD_modeler/model/systems/controlPointsRegistrySystem.hpp"
 #include "CAD_modeler/model/systems/toUpdateSystem.hpp"
 #include "CAD_modeler/model/systems/c0PatchesSystem.hpp"
 #include "CAD_modeler/model/systems/controlNetSystem.hpp"
@@ -230,7 +230,7 @@ void C0SurfaceSystem::DeletionHandler::HandleEvent(Entity entity, const C0Patche
 
     coordinator.EditComponent<C0Patches>(entity,
         [&component, this](C0Patches& patches) {
-            auto controlPointsSystem = coordinator.GetSystem<CurveControlPointsSystem>();
+            auto cpRegistry = coordinator.GetSystem<ControlPointsRegistrySystem>();
 
             for (int col=0; col < component.PointsInCol(); col++) {
                 for (int row=0; row < component.PointsInRow(); row++) {
@@ -238,7 +238,7 @@ void C0SurfaceSystem::DeletionHandler::HandleEvent(Entity entity, const C0Patche
 
                     coordinator.Unsubscribe<Position>(controlPoint, patches.controlPointsHandlers.at(controlPoint));
 
-                    if (!controlPointsSystem->IsAControlPoint(controlPoint))
+                    if (!cpRegistry->IsAControlPoint(controlPoint))
                         coordinator.DestroyEntity(controlPoint);
                 }
             }
