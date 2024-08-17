@@ -628,7 +628,7 @@ void GuiView::DisplayTorusProperty(Entity entity, const TorusParameters& params)
 
     bool valueChanged = false;
 
-    ImGui::SeparatorText("Rotation");
+    ImGui::SeparatorText("Torus parameters");
 
     valueChanged |= ImGui::DragFloat("Major radius", &R, DRAG_FLOAT_SPEED, 0.001f, 0.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
     valueChanged |= ImGui::DragFloat("Minor radius", &r, DRAG_FLOAT_SPEED, 0.001f, R, "%.3f", ImGuiSliderFlags_AlwaysClamp);
