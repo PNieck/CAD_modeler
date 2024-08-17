@@ -6,7 +6,7 @@ void ControlPointsRegistrySystem::UnregisterControlPoint(Entity owner, Entity cp
     if (!controlPointsOwners.contains(cp))
         return;
 
-    auto ownersSet = controlPointsOwners.at(cp);
+    auto& ownersSet = controlPointsOwners.at(cp);
     ownersSet.erase({owner, system});
 
     if (ownersSet.empty())
