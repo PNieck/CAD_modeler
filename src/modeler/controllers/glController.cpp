@@ -56,7 +56,14 @@ void GlController::Add3DPoint() const
     auto selectedCurves = intersect(curves, selected);
 
     for (auto curve: selectedCurves) {
-        model.AddControlPointToCurve(curve, point);
+        if (model.GetAllC0Curves().contains(curve))
+            model.AddControlPointToC0Curve(curve, point);
+        else if (model.GetAllC2Curves().contains(curve))
+            model.AddControlPointToC2Curve(curve, point);
+        else if (model.GetAllInterpolationCurves().contains(curve))
+            model.AddControlPointToInterpolationCurve(curve, point);
+        else
+            throw std::runtime_error("Unkown curve type");
     }
 }
 

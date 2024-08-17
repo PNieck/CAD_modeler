@@ -217,7 +217,7 @@ void GuiView::RenderAddingCurveGui(CurveType curveType) const
                 if (controlPoints.size() == 1)
                     curve = controller.AddCurve({entity}, curveType);
                 else 
-                    controller.AddControlPointToCurve(curve, entity);
+                    controller.AddControlPointToCurve(curve, entity, curveType);
                 controller.SelectEntity(entity);
             }
             else {
@@ -679,7 +679,18 @@ void GuiView::DisplayCurveControlPoints(Entity entity, const CurveControlPoints&
             // TODO: rewrite with set intersection
             if (std::find(params.GetPoints().begin(), params.GetPoints().end(), point) == params.GetPoints().end()) {
                 if (pointsWithNames.contains(point) && ImGui::Selectable(model.GetEntityName(point).c_str(), false)) {
-                    controller.AddControlPointToCurve(entity, point);
+                    CurveType curveType;
+                    
+                    if (model.GetAllC0Curves().contains(point))
+                        curveType = CurveType::C0;
+                    else if (model.GetAllC2Curves().contains(point))
+                        curveType = CurveType::C2;
+                    else if (model.GetAllInterpolationCurves().contains(point))
+                        curveType = CurveType::Interpolation;
+                    else
+                        throw std::runtime_error("Unknown curve type");
+
+                    controller.AddControlPointToCurve(entity, point, curveType);
                 }
             }
         }

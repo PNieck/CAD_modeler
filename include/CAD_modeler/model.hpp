@@ -58,8 +58,14 @@ public:
     inline Entity AddC2Cylinder() const
         { return c2CylinderSystem->CreateCylinder(cursorSystem->GetPosition(), alg::Vec3(0.f, 1.f, 0.f), 1.f); }
 
-    inline void AddControlPointToCurve(Entity curve, Entity entity) const
+    inline void AddControlPointToC0Curve(Entity curve, Entity entity) const
         { c0CurveSystem->AddControlPoint(curve, entity); }
+
+    inline void AddControlPointToC2Curve(Entity curve, Entity entity) const
+        { c2CurveSystem->AddControlPoint(curve, entity); }
+
+    inline void AddControlPointToInterpolationCurve(Entity curve, Entity entity) const
+        { interpolationCurveSystem->AddControlPoint(curve, entity); }
 
     inline void AddRowOfC0SurfacePatches(Entity surface, const alg::Vec3& direction, float length, float width) const
         { c0SurfaceSystem->AddRowOfPatches(surface, cursorSystem->GetPosition(), direction, length, width); }
@@ -214,6 +220,15 @@ public:
 
     inline const std::unordered_set<Entity>& GetAllCurves() const
         { return coordinator.GetSystem<CurveControlPointsSystem>()->GetEntities(); }
+
+    inline const std::unordered_set<Entity>& GetAllC0Curves() const
+        { return c0CurveSystem->GetEntities(); }
+
+    inline const std::unordered_set<Entity>& GetAllC2Curves() const
+        { return c2CurveSystem->GetEntities(); }
+
+    inline const std::unordered_set<Entity>& GetAllInterpolationCurves() const
+        { return interpolationCurveSystem->GetEntities(); }
 
     inline const void ShowC2BSplinePolygon(Entity entity) const
         { return c2CurveSystem->ShowBSplinePolygon(entity); }

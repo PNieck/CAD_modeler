@@ -149,6 +149,26 @@ void GuiController::RecalculateSurface(Entity surface, SurfaceType surfaceType, 
     }
 }
 
+void GuiController::AddControlPointToCurve(Entity curve, Entity entity, CurveType curveType) const
+{
+    switch (curveType)
+    {
+    case CurveType::C0:
+        model.AddControlPointToC0Curve(curve, entity);
+        break;
+
+    case CurveType::C2:
+        model.AddControlPointToC2Curve(curve, entity);
+        break;
+
+    case CurveType::Interpolation:
+        model.AddControlPointToInterpolationCurve(curve, entity);
+        break;
+    
+    default:
+        throw std::runtime_error("Unknown curve type");
+    }
+}
 
 void GuiController::AddRowOfCylinderPatches(Entity cylinder, CylinderType cylinderType, const alg::Vec3 &dir, float radius)
 {
