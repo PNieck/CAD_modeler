@@ -455,56 +455,43 @@ void GuiView::RenderSingleObjectProperties(Entity entity) const
 {
     auto const& components = model.GetEntityComponents(entity);
 
-    auto it = components.find(Model::GetComponentId<Position>());
-    if (it != components.end())
+    if (components.contains(Model::GetComponentId<Position>()))
         DisplayPositionProperty(entity, model.GetComponent<Position>(entity));
 
-    it = components.find(Model::GetComponentId<Scale>());
-    if (it != components.end())
+    if (components.contains(Model::GetComponentId<Scale>()))
         DisplayScaleProperty(entity, model.GetComponent<Scale>(entity));
 
-    it = components.find(Model::GetComponentId<Rotation>());
-    if (it != components.end())
+    if (components.contains(Model::GetComponentId<Rotation>()))
         DisplayRotationProperty(entity, model.GetComponent<Rotation>(entity));
 
-    it = components.find(Model::GetComponentId<TorusParameters>());
-    if (it != components.end())
+    if (components.contains(Model::GetComponentId<TorusParameters>()))
         DisplayTorusProperty(entity, model.GetComponent<TorusParameters>(entity));
 
-    it = components.find(Model::GetComponentId<Name>());
-    if (it != components.end())
+    if (components.contains(Model::GetComponentId<Name>()))
         DisplayNameEditor(entity, model.GetComponent<Name>(entity));
 
-    it = components.find(Model::GetComponentId<CurveControlPoints>());
-    if (it != components.end())
+    if (components.contains(Model::GetComponentId<CurveControlPoints>()))
         DisplayCurveControlPoints(entity, model.GetComponent<CurveControlPoints>(entity));
 
-    it = components.find(Model::GetComponentId<C0CurveParameters>());
-    if (it != components.end())
+    if (components.contains(Model::GetComponentId<C0CurveParameters>()))
         DisplayC0CurveParameters(entity, model.GetComponent<C0CurveParameters>(entity));
 
-    it = components.find(Model::GetComponentId<C2CurveParameters>());
-    if (it != components.end())
+    if (components.contains(Model::GetComponentId<C2CurveParameters>()))
         DisplayC2CurveParameters(entity, model.GetComponent<C2CurveParameters>(entity));
 
-    it = components.find(Model::GetComponentId<PatchesDensity>());
-    if (it != components.end())
+    if (components.contains(Model::GetComponentId<PatchesDensity>()))
         DisplaySurfaceDensityParameter(entity, model.GetComponent<PatchesDensity>(entity));
 
-    it = components.find(Model::GetComponentId<C0Patches>());
-    if (it != components.end())
+    if (components.contains(Model::GetComponentId<C0Patches>()))
         DisplaySurfacePatches(entity, model.GetComponent<C0Patches>(entity));
 
-    it = components.find(Model::GetComponentId<C2Patches>());
-    if (it != components.end())
+    if (components.contains(Model::GetComponentId<C2Patches>()))
         DisplaySurfacePatches(entity, model.GetComponent<C2Patches>(entity));
 
-    it = components.find(Model::GetComponentId<C2CylinderPatches>());
-    if (it != components.end())
+    if (components.contains(Model::GetComponentId<C2CylinderPatches>()))
         DisplaySurfacePatches(entity, model.GetComponent<C2CylinderPatches>(entity));
 
-    it = components.find(Model::GetComponentId<Unremovable>());
-    if (it == components.end())
+    if (!components.contains(Model::GetComponentId<Unremovable>()))
         DisplayEntityDeletionOption(entity);
 }
 
