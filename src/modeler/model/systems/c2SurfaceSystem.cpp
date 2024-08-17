@@ -34,6 +34,7 @@ Entity C2SurfaceSystem::CreateSurface(const Position &pos, const alg::Vec3 &dire
     C2Patches patches(1, 1);
 
     auto const pointsSystem = coordinator->GetSystem<PointsSystem>();
+    auto cpRegistrySys = coordinator->GetSystem<ControlPointsRegistrySystem>();
 
     Entity surface = coordinator->CreateEntity();
 
@@ -49,6 +50,8 @@ Entity C2SurfaceSystem::CreateSurface(const Position &pos, const alg::Vec3 &dire
             patches.controlPointsHandlers.insert({cp, cpHandler});
 
             coordinator->AddComponent<Unremovable>(cp, Unremovable());
+
+            cpRegistrySys->RegisterControlPoint(surface, cp, Coordinator::GetSystemID<C2SurfaceSystem>());
         }
     }
 
@@ -63,7 +66,6 @@ Entity C2SurfaceSystem::CreateSurface(const Position &pos, const alg::Vec3 &dire
     coordinator->AddComponent<PatchesDensity>(surface, density);
 
     coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
-    //coordinator->GetSystem<C0PatchesSystem>()->AddPossibilityToHasPatchesPolygon(surface);
 
     Recalculate(surface, pos, direction, length, width);
 
@@ -76,6 +78,7 @@ void C2SurfaceSystem::AddRowOfPatches(Entity surface, const Position &pos, const
     coordinator->EditComponent<C2Patches>(surface,
         [surface, this](C2Patches& patches) {
             auto pointSys = coordinator->GetSystem<PointsSystem>();
+            auto cpRegistrySys = coordinator->GetSystem<ControlPointsRegistrySystem>();
             
             patches.AddRowOfPatches();
 
@@ -92,6 +95,8 @@ void C2SurfaceSystem::AddRowOfPatches(Entity surface, const Position &pos, const
                 patches.controlPointsHandlers.insert({ newEntity, newHandler });
 
                 coordinator->AddComponent<Unremovable>(newEntity, Unremovable());
+
+                cpRegistrySys->RegisterControlPoint(surface, newEntity, Coordinator::GetSystemID<C2SurfaceSystem>());
             }
         }
     );
@@ -107,6 +112,7 @@ void C2SurfaceSystem::AddColOfPatches(Entity surface, const Position &pos, const
     coordinator->EditComponent<C2Patches>(surface,
         [surface, this](C2Patches& patches) {
             auto pointSys = coordinator->GetSystem<PointsSystem>();
+            auto cpRegistrySys = coordinator->GetSystem<ControlPointsRegistrySystem>();
             
             patches.AddColOfPatches();
 
@@ -123,6 +129,8 @@ void C2SurfaceSystem::AddColOfPatches(Entity surface, const Position &pos, const
                 patches.controlPointsHandlers.insert({ newEntity, newHandler });
 
                 coordinator->AddComponent<Unremovable>(newEntity, Unremovable());
+
+                cpRegistrySys->RegisterControlPoint(surface, newEntity, Coordinator::GetSystemID<C2SurfaceSystem>());
             }
         }
     );
@@ -137,8 +145,11 @@ void C2SurfaceSystem::DeleteRowOfPatches(Entity surface, const Position &pos, co
 {
     coordinator->EditComponent<C2Patches>(surface,
         [surface, this](C2Patches& patches) {
+            auto cpRegistrySys = coordinator->GetSystem<ControlPointsRegistrySystem>();
+
             for (int col=0; col < patches.PointsInCol(); col++) {
                 Entity point = patches.GetPoint(patches.PointsInRow() - 1, col);
+                cpRegistrySys->UnregisterControlPoint(surface, point, Coordinator::GetSystemID<C2SurfaceSystem>());
                 coordinator->DestroyEntity(point);
 
                 patches.controlPointsHandlers.erase(point);
@@ -158,8 +169,11 @@ void C2SurfaceSystem::DeleteColOfPatches(Entity surface, const Position &pos, co
 {
     coordinator->EditComponent<C2Patches>(surface,
         [surface, this](C2Patches& patches) {
+            auto cpRegistrySys = coordinator->GetSystem<ControlPointsRegistrySystem>();
+
             for (int row=0; row < patches.PointsInRow(); row++) {
                 Entity point = patches.GetPoint(row, patches.PointsInCol());
+                cpRegistrySys->UnregisterControlPoint(surface, point, Coordinator::GetSystemID<C2SurfaceSystem>());
                 coordinator->DestroyEntity(point);
 
                 patches.controlPointsHandlers.erase(point);
@@ -338,7 +352,7 @@ void C2SurfaceSystem::DeletionHandler::HandleEvent(Entity entity, const C2Patche
         return;
 
     coordinator.EditComponent<C2Patches>(entity,
-        [&component, this](C2Patches& patches) {
+        [&component, entity, this](C2Patches& patches) {
             auto cpRegistry = coordinator.GetSystem<ControlPointsRegistrySystem>();
 
             for (int col=0; col < component.PointsInCol(); col++) {
@@ -346,6 +360,7 @@ void C2SurfaceSystem::DeletionHandler::HandleEvent(Entity entity, const C2Patche
                     Entity controlPoint = component.GetPoint(row, col);
 
                     coordinator.Unsubscribe<Position>(controlPoint, patches.controlPointsHandlers.at(controlPoint));
+                    cpRegistry->UnregisterControlPoint(entity, controlPoint, Coordinator::GetSystemID<C2SurfaceSystem>());
 
                     if (!cpRegistry->IsAControlPoint(controlPoint))
                         coordinator.DestroyEntity(controlPoint);

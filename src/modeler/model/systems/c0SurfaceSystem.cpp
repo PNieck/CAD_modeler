@@ -44,6 +44,7 @@ Entity C0SurfaceSystem::CreateSurface(const Position& pos, const alg::Vec3& dire
     C0Patches patches(1, 1);
 
     auto const pointsSystem = coordinator->GetSystem<PointsSystem>();
+    auto cpRegistrySystem = coordinator->GetSystem<ControlPointsRegistrySystem>();
 
     Entity surface = coordinator->CreateEntity();
 
@@ -59,6 +60,8 @@ Entity C0SurfaceSystem::CreateSurface(const Position& pos, const alg::Vec3& dire
             patches.controlPointsHandlers.insert({cp, cpHandler});
 
             coordinator->AddComponent<Unremovable>(cp, Unremovable());
+
+            cpRegistrySystem->RegisterControlPoint(surface, cp, Coordinator::GetSystemID<C0SurfaceSystem>());
         }
     }
 
@@ -85,6 +88,7 @@ void C0SurfaceSystem::AddRowOfPatches(Entity surface, const Position& pos, const
     coordinator->EditComponent<C0Patches>(surface,
         [surface, this](C0Patches& patches) {
             auto pointSys = coordinator->GetSystem<PointsSystem>();
+            auto cpRegistrySys = coordinator->GetSystem<ControlPointsRegistrySystem>();
             
             patches.AddRowOfPatches();
 
@@ -102,6 +106,8 @@ void C0SurfaceSystem::AddRowOfPatches(Entity surface, const Position& pos, const
                     patches.controlPointsHandlers.insert({ newEntity, newHandler });
 
                     coordinator->AddComponent<Unremovable>(newEntity, Unremovable());
+
+                    cpRegistrySys->RegisterControlPoint(surface, newEntity, Coordinator::GetSystemID<C0SurfaceSystem>());
                 }
             }
         }
@@ -118,6 +124,7 @@ void C0SurfaceSystem::AddColOfPatches(Entity surface, const Position& pos, const
     coordinator->EditComponent<C0Patches>(surface,
         [surface, this](C0Patches& patches) {
             auto pointSys = coordinator->GetSystem<PointsSystem>();
+            auto cpRegistrySys = coordinator->GetSystem<ControlPointsRegistrySystem>();
             
             patches.AddColOfPatches();
 
@@ -135,6 +142,8 @@ void C0SurfaceSystem::AddColOfPatches(Entity surface, const Position& pos, const
                     patches.controlPointsHandlers.insert({ newEntity, newHandler });
 
                     coordinator->AddComponent<Unremovable>(newEntity, Unremovable());
+
+                    cpRegistrySys->RegisterControlPoint(surface, newEntity, Coordinator::GetSystemID<C0SurfaceSystem>());
                 }
             }
         }
@@ -150,9 +159,12 @@ void C0SurfaceSystem::DeleteRowOfPatches(Entity surface, const Position& pos, co
 {
     coordinator->EditComponent<C0Patches>(surface,
         [surface, this](C0Patches& patches) {
+            auto cpRegistrySys = coordinator->GetSystem<ControlPointsRegistrySystem>();
+
             for (int col=0; col < patches.PointsInCol(); col++) {
                 for (int row=patches.PointsInRow() - 3; row < patches.PointsInRow(); row++) {
                     Entity point = patches.GetPoint(row, col);
+                    cpRegistrySys->UnregisterControlPoint(surface, point, Coordinator::GetSystemID<C0SurfaceSystem>());
                     coordinator->DestroyEntity(point);
 
                     patches.controlPointsHandlers.erase(point);
@@ -173,9 +185,12 @@ void C0SurfaceSystem::DeleteColOfPatches(Entity surface, const Position& pos, co
 {
     coordinator->EditComponent<C0Patches>(surface,
         [surface, this](C0Patches& patches) {
+            auto cpRegistrySys = coordinator->GetSystem<ControlPointsRegistrySystem>();
+
             for (int row=0; row < patches.PointsInRow(); row++) {
                 for (int col=patches.PointsInCol() - 3; col < patches.PointsInCol(); col++) {
                     Entity point = patches.GetPoint(row, col);
+                    cpRegistrySys->UnregisterControlPoint(surface, point, Coordinator::GetSystemID<C0SurfaceSystem>());
                     coordinator->DestroyEntity(point);
 
                     patches.controlPointsHandlers.erase(point);
@@ -229,7 +244,7 @@ void C0SurfaceSystem::DeletionHandler::HandleEvent(Entity entity, const C0Patche
         return;
 
     coordinator.EditComponent<C0Patches>(entity,
-        [&component, this](C0Patches& patches) {
+        [&component, entity, this](C0Patches& patches) {
             auto cpRegistry = coordinator.GetSystem<ControlPointsRegistrySystem>();
 
             for (int col=0; col < component.PointsInCol(); col++) {
@@ -237,6 +252,7 @@ void C0SurfaceSystem::DeletionHandler::HandleEvent(Entity entity, const C0Patche
                     Entity controlPoint = component.GetPoint(row, col);
 
                     coordinator.Unsubscribe<Position>(controlPoint, patches.controlPointsHandlers.at(controlPoint));
+                    cpRegistry->UnregisterControlPoint(entity, controlPoint, Coordinator::GetSystemID<C0SurfaceSystem>());
 
                     if (!cpRegistry->IsAControlPoint(controlPoint))
                         coordinator.DestroyEntity(controlPoint);
