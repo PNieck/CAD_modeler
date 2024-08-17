@@ -16,12 +16,6 @@ void CurveControlPointsSystem::RegisterSystem(Coordinator & coordinator)
 }
 
 
-void CurveControlPointsSystem::Init()
-{
-    deletionHandler = std::make_shared<DeletionHandler>(*coordinator);
-}
-
-
 Entity CurveControlPointsSystem::CreateControlPoints(const std::vector<Entity>& entities, SystemId system)
 {
     Entity object = coordinator->CreateEntity();
@@ -36,6 +30,7 @@ Entity CurveControlPointsSystem::CreateControlPoints(const std::vector<Entity>& 
         registry->RegisterControlPoint(object, entity, system);
     }
 
+    auto deletionHandler = GetDeletionHandler(system);
     controlPoints.deletionHandler = coordinator->Subscribe<CurveControlPoints>(object, std::static_pointer_cast<EventHandler<CurveControlPoints>>(deletionHandler));
 
      coordinator->AddComponent<CurveControlPoints>(object, controlPoints);
@@ -82,6 +77,15 @@ void CurveControlPointsSystem::DeleteControlPoint(Entity object, Entity controlP
 }
 
 
+std::shared_ptr<CurveControlPointsSystem::DeletionHandler> CurveControlPointsSystem::GetDeletionHandler(SystemId systemId)
+{
+    if (!deletionHandlers.contains(systemId))
+        deletionHandlers.insert({systemId, std::make_shared<DeletionHandler>(*coordinator, systemId)});
+
+    return deletionHandlers.at(systemId);
+}
+
+
 void CurveControlPointsSystem::ControlPointMovedHandler::HandleEvent(Entity entity, const Position & component, EventType eventType)
 {
     if (eventType == EventType::ComponentDeleted) {
@@ -107,8 +111,11 @@ void CurveControlPointsSystem::DeletionHandler::HandleEvent(Entity entity, const
     auto entitiesIt = component.GetPoints().begin();
     auto handlersIt = component.controlPointsHandlers.begin();
 
+    auto cpRegistrySys = coordinator.GetSystem<ControlPointsRegistrySystem>();
+
     while (handlersIt != component.controlPointsHandlers.end() && entitiesIt != component.GetPoints().end()) {
         coordinator.Unsubscribe<Position>(*entitiesIt, (*handlersIt).second);
+        cpRegistrySys->UnregisterControlPoint(entity, *entitiesIt, systemId);
 
         ++entitiesIt;
         ++handlersIt;

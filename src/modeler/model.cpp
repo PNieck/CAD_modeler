@@ -66,7 +66,6 @@ Model::Model(int viewport_width, int viewport_height):
     toriSystem->Init(&shadersRepo);
     c0CurveSystem->Init(&shadersRepo);
     c2CurveSystem->Init(&shadersRepo);
-    controlPointsSystem->Init();
     interpolationCurveSystem->Init(&shadersRepo);
     c0PatchesSystem->Init(&shadersRepo);
     c0SurfaceSystem->Init();
