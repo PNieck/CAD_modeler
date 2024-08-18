@@ -7,6 +7,7 @@
 
 #include <memory>
 #include <functional>
+#include <concepts>
 
 
 class Coordinator {
@@ -21,7 +22,7 @@ public:
     }
 
 
-    template <typename Sys>
+    template <SystemConcept Sys>
     void RegisterSystem() {
         systemsMgr.RegisterSystem<Sys>();
         auto const& system = systemsMgr.GetSystem<Sys>();
@@ -29,7 +30,7 @@ public:
     }
 
 
-    template <typename Sys, typename Comp>
+    template <SystemConcept Sys, typename Comp>
     inline void RegisterRequiredComponent() {
         systemsMgr.RegisterRequiredComponent<Sys, Comp>();
     }
@@ -100,7 +101,7 @@ public:
     inline const std::set<ComponentId>& GetEntityComponents(Entity entity) const
         { return componentMgr.GetEntityComponents(entity); }
 
-    template <typename Sys>
+    template <SystemConcept Sys>
     inline std::shared_ptr<Sys> GetSystem() const {
         return systemsMgr.GetSystem<Sys>();
     }
@@ -111,7 +112,7 @@ public:
     }
 
 
-    template <typename Sys>
+    template <SystemConcept Sys>
     static constexpr SystemId GetSystemID() {
         return SystemsManager::GetSystemID<Sys>();
     }
