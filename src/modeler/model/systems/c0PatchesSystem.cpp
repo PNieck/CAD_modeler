@@ -6,6 +6,7 @@
 
 #include "CAD_modeler/model/systems/selectionSystem.hpp"
 #include "CAD_modeler/model/systems/toUpdateSystem.hpp"
+#include "CAD_modeler/model/systems/controlPointsRegistrySystem.hpp"
 
 #include <CAD_modeler/utilities/setIntersection.hpp>
 
@@ -17,6 +18,38 @@ void C0PatchesSystem::RegisterSystem(Coordinator &coordinator)
     coordinator.RegisterRequiredComponent<C0PatchesSystem, C0Patches>();
     coordinator.RegisterRequiredComponent<C0PatchesSystem, PatchesDensity>();
     coordinator.RegisterRequiredComponent<C0PatchesSystem, Mesh>();
+}
+
+
+void C0PatchesSystem::MergeControlPoints(Entity surface, Entity oldCP, Entity newCP, SystemId system)
+{
+    coordinator->EditComponent<C0Patches>(surface,
+        [oldCP, newCP, this] (C0Patches& patches) {
+            for (int row=0; row < patches.PointsInRow(); row++) {
+                for (int col=0; col < patches.PointsInCol(); col++) {
+                    if (patches.GetPoint(row, col) == oldCP)
+                        patches.SetPoint(newCP, row, col);
+                }
+            }
+
+            HandlerId handlerId = patches.controlPointsHandlers.at(oldCP);
+
+            if (!patches.controlPointsHandlers.contains(newCP)) {
+                auto eventHandler = coordinator->GetEventHandler<Position>(oldCP, handlerId);
+                auto newEventHandlerId = coordinator->Subscribe<Position>(newCP, eventHandler);
+                patches.controlPointsHandlers.insert({newCP, newEventHandlerId});
+            }
+
+            coordinator->Unsubscribe<Position>(oldCP, handlerId);
+            patches.controlPointsHandlers.erase(oldCP);
+        }
+    );
+
+    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
+
+    auto registry = coordinator->GetSystem<ControlPointsRegistrySystem>();
+    registry->UnregisterControlPoint(surface, oldCP, system);
+    registry->RegisterControlPoint(surface, newCP, system);
 }
 
 

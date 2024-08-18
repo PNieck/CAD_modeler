@@ -238,28 +238,25 @@ void C0SurfaceSystem::Recalculate(Entity surface, const Position &pos, const alg
 }
 
 
+// TODO: merge with other deletion handlers
 void C0SurfaceSystem::DeletionHandler::HandleEvent(Entity entity, const C0Patches& component, EventType eventType)
 {
     if (eventType != EventType::ComponentDeleted)
         return;
 
-    coordinator.EditComponent<C0Patches>(entity,
-        [&component, entity, this](C0Patches& patches) {
-            auto cpRegistry = coordinator.GetSystem<ControlPointsRegistrySystem>();
+    auto cpRegistry = coordinator.GetSystem<ControlPointsRegistrySystem>();
+    C0Patches patches = coordinator.GetComponent<C0Patches>(entity);
 
-            for (int col=0; col < component.PointsInCol(); col++) {
-                for (int row=0; row < component.PointsInRow(); row++) {
-                    Entity controlPoint = component.GetPoint(row, col);
+    for (auto handler: patches.controlPointsHandlers) {
+        Entity cp = handler.first;
+        HandlerId handlerId = handler.second;
 
-                    coordinator.Unsubscribe<Position>(controlPoint, patches.controlPointsHandlers.at(controlPoint));
-                    cpRegistry->UnregisterControlPoint(entity, controlPoint, Coordinator::GetSystemID<C0SurfaceSystem>());
+        coordinator.Unsubscribe<Position>(cp, handlerId);
+        cpRegistry->UnregisterControlPoint(entity, cp, Coordinator::GetSystemID<C0SurfaceSystem>());
 
-                    if (!cpRegistry->IsAControlPoint(controlPoint))
-                        coordinator.DestroyEntity(controlPoint);
-                }
-            }
-        }
-    );
+        if (!cpRegistry->IsAControlPoint(cp))
+            coordinator.DestroyEntity(cp);
+    }
 }
 
 

@@ -21,6 +21,8 @@ public:
     inline int GetColsCnt(Entity surface) const
         { return coordinator->GetComponent<C0Patches>(surface).PatchesInCol(); }
 
+    void MergeControlPoints(Entity curve, Entity oldCP, Entity newCP, SystemId system);
+
     void ShowBezierNet(Entity surface);
 
     inline void HideBezierNet(Entity surface)

@@ -200,6 +200,38 @@ void C2CylinderSystem::DeleteColOfPatches(Entity surface, const Position &pos, c
 }
 
 
+void C2CylinderSystem::MergeControlPoints(Entity cylinder, Entity oldCP, Entity newCP)
+{
+    coordinator->EditComponent<C2CylinderPatches>(cylinder,
+        [oldCP, newCP, this] (C2CylinderPatches& patches) {
+            for (int row=0; row < patches.PointsInRow(); row++) {
+                for (int col=0; col < patches.PointsInCol(); col++) {
+                    if (patches.GetPoint(row, col) == oldCP)
+                        patches.SetPoint(newCP, row, col);
+                }
+            }
+
+            HandlerId handlerId = patches.controlPointsHandlers.at(oldCP);
+
+            if (!patches.controlPointsHandlers.contains(newCP)) {
+                auto eventHandler = coordinator->GetEventHandler<Position>(oldCP, handlerId);
+                auto newEventHandlerId = coordinator->Subscribe<Position>(newCP, eventHandler);
+                patches.controlPointsHandlers.insert({newCP, newEventHandlerId});
+            }
+
+            coordinator->Unsubscribe<Position>(oldCP, handlerId);
+            patches.controlPointsHandlers.erase(oldCP);
+        }
+    );
+
+    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(cylinder);
+
+    auto registry = coordinator->GetSystem<ControlPointsRegistrySystem>();
+    registry->UnregisterControlPoint(cylinder, oldCP, Coordinator::GetSystemID<C2CylinderSystem>());
+    registry->RegisterControlPoint(cylinder, newCP, Coordinator::GetSystemID<C2CylinderSystem>());
+}
+
+
 void C2CylinderSystem::ShowDeBoorNet(Entity cylinder)
 {
     auto const& patches = coordinator->GetComponent<C2CylinderPatches>(cylinder);
@@ -234,28 +266,25 @@ void C2CylinderSystem::Recalculate(Entity cylinder, const Position &pos, const a
 }
 
 
+// TODO: merge with other deletion handlers
 void C2CylinderSystem::DeletionHandler::HandleEvent(Entity entity, const C2CylinderPatches& component, EventType eventType)
 {
     if (eventType != EventType::ComponentDeleted)
         return;
 
-    coordinator.EditComponent<C2CylinderPatches>(entity,
-        [&component, entity, this](C2CylinderPatches& patches) {
-            auto cpRegistry = coordinator.GetSystem<ControlPointsRegistrySystem>();
+    auto cpRegistry = coordinator.GetSystem<ControlPointsRegistrySystem>();
+    C2CylinderPatches patches = coordinator.GetComponent<C2CylinderPatches>(entity);
 
-            for (int col=0; col < component.PointsInCol() - doublePointsCnt; col++) {
-                for (int row=0; row < component.PointsInRow(); row++) {
-                    Entity controlPoint = component.GetPoint(row, col);
+    for (auto handler: patches.controlPointsHandlers) {
+        Entity cp = handler.first;
+        HandlerId handlerId = handler.second;
 
-                    coordinator.Unsubscribe<Position>(controlPoint, patches.controlPointsHandlers.at(controlPoint));
-                    cpRegistry->UnregisterControlPoint(entity, controlPoint, Coordinator::GetSystemID<C2CylinderSystem>());
+        coordinator.Unsubscribe<Position>(cp, handlerId);
+        cpRegistry->UnregisterControlPoint(entity, cp, Coordinator::GetSystemID<C2CylinderSystem>());
 
-                    if (!cpRegistry->IsAControlPoint(controlPoint))
-                        coordinator.DestroyEntity(controlPoint);
-                }
-            }
-        }
-    );
+        if (!cpRegistry->IsAControlPoint(cp))
+            coordinator.DestroyEntity(cp);
+    }
 }
 
 
