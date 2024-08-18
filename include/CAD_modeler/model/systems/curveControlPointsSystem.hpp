@@ -18,6 +18,7 @@ public:
 
     void DeleteControlPoint(Entity object, Entity controlPoint, SystemId system);
 
+    void MergeControlPoints(Entity curve, Entity oldCP, Entity newCP, SystemId system);
 
 private:
     class DeletionHandler;

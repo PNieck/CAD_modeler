@@ -77,6 +77,33 @@ void CurveControlPointsSystem::DeleteControlPoint(Entity object, Entity controlP
 }
 
 
+void CurveControlPointsSystem::MergeControlPoints(Entity curve, Entity oldCP, Entity newCP, SystemId system)
+{
+    coordinator->EditComponent<CurveControlPoints>(curve,
+        [oldCP, newCP, this] (CurveControlPoints& params) {
+            params.SwapControlPoint(oldCP, newCP);
+
+            HandlerId handlerId = params.controlPointsHandlers.at(oldCP);
+
+            if (!params.controlPointsHandlers.contains(newCP)) {
+                auto eventHandler = coordinator->GetEventHandler<Position>(oldCP, handlerId);
+                auto newEventHandlerId = coordinator->Subscribe<Position>(newCP, eventHandler);
+                params.controlPointsHandlers.insert({newCP, newEventHandlerId});
+            }
+
+            coordinator->Unsubscribe<Position>(oldCP, handlerId);
+            params.controlPointsHandlers.erase(oldCP);
+        }
+    );
+
+    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(curve);
+
+    auto registry = coordinator->GetSystem<ControlPointsRegistrySystem>();
+    registry->UnregisterControlPoint(curve, oldCP, system);
+    registry->RegisterControlPoint(curve, newCP, system);
+}
+
+
 std::shared_ptr<CurveControlPointsSystem::DeletionHandler> CurveControlPointsSystem::GetDeletionHandler(SystemId systemId)
 {
     if (!deletionHandlers.contains(systemId))
@@ -108,17 +135,11 @@ void CurveControlPointsSystem::DeletionHandler::HandleEvent(Entity entity, const
     if (eventType != EventType::ComponentDeleted)
         return;
 
-    auto entitiesIt = component.GetPoints().begin();
-    auto handlersIt = component.controlPointsHandlers.begin();
-
     auto cpRegistrySys = coordinator.GetSystem<ControlPointsRegistrySystem>();
 
-    while (handlersIt != component.controlPointsHandlers.end() && entitiesIt != component.GetPoints().end()) {
-        coordinator.Unsubscribe<Position>(*entitiesIt, (*handlersIt).second);
-        cpRegistrySys->UnregisterControlPoint(entity, *entitiesIt, systemId);
-
-        ++entitiesIt;
-        ++handlersIt;
+    for (auto cp: component.controlPointsHandlers) {
+        coordinator.Unsubscribe<Position>(cp.first, cp.second);
+        cpRegistrySys->UnregisterControlPoint(entity, cp.first, systemId);
     }
 
     coordinator.Unsubscribe<CurveControlPoints>(entity, component.deletionHandler);

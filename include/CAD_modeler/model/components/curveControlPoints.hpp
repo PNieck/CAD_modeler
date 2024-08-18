@@ -20,6 +20,9 @@ public:
     inline void DeleteControlPoint(Entity entity)
         { controlPoints.erase(std::find(controlPoints.begin(), controlPoints.end(), entity)); }
 
+    inline void SwapControlPoint(Entity oldCP, Entity newCP)
+        { std::replace(controlPoints.begin(), controlPoints.end(), oldCP, newCP); }
+
     inline const std::vector<Entity>& GetPoints() const
         { return controlPoints; }
 

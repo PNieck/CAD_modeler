@@ -26,6 +26,9 @@ public:
     inline void DeleteControlPoint(Entity bezierCurve, Entity entity)
         { coordinator->GetSystem<CurveControlPointsSystem>()->DeleteControlPoint(bezierCurve, entity, Coordinator::GetSystemID<InterpolationCurveSystem>()); }
 
+    inline void MergeControlPoints(Entity curve, Entity oldCP, Entity newCP)
+        { coordinator->GetSystem<CurveControlPointsSystem>()->MergeControlPoints(curve, oldCP, newCP, Coordinator::GetSystemID<InterpolationCurveSystem>()); }
+
     void Render(const alg::Mat4x4& cameraMtx) const;
 
 private:

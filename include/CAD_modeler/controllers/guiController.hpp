@@ -28,6 +28,9 @@ public:
     inline void AddTorus() const
         { model.AddTorus(); }
 
+    inline void MergeControlPoints(Entity e1, Entity e2)
+        { model.MergeControlPoints(e1, e2); }
+
     Entity AddCurve(const std::vector<Entity>& entities, CurveType curveType) const;
 
     Entity AddSurface(SurfaceType surfaceType, const alg::Vec3& dir, float length, float width) const;

@@ -447,6 +447,13 @@ void GuiView::RenderObjectsProperties() const
         break;
     }
 
+    if (selectedEntities.size() == 2) {
+        Entity e1 = *selectedEntities.begin();
+        Entity e2 = *(++selectedEntities.begin());
+
+        RenderMergingControlPointsOptionButton(e1, e2);
+    }
+
     ImGui::End();
 }
 
@@ -553,7 +560,17 @@ void GuiView::RenderMultipleObjectProperties() const
 
         controller.RotateSelected(newRot);
     }
-        
+}
+
+
+void GuiView::RenderMergingControlPointsOptionButton(Entity e1, Entity e2) const
+{
+    ImGui::Separator();
+
+    if (model.IsAControlPoint(e1) && model.IsAControlPoint(e2)) {
+        if (ImGui::Button("Merge control points"))
+            controller.MergeControlPoints(e1, e2);
+    }
 }
 
 

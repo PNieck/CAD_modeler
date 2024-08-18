@@ -9,7 +9,6 @@
 
 #include <CAD_modeler/model/systems/toUpdateSystem.hpp>
 #include <CAD_modeler/model/systems/curveControlPointsSystem.hpp>
-#include <CAD_modeler/model/systems/controlPointsRegistrySystem.hpp>
 
 #include <stdexcept>
 
@@ -57,6 +56,7 @@ Model::Model(int viewport_width, int viewport_height):
     c2SurfaceSystem = coordinator.GetSystem<C2SurfaceSystem>();
     c2CylinderSystem = coordinator.GetSystem<C2CylinderSystem>();
     controlNetSystem = coordinator.GetSystem<ControlNetSystem>();
+    controlPointsRegistrySys = coordinator.GetSystem<ControlPointsRegistrySystem>();
 
     cameraManager.Init(viewport_width, viewport_height);
     gridSystem->Init(&shadersRepo);
@@ -114,6 +114,26 @@ void Model::AddTorus()
     };
 
     toriSystem->AddTorus(cursorPos, params);
+}
+
+
+void Model::MergeControlPoints(Entity e1, Entity e2)
+{
+    auto registrySys = coordinator.GetSystem<ControlPointsRegistrySystem>();
+    auto curveCPSys = coordinator.GetSystem<CurveControlPointsSystem>();
+
+    auto ownersSet = registrySys->GetOwnersOfControlPoints(e2);
+
+    for (auto owner: ownersSet) {
+        curveCPSys->MergeControlPoints(std::get<0>(owner), e2, e1, std::get<1>(owner));
+    }
+
+    auto const& pos1 = coordinator.GetComponent<Position>(e1);
+    auto const& pos2 = coordinator.GetComponent<Position>(e2);
+    Position newPos((pos1.vec + pos2.vec) * 0.5f);
+
+    coordinator.SetComponent<Position>(e1, newPos);
+    coordinator.DestroyEntity(e2);
 }
 
 

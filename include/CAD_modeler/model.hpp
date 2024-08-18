@@ -19,6 +19,7 @@
 #include "model/systems/c2SurfacesSystem.hpp"
 #include "model/systems/c2CylinderSystem.hpp"
 #include "model/systems/controlNetSystem.hpp"
+#include "model/systems/controlPointsRegistrySystem.hpp"
 
 #include "model/systems/shaders/shaderRepository.hpp"
 
@@ -63,6 +64,11 @@ public:
 
     inline void AddControlPointToC2Curve(Entity curve, Entity entity) const
         { c2CurveSystem->AddControlPoint(curve, entity); }
+
+    void MergeControlPoints(Entity e1, Entity e2);
+
+    inline bool IsAControlPoint(Entity entity) const
+        { return controlPointsRegistrySys->IsAControlPoint(entity); }
 
     inline void AddControlPointToInterpolationCurve(Entity curve, Entity entity) const
         { interpolationCurveSystem->AddControlPoint(curve, entity); }
@@ -286,6 +292,7 @@ private:
     std::shared_ptr<C2SurfaceSystem> c2SurfaceSystem;
     std::shared_ptr<C2CylinderSystem> c2CylinderSystem;
     std::shared_ptr<ControlNetSystem> controlNetSystem;
+    std::shared_ptr<ControlPointsRegistrySystem> controlPointsRegistrySys;
 
     alg::Vec3 PointFromViewportCoordinates(float x, float y);
     Line LineFromViewportCoordinates(float x, float y);
