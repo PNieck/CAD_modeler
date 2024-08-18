@@ -25,6 +25,8 @@ public:
     void DeleteRowOfPatches(Entity surface, const Position& pos, const alg::Vec3& direction, float length, float width) const;
     void DeleteColOfPatches(Entity surface, const Position& pos, const alg::Vec3& direction, float length, float width) const;
 
+    void MergeControlPoints(Entity cylinder, Entity oldCP, Entity newCP);
+
     inline void SetDensity(Entity entity, PatchesDensity density) const
         { coordinator->SetComponent<PatchesDensity>(entity, density); }
 

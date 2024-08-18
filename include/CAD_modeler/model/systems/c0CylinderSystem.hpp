@@ -24,6 +24,9 @@ public:
     void DeleteRowOfPatches(Entity surface, const Position& pos, const alg::Vec3& direction, float radius) const;
     void DeleteColOfPatches(Entity surface, const Position& pos, const alg::Vec3& direction, float radius) const;
 
+    inline void MergeControlPoints(Entity cylinder, Entity oldCP, Entity newCP)
+        { coordinator->GetSystem<C0PatchesSystem>()->MergeControlPoints(cylinder, oldCP, newCP, Coordinator::GetSystemID<C0CylinderSystem>()); }
+
     void ShowBezierPolygon(Entity cylinder) const;
 
     inline void HideBezierPolygon(Entity cylinder) const

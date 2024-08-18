@@ -217,7 +217,7 @@ void GuiView::RenderAddingCurveGui(CurveType curveType) const
                 if (controlPoints.size() == 1)
                     curve = controller.AddCurve({entity}, curveType);
                 else 
-                    controller.AddControlPointToCurve(curve, entity);
+                    controller.AddControlPointToCurve(curve, entity, curveType);
                 controller.SelectEntity(entity);
             }
             else {
@@ -447,6 +447,13 @@ void GuiView::RenderObjectsProperties() const
         break;
     }
 
+    if (selectedEntities.size() == 2) {
+        Entity e1 = *selectedEntities.begin();
+        Entity e2 = *(++selectedEntities.begin());
+
+        RenderMergingControlPointsOptionButton(e1, e2);
+    }
+
     ImGui::End();
 }
 
@@ -455,56 +462,43 @@ void GuiView::RenderSingleObjectProperties(Entity entity) const
 {
     auto const& components = model.GetEntityComponents(entity);
 
-    auto it = components.find(Model::GetComponentId<Position>());
-    if (it != components.end())
+    if (components.contains(Model::GetComponentId<Position>()))
         DisplayPositionProperty(entity, model.GetComponent<Position>(entity));
 
-    it = components.find(Model::GetComponentId<Scale>());
-    if (it != components.end())
+    if (components.contains(Model::GetComponentId<Scale>()))
         DisplayScaleProperty(entity, model.GetComponent<Scale>(entity));
 
-    it = components.find(Model::GetComponentId<Rotation>());
-    if (it != components.end())
+    if (components.contains(Model::GetComponentId<Rotation>()))
         DisplayRotationProperty(entity, model.GetComponent<Rotation>(entity));
 
-    it = components.find(Model::GetComponentId<TorusParameters>());
-    if (it != components.end())
+    if (components.contains(Model::GetComponentId<TorusParameters>()))
         DisplayTorusProperty(entity, model.GetComponent<TorusParameters>(entity));
 
-    it = components.find(Model::GetComponentId<Name>());
-    if (it != components.end())
+    if (components.contains(Model::GetComponentId<Name>()))
         DisplayNameEditor(entity, model.GetComponent<Name>(entity));
 
-    it = components.find(Model::GetComponentId<CurveControlPoints>());
-    if (it != components.end())
+    if (components.contains(Model::GetComponentId<CurveControlPoints>()))
         DisplayCurveControlPoints(entity, model.GetComponent<CurveControlPoints>(entity));
 
-    it = components.find(Model::GetComponentId<C0CurveParameters>());
-    if (it != components.end())
+    if (components.contains(Model::GetComponentId<C0CurveParameters>()))
         DisplayC0CurveParameters(entity, model.GetComponent<C0CurveParameters>(entity));
 
-    it = components.find(Model::GetComponentId<C2CurveParameters>());
-    if (it != components.end())
+    if (components.contains(Model::GetComponentId<C2CurveParameters>()))
         DisplayC2CurveParameters(entity, model.GetComponent<C2CurveParameters>(entity));
 
-    it = components.find(Model::GetComponentId<PatchesDensity>());
-    if (it != components.end())
+    if (components.contains(Model::GetComponentId<PatchesDensity>()))
         DisplaySurfaceDensityParameter(entity, model.GetComponent<PatchesDensity>(entity));
 
-    it = components.find(Model::GetComponentId<C0Patches>());
-    if (it != components.end())
+    if (components.contains(Model::GetComponentId<C0Patches>()))
         DisplaySurfacePatches(entity, model.GetComponent<C0Patches>(entity));
 
-    it = components.find(Model::GetComponentId<C2Patches>());
-    if (it != components.end())
+    if (components.contains(Model::GetComponentId<C2Patches>()))
         DisplaySurfacePatches(entity, model.GetComponent<C2Patches>(entity));
 
-    it = components.find(Model::GetComponentId<C2CylinderPatches>());
-    if (it != components.end())
+    if (components.contains(Model::GetComponentId<C2CylinderPatches>()))
         DisplaySurfacePatches(entity, model.GetComponent<C2CylinderPatches>(entity));
 
-    it = components.find(Model::GetComponentId<Unremovable>());
-    if (it == components.end())
+    if (!components.contains(Model::GetComponentId<Unremovable>()))
         DisplayEntityDeletionOption(entity);
 }
 
@@ -566,7 +560,17 @@ void GuiView::RenderMultipleObjectProperties() const
 
         controller.RotateSelected(newRot);
     }
-        
+}
+
+
+void GuiView::RenderMergingControlPointsOptionButton(Entity e1, Entity e2) const
+{
+    ImGui::Separator();
+
+    if (model.IsAControlPoint(e1) && model.IsAControlPoint(e2)) {
+        if (ImGui::Button("Merge control points"))
+            controller.MergeControlPoints(e1, e2);
+    }
 }
 
 
@@ -641,7 +645,7 @@ void GuiView::DisplayTorusProperty(Entity entity, const TorusParameters& params)
 
     bool valueChanged = false;
 
-    ImGui::SeparatorText("Rotation");
+    ImGui::SeparatorText("Torus parameters");
 
     valueChanged |= ImGui::DragFloat("Major radius", &R, DRAG_FLOAT_SPEED, 0.001f, 0.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
     valueChanged |= ImGui::DragFloat("Minor radius", &r, DRAG_FLOAT_SPEED, 0.001f, R, "%.3f", ImGuiSliderFlags_AlwaysClamp);
@@ -692,7 +696,18 @@ void GuiView::DisplayCurveControlPoints(Entity entity, const CurveControlPoints&
             // TODO: rewrite with set intersection
             if (std::find(params.GetPoints().begin(), params.GetPoints().end(), point) == params.GetPoints().end()) {
                 if (pointsWithNames.contains(point) && ImGui::Selectable(model.GetEntityName(point).c_str(), false)) {
-                    controller.AddControlPointToCurve(entity, point);
+                    CurveType curveType;
+                    
+                    if (model.GetAllC0Curves().contains(point))
+                        curveType = CurveType::C0;
+                    else if (model.GetAllC2Curves().contains(point))
+                        curveType = CurveType::C2;
+                    else if (model.GetAllInterpolationCurves().contains(point))
+                        curveType = CurveType::Interpolation;
+                    else
+                        throw std::runtime_error("Unknown curve type");
+
+                    controller.AddControlPointToCurve(entity, point, curveType);
                 }
             }
         }

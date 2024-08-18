@@ -3,7 +3,7 @@
 #include <ecs/system.hpp>
 
 #include <memory>
-#include <unordered_map>
+#include <map>
 #include "../components/curveControlPoints.hpp"
 
 
@@ -11,27 +11,21 @@ class CurveControlPointsSystem: public System {
 public:
     static void RegisterSystem(Coordinator& coordinator);
 
-    void Init();
+    // TODO: delete dependency with controlPointsRegistry
+    Entity CreateControlPoints(const std::vector<Entity>& entities, SystemId system);
 
-    // TODO: delete
-    Entity CreateControlPoints(const std::vector<Entity>& entities);
+    void AddControlPoint(Entity object, Entity controlPoint, SystemId system);
 
-    void AddControlPoint(Entity object, Entity controlPoint);
+    void DeleteControlPoint(Entity object, Entity controlPoint, SystemId system);
 
-    void DeleteControlPoint(Entity object, Entity controlPoint);
-
-    inline bool IsAControlPoint(Entity entity) const
-        { return numberOfObjectsConnectedToControlPoint.contains(entity); }
+    void MergeControlPoints(Entity curve, Entity oldCP, Entity newCP, SystemId system);
 
 private:
     class DeletionHandler;
 
-    std::shared_ptr<DeletionHandler> deletionHandler;
-    std::unordered_map<Entity, unsigned int> numberOfObjectsConnectedToControlPoint;
+    std::map<SystemId, std::shared_ptr<DeletionHandler>> deletionHandlers;
 
-    void RegisterControlPoint(Entity controlPoint);
-
-    void UnregisterControlPoint(Entity controlPoint);
+    std::shared_ptr<DeletionHandler> GetDeletionHandler(SystemId systemId);
 
     class ControlPointMovedHandler: public EventHandler<Position> {
     public:
@@ -48,12 +42,13 @@ private:
 
     class DeletionHandler: public EventHandler<CurveControlPoints> {
     public:
-        DeletionHandler(Coordinator& coordinator):
-            coordinator(coordinator) {}
+        DeletionHandler(Coordinator& coordinator, SystemId systemId):
+            coordinator(coordinator), systemId(systemId) {}
 
         void HandleEvent(Entity entity, const CurveControlPoints& component, EventType eventType) override;
 
     private:
         Coordinator& coordinator;
+        SystemId systemId;
     };
 };

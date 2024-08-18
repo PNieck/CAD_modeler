@@ -23,7 +23,9 @@ void InterpolationCurveSystem::RegisterSystem(Coordinator &coordinator)
 
 Entity InterpolationCurveSystem::CreateCurve(const std::vector<Entity> &controlPoints)
 {
-    Entity curve = coordinator->GetSystem<CurveControlPointsSystem>()->CreateControlPoints(controlPoints);
+    Entity curve = coordinator->GetSystem<CurveControlPointsSystem>()->CreateControlPoints(controlPoints,
+        Coordinator::GetSystemID<InterpolationCurveSystem>()
+    );
 
     coordinator->AddComponent<Name>(curve, nameGenerator.GenerateName("InterpolationCurve"));
     coordinator->AddComponent<Mesh>(curve, Mesh());

@@ -38,6 +38,7 @@ Model::Model(int viewport_width, int viewport_height):
     C2SurfaceSystem::RegisterSystem(coordinator);
     C2CylinderSystem::RegisterSystem(coordinator);
     ControlNetSystem::RegisterSystem(coordinator);
+    ControlPointsRegistrySystem::RegisterSystem(coordinator);
 
     toriSystem = coordinator.GetSystem<ToriSystem>();
     gridSystem = coordinator.GetSystem<GridSystem>();
@@ -55,6 +56,7 @@ Model::Model(int viewport_width, int viewport_height):
     c2SurfaceSystem = coordinator.GetSystem<C2SurfaceSystem>();
     c2CylinderSystem = coordinator.GetSystem<C2CylinderSystem>();
     controlNetSystem = coordinator.GetSystem<ControlNetSystem>();
+    controlPointsRegistrySys = coordinator.GetSystem<ControlPointsRegistrySystem>();
 
     cameraManager.Init(viewport_width, viewport_height);
     gridSystem->Init(&shadersRepo);
@@ -64,7 +66,6 @@ Model::Model(int viewport_width, int viewport_height):
     toriSystem->Init(&shadersRepo);
     c0CurveSystem->Init(&shadersRepo);
     c2CurveSystem->Init(&shadersRepo);
-    controlPointsSystem->Init();
     interpolationCurveSystem->Init(&shadersRepo);
     c0PatchesSystem->Init(&shadersRepo);
     c0SurfaceSystem->Init();
@@ -116,10 +117,40 @@ void Model::AddTorus()
 }
 
 
-void Model::MultiplyCameraDistanceFromTarget(float coefficient)
+void Model::MergeControlPoints(Entity e1, Entity e2)
 {
-    float act = cameraManager.GetDistanceFromTarget();
-    cameraManager.SetDistanceFromTarget(act * coefficient);
+    auto registrySys = coordinator.GetSystem<ControlPointsRegistrySystem>();
+    auto curveCPSys = coordinator.GetSystem<CurveControlPointsSystem>();
+
+    auto ownersSet = registrySys->GetOwnersOfControlPoints(e2);
+
+    for (auto owner: ownersSet) {
+        auto sysId = std::get<SystemId>(owner);
+
+        if (sysId == Coordinator::GetSystemID<C0CurveSystem>() ||
+            sysId == Coordinator::GetSystemID<C2CurveSystem>() ||
+            sysId == Coordinator::GetSystemID<InterpolationCurveSystem>())
+            curveCPSys->MergeControlPoints(std::get<Entity>(owner), e2, e1, sysId);
+
+        else if (sysId == Coordinator::GetSystemID<C0CylinderSystem>() ||
+                 sysId == Coordinator::GetSystemID<C0SurfaceSystem>())
+                 c0PatchesSystem->MergeControlPoints(std::get<Entity>(owner), e2, e1, sysId);
+
+        else if (sysId == Coordinator::GetSystemID<C2SurfaceSystem>())
+                 c2SurfaceSystem->MergeControlPoints(std::get<Entity>(owner), e2, e1);
+
+        else if (sysId == Coordinator::GetSystemID<C2CylinderSystem>())
+                 c2CylinderSystem->MergeControlPoints(std::get<Entity>(owner), e2, e1);
+        else
+            throw std::runtime_error("Unknown system");
+    }
+
+    auto const& pos1 = coordinator.GetComponent<Position>(e1);
+    auto const& pos2 = coordinator.GetComponent<Position>(e2);
+    Position newPos((pos1.vec + pos2.vec) * 0.5f);
+
+    coordinator.SetComponent<Position>(e1, newPos);
+    coordinator.DestroyEntity(e2);
 }
 
 
@@ -215,7 +246,7 @@ void Model::RenderAnaglyphsFrame()
     auto camParams = cameraManager.GetBaseParams();
 
     glColorMask(true, false, false, false);
-    RenderSystemsObjects(viewMtx, persMtx, camParams.near_plane, camParams.far_plane);
+    RenderSystemsObjects(viewMtx, persMtx, camParams.nearPlane, camParams.farPlane);
 
     // Render picture for right eye
     cameraManager.SetCurrentEye(CameraManager::Eye::Right);
@@ -223,7 +254,7 @@ void Model::RenderAnaglyphsFrame()
     viewMtx = cameraManager.ViewMtx();
 
     glColorMask(false, true, true, false);
-    RenderSystemsObjects(viewMtx, persMtx, camParams.near_plane, camParams.far_plane);
+    RenderSystemsObjects(viewMtx, persMtx, camParams.nearPlane, camParams.farPlane);
 
     // Setting mask back to normal
     glColorMask(true, true, true, true);
@@ -238,7 +269,7 @@ void Model::RenderPerspectiveFrame()
 
     glClear(GL_COLOR_BUFFER_BIT);
 
-    RenderSystemsObjects(viewMtx, persMtx, camParams.near_plane, camParams.far_plane);
+    RenderSystemsObjects(viewMtx, persMtx, camParams.nearPlane, camParams.farPlane);
 }
 
 

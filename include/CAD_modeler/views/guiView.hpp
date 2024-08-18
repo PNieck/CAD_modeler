@@ -39,6 +39,7 @@ private:
 
     void RenderSingleObjectProperties(Entity entity) const;
     void RenderMultipleObjectProperties() const;
+    void RenderMergingControlPointsOptionButton(Entity e1, Entity e2) const;
 
     void DisplayPositionProperty(Entity entity, const Position& pos) const;
     void DisplayScaleProperty(Entity entity, const Scale& scale) const;

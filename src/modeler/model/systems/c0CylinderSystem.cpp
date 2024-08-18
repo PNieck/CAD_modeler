@@ -3,7 +3,7 @@
 #include <ecs/coordinator.hpp>
 
 #include "CAD_modeler/model/systems/pointsSystem.hpp"
-#include "CAD_modeler/model/systems/curveControlPointsSystem.hpp"
+#include "CAD_modeler/model/systems/controlPointsRegistrySystem.hpp"
 #include "CAD_modeler/model/systems/toUpdateSystem.hpp"
 #include "CAD_modeler/model/systems/c0PatchesSystem.hpp"
 
@@ -38,6 +38,7 @@ Entity C0CylinderSystem::CreateCylinder(const Position &pos, const alg::Vec3 &di
     C0Patches patches(1, 1);
 
     auto const pointsSystem = coordinator->GetSystem<PointsSystem>();
+    auto cpRegistry = coordinator->GetSystem<ControlPointsRegistrySystem>();
 
     Entity surface = coordinator->CreateEntity();
 
@@ -52,6 +53,8 @@ Entity C0CylinderSystem::CreateCylinder(const Position &pos, const alg::Vec3 &di
             patches.controlPointsHandlers.insert({cp, cpHandler});
 
             coordinator->AddComponent<Unremovable>(cp, Unremovable());
+
+            cpRegistry->RegisterControlPoint(surface, cp, Coordinator::GetSystemID<C0CylinderSystem>());
         }
     }
 
@@ -83,6 +86,7 @@ void C0CylinderSystem::AddRowOfPatches(Entity surface, const Position &pos, cons
     coordinator->EditComponent<C0Patches>(surface,
         [surface, this](C0Patches& patches) {
             auto pointSys = coordinator->GetSystem<PointsSystem>();
+            auto cpRegistrySys = coordinator->GetSystem<ControlPointsRegistrySystem>();
             
             patches.AddRowOfPatches();
 
@@ -100,6 +104,8 @@ void C0CylinderSystem::AddRowOfPatches(Entity surface, const Position &pos, cons
                     patches.controlPointsHandlers.insert({ newEntity, newHandler });
 
                     coordinator->AddComponent<Unremovable>(newEntity, Unremovable());
+
+                    cpRegistrySys->RegisterControlPoint(surface, newEntity, Coordinator::GetSystemID<C0CylinderSystem>());
                 }
             }
 
@@ -121,6 +127,7 @@ void C0CylinderSystem::AddColOfPatches(Entity surface, const Position &pos, cons
     coordinator->EditComponent<C0Patches>(surface,
         [surface, this](C0Patches& patches) {
             auto pointSys = coordinator->GetSystem<PointsSystem>();
+            auto cpRegistrySys = coordinator->GetSystem<ControlPointsRegistrySystem>();
             
             patches.AddColOfPatches();
 
@@ -143,6 +150,8 @@ void C0CylinderSystem::AddColOfPatches(Entity surface, const Position &pos, cons
                     patches.controlPointsHandlers.insert({ newEntity, newHandler });
 
                     coordinator->AddComponent<Unremovable>(newEntity, Unremovable());
+
+                    cpRegistrySys->RegisterControlPoint(surface, newEntity, Coordinator::GetSystemID<C0CylinderSystem>());
                 }
             }
         }
@@ -158,9 +167,12 @@ void C0CylinderSystem::DeleteRowOfPatches(Entity surface, const Position &pos, c
 {
     coordinator->EditComponent<C0Patches>(surface,
         [surface, this](C0Patches& patches) {
+            auto cpRegistrySys = coordinator->GetSystem<ControlPointsRegistrySystem>();
+
             for (int col=0; col < patches.PointsInCol() - 1; col++) {
                 for (int row=patches.PointsInRow() - 3; row < patches.PointsInRow(); row++) {
                     Entity point = patches.GetPoint(row, col);
+                    cpRegistrySys->UnregisterControlPoint(surface, point, Coordinator::GetSystemID<C0CylinderSystem>());
                     coordinator->DestroyEntity(point);
 
                     patches.controlPointsHandlers.erase(point);
@@ -180,9 +192,12 @@ void C0CylinderSystem::DeleteColOfPatches(Entity surface, const Position &pos, c
 {
     coordinator->EditComponent<C0Patches>(surface,
         [surface, this](C0Patches& patches) {
+            auto cpRegistrySys = coordinator->GetSystem<ControlPointsRegistrySystem>();
+
             for (int row=0; row < patches.PointsInRow(); row++) {
                 for (int col=patches.PointsInCol() - 4; col < patches.PointsInCol() - 1; col++) {
                     Entity point = patches.GetPoint(row, col);
+                    cpRegistrySys->UnregisterControlPoint(surface, point, Coordinator::GetSystemID<C0CylinderSystem>());
                     coordinator->DestroyEntity(point);
 
                     patches.controlPointsHandlers.erase(point);
@@ -235,27 +250,25 @@ void C0CylinderSystem::Recalculate(Entity cylinder, const Position &pos, const a
 }
 
 
+// TODO: merge with other deletion handlers
 void C0CylinderSystem::DeletionHandler::HandleEvent(Entity entity, const C0Patches& component, EventType eventType)
 {
     if (eventType != EventType::ComponentDeleted)
         return;
 
-    coordinator.EditComponent<C0Patches>(entity,
-        [&component, this](C0Patches& patches) {
-            auto controlPointsSystem = coordinator.GetSystem<CurveControlPointsSystem>();
+    auto cpRegistry = coordinator.GetSystem<ControlPointsRegistrySystem>();
+    C0Patches patches = coordinator.GetComponent<C0Patches>(entity);
 
-            for (int col=0; col < component.PointsInCol() - 1; col++) {
-                for (int row=0; row < component.PointsInRow(); row++) {
-                    Entity controlPoint = component.GetPoint(row, col);
+    for (auto handler: patches.controlPointsHandlers) {
+        Entity cp = handler.first;
+        HandlerId handlerId = handler.second;
 
-                    coordinator.Unsubscribe<Position>(controlPoint, patches.controlPointsHandlers.at(controlPoint));
+        coordinator.Unsubscribe<Position>(cp, handlerId);
+        cpRegistry->UnregisterControlPoint(entity, cp, Coordinator::GetSystemID<C0CylinderSystem>());
 
-                    if (!controlPointsSystem->IsAControlPoint(controlPoint))
-                        coordinator.DestroyEntity(controlPoint);
-                }
-            }
-        }
-    );
+        if (!cpRegistry->IsAControlPoint(cp))
+            coordinator.DestroyEntity(cp);
+    }
 }
 
 

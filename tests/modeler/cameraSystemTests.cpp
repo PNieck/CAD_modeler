@@ -23,13 +23,13 @@ TEST(CameraSystemsTests, Initialization) {
         .viewportWidth = 600,
         .viewportHeight = 400,
         .fov = glm::radians(45.0f),
-        .near_plane = 0.1f,
-        .far_plane = 100.0f,
+        .nearPlane = 0.1f,
+        .farPlane = 100.0f,
     };
 
     cameraSystem->Init(params, Position(0.0f, 0.0f, 10.0f));
 
-    EXPECT_EQ(0.1f, cameraSystem->GetParameters().near_plane);
+    EXPECT_EQ(0.1f, cameraSystem->GetParameters().nearPlane);
 }
 
 
@@ -45,8 +45,8 @@ TEST(CameraSystemsTests, SimplePerspectiveMatrixCompareWithGLM) {
         .viewportWidth = 600,
         .viewportHeight = 400,
         .fov = glm::radians(45.0f),
-        .near_plane = 0.1f,
-        .far_plane = 100.0f,
+        .nearPlane = 0.1f,
+        .farPlane = 100.0f,
     };
 
     cameraSystem->Init(params, Position(0.0f, 0.0f, 10.0f));
@@ -55,8 +55,8 @@ TEST(CameraSystemsTests, SimplePerspectiveMatrixCompareWithGLM) {
     auto glmMatrix = glm::perspective(
         params.fov,
         params.GetAspectRatio(),
-        params.near_plane,
-        params.far_plane
+        params.nearPlane,
+        params.farPlane
     );
 
     for (int row=0; row < 4; row++) {
@@ -86,8 +86,8 @@ TEST(CameraSystemsTests, SimpleViewMatrixCompareWithGLM) {
         .viewportWidth = 600,
         .viewportHeight = 400,
         .fov = glm::radians(45.0f),
-        .near_plane = 0.1f,
-        .far_plane = 100.0f,
+        .nearPlane = 0.1f,
+        .farPlane = 100.0f,
     };
 
     cameraSystem->Init(params, Position(0.0f, 0.0f, 10.0f));
@@ -128,8 +128,8 @@ TEST(CameraSystemsTests, ViewMatrixCompareWithGLM) {
         .viewportWidth = 600,
         .viewportHeight = 400,
         .fov = glm::radians(45.0f),
-        .near_plane = 0.1f,
-        .far_plane = 100.0f,
+        .nearPlane = 0.1f,
+        .farPlane = 100.0f,
     };
 
     cameraSystem->Init(params, Position(-5.0f, 4.0f, 10.0f));

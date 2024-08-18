@@ -26,10 +26,13 @@ public:
         { CreateC2Curve({controlPoint}); }
 
     inline void AddControlPoint(Entity bezierCurve, Entity entity)
-        { coordinator->GetSystem<CurveControlPointsSystem>()->AddControlPoint(bezierCurve, entity); }
+        { coordinator->GetSystem<CurveControlPointsSystem>()->AddControlPoint(bezierCurve, entity, Coordinator::GetSystemID<C2CurveSystem>()); }
 
     inline void DeleteControlPoint(Entity bezierCurve, Entity entity)
-        { coordinator->GetSystem<CurveControlPointsSystem>()->DeleteControlPoint(bezierCurve, entity); }
+        { coordinator->GetSystem<CurveControlPointsSystem>()->DeleteControlPoint(bezierCurve, entity, Coordinator::GetSystemID<C2CurveSystem>()); }
+
+    inline void MergeControlPoints(Entity curve, Entity oldCP, Entity newCP)
+        { coordinator->GetSystem<CurveControlPointsSystem>()->MergeControlPoints(curve, oldCP, newCP, Coordinator::GetSystemID<C2CurveSystem>()); }
 
     void ShowBSplinePolygon(Entity entity);
     void HideBSplinePolygon(Entity entity);

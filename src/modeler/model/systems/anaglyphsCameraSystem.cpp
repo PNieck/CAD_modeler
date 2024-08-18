@@ -46,7 +46,7 @@ alg::Mat4x4 AnaglyphsCameraSystem::PerspectiveMatrix() const
 
     float aspectRatio = params.GetAspectRatio();
 
-    float top = std::tan(params.fov / 2.0f) * params.near_plane;
+    float top = std::tan(params.fov / 2.0f) * params.nearPlane;
     float bottom = -top;
 
     float convPlaneWidth = 2.f * params.convergence * aspectRatio * std::tan(params.fov / 2.0f);
@@ -56,19 +56,19 @@ alg::Mat4x4 AnaglyphsCameraSystem::PerspectiveMatrix() const
     switch (currentEye)
     {
     case Eye::Left:
-        left = params.near_plane * (convPlaneWidth + params.eyeSeparation) / (2.f * params.convergence);
-        right = -params.near_plane * (convPlaneWidth - params.eyeSeparation) / (2.f * params.convergence);
+        left = params.nearPlane * (convPlaneWidth + params.eyeSeparation) / (2.f * params.convergence);
+        right = -params.nearPlane * (convPlaneWidth - params.eyeSeparation) / (2.f * params.convergence);
         break;
 
     case Eye::Right:
-        left = params.near_plane * (convPlaneWidth - params.eyeSeparation) / (2.f * params.convergence);
-        right = -params.near_plane * (convPlaneWidth + params.eyeSeparation) / (2.f * params.convergence);
+        left = params.nearPlane * (convPlaneWidth - params.eyeSeparation) / (2.f * params.convergence);
+        right = -params.nearPlane * (convPlaneWidth + params.eyeSeparation) / (2.f * params.convergence);
         break;
     }
 
     return alg::Frustum(
-        params.near_plane,
-        params.far_plane,
+        params.nearPlane,
+        params.farPlane,
         left,
         right,
         top,

@@ -5,6 +5,7 @@
 #include <CAD_modeler/model/components/curveControlPoints.hpp>
 
 #include <CAD_modeler/model/systems/toUpdateSystem.hpp>
+#include <CAD_modeler/model/systems/controlPointsRegistrySystem.hpp>
 
 
 void CurveControlPointsSystem::RegisterSystem(Coordinator & coordinator)
@@ -15,26 +16,21 @@ void CurveControlPointsSystem::RegisterSystem(Coordinator & coordinator)
 }
 
 
-void CurveControlPointsSystem::Init()
-{
-    deletionHandler = std::make_shared<DeletionHandler>(*coordinator);
-}
-
-
-Entity CurveControlPointsSystem::CreateControlPoints(const std::vector<Entity>& entities)
+Entity CurveControlPointsSystem::CreateControlPoints(const std::vector<Entity>& entities, SystemId system)
 {
     Entity object = coordinator->CreateEntity();
-
     CurveControlPoints controlPoints(entities);
 
     auto handler = std::make_shared<ControlPointMovedHandler>(object, *coordinator);
+    auto registry = coordinator->GetSystem<ControlPointsRegistrySystem>();
 
     for (Entity entity: entities) {
         auto handlerId = coordinator->Subscribe<Position>(entity, std::static_pointer_cast<EventHandler<Position>>(handler));
         controlPoints.controlPointsHandlers.insert({ entity, handlerId });
-        RegisterControlPoint(entity);
+        registry->RegisterControlPoint(object, entity, system);
     }
 
+    auto deletionHandler = GetDeletionHandler(system);
     controlPoints.deletionHandler = coordinator->Subscribe<CurveControlPoints>(object, std::static_pointer_cast<EventHandler<CurveControlPoints>>(deletionHandler));
 
      coordinator->AddComponent<CurveControlPoints>(object, controlPoints);
@@ -43,7 +39,7 @@ Entity CurveControlPointsSystem::CreateControlPoints(const std::vector<Entity>& 
 }
 
 
-void CurveControlPointsSystem::AddControlPoint(Entity object, Entity controlPoint)
+void CurveControlPointsSystem::AddControlPoint(Entity object, Entity controlPoint, SystemId system)
 {
     coordinator->EditComponent<CurveControlPoints>(object,
         [controlPoint, this](CurveControlPoints& params) {
@@ -59,11 +55,12 @@ void CurveControlPointsSystem::AddControlPoint(Entity object, Entity controlPoin
 
     coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(object);
 
-    RegisterControlPoint(controlPoint);
+    auto registry = coordinator->GetSystem<ControlPointsRegistrySystem>();
+    registry->RegisterControlPoint(object, controlPoint, system);
 }
 
 
-void CurveControlPointsSystem::DeleteControlPoint(Entity object, Entity controlPoint)
+void CurveControlPointsSystem::DeleteControlPoint(Entity object, Entity controlPoint, SystemId system)
 {
     coordinator->EditComponent<CurveControlPoints>(object,
         [object, controlPoint, this](CurveControlPoints& params) {
@@ -75,30 +72,44 @@ void CurveControlPointsSystem::DeleteControlPoint(Entity object, Entity controlP
 
     coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(object);
 
-    UnregisterControlPoint(controlPoint);
+    auto registry = coordinator->GetSystem<ControlPointsRegistrySystem>();
+    registry->UnregisterControlPoint(object, controlPoint, system);
 }
 
 
-void CurveControlPointsSystem::RegisterControlPoint(Entity controlPoint)
+void CurveControlPointsSystem::MergeControlPoints(Entity curve, Entity oldCP, Entity newCP, SystemId system)
 {
-    if (numberOfObjectsConnectedToControlPoint.contains(controlPoint))
-        numberOfObjectsConnectedToControlPoint.at(controlPoint)++;
-    else
-        numberOfObjectsConnectedToControlPoint.insert( {controlPoint, 1u} );
+    coordinator->EditComponent<CurveControlPoints>(curve,
+        [oldCP, newCP, this] (CurveControlPoints& params) {
+            params.SwapControlPoint(oldCP, newCP);
+
+            HandlerId handlerId = params.controlPointsHandlers.at(oldCP);
+
+            if (!params.controlPointsHandlers.contains(newCP)) {
+                auto eventHandler = coordinator->GetEventHandler<Position>(oldCP, handlerId);
+                auto newEventHandlerId = coordinator->Subscribe<Position>(newCP, eventHandler);
+                params.controlPointsHandlers.insert({newCP, newEventHandlerId});
+            }
+
+            coordinator->Unsubscribe<Position>(oldCP, handlerId);
+            params.controlPointsHandlers.erase(oldCP);
+        }
+    );
+
+    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(curve);
+
+    auto registry = coordinator->GetSystem<ControlPointsRegistrySystem>();
+    registry->UnregisterControlPoint(curve, oldCP, system);
+    registry->RegisterControlPoint(curve, newCP, system);
 }
 
 
-void CurveControlPointsSystem::UnregisterControlPoint(Entity controlPoint)
+std::shared_ptr<CurveControlPointsSystem::DeletionHandler> CurveControlPointsSystem::GetDeletionHandler(SystemId systemId)
 {
-    if (!numberOfObjectsConnectedToControlPoint.contains(controlPoint))
-        return;
+    if (!deletionHandlers.contains(systemId))
+        deletionHandlers.insert({systemId, std::make_shared<DeletionHandler>(*coordinator, systemId)});
 
-    unsigned int& cnt = numberOfObjectsConnectedToControlPoint.at(controlPoint);
-    
-    if (cnt == 1)
-        numberOfObjectsConnectedToControlPoint.erase(controlPoint);
-    else
-        cnt--;
+    return deletionHandlers.at(systemId);
 }
 
 
@@ -124,14 +135,11 @@ void CurveControlPointsSystem::DeletionHandler::HandleEvent(Entity entity, const
     if (eventType != EventType::ComponentDeleted)
         return;
 
-    auto entitiesIt = component.GetPoints().begin();
-    auto handlersIt = component.controlPointsHandlers.begin();
+    auto cpRegistrySys = coordinator.GetSystem<ControlPointsRegistrySystem>();
 
-    while (handlersIt != component.controlPointsHandlers.end() && entitiesIt != component.GetPoints().end()) {
-        coordinator.Unsubscribe<Position>(*entitiesIt, (*handlersIt).second);
-
-        ++entitiesIt;
-        ++handlersIt;
+    for (auto cp: component.controlPointsHandlers) {
+        coordinator.Unsubscribe<Position>(cp.first, cp.second);
+        cpRegistrySys->UnregisterControlPoint(entity, cp.first, systemId);
     }
 
     coordinator.Unsubscribe<CurveControlPoints>(entity, component.deletionHandler);

@@ -28,8 +28,8 @@ void CameraManager::Init(int viewportWidth, int viewportHeight)
         .viewportWidth = viewportWidth,
         .viewportHeight = viewportHeight,
         .fov = Angle::FromDegrees(45.f).ToRadians(),
-        .near_plane = 0.1f,
-        .far_plane = 100.0f,
+        .nearPlane = 0.1f,
+        .farPlane = 100.0f,
     };
 
     AnaglyphsCameraParameters anaCamParams(persCamParams, 0.5, 10.f);

@@ -19,6 +19,7 @@
 #include "model/systems/c2SurfacesSystem.hpp"
 #include "model/systems/c2CylinderSystem.hpp"
 #include "model/systems/controlNetSystem.hpp"
+#include "model/systems/controlPointsRegistrySystem.hpp"
 
 #include "model/systems/shaders/shaderRepository.hpp"
 
@@ -58,8 +59,19 @@ public:
     inline Entity AddC2Cylinder() const
         { return c2CylinderSystem->CreateCylinder(cursorSystem->GetPosition(), alg::Vec3(0.f, 1.f, 0.f), 1.f); }
 
-    inline void AddControlPointToCurve(Entity curve, Entity entity) const
+    inline void AddControlPointToC0Curve(Entity curve, Entity entity) const
         { c0CurveSystem->AddControlPoint(curve, entity); }
+
+    inline void AddControlPointToC2Curve(Entity curve, Entity entity) const
+        { c2CurveSystem->AddControlPoint(curve, entity); }
+
+    void MergeControlPoints(Entity e1, Entity e2);
+
+    inline bool IsAControlPoint(Entity entity) const
+        { return controlPointsRegistrySys->IsAControlPoint(entity); }
+
+    inline void AddControlPointToInterpolationCurve(Entity curve, Entity entity) const
+        { interpolationCurveSystem->AddControlPoint(curve, entity); }
 
     inline void AddRowOfC0SurfacePatches(Entity surface, const alg::Vec3& direction, float length, float width) const
         { c0SurfaceSystem->AddRowOfPatches(surface, cursorSystem->GetPosition(), direction, length, width); }
@@ -142,17 +154,6 @@ public:
     inline void DeleteControlPointFromCurve(Entity curve, Entity controlPoint) const
         { c0CurveSystem->DeleteControlPoint(curve, controlPoint); }
 
-    inline void RotateCamera(float x, float y)
-        { cameraManager.RotateCamera(x, y); }
-
-    inline float GetCameraDistanceFromTarget() const
-        { return cameraManager.GetDistanceFromTarget(); }
-
-    inline void SetCameraDistance(float newDist)
-        { cameraManager.SetDistanceFromTarget(newDist); }
-
-    void MultiplyCameraDistanceFromTarget(float coefficient);
-
     void ChangeViewportSize(int width, int height);
 
     inline void SetCursorPosition(float x, float y, float z) const
@@ -226,6 +227,15 @@ public:
     inline const std::unordered_set<Entity>& GetAllCurves() const
         { return coordinator.GetSystem<CurveControlPointsSystem>()->GetEntities(); }
 
+    inline const std::unordered_set<Entity>& GetAllC0Curves() const
+        { return c0CurveSystem->GetEntities(); }
+
+    inline const std::unordered_set<Entity>& GetAllC2Curves() const
+        { return c2CurveSystem->GetEntities(); }
+
+    inline const std::unordered_set<Entity>& GetAllInterpolationCurves() const
+        { return interpolationCurveSystem->GetEntities(); }
+
     inline const void ShowC2BSplinePolygon(Entity entity) const
         { return c2CurveSystem->ShowBSplinePolygon(entity); }
 
@@ -282,6 +292,7 @@ private:
     std::shared_ptr<C2SurfaceSystem> c2SurfaceSystem;
     std::shared_ptr<C2CylinderSystem> c2CylinderSystem;
     std::shared_ptr<ControlNetSystem> controlNetSystem;
+    std::shared_ptr<ControlPointsRegistrySystem> controlPointsRegistrySys;
 
     alg::Vec3 PointFromViewportCoordinates(float x, float y);
     Line LineFromViewportCoordinates(float x, float y);

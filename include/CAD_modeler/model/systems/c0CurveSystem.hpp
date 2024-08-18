@@ -26,10 +26,13 @@ public:
         { CreateC0Curve({entity}); }
 
     inline void AddControlPoint(Entity bezierCurve, Entity entity)
-        { coordinator->GetSystem<CurveControlPointsSystem>()->AddControlPoint(bezierCurve, entity); }
+        { coordinator->GetSystem<CurveControlPointsSystem>()->AddControlPoint(bezierCurve, entity, Coordinator::GetSystemID<C0CurveSystem>()); }
 
     inline void DeleteControlPoint(Entity bezierCurve, Entity entity)
-        { coordinator->GetSystem<CurveControlPointsSystem>()->DeleteControlPoint(bezierCurve, entity); }
+        { coordinator->GetSystem<CurveControlPointsSystem>()->DeleteControlPoint(bezierCurve, entity, Coordinator::GetSystemID<C0CurveSystem>()); }
+
+    inline void MergeControlPoints(Entity curve, Entity oldCP, Entity newCP)
+        { coordinator->GetSystem<CurveControlPointsSystem>()->MergeControlPoints(curve, oldCP, newCP, Coordinator::GetSystemID<C0CurveSystem>()); }
 
     void Render(const alg::Mat4x4& cameraMtx) const;
 

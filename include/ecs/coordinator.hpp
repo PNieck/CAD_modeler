@@ -106,8 +106,14 @@ public:
     }
 
     template <typename Comp>
-    inline constexpr ComponentId GetComponentID() const {
-        return componentMgr.GetComponentId<Comp>();
+    static constexpr ComponentId GetComponentID() {
+        return ComponentsManager::GetComponentId<Comp>();
+    }
+
+
+    template <typename Sys>
+    static constexpr SystemId GetSystemID() {
+        return SystemsManager::GetSystemID<Sys>();
     }
 
 
