@@ -9,6 +9,7 @@
 
 #include "system.hpp"
 #include "componentsManager.hpp"
+#include "systemConcept.hpp"
 
 
 using SystemId = std::size_t;
@@ -16,26 +17,26 @@ using SystemId = std::size_t;
 
 class SystemsManager {
 public:
-    template<typename Sys>
+    template<SystemConcept Sys>
     void RegisterSystem() {
         SystemId id = GetSystemID<Sys>();
         systems.insert({ id, std::make_shared<Sys>() });
     }
 
 
-    template<typename Sys>
+    template<SystemConcept Sys>
     std::shared_ptr<Sys> GetSystem() const {
         return std::static_pointer_cast<Sys>(systems.at(GetSystemID<Sys>()));
     }
 
 
-    template<typename Sys>
+    template<SystemConcept Sys>
     static constexpr SystemId GetSystemID() {
         return typeid(Sys).hash_code();
     }
 
 
-    template<typename Sys, typename Comp>
+    template<SystemConcept Sys, typename Comp>
     void RegisterRequiredComponent() {
         ComponentId compId = ComponentsManager::GetComponentId<Comp>();
         SystemId sysId = GetSystemID<Sys>();
