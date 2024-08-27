@@ -19,6 +19,16 @@ target_include_directories(ecs PUBLIC ../include)
 
 
 #
+# Graph library
+#
+file(GLOB_RECURSE GRAPH_LIB_HEADERS CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/include/graph/*.hpp")
+file(GLOB_RECURSE GRAPH_LIB_SRCS CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/src/graph/*.cpp")
+
+add_library(graph ${GRAPH_LIB_SRCS} ${GRAPH_LIB_HEADERS})
+target_include_directories(graph PUBLIC ../include)
+
+
+#
 # Main library
 #
 file(GLOB_RECURSE HEADER_LIST CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/include/CAD_modeler/*.hpp")
@@ -26,7 +36,7 @@ file(GLOB_RECURSE SOURCE_LIST CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/src/model
 
 add_library(modeler_lib ${SOURCE_LIST} ${HEADER_LIST})
 target_include_directories(modeler_lib PUBLIC ../include)
-target_link_libraries(modeler_lib PRIVATE glfw glad imgui ecs algebra)
+target_link_libraries(modeler_lib PRIVATE glfw glad imgui ecs algebra graph)
 
 # Copy shaders
 add_custom_target(copy_shaders
