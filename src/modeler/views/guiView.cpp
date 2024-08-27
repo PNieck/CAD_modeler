@@ -159,16 +159,13 @@ void GuiView::RenderObjectsNames() const
     const auto& entities = model.EntitiesWithNames();
 
     for (auto entity: entities) {
-        bool oldSelected = model.IsSelected(entity);
-        bool newSelected = oldSelected;
+        bool selected = model.IsSelected(entity);
 
-        ImGui::Selectable(
+        if (ImGui::Selectable(
             model.GetEntityName(entity).c_str(),
-            &newSelected
-        );
-
-        if (oldSelected != newSelected) {
-            if (newSelected)
+            &selected
+        )) {
+            if (selected)
                 controller.SelectEntity(entity);
             else
                 controller.DeselectEntity(entity);
