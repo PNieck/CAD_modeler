@@ -12,6 +12,7 @@
 #include <iterator>
 #include <stdexcept>
 #include <optional>
+#include <sstream>
 
 
 GuiView::GuiView(GLFWwindow* window, GuiController& controller, const Model& model):
@@ -21,7 +22,7 @@ GuiView::GuiView(GLFWwindow* window, GuiController& controller, const Model& mod
     const char* glsl_version = "#version 410";
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 
     ImGui::StyleColorsDark();
@@ -90,6 +91,10 @@ void GuiView::RenderGui() const
             RenderAddingCylinder(CylinderType::C2);
             break;
 
+        case AppState::AddingGregoryPatches:
+            RenderAddingGregoryPatches();
+            break;
+
         case AppState::AnaglyphsSettings:
             RenderAnaglyphsCameraSettings();
             break;
@@ -146,6 +151,11 @@ void GuiView::RenderDefaultGui() const
 
     if (ImGui::Button("Add C2 cylinder")) {
         controller.SetAppState(AppState::AddingC2Cylinder);
+    }
+
+    if (ImGui::Button("Add Gregory patches")) {
+        model.DeselectAllEntities();
+        controller.SetAppState(AppState::AddingGregoryPatches);
     }
 
     ImGui::Separator();
@@ -402,6 +412,77 @@ void GuiView::RenderAddingCylinder(CylinderType cylinderType) const
         controller.SetAppState(AppState::Default);
         entity.reset();
     }
+}
+
+
+void GuiView::RenderAddingGregoryPatches() const
+{
+    static bool entitiesSelected = false;
+    static std::vector<std::vector<Entity>> holes;
+    static int selected = -1;
+
+    if (!entitiesSelected) {
+        ImGui::Text("Select up three C0 surfaces or patches");
+
+        const auto& c0Surfaces = model.GetAllC0Surfaces();
+
+        for (auto surface: c0Surfaces) {
+            bool selected = model.IsSelected(surface);
+
+            if (ImGui::Selectable(
+                model.GetEntityName(surface).c_str(),
+                &selected
+            )) {
+                if (selected) {
+                    // TODO: add error message
+                    if (model.GetAllSelectedEntities().size() < 3)
+                        controller.SelectEntity(surface);
+                }
+                else
+                    controller.DeselectEntity(surface);
+            }
+        }
+
+        if (ImGui::Button("Accept")) {
+            entitiesSelected = true;
+            holes = model.GetHolesPossibleToFill(model.GetAllSelectedEntities());
+            selected = -1;
+        }
+
+        if (ImGui::Button("Cancel")) {
+            controller.SetAppState(AppState::Default);
+            controller.DeselectAllEntities();
+            entitiesSelected = false;
+        }
+    }
+    else {
+        ImGui::Text("Select a hole to fill");
+        int holeNb = 1;
+
+        for (auto& hole: holes) {
+            std::stringstream ss;
+
+            ss << "Hole " << holeNb;
+
+            if (ImGui::Selectable(ss.str().c_str(), selected == holeNb)) {
+                selected = holeNb;
+                model.DeselectAllEntities();
+                for (auto entity: hole) {
+                    controller.SelectEntity(entity);
+                }
+            }
+
+            holeNb++;
+        }
+
+        if (ImGui::Button("Cancel")) {
+            controller.SetAppState(AppState::Default);
+            controller.DeselectAllEntities();
+            entitiesSelected = false;
+            selected = -1;
+        }
+    }
+    
 }
 
 

@@ -31,6 +31,7 @@ private:
     void RenderAddingCurveGui(CurveType curveType) const;
     void RenderAddingSurface(SurfaceType surfaceType) const;
     void RenderAddingCylinder(CylinderType CylinderType) const;
+    void RenderAddingGregoryPatches() const;
 
     void RenderAnaglyphsCameraSettings() const;
 

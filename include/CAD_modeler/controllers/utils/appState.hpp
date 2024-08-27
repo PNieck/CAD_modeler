@@ -12,6 +12,7 @@ enum class AppState {
     AddingC2Surface,
     AddingC0Cylinder,
     AddingC2Cylinder,
+    AddingGregoryPatches,
 
     AnaglyphsSettings
 };

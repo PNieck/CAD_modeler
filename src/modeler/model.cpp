@@ -39,6 +39,7 @@ Model::Model(int viewport_width, int viewport_height):
     C2CylinderSystem::RegisterSystem(coordinator);
     ControlNetSystem::RegisterSystem(coordinator);
     ControlPointsRegistrySystem::RegisterSystem(coordinator);
+    GregoryPatchesSystem::RegisterSystem(coordinator);
 
     toriSystem = coordinator.GetSystem<ToriSystem>();
     gridSystem = coordinator.GetSystem<GridSystem>();
@@ -57,6 +58,7 @@ Model::Model(int viewport_width, int viewport_height):
     c2CylinderSystem = coordinator.GetSystem<C2CylinderSystem>();
     controlNetSystem = coordinator.GetSystem<ControlNetSystem>();
     controlPointsRegistrySys = coordinator.GetSystem<ControlPointsRegistrySystem>();
+    gregoryPatchesSystem = coordinator.GetSystem<GregoryPatchesSystem>();
 
     cameraManager.Init(viewport_width, viewport_height);
     gridSystem->Init(&shadersRepo);
@@ -177,6 +179,18 @@ void Model::TryToSelectFromViewport(float x, float y)
 {
     Line line(LineFromViewportCoordinates(x, y));
     selectionSystem->SelectFromLine(line);
+}
+
+
+std::vector<std::vector<Entity>> Model::GetHolesPossibleToFill(const std::unordered_set<Entity> &entities) const
+{
+    std::vector<C0Patches> c0Patches;
+
+    for (auto entity: entities) {
+        c0Patches.push_back(coordinator.GetComponent<C0Patches>(entity));
+    }
+
+    return gregoryPatchesSystem->FindHoleToFill(c0Patches);
 }
 
 

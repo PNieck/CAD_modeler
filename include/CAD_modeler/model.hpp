@@ -20,6 +20,7 @@
 #include "model/systems/c2CylinderSystem.hpp"
 #include "model/systems/controlNetSystem.hpp"
 #include "model/systems/controlPointsRegistrySystem.hpp"
+#include "model/systems/gregoryPatchesSystem.hpp"
 
 #include "model/systems/shaders/shaderRepository.hpp"
 
@@ -154,6 +155,9 @@ public:
     inline void DeleteControlPointFromCurve(Entity curve, Entity controlPoint) const
         { c0CurveSystem->DeleteControlPoint(curve, controlPoint); }
 
+    inline const std::unordered_set<Entity>& GetAllC0Surfaces() const
+        { return c0SurfaceSystem->GetEntities(); }
+
     void ChangeViewportSize(int width, int height);
 
     inline void SetCursorPosition(float x, float y, float z) const
@@ -266,6 +270,8 @@ public:
     inline bool HasPatchesPolygon(Entity entity) const
         { return controlNetSystem->HasControlPointsNet(entity); }
 
+    std::vector<std::vector<Entity>> GetHolesPossibleToFill(const std::unordered_set<Entity>& entities) const;
+
     template <typename Comp>
     static inline constexpr ComponentId GetComponentId()
         { return ComponentsManager::GetComponentId<Comp>(); }
@@ -293,6 +299,7 @@ private:
     std::shared_ptr<C2CylinderSystem> c2CylinderSystem;
     std::shared_ptr<ControlNetSystem> controlNetSystem;
     std::shared_ptr<ControlPointsRegistrySystem> controlPointsRegistrySys;
+    std::shared_ptr<GregoryPatchesSystem> gregoryPatchesSystem;
 
     alg::Vec3 PointFromViewportCoordinates(float x, float y);
     Line LineFromViewportCoordinates(float x, float y);
