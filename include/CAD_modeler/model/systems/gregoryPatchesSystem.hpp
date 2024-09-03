@@ -11,5 +11,5 @@ class GregoryPatchesSystem: public System {
 public:
     static void RegisterSystem(Coordinator& coordinator);
 
-    std::vector<std::vector<Entity>> FindHoleToFill(std::vector<C0Patches> patches) const;
+    std::vector<std::vector<Entity>> FindHoleToFill(const std::vector<C0Patches>& patches) const;
 };

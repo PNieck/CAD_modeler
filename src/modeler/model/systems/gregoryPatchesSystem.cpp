@@ -49,7 +49,7 @@ struct GraphEdgeHash {
 };
 
 
-std::vector<std::vector<Entity>> GregoryPatchesSystem::FindHoleToFill(std::vector<C0Patches> patchesVec) const
+std::vector<std::vector<Entity>> GregoryPatchesSystem::FindHoleToFill(const std::vector<C0Patches>& patchesVec) const
 {
     int graphSize = 0;
     std::map<Entity, int> cpToGraphVertexMap;
@@ -132,16 +132,29 @@ std::vector<std::vector<Entity>> GregoryPatchesSystem::FindHoleToFill(std::vecto
         graphEdge.v2 = cycle[2];
 
         patchEdge = edgeMap[graphEdge];
-        patchCycle.push_back(patchEdge.middleCP1);
-        patchCycle.push_back(patchEdge.middleCP2);
-        patchCycle.push_back(patchEdge.cornerCP2);
+        if (patchCycle[patchCycle.size() - 1] == patchEdge.cornerCP1) {
+            patchCycle.push_back(patchEdge.middleCP1);
+            patchCycle.push_back(patchEdge.middleCP2);
+            patchCycle.push_back(patchEdge.cornerCP2);
+        }
+        else {
+            patchCycle.push_back(patchEdge.middleCP2);
+            patchCycle.push_back(patchEdge.middleCP1);
+            patchCycle.push_back(patchEdge.cornerCP1);
+        }
 
         graphEdge.v1 = cycle[2];
         graphEdge.v2 = cycle[0];
 
         patchEdge = edgeMap[graphEdge];
-        patchCycle.push_back(patchEdge.middleCP1);
-        patchCycle.push_back(patchEdge.middleCP2);
+        if (patchCycle[patchCycle.size() - 1] == patchEdge.cornerCP1) {
+            patchCycle.push_back(patchEdge.middleCP1);
+            patchCycle.push_back(patchEdge.middleCP2);
+        }
+        else {
+            patchCycle.push_back(patchEdge.middleCP2);
+            patchCycle.push_back(patchEdge.middleCP1);
+        }
         
         result.push_back(patchCycle);
     }
