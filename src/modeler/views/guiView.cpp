@@ -418,7 +418,7 @@ void GuiView::RenderAddingCylinder(CylinderType cylinderType) const
 void GuiView::RenderAddingGregoryPatches() const
 {
     static bool entitiesSelected = false;
-    static std::vector<std::vector<Entity>> holes;
+    static std::vector<GregoryPatchesSystem::Hole> holes;
     static int selected = -1;
 
     if (!entitiesSelected) {
@@ -467,7 +467,8 @@ void GuiView::RenderAddingGregoryPatches() const
             if (ImGui::Selectable(ss.str().c_str(), selected == holeNb)) {
                 selected = holeNb;
                 model.DeselectAllEntities();
-                for (auto entity: hole) {
+                for (int i=0; i < GregoryPatchesSystem::Hole::innerCpNb; i++) {
+                    Entity entity = hole.GetInnerControlPoint(i);
                     controller.SelectEntity(entity);
                 }
             }

@@ -270,7 +270,7 @@ public:
     inline bool HasPatchesPolygon(Entity entity) const
         { return controlNetSystem->HasControlPointsNet(entity); }
 
-    std::vector<std::vector<Entity>> GetHolesPossibleToFill(const std::unordered_set<Entity>& entities) const;
+    std::vector<GregoryPatchesSystem::Hole> GetHolesPossibleToFill(const std::unordered_set<Entity>& entities) const;
 
     template <typename Comp>
     static inline constexpr ComponentId GetComponentId()

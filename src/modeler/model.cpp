@@ -182,15 +182,15 @@ void Model::TryToSelectFromViewport(float x, float y)
 }
 
 
-std::vector<std::vector<Entity>> Model::GetHolesPossibleToFill(const std::unordered_set<Entity> &entities) const
+std::vector<GregoryPatchesSystem::Hole> Model::GetHolesPossibleToFill(const std::unordered_set<Entity> &entities) const
 {
     std::vector<C0Patches> c0Patches;
+    c0Patches.reserve(entities.size());
 
-    for (auto entity: entities) {
+    for (auto entity: entities)
         c0Patches.push_back(coordinator.GetComponent<C0Patches>(entity));
-    }
 
-    return gregoryPatchesSystem->FindHoleToFill(c0Patches);
+    return gregoryPatchesSystem->FindHolesToFill(c0Patches);
 }
 
 
