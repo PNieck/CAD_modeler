@@ -101,6 +101,10 @@ public:
     inline const std::set<ComponentId>& GetEntityComponents(Entity entity) const
         { return componentMgr.GetEntityComponents(entity); }
 
+    template <typename Comp>
+    inline bool HasComponent(Entity entity) const
+        { return componentMgr.GetEntityComponents(entity).contains(ComponentsManager::GetComponentId<Comp>()); }
+
     template <SystemConcept Sys>
     inline std::shared_ptr<Sys> GetSystem() const {
         return systemsMgr.GetSystem<Sys>();
