@@ -525,7 +525,7 @@ std::vector<uint32_t> C2CurveSystem::GenerateBSplinePolygonIndices(const CurveCo
 void C2CurveSystem::BezierCtrlPtMovedHandler::HandleEvent(Entity entity, const Position & component, EventType eventType)
 {
     // FIXME: remove this condition
-    if (coordinator.GetEntityComponents(c2Curve).contains(ComponentsManager::GetComponentId<ToUpdate>()))
+    if (coordinator.HasComponent<ToUpdate>(c2Curve))
         return;
 
     auto const& bSplineCPs = coordinator.GetComponent<CurveControlPoints>(c2Curve).GetPoints();
