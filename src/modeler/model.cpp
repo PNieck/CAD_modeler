@@ -40,6 +40,7 @@ Model::Model(int viewport_width, int viewport_height):
     ControlNetSystem::RegisterSystem(coordinator);
     ControlPointsRegistrySystem::RegisterSystem(coordinator);
     GregoryPatchesSystem::RegisterSystem(coordinator);
+    VectorSystem::RegisterSystem(coordinator);
 
     toriSystem = coordinator.GetSystem<ToriSystem>();
     gridSystem = coordinator.GetSystem<GridSystem>();
@@ -59,6 +60,7 @@ Model::Model(int viewport_width, int viewport_height):
     controlNetSystem = coordinator.GetSystem<ControlNetSystem>();
     controlPointsRegistrySys = coordinator.GetSystem<ControlPointsRegistrySystem>();
     gregoryPatchesSystem = coordinator.GetSystem<GregoryPatchesSystem>();
+    vectorSystem = coordinator.GetSystem<VectorSystem>();
 
     cameraManager.Init(viewport_width, viewport_height);
     gridSystem->Init(&shadersRepo);
@@ -75,6 +77,7 @@ Model::Model(int viewport_width, int viewport_height):
     c2SurfaceSystem->Init(&shadersRepo);
     c2CylinderSystem->Init(&shadersRepo);
     controlNetSystem->Init(&shadersRepo);
+    vectorSystem->Init(&shadersRepo);
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glEnable(GL_LINE_SMOOTH);
@@ -303,4 +306,5 @@ void Model::RenderSystemsObjects(const alg::Mat4x4 &viewMtx, const alg::Mat4x4 &
     c2SurfaceSystem->Render(cameraMtx);
     c2CylinderSystem->Render(cameraMtx);
     controlNetSystem->Render(cameraMtx);
+    vectorSystem->Render(cameraMtx);
 }

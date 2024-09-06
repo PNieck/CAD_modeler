@@ -21,6 +21,8 @@
 #include <CAD_modeler/model/components/c2CylinderPatches.hpp>
 #include <CAD_modeler/model/components/controlNetMesh.hpp>
 #include <CAD_modeler/model/components/anaglypsCameraParameters.hpp>
+#include <CAD_modeler/model/components/vector.hpp>
+#include <CAD_modeler/model/components/vectorMesh.hpp>
 
 
 void RegisterAllComponents(Coordinator& coordinator)
@@ -46,4 +48,6 @@ void RegisterAllComponents(Coordinator& coordinator)
     coordinator.RegisterComponent<C2CylinderPatches>();
     coordinator.RegisterComponent<ControlNetMesh>();
     coordinator.RegisterComponent<AnaglyphsCameraParameters>();
+    coordinator.RegisterComponent<Vector>();
+    coordinator.RegisterComponent<VectorMesh>();
 }

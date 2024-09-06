@@ -21,6 +21,7 @@
 #include "model/systems/controlNetSystem.hpp"
 #include "model/systems/controlPointsRegistrySystem.hpp"
 #include "model/systems/gregoryPatchesSystem.hpp"
+#include "model/systems/vectorSystem.hpp"
 
 #include "model/systems/shaders/shaderRepository.hpp"
 
@@ -300,6 +301,7 @@ private:
     std::shared_ptr<ControlNetSystem> controlNetSystem;
     std::shared_ptr<ControlPointsRegistrySystem> controlPointsRegistrySys;
     std::shared_ptr<GregoryPatchesSystem> gregoryPatchesSystem;
+    std::shared_ptr<VectorSystem> vectorSystem;
 
     alg::Vec3 PointFromViewportCoordinates(float x, float y);
     Line LineFromViewportCoordinates(float x, float y);
