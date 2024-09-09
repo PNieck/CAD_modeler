@@ -25,6 +25,9 @@ public:
     inline void SetCameraType(CameraType type)
         { model.cameraManager.SetCameraType(type); }
 
+    inline void FillHole(const GregoryPatchesSystem::Hole& hole)
+        { model.FillHole(hole); }
+
     inline void AddTorus() const
         { model.AddTorus(); }
 

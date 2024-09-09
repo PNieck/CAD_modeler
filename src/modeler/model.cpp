@@ -77,6 +77,7 @@ Model::Model(int viewport_width, int viewport_height):
     c2SurfaceSystem->Init(&shadersRepo);
     c2CylinderSystem->Init(&shadersRepo);
     controlNetSystem->Init(&shadersRepo);
+    gregoryPatchesSystem->Init(&shadersRepo);
     vectorSystem->Init(&shadersRepo);
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -306,5 +307,6 @@ void Model::RenderSystemsObjects(const alg::Mat4x4 &viewMtx, const alg::Mat4x4 &
     c2SurfaceSystem->Render(cameraMtx);
     c2CylinderSystem->Render(cameraMtx);
     controlNetSystem->Render(cameraMtx);
+    gregoryPatchesSystem->Render(cameraMtx);
     vectorSystem->Render(cameraMtx);
 }

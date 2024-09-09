@@ -272,6 +272,9 @@ public:
         { return controlNetSystem->HasControlPointsNet(entity); }
 
     std::vector<GregoryPatchesSystem::Hole> GetHolesPossibleToFill(const std::unordered_set<Entity>& entities) const;
+    
+    inline void FillHole(const GregoryPatchesSystem::Hole& hole)
+        { gregoryPatchesSystem->FillHole(hole); }
 
     template <typename Comp>
     static inline constexpr ComponentId GetComponentId()

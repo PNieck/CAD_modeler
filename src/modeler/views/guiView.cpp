@@ -476,6 +476,15 @@ void GuiView::RenderAddingGregoryPatches() const
             holeNb++;
         }
 
+        if (ImGui::Button("Accept")) {
+            controller.FillHole(holes[selected - 1]);
+
+            controller.SetAppState(AppState::Default);
+            controller.DeselectAllEntities();
+            entitiesSelected = false;
+            selected = -1;
+        }
+
         if (ImGui::Button("Cancel")) {
             controller.SetAppState(AppState::Default);
             controller.DeselectAllEntities();

@@ -69,7 +69,6 @@ void C0PatchesSystem::Render(const alg::Mat4x4& cameraMtx) const
     }
 
     auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
-
     auto const& shader = shaderRepo->GetBezierSurfaceShader();
 
     UpdateEntities();
