@@ -20,6 +20,7 @@
 #include <map>
 #include <tuple>
 #include <cassert>
+#include <stdexcept>
 
 
 using GregOuterPoint = GregoryPatchParameters::OuterPointSpec;
@@ -302,7 +303,39 @@ alg::Vec3 SquareBernsteinPolynomialValue(const alg::Vec3& p0, const alg::Vec3& p
            u * u * p2;
 }
 
-#include <iostream>
+
+inline float DetOfMat2x2(float _00, float _01, float _10, float _11)
+{
+    return _00 * _11 - _10 * _01;
+}
+
+
+std::tuple<float, float> SolveSysOfLinEqWith3EqAnd3Unknowns(const alg::Vec3& result, const alg::Vec3& coef1, const alg::Vec3& coef2)
+{
+    float denominator = DetOfMat2x2(coef1.X(), coef2.X(), coef1.Y(), coef2.Y());
+    if (denominator != 0.f)
+        return {
+            (result.X() * coef2.Y() - coef2.X() * result.Y()) / denominator,
+            (result.Y() * coef1.X() - coef1.Y() * result.X()) / denominator
+        };
+
+    denominator = DetOfMat2x2(coef1.X(), coef2.X(), coef1.Z(), coef2.Z());
+    if (denominator != 0.f)
+        return {
+            (result.X() * coef2.Z() - coef2.X() * result.Z()) / denominator,
+            (result.Z() * coef1.X() - coef1.Z() * result.X()) / denominator
+        };
+
+    denominator = DetOfMat2x2(coef1.Y(), coef2.Y(), coef1.Z(), coef2.Z());
+    if (denominator != 0.f)
+        return {
+            (result.Y() * coef2.Z() - coef2.Y() * result.Z()) / denominator,
+            (result.Z() * coef1.Y() - coef1.Z() * result.Y()) / denominator
+        };
+
+    throw std::runtime_error("Cannot solve system of linear equations");
+}
+
 
 std::tuple<Position, Position> CalculateInnerPoints(
     const std::vector<Position>& curve,
@@ -321,19 +354,12 @@ std::tuple<Position, Position> CalculateInnerPoints(
     alg::Vec3 c1 = curve[2].vec - curve[1].vec;
     alg::Vec3 c2 = curve[3].vec - curve[2].vec;
 
-    // Solving system of two linear equations
-    float k0 = (b0.X()*c0.Y() - b0.Y()*c0.X()) / (g0.X()*c0.Y() - g0.Y()*c0.X());
-    float h0 = (g0.X()*b0.Y() - g0.Y()*b0.X()) / (g0.X()*c0.Y() - g0.Y()*c0.X());
+    float k0, h0, k1, h1;
+    std::tie(k0, h0) = SolveSysOfLinEqWith3EqAnd3Unknowns(b0, g0, c0);
+    assert((k0*g0 + h0*c0 - b0).LengthSquared() < 0.1f);
 
-    //assert((k0*g0 + h0*c0 - b0).LengthSquared() < 0.1f);
-    std::cout << "len1: " << (k0*g0 + h0*c0 - b0).LengthSquared() << std::endl;
-
-    float k1 = (b3.X()*c2.Y() - b3.Y()*c2.X()) / (g2.X()*c2.Y() - g2.Y()*c2.X());
-    float h1 = (g2.X()*b3.Y() - g2.Y()*b3.X()) / (g2.X()*c2.Y() - g2.Y()*c2.X());
-
-    //assert((k1*g2 + h1*c2 - b3).LengthSquared() < 0.1f);
-
-    std::cout << "len2: " << (k1*g2 + h1*c2 - b3).LengthSquared() << std::endl;
+    std::tie(k1, h1) = SolveSysOfLinEqWith3EqAnd3Unknowns(b3, g2, c2);
+    assert((k1*g2 + h1*c2 - b3).LengthSquared() < 0.1f);
 
     alg::Vec3 d1 = k0 * 2.f/3.f * k1 * 1.f/3.f * SquareBernsteinPolynomialValue(g0, g1, g2, 1.f/3.f) +
                    h0 * 2.f/3.f * h1 * 1.f/3.f * SquareBernsteinPolynomialValue(c0, c1, c2, 1.f/3.f);
