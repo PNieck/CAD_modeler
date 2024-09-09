@@ -50,8 +50,8 @@ private:
 
     void RenderNet(const alg::Mat4x4& cameraMtx) const;
 
-    std::vector<float> GenerateGregoryPatchVertices(const GregoryPatchParameters& params) const;
-    std::vector<uint32_t> GenerateGregoryPatchIndices(const GregoryPatchParameters& params) const;
+    std::vector<float> GenerateGregoryPatchVertices(const TriangleOfGregoryPatches& params) const;
+    std::vector<uint32_t> GenerateGregoryPatchIndices(const TriangleOfGregoryPatches& params) const;
 
     std::vector<float> GenerateNetVertices(const GregoryPatchParameters& params) const;
     std::vector<uint32_t> GenerateNetIndices(const GregoryPatchParameters& params) const;

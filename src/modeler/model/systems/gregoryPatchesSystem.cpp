@@ -31,7 +31,9 @@ void GregoryPatchesSystem::RegisterSystem(Coordinator &coordinator)
 {
     coordinator.RegisterSystem<GregoryPatchesSystem>();
 
-    coordinator.RegisterRequiredComponent<GregoryPatchesSystem, GregoryPatchParameters>();
+    coordinator.RegisterRequiredComponent<GregoryPatchesSystem, TriangleOfGregoryPatches>();
+    coordinator.RegisterRequiredComponent<GregoryPatchesSystem, PatchesDensity>();
+    coordinator.RegisterRequiredComponent<GregoryPatchesSystem, Mesh>();
 }
 
 
@@ -429,13 +431,6 @@ void GregoryPatchesSystem::FillHole(const GregoryPatchesSystem::Hole& hole)
     auto sub3 = SubdivideBezierCurve(curve3, 0.5f);
     auto outerSub3 = SubdivideBezierCurve(outerCurve3, 0.5f);
 
-    GregoryPatchParameters params;
-
-    params.SetOuterPoint(std::get<0>(sub1)[0], GregOuterPoint::_30);
-    params.SetOuterPoint(std::get<0>(sub1)[1], GregOuterPoint::_31);
-    params.SetOuterPoint(std::get<0>(sub1)[2], GregOuterPoint::_32);
-    params.SetOuterPoint(std::get<0>(sub1)[3], GregOuterPoint::_33);
-
     for (int i=1; i < 4; i++) {
         std::get<0>(outerSub1)[i] = 2.f * std::get<0>(sub1)[i].vec - std::get<0>(outerSub1)[i].vec;
         std::get<0>(outerSub2)[i] = 2.f * std::get<0>(sub2)[i].vec - std::get<0>(outerSub2)[i].vec;
@@ -492,77 +487,151 @@ void GregoryPatchesSystem::FillHole(const GregoryPatchesSystem::Hole& hole)
     coordinator->SetComponent<Name>(tmp_p12, "P12");
     coordinator->SetComponent<Name>(tmp_p13, "P13");
 
-    params.SetInnerPoint(std::get<0>(outerSub1)[1], GregInnerPoint::neighbourOf31);
-    params.SetInnerPoint(std::get<0>(outerSub1)[2], GregInnerPoint::neighbourOf32);
+    TriangleOfGregoryPatches triangle;
 
-    params.SetOuterPoint(std::get<1>(sub3)[2], GregOuterPoint::_20);
-    params.SetOuterPoint(std::get<1>(sub3)[1], GregOuterPoint::_10);
-    params.SetOuterPoint(std::get<1>(sub3)[0], GregOuterPoint::_00);
+    // Go around the hole
+    triangle.patch[0].SetOuterPoint(std::get<0>(sub1)[0], GregOuterPoint::_30);
+    triangle.patch[0].SetOuterPoint(std::get<0>(sub1)[1], GregOuterPoint::_31);
+    triangle.patch[0].SetOuterPoint(std::get<0>(sub1)[2], GregOuterPoint::_32);
+    triangle.patch[0].SetOuterPoint(std::get<0>(sub1)[3], GregOuterPoint::_33);
 
-    params.SetInnerPoint(std::get<1>(outerSub3)[2], GregInnerPoint::neighbourOf20);
-    params.SetInnerPoint(std::get<1>(outerSub3)[1], GregInnerPoint::neighbourOf10);
+    triangle.patch[1].SetOuterPoint(std::get<1>(sub1)[0], GregOuterPoint::_30);
+    triangle.patch[1].SetOuterPoint(std::get<1>(sub1)[1], GregOuterPoint::_31);
+    triangle.patch[1].SetOuterPoint(std::get<1>(sub1)[2], GregOuterPoint::_32);
+    triangle.patch[1].SetOuterPoint(std::get<1>(sub1)[3], GregOuterPoint::_33);
 
-    params.SetOuterPoint(p23, GregOuterPoint::_01);
-    params.SetOuterPoint(p13, GregOuterPoint::_02);
-    params.SetOuterPoint(p, GregOuterPoint::_03);
-    params.SetOuterPoint(p21, GregOuterPoint::_23);
-    params.SetOuterPoint(p11, GregOuterPoint::_13);
+    triangle.patch[1].SetOuterPoint(std::get<0>(sub2)[1], GregOuterPoint::_23);
+    triangle.patch[1].SetOuterPoint(std::get<0>(sub2)[2], GregOuterPoint::_13);
+    triangle.patch[1].SetOuterPoint(std::get<0>(sub2)[3], GregOuterPoint::_03);
 
-    alg::Vec3 a0 = -DerivativeOfBezierCurve(std::get<0>(sub1), 1.0f) / 3.f;
-    alg::Vec3 b0 = a0;
+    triangle.patch[2].SetOuterPoint(std::get<1>(sub2)[0], GregOuterPoint::_33);
+    triangle.patch[2].SetOuterPoint(std::get<1>(sub2)[1], GregOuterPoint::_23);
+    triangle.patch[2].SetOuterPoint(std::get<1>(sub2)[2], GregOuterPoint::_13);
+    triangle.patch[2].SetOuterPoint(std::get<1>(sub2)[3], GregOuterPoint::_03);
 
-    // auto tmp_a0 = vectorSys->AddVector(a0, std::get<0>(sub1)[3]);
-    // coordinator->AddComponent<Name>(tmp_a0, "a0");
+    triangle.patch[2].SetOuterPoint(std::get<0>(sub3)[1], GregOuterPoint::_02);
+    triangle.patch[2].SetOuterPoint(std::get<0>(sub3)[2], GregOuterPoint::_01);
+    triangle.patch[2].SetOuterPoint(std::get<0>(sub3)[3], GregOuterPoint::_00);
 
-    alg::Vec3 a3 = p.vec - p12.vec;  //DerivativeOfBezierCurve({p32, p22, p12, p}, 1.0f);
-    alg::Vec3 b3 = p13.vec - p.vec;  //DerivativeOfBezierCurve({p, p13, p23, p33}, 0.0f);
+    triangle.patch[0].SetOuterPoint(std::get<1>(sub3)[0], GregOuterPoint::_00);
+    triangle.patch[0].SetOuterPoint(std::get<1>(sub3)[1], GregOuterPoint::_10);
+    triangle.patch[0].SetOuterPoint(std::get<1>(sub3)[2], GregOuterPoint::_20);
+    
+    
+    // Set inner points around the hole
+    triangle.patch[0].SetInnerPoint(std::get<0>(outerSub1)[1], GregInnerPoint::neighbourOf31);
+    triangle.patch[0].SetInnerPoint(std::get<0>(outerSub1)[2], GregInnerPoint::neighbourOf32);
 
-    // auto tmp_a3 = vectorSys->AddVector(a3, p12);
-    // coordinator->AddComponent<Name>(tmp_a3, "a3");
+    triangle.patch[1].SetInnerPoint(std::get<1>(outerSub1)[1], GregInnerPoint::neighbourOf31);
+    triangle.patch[1].SetInnerPoint(std::get<1>(outerSub1)[2], GregInnerPoint::neighbourOf32);
 
-    // auto tmp_b3 = vectorSys->AddVector(b3, p);
-    // coordinator->AddComponent<Name>(tmp_b3, "b3");
+    triangle.patch[1].SetInnerPoint(std::get<0>(outerSub2)[1], GregInnerPoint::neighbourOf23);
+    triangle.patch[1].SetInnerPoint(std::get<0>(outerSub2)[2], GregInnerPoint::neighbourOf13);
+
+    triangle.patch[2].SetInnerPoint(std::get<1>(outerSub2)[1], GregInnerPoint::neighbourOf23);
+    triangle.patch[2].SetInnerPoint(std::get<1>(outerSub2)[2], GregInnerPoint::neighbourOf13);
+
+    triangle.patch[2].SetInnerPoint(std::get<0>(outerSub3)[1], GregInnerPoint::neighbourOf02);
+    triangle.patch[2].SetInnerPoint(std::get<0>(outerSub3)[2], GregInnerPoint::neighbourOf01);
+
+    triangle.patch[0].SetInnerPoint(std::get<1>(outerSub3)[1], GregInnerPoint::neighbourOf10);
+    triangle.patch[0].SetInnerPoint(std::get<1>(outerSub3)[2], GregInnerPoint::neighbourOf20);
+
+
+    // Set the rest of outer points
+    triangle.patch[0].SetOuterPoint(p21, GregOuterPoint::_23);
+    triangle.patch[0].SetOuterPoint(p11, GregOuterPoint::_13);
+    triangle.patch[0].SetOuterPoint(p, GregOuterPoint::_03);
+
+    triangle.patch[1].SetOuterPoint(p21, GregOuterPoint::_20);
+    triangle.patch[1].SetOuterPoint(p11, GregOuterPoint::_10);
+    triangle.patch[1].SetOuterPoint(p, GregOuterPoint::_00);
+
+    triangle.patch[1].SetOuterPoint(p22, GregOuterPoint::_02);
+    triangle.patch[1].SetOuterPoint(p12, GregOuterPoint::_01);
+
+    triangle.patch[2].SetOuterPoint(p22, GregOuterPoint::_32);
+    triangle.patch[2].SetOuterPoint(p12, GregOuterPoint::_31);
+    triangle.patch[2].SetOuterPoint(p, GregOuterPoint::_30);
+
+    triangle.patch[2].SetOuterPoint(p23, GregOuterPoint::_10);
+    triangle.patch[2].SetOuterPoint(p13, GregOuterPoint::_20);
+
+    triangle.patch[0].SetOuterPoint(p23, GregOuterPoint::_01);
+    triangle.patch[0].SetOuterPoint(p13, GregOuterPoint::_02);
+
+
+    // Finish inner points
+    alg::Vec3 b0 = std::get<0>(sub1)[2].vec - std::get<0>(sub1)[3].vec;
+    alg::Vec3 a0 = b0;
+
+    alg::Vec3 a3 = p.vec - p12.vec;
+    alg::Vec3 b3 = p13.vec - p.vec;
 
     auto innerPts = CalculateInnerPoints({p31, p21, p11, p}, a0, b0, a3, b3);
-    params.SetInnerPoint(std::get<0>(innerPts), GregInnerPoint::neighbourOf23);
-    params.SetInnerPoint(std::get<1>(innerPts), GregInnerPoint::neighbourOf13);
+    triangle.patch[0].SetInnerPoint(std::get<0>(innerPts), GregInnerPoint::neighbourOf23);
+    triangle.patch[0].SetInnerPoint(std::get<1>(innerPts), GregInnerPoint::neighbourOf13);
 
-    b0 = DerivativeOfBezierCurve(std::get<1>(sub3), 0.0f) / 3.f;
+    b0 = std::get<1>(sub1)[1].vec - std::get<1>(sub1)[0].vec;
     a0 = b0;
 
-    // auto tmp_a0 = vectorSys->AddVector(a0, std::get<1>(sub3)[0]);
-    // coordinator->AddComponent<Name>(tmp_a0, "a0");
+    b3 = p12.vec - p.vec;
+    a3 = p.vec - p13.vec;
 
-    b3 = p11.vec - p.vec; // DerivativeOfBezierCurve({p, p11, p21, p31}, 0.0f);
-    a3 = p.vec - p12.vec; // DerivativeOfBezierCurve({p33, p32, p31, p}, 1.0f);
+    innerPts = CalculateInnerPoints({p31, p21, p11, p}, a0, b0, a3, b3);
+    triangle.patch[1].SetInnerPoint(std::get<0>(innerPts), GregInnerPoint::neighbourOf20);
+    triangle.patch[1].SetInnerPoint(std::get<1>(innerPts), GregInnerPoint::neighbourOf10);
 
-    // auto tmp_a3 = vectorSys->AddVector(a3, p12);
-    // coordinator->AddComponent<Name>(tmp_a3, "a3");
+    b0 = std::get<0>(sub2)[2].vec - std::get<0>(sub2)[3].vec;
+    a0 = b0;
 
-    // auto tmp_b3 = vectorSys->AddVector(b3, p);
-    // coordinator->AddComponent<Name>(tmp_b3, "b3");
+    b3 = p11.vec - p.vec;
+    a3 = p.vec - p13.vec;
+
+    innerPts = CalculateInnerPoints({p32, p22, p12, p}, a0, b0, a3, b3);
+    triangle.patch[1].SetInnerPoint(std::get<0>(innerPts), GregInnerPoint::neighbourOf02);
+    triangle.patch[1].SetInnerPoint(std::get<1>(innerPts), GregInnerPoint::neighbourOf01);
+
+    b0 = std::get<1>(sub2)[1].vec - std::get<1>(sub2)[0].vec;
+    a0 = b0;
+
+    b3 = p13.vec - p.vec;
+    a3 = p.vec - p11.vec;
+
+    innerPts = CalculateInnerPoints({p32, p22, p12, p}, a0, b0, a3, b3);
+    triangle.patch[2].SetInnerPoint(std::get<0>(innerPts), GregInnerPoint::neighbourOf32);
+    triangle.patch[2].SetInnerPoint(std::get<1>(innerPts), GregInnerPoint::neighbourOf31);
+
+    b0 = std::get<0>(sub3)[2].vec - std::get<0>(sub3)[3].vec;
+    a0 = b0;
+
+    b3 = p12.vec - p.vec;
+    a3 = p.vec - p11.vec;
 
     innerPts = CalculateInnerPoints({p33, p23, p13, p}, a0, b0, a3, b3);
-    params.SetInnerPoint(std::get<0>(innerPts), GregInnerPoint::neighbourOf01);
-    params.SetInnerPoint(std::get<1>(innerPts), GregInnerPoint::neighbourOf02);
+    triangle.patch[2].SetInnerPoint(std::get<0>(innerPts), GregInnerPoint::neighbourOf10);
+    triangle.patch[2].SetInnerPoint(std::get<1>(innerPts), GregInnerPoint::neighbourOf20);
+
+    b0 = std::get<1>(sub3)[0].vec - std::get<1>(sub3)[1].vec;
+    a0 = b0;
+
+    b3 = p11.vec - p.vec;
+    a3 = p.vec - p12.vec;
+
+    innerPts = CalculateInnerPoints({p33, p23, p13, p}, a0, b0, a3, b3);
+    triangle.patch[0].SetInnerPoint(std::get<0>(innerPts), GregInnerPoint::neighbourOf01);
+    triangle.patch[0].SetInnerPoint(std::get<1>(innerPts), GregInnerPoint::neighbourOf02);
 
     Entity entity = coordinator->CreateEntity();
-    coordinator->AddComponent<GregoryPatchParameters>(entity, params);
-
-    GregoryNetMesh netMesh;
-    netMesh.Update(
-        GenerateNetVertices(params),
-        GenerateNetIndices(params)
-    );
+    coordinator->AddComponent<TriangleOfGregoryPatches>(entity, triangle);
 
     Mesh mesh;
     mesh.Update(
-        GenerateGregoryPatchVertices(params),
-        GenerateGregoryPatchIndices(params)
+        GenerateGregoryPatchVertices(triangle),
+        GenerateGregoryPatchIndices(triangle)
     );
 
-    coordinator->AddComponent<GregoryNetMesh>(entity, netMesh);
-    coordinator->AddComponent<Name>(entity, "Gregory");
+    coordinator->AddComponent<Name>(entity, nameGenerator.GenerateName("GregoryPatch"));
     coordinator->AddComponent<Mesh>(entity, mesh);
     coordinator->AddComponent<PatchesDensity>(entity, PatchesDensity(5));
 }
@@ -576,8 +645,6 @@ void GregoryPatchesSystem::Render(const alg::Mat4x4 &cameraMtx) const
 
     auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
     auto const& shader = shaderRepo->GetGregoryPatchShader();
-
-    //UpdateEntities();
 
     shader.Use();
     shader.SetColor(alg::Vec4(1.0f));
@@ -645,11 +712,8 @@ void AddPosition(std::vector<float>& vec, const Position& pos)
 }
 
 
-std::vector<float> GregoryPatchesSystem::GenerateGregoryPatchVertices(const GregoryPatchParameters &params) const
+void AddPatchToVertices(std::vector<float>& result, const GregoryPatchParameters& params)
 {
-    std::vector<float> result;
-    result.reserve(params.InnerPointsNb + params.OuterPointsNb);
-
     AddPosition(result, params.GetOuterPoint(GregOuterPoint::_00));
     AddPosition(result, params.GetOuterPoint(GregOuterPoint::_01));
     AddPosition(result, params.GetOuterPoint(GregOuterPoint::_02));
@@ -678,34 +742,51 @@ std::vector<float> GregoryPatchesSystem::GenerateGregoryPatchVertices(const Greg
 
     AddPosition(result, params.GetInnerPoint(GregInnerPoint::neighbourOf20));
     AddPosition(result, params.GetInnerPoint(GregInnerPoint::neighbourOf10));
+}
+
+
+std::vector<float> GregoryPatchesSystem::GenerateGregoryPatchVertices(const TriangleOfGregoryPatches& triangle) const
+{
+    std::vector<float> result;
+    constexpr int size = (GregoryPatchParameters::InnerPointsNb + GregoryPatchParameters::OuterPointsNb) * triangle.ParamsCnt * 3;
+    result.reserve(size);
+
+    for (int i=0; i < triangle.ParamsCnt; i++)
+        AddPatchToVertices(result, triangle.patch[i]);
 
     return result;
 }
 
 
-std::vector<uint32_t> GregoryPatchesSystem::GenerateGregoryPatchIndices(const GregoryPatchParameters &params) const
+void AddPatchToIndices(std::vector<uint32_t>& result,const GregoryPatchParameters& params, int startIdx)
+{
+    for (int i=0; i < params.InnerPointsNb + params.OuterPointsNb; i++)
+        result.push_back(startIdx + i);
+
+    for (int i=3; i < params.OuterPointsNb; i++)
+        result.push_back(startIdx + i);
+
+    result.push_back(startIdx + 0);
+    result.push_back(startIdx + 1);
+    result.push_back(startIdx + 2);
+
+    for (int i=14; i < params.InnerPointsNb + params.OuterPointsNb; i++)
+        result.push_back(startIdx + i);
+
+    result.push_back(startIdx + 12);
+    result.push_back(startIdx + 13);
+}
+
+
+std::vector<uint32_t> GregoryPatchesSystem::GenerateGregoryPatchIndices(const TriangleOfGregoryPatches& triangle) const
 {
     std::vector<uint32_t> result;
-    result.reserve((params.InnerPointsNb + params.OuterPointsNb)*2);
+    constexpr int size = (GregoryPatchParameters::InnerPointsNb + GregoryPatchParameters::OuterPointsNb) * triangle.ParamsCnt * 2;
+    result.reserve(size);
 
-    for (int i=0; i < params.InnerPointsNb + params.OuterPointsNb; i++) {
-        result.push_back(i);
-    }
-
-    for (int i=3; i < params.OuterPointsNb; i++) {
-        result.push_back(i);
-    }
-
-    result.push_back(0);
-    result.push_back(1);
-    result.push_back(2);
-
-    for (int i=14; i < params.InnerPointsNb + params.OuterPointsNb; i++) {
-        result.push_back(i);
-    }
-
-    result.push_back(12);
-    result.push_back(13);
+    AddPatchToIndices(result, triangle.patch[0], 0);
+    AddPatchToIndices(result, triangle.patch[1], 20);
+    AddPatchToIndices(result, triangle.patch[1], 40);
 
     return result;
 }

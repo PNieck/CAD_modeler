@@ -50,7 +50,7 @@ void RegisterAllComponents(Coordinator& coordinator)
     coordinator.RegisterComponent<C2CylinderPatches>();
     coordinator.RegisterComponent<ControlNetMesh>();
     coordinator.RegisterComponent<AnaglyphsCameraParameters>();
-    coordinator.RegisterComponent<GregoryPatchParameters>();
+    coordinator.RegisterComponent<TriangleOfGregoryPatches>();
     coordinator.RegisterComponent<GregoryNetMesh>();
     coordinator.RegisterComponent<Vector>();
     coordinator.RegisterComponent<VectorMesh>();
