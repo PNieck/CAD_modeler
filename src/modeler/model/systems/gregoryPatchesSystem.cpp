@@ -1,11 +1,6 @@
 #include <CAD_modeler/model/systems/gregoryPatchesSystem.hpp>
 
-#include <CAD_modeler/utilities/hashCombine.hpp>
-
-#include <CAD_modeler/model/systems/c0CurveSystem.hpp>
-#include <CAD_modeler/model/systems/pointsSystem.hpp>
 #include <CAD_modeler/model/systems/selectionSystem.hpp>
-#include <CAD_modeler/model/systems/vectorSystem.hpp>
 
 #include <CAD_modeler/model/components/name.hpp>
 #include <CAD_modeler/model/components/gregoryPatchParameters.hpp>
@@ -377,10 +372,6 @@ std::tuple<Position, Position> CalculateInnerPoints(
 
 void GregoryPatchesSystem::FillHole(const GregoryPatchesSystem::Hole& hole)
 {
-    auto curveSys = coordinator->GetSystem<C0CurveSystem>();
-    auto pointSys = coordinator->GetSystem<PointsSystem>();
-    auto vectorSys = coordinator->GetSystem<VectorSystem>();
-
     std::vector<Position> curve1 {
         coordinator->GetComponent<Position>(hole.GetInnerControlPoint(0)),
         coordinator->GetComponent<Position>(hole.GetInnerControlPoint(1)),
@@ -449,25 +440,9 @@ void GregoryPatchesSystem::FillHole(const GregoryPatchesSystem::Hole& hole)
     const auto& p22 = std::get<0>(outerSub2)[3];
     const auto& p23 = std::get<0>(outerSub3)[3];
 
-    auto tmp_p21 = pointSys->CreatePoint(p21);
-    auto tmp_p22 = pointSys->CreatePoint(p22);
-    auto tmp_p23 = pointSys->CreatePoint(p23);
-
     const auto& p31 = std::get<0>(sub1)[3];
     const auto& p32 = std::get<0>(sub2)[3];
     const auto& p33 = std::get<0>(sub3)[3];
-
-    auto tmp_p31 = pointSys->CreatePoint(p31);
-    auto tmp_p32 = pointSys->CreatePoint(p32);
-    auto tmp_p33 = pointSys->CreatePoint(p33);
-
-    coordinator->SetComponent<Name>(tmp_p21, "P21");
-    coordinator->SetComponent<Name>(tmp_p22, "P22");
-    coordinator->SetComponent<Name>(tmp_p23, "P23");
-
-    coordinator->SetComponent<Name>(tmp_p31, "P31");
-    coordinator->SetComponent<Name>(tmp_p32, "P32");
-    coordinator->SetComponent<Name>(tmp_p33, "P33");
 
     Position q1 = (3.f * p21.vec - p31.vec) / 2.0f;
     Position q2 = (3.f * p22.vec - p32.vec) / 2.0f;
@@ -478,16 +453,6 @@ void GregoryPatchesSystem::FillHole(const GregoryPatchesSystem::Hole& hole)
     Position p11 = (2.0f * q1.vec + p.vec) / 3.0f;
     Position p12 = (2.0f * q2.vec + p.vec) / 3.0f;
     Position p13 = (2.0f * q3.vec + p.vec) / 3.0f;
-
-    auto tmp_p = pointSys->CreatePoint(p);
-    auto tmp_p11 = pointSys->CreatePoint(p11);
-    auto tmp_p12 = pointSys->CreatePoint(p12);
-    auto tmp_p13 = pointSys->CreatePoint(p13);
-
-    coordinator->SetComponent<Name>(tmp_p, "P");
-    coordinator->SetComponent<Name>(tmp_p11, "P11");
-    coordinator->SetComponent<Name>(tmp_p12, "P12");
-    coordinator->SetComponent<Name>(tmp_p13, "P13");
 
     TriangleOfGregoryPatches triangle;
 
