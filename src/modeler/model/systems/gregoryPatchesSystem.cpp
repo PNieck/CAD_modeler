@@ -21,6 +21,8 @@
 #include <tuple>
 #include <cassert>
 #include <stdexcept>
+#include <algorithm>
+#include <stack>
 
 
 using GregOuterPoint = GregoryPatchParameters::OuterPointSpec;
@@ -637,6 +639,37 @@ void GregoryPatchesSystem::FillHole(const GregoryPatchesSystem::Hole& hole)
 }
 
 
+void GregoryPatchesSystem::ShowControlNet(Entity gregoryPatches)
+{
+    coordinator->EditComponent<TriangleOfGregoryPatches>(gregoryPatches,
+        [this, gregoryPatches] (TriangleOfGregoryPatches& triangle) {
+            GregoryNetMesh mesh; 
+
+            mesh.Update(
+                GenerateNetVertices(triangle),
+                GenerateNetIndices(triangle)
+            );
+
+            coordinator->AddComponent(gregoryPatches, mesh);
+
+            triangle.hasNet = true;
+        }
+    );  
+}
+
+
+void GregoryPatchesSystem::HideControlNet(Entity gregoryPatches)
+{
+    coordinator->DeleteComponent<GregoryNetMesh>(gregoryPatches);
+
+    coordinator->EditComponent<TriangleOfGregoryPatches>(gregoryPatches,
+        [] (TriangleOfGregoryPatches& triangle) {
+            triangle.hasNet = false;
+        }
+    );
+}
+
+
 void GregoryPatchesSystem::Render(const alg::Mat4x4 &cameraMtx) const
 {
     if (entities.empty()) {
@@ -645,6 +678,7 @@ void GregoryPatchesSystem::Render(const alg::Mat4x4 &cameraMtx) const
 
     auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
     auto const& shader = shaderRepo->GetGregoryPatchShader();
+    std::stack<Entity> netsToDraw;
 
     shader.Use();
     shader.SetColor(alg::Vec4(1.0f));
@@ -653,7 +687,11 @@ void GregoryPatchesSystem::Render(const alg::Mat4x4 &cameraMtx) const
     glPatchParameteri(GL_PATCH_VERTICES, 20);
 
     for (auto const entity: entities) {
+        auto const& triangle = coordinator->GetComponent<TriangleOfGregoryPatches>(entity);
         bool selection = selectionSystem->IsSelected(entity);
+
+        if (triangle.hasNet)
+            netsToDraw.push(entity);
 
         if (selection)
             shader.SetColor(alg::Vec4(1.0f, 0.5f, 0.0f, 1.0f));
@@ -671,15 +709,14 @@ void GregoryPatchesSystem::Render(const alg::Mat4x4 &cameraMtx) const
         if (selection)
             shader.SetColor(alg::Vec4(1.0f));
     }
+
+    if (!netsToDraw.empty())
+        RenderNet(netsToDraw, cameraMtx);
 }
 
 
-void GregoryPatchesSystem::RenderNet(const alg::Mat4x4 &cameraMtx) const
+void GregoryPatchesSystem::RenderNet(std::stack<Entity>& entities, const alg::Mat4x4 &cameraMtx) const
 {
-    if (entities.empty()) {
-        return;
-    }
-
     auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
     auto const& shader = shaderRepo->GetStdShader();
 
@@ -687,7 +724,10 @@ void GregoryPatchesSystem::RenderNet(const alg::Mat4x4 &cameraMtx) const
     shader.SetColor(alg::Vec4(1.0f));
     shader.SetMVP(cameraMtx);
 
-    for (auto entity: entities) {
+    while (!entities.empty()) {
+        Entity entity = entities.top();
+        entities.pop();
+
         bool selection = selectionSystem->IsSelected(entity);
 
         if (selection)
@@ -754,6 +794,8 @@ std::vector<float> GregoryPatchesSystem::GenerateGregoryPatchVertices(const Tria
     for (int i=0; i < triangle.ParamsCnt; i++)
         AddPatchToVertices(result, triangle.patch[i]);
 
+    assert(result.size() == size);
+
     return result;
 }
 
@@ -788,15 +830,14 @@ std::vector<uint32_t> GregoryPatchesSystem::GenerateGregoryPatchIndices(const Tr
     AddPatchToIndices(result, triangle.patch[1], 20);
     AddPatchToIndices(result, triangle.patch[1], 40);
 
+    assert(result.size() == size);
+
     return result;
 }
 
 
-std::vector<float> GregoryPatchesSystem::GenerateNetVertices(const GregoryPatchParameters& params) const
+void AddSingleGregoryPatchToNetVertices(std::vector<float>& result, const GregoryPatchParameters& params)
 {
-    std::vector<float> result;
-    result.reserve((2 * params.InnerPointsNb + params.OuterPointsNb) * 3);
-
     AddPosition(result, params.GetOuterPoint(GregOuterPoint::_00));
 
     AddPosition(result, params.GetOuterPoint(GregOuterPoint::_01));
@@ -828,14 +869,27 @@ std::vector<float> GregoryPatchesSystem::GenerateNetVertices(const GregoryPatchP
 
     AddPosition(result, params.GetOuterPoint(GregOuterPoint::_10));
     AddPosition(result, params.GetInnerPoint(GregInnerPoint::neighbourOf10));
+}
+
+
+std::vector<float> GregoryPatchesSystem::GenerateNetVertices(const TriangleOfGregoryPatches& triangles) const
+{
+    std::vector<float> result;
+    constexpr int size = (2 * GregoryPatchParameters::InnerPointsNb + GregoryPatchParameters::OuterPointsNb) * 3 * triangles.ParamsCnt;
+    result.reserve(size);
+
+    for (int i=0; i < triangles.ParamsCnt; i++)
+        AddSingleGregoryPatchToNetVertices(result, triangles.patch[i]);
+
+    assert(result.size() == size);
 
     return result;
 }
 
 
-std::vector<uint32_t> GregoryPatchesSystem::GenerateNetIndices(const GregoryPatchParameters &params) const
+void AddSingleGregoryPatchToNetIndices(std::vector<uint32_t>& result, int startIdx)
 {
-    return {
+    std::vector<uint32_t> newIndices {
         0, 
         1, 2, 1,
         3, 4, 3,
@@ -850,4 +904,24 @@ std::vector<uint32_t> GregoryPatchesSystem::GenerateNetIndices(const GregoryPatc
         18, 19, 18,
         0
     };
+
+    if (startIdx != 0)
+        std::for_each(newIndices.begin(), newIndices.end(), [startIdx] (uint32_t& index) { index += startIdx; });
+
+    for (auto idx: newIndices)
+        result.push_back(idx);
+}
+
+
+std::vector<uint32_t> GregoryPatchesSystem::GenerateNetIndices(const TriangleOfGregoryPatches& triangle) const
+{
+    std::vector<uint32_t> result;
+
+    AddSingleGregoryPatchToNetIndices(result, 0);
+    result.push_back(std::numeric_limits<uint32_t>::max());
+    AddSingleGregoryPatchToNetIndices(result, 20);
+    result.push_back(std::numeric_limits<uint32_t>::max());
+    AddSingleGregoryPatchToNetIndices(result, 40);
+
+    return result; 
 }

@@ -276,6 +276,12 @@ public:
     inline void FillHole(const GregoryPatchesSystem::Hole& hole)
         { gregoryPatchesSystem->FillHole(hole); }
 
+    inline void ShowGregoryNet(Entity gregoryPatches)
+        { gregoryPatchesSystem->ShowControlNet(gregoryPatches); }
+
+    inline void HideGregoryNet(Entity gregoryPatches)
+        { gregoryPatchesSystem->HideControlNet(gregoryPatches); }
+
     template <typename Comp>
     static inline constexpr ComponentId GetComponentId()
         { return ComponentsManager::GetComponentId<Comp>(); }

@@ -52,6 +52,7 @@ private:
     void DisplayEntityDeletionOption(Entity entity) const;
     void DisplaySurfaceDensityParameter(Entity entity, const PatchesDensity& density) const;
     void DisplaySurfacePatches(Entity entity, const Patches& patches) const;
+    void DisplayGregoryPatchesParameters(Entity entity, const TriangleOfGregoryPatches& triangle) const;
 
     void DisplayNameEditor(Entity entity, const Name& name) const;
     

@@ -70,4 +70,6 @@ struct TriangleOfGregoryPatches {
     static constexpr int ParamsCnt = 3;
 
     GregoryPatchParameters patch[ParamsCnt];
+
+    bool hasNet = false;
 };

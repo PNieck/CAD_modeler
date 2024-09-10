@@ -28,6 +28,12 @@ public:
     inline void FillHole(const GregoryPatchesSystem::Hole& hole)
         { model.FillHole(hole); }
 
+    inline void ShowGregoryNet(Entity gregoryPatches)
+        { model.ShowGregoryNet(gregoryPatches); }
+
+    inline void HideGregoryNet(Entity gregoryPatches)
+        { model.HideGregoryNet(gregoryPatches); }
+
     inline void AddTorus() const
         { model.AddTorus(); }
 

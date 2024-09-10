@@ -586,6 +586,9 @@ void GuiView::RenderSingleObjectProperties(Entity entity) const
     if (components.contains(Model::GetComponentId<C2CylinderPatches>()))
         DisplaySurfacePatches(entity, model.GetComponent<C2CylinderPatches>(entity));
 
+    if (components.contains(Model::GetComponentId<TriangleOfGregoryPatches>()))
+        DisplayGregoryPatchesParameters(entity, model.GetComponent<TriangleOfGregoryPatches>(entity));
+
     if (!components.contains(Model::GetComponentId<Unremovable>()))
         DisplayEntityDeletionOption(entity);
 }
@@ -895,6 +898,19 @@ void GuiView::DisplaySurfacePatches(Entity entity, const Patches &patches) const
             controller.ShowPatchesPolygon(entity, patches);
         else
             controller.HidePatchesPolygon(entity);
+    }
+}
+
+
+void GuiView::DisplayGregoryPatchesParameters(Entity entity, const TriangleOfGregoryPatches &triangle) const
+{
+    bool hasNet = triangle.hasNet;
+
+    if (ImGui::Checkbox("Draw Control Points Net", &hasNet)) {
+        if (hasNet)
+            controller.ShowGregoryNet(entity);
+        else
+            controller.HideGregoryNet(entity);
     }
 }
 
