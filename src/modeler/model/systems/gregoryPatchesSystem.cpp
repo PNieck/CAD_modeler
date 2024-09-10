@@ -358,16 +358,16 @@ std::tuple<Position, Position> CalculateInnerPoints(
 
     float k0, h0, k1, h1;
     std::tie(k0, h0) = SolveSysOfLinEqWith3EqAnd3Unknowns(b0, g0, c0);
-    assert((k0*g0 + h0*c0 - b0).LengthSquared() < 0.1f);
+    assert((k0*g0 + h0*c0 - b0).LengthSquared() < 0.01f);
 
     std::tie(k1, h1) = SolveSysOfLinEqWith3EqAnd3Unknowns(b3, g2, c2);
-    assert((k1*g2 + h1*c2 - b3).LengthSquared() < 0.1f);
+    assert((k1*g2 + h1*c2 - b3).LengthSquared() < 0.01f);
 
-    alg::Vec3 d1 = k0 * 2.f/3.f * k1 * 1.f/3.f * SquareBernsteinPolynomialValue(g0, g1, g2, 1.f/3.f) +
-                   h0 * 2.f/3.f * h1 * 1.f/3.f * SquareBernsteinPolynomialValue(c0, c1, c2, 1.f/3.f);
+    alg::Vec3 d1 = (k0 * 2.f/3.f + k1 * 1.f/3.f) * SquareBernsteinPolynomialValue(g0, g1, g2, 1.f/3.f) +
+                   (h0 * 2.f/3.f + h1 * 1.f/3.f) * SquareBernsteinPolynomialValue(c0, c1, c2, 1.f/3.f);
 
-    alg::Vec3 d2 = k0 * 1.f/3.f * k1 * 2.f/3.f * SquareBernsteinPolynomialValue(g0, g1, g2, 2.f/3.f) +
-                   h0 * 1.f/3.f * h1 * 2.f/3.f * SquareBernsteinPolynomialValue(c0, c1, c2, 2.f/3.f);
+    alg::Vec3 d2 = (k0 * 1.f/3.f + k1 * 2.f/3.f) * SquareBernsteinPolynomialValue(g0, g1, g2, 2.f/3.f) +
+                   (h0 * 1.f/3.f + h1 * 2.f/3.f) * SquareBernsteinPolynomialValue(c0, c1, c2, 2.f/3.f);
 
     return { curve[1].vec + d1, curve[2].vec + d2 };
 }
@@ -612,7 +612,7 @@ void GregoryPatchesSystem::FillHole(const GregoryPatchesSystem::Hole& hole)
     triangle.patch[2].SetInnerPoint(std::get<0>(innerPts), GregInnerPoint::neighbourOf10);
     triangle.patch[2].SetInnerPoint(std::get<1>(innerPts), GregInnerPoint::neighbourOf20);
 
-    b0 = std::get<1>(sub3)[0].vec - std::get<1>(sub3)[1].vec;
+    b0 = std::get<1>(sub3)[1].vec - std::get<1>(sub3)[0].vec;
     a0 = b0;
 
     b3 = p11.vec - p.vec;
