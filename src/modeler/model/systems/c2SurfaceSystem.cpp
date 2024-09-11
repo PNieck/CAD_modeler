@@ -385,9 +385,8 @@ void C2SurfaceSystem::DeletionHandler::HandleEvent(Entity entity, const C2Patche
         return;
 
     auto cpRegistry = coordinator.GetSystem<ControlPointsRegistrySystem>();
-    C2Patches patches = coordinator.GetComponent<C2Patches>(entity);
 
-    for (auto handler: patches.controlPointsHandlers) {
+    for (auto handler: component.controlPointsHandlers) {
         Entity cp = handler.first;
         HandlerId handlerId = handler.second;
 

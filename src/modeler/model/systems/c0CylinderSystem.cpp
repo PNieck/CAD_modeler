@@ -257,9 +257,8 @@ void C0CylinderSystem::DeletionHandler::HandleEvent(Entity entity, const C0Patch
         return;
 
     auto cpRegistry = coordinator.GetSystem<ControlPointsRegistrySystem>();
-    C0Patches patches = coordinator.GetComponent<C0Patches>(entity);
 
-    for (auto handler: patches.controlPointsHandlers) {
+    for (auto handler: component.controlPointsHandlers) {
         Entity cp = handler.first;
         HandlerId handlerId = handler.second;
 
