@@ -16,6 +16,7 @@
 
 #include <cmath>
 #include <algorithm>
+#include <cassert>
 
 
 static constexpr int COORD_IN_VERTEX = 3;
@@ -94,6 +95,62 @@ void C0CurveSystem::Render(const alg::Mat4x4& cameraMtx) const
 
     if (!polygonsToDraw.empty())
         RenderCurvesPolygons(polygonsToDraw, cameraMtx);
+}
+
+
+Position CalculatePositionInSinglePatch(const Position& cp1, const Position& cp2, const Position& cp3, const Position& cp4, float t)
+{
+    assert(t >= 0.0f);
+    assert(t <= 1.0f);
+
+    float oneMinutT = 1 - t;
+
+    // Bernstein polynomials
+    float b0 = oneMinutT * oneMinutT * oneMinutT;
+    float b1 = 3 * oneMinutT * oneMinutT * t;
+    float b2 = 3 * oneMinutT * t * t;
+    float b3 = t * t * t;
+
+    alg::Vec3 result = cp1.vec * b0 +
+                       cp2.vec * b1 +
+                       cp3.vec * b2 +
+                       cp4.vec * b3;
+
+    return Position(result);
+}
+
+
+Position C0CurveSystem::CalculatePosition(const std::vector<Position>& cpPositions, float t)
+{
+    int firstIdx = std::floor(t);
+
+    // Normalizing t so it is between 0 and 1
+    t = t - std::floor(t);
+
+    return CalculatePositionInSinglePatch(
+        cpPositions[firstIdx],
+        cpPositions[firstIdx + 1],
+        cpPositions[firstIdx + 2],
+        cpPositions[firstIdx + 3],
+        t
+    );
+}
+
+
+Position C0CurveSystem::CalculatePosition(const std::vector<Entity>& cps, float t) const
+{
+    int firstIdx = std::floor(t);
+
+    // Normalizing t so it is between 0 and 1
+    t = t - std::floor(t);
+
+    return CalculatePositionInSinglePatch(
+        coordinator->GetComponent<Position>(cps[firstIdx]),
+        coordinator->GetComponent<Position>(cps[firstIdx + 1]),
+        coordinator->GetComponent<Position>(cps[firstIdx + 2]),
+        coordinator->GetComponent<Position>(cps[firstIdx + 3]),
+        t
+    );
 }
 
 

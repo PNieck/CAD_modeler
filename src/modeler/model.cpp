@@ -39,6 +39,8 @@ Model::Model(int viewport_width, int viewport_height):
     C2CylinderSystem::RegisterSystem(coordinator);
     ControlNetSystem::RegisterSystem(coordinator);
     ControlPointsRegistrySystem::RegisterSystem(coordinator);
+    GregoryPatchesSystem::RegisterSystem(coordinator);
+    VectorSystem::RegisterSystem(coordinator);
 
     toriSystem = coordinator.GetSystem<ToriSystem>();
     gridSystem = coordinator.GetSystem<GridSystem>();
@@ -57,6 +59,8 @@ Model::Model(int viewport_width, int viewport_height):
     c2CylinderSystem = coordinator.GetSystem<C2CylinderSystem>();
     controlNetSystem = coordinator.GetSystem<ControlNetSystem>();
     controlPointsRegistrySys = coordinator.GetSystem<ControlPointsRegistrySystem>();
+    gregoryPatchesSystem = coordinator.GetSystem<GregoryPatchesSystem>();
+    vectorSystem = coordinator.GetSystem<VectorSystem>();
 
     cameraManager.Init(viewport_width, viewport_height);
     gridSystem->Init(&shadersRepo);
@@ -73,6 +77,8 @@ Model::Model(int viewport_width, int viewport_height):
     c2SurfaceSystem->Init(&shadersRepo);
     c2CylinderSystem->Init(&shadersRepo);
     controlNetSystem->Init(&shadersRepo);
+    gregoryPatchesSystem->Init(&shadersRepo);
+    vectorSystem->Init(&shadersRepo);
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glEnable(GL_LINE_SMOOTH);
@@ -177,6 +183,18 @@ void Model::TryToSelectFromViewport(float x, float y)
 {
     Line line(LineFromViewportCoordinates(x, y));
     selectionSystem->SelectFromLine(line);
+}
+
+
+std::vector<GregoryPatchesSystem::Hole> Model::GetHolesPossibleToFill(const std::unordered_set<Entity> &entities) const
+{
+    std::vector<C0Patches> c0Patches;
+    c0Patches.reserve(entities.size());
+
+    for (auto entity: entities)
+        c0Patches.push_back(coordinator.GetComponent<C0Patches>(entity));
+
+    return gregoryPatchesSystem->FindHolesToFill(c0Patches);
 }
 
 
@@ -289,4 +307,6 @@ void Model::RenderSystemsObjects(const alg::Mat4x4 &viewMtx, const alg::Mat4x4 &
     c2SurfaceSystem->Render(cameraMtx);
     c2CylinderSystem->Render(cameraMtx);
     controlNetSystem->Render(cameraMtx);
+    gregoryPatchesSystem->Render(cameraMtx);
+    vectorSystem->Render(cameraMtx);
 }

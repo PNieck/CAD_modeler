@@ -61,7 +61,7 @@ private:
 
     template<typename T>
     std::shared_ptr<ComponentCollection<T>> GetComponentCollection() const {
-        std::size_t hash = GetComponentId<T>();
-        return std::static_pointer_cast<ComponentCollection<T>>(components.at(hash));
+        ComponentId id = GetComponentId<T>();
+        return std::static_pointer_cast<ComponentCollection<T>>(components.at(id));
     }
 };

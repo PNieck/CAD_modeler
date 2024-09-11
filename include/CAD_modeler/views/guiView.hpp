@@ -31,6 +31,7 @@ private:
     void RenderAddingCurveGui(CurveType curveType) const;
     void RenderAddingSurface(SurfaceType surfaceType) const;
     void RenderAddingCylinder(CylinderType CylinderType) const;
+    void RenderAddingGregoryPatches() const;
 
     void RenderAnaglyphsCameraSettings() const;
 
@@ -51,6 +52,7 @@ private:
     void DisplayEntityDeletionOption(Entity entity) const;
     void DisplaySurfaceDensityParameter(Entity entity, const PatchesDensity& density) const;
     void DisplaySurfacePatches(Entity entity, const Patches& patches) const;
+    void DisplayGregoryPatchesParameters(Entity entity, const TriangleOfGregoryPatches& triangle) const;
 
     void DisplayNameEditor(Entity entity, const Name& name) const;
     

@@ -8,7 +8,7 @@ uniform mat4 MVP;
 void main()
 {
     float t = gl_TessCoord.x / gl_TessLevelOuter[0] + gl_TessCoord.y;
-    float oneMinusT = (1.0f - t);
+    float oneMinusT = 1.0f - t;
 
     // Control points
     vec3 p0 = gl_in[0].gl_Position.xyz;

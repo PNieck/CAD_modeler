@@ -36,6 +36,9 @@ public:
 
     void Render(const alg::Mat4x4& cameraMtx) const;
 
+    static Position CalculatePosition(const std::vector<Position>& cpPositions, float t);
+    Position CalculatePosition(const std::vector<Entity>& cps, float t) const;
+
 private:
     ShaderRepository* shaderRepo;
     NameGenerator nameGenerator;

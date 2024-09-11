@@ -131,7 +131,7 @@ void SelectionSystem::UpdateMiddlePointPosition()
     int cnt = 0;
 
     for (auto entity: entities) {
-        if (coordinator->GetEntityComponents(entity).contains(ComponentsManager::GetComponentId<Position>())) {
+        if (coordinator->HasComponent<Position>(entity)) {
             newPos.vec += coordinator->GetComponent<Position>(entity).vec;
             cnt++;
         }
@@ -152,7 +152,7 @@ void SelectionSystem::MoveSelected(const Position & newMiddlePointPos)
     alg::Vec3 delta = newMiddlePointPos.vec - midPointPos.vec;
 
     for (auto entity: entities) {
-        if (!coordinator->GetEntityComponents(entity).contains(ComponentsManager::GetComponentId<Position>()))
+        if (!coordinator->HasComponent<Position>(entity))
             continue;
 
         auto const& oldPos = coordinator->GetComponent<Position>(entity);
