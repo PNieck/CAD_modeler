@@ -2,6 +2,11 @@
 
 #include "position.hpp"
 
+#include <ecs/entitiesManager.hpp>
+#include <ecs/eventsManager.hpp>
+
+#include <unordered_map>
+
 
 class GregoryPatchParameters {
 public:
@@ -72,4 +77,7 @@ struct TriangleOfGregoryPatches {
     GregoryPatchParameters patch[ParamsCnt];
 
     bool hasNet = false;
+
+    std::unordered_map<Entity, HandlerId> controlPointsHandlers;
+    HandlerId deletionHandler;
 };

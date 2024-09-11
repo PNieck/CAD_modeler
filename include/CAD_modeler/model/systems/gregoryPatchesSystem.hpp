@@ -17,8 +17,7 @@ class GregoryPatchesSystem: public System {
 public:
     static void RegisterSystem(Coordinator& coordinator);
 
-    inline void Init(ShaderRepository* shadersRepo)
-        { this->shaderRepo = shadersRepo; }
+    void Init(ShaderRepository* shadersRepo);
 
     class Hole {
     public:
@@ -48,8 +47,16 @@ public:
     void Render(const alg::Mat4x4& cameraMtx) const;
 
 private:
+    class DeletionHandler;
+
+    std::shared_ptr<DeletionHandler> deletionHandler;
+
     ShaderRepository* shaderRepo;
     NameGenerator nameGenerator;
+
+    void UpdateEntities() const;
+    void UpdateMesh(Entity entity, const TriangleOfGregoryPatches& triangle) const;
+    void FillPatchesParameters(TriangleOfGregoryPatches& triangle, Entity entity) const;
 
     void RenderNet(std::stack<Entity>& entities, const alg::Mat4x4& cameraMtx) const;
 
@@ -58,4 +65,27 @@ private:
 
     std::vector<float> GenerateNetVertices(const TriangleOfGregoryPatches& params) const;
     std::vector<uint32_t> GenerateNetIndices(const TriangleOfGregoryPatches& params) const;
+
+    class DeletionHandler: public EventHandler<TriangleOfGregoryPatches> {
+    public:
+        DeletionHandler(Coordinator& coordinator):
+            coordinator(coordinator) {}
+
+        void HandleEvent(Entity entity, const TriangleOfGregoryPatches& component, EventType eventType) override;
+
+    private:
+        Coordinator& coordinator;
+    };
+
+    class ControlPointMovedHandler: public EventHandler<Position> {
+    public:
+        ControlPointMovedHandler(Entity targetObject, Coordinator& coordinator):
+            coordinator(coordinator), targetObject(targetObject) {}
+
+        void HandleEvent(Entity entity, const Position& component, EventType eventType) override;
+
+    private:
+        Coordinator& coordinator;
+        Entity targetObject;
+    };
 };
