@@ -4,3 +4,6 @@
 [submodule "extern/sceneSerializer"]
 	path = extern/sceneSerializer
 	url = https://github.com/bjadczak/Scene-Serializer.git
+[submodule "extern/fileBrowser"]
+	path = extern/fileBrowser
+	url = https://github.com/AirGuanZ/imgui-filebrowser.git
