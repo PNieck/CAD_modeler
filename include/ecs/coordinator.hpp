@@ -36,8 +36,11 @@ public:
     }
 
 
-    inline Entity CreateEntity() {
-        return entitiesMgr.CreateEntity();
+    Entity CreateEntity() {
+        Entity result = entitiesMgr.CreateEntity();
+        componentMgr.RegisterNewEntity(result);
+
+        return result;
     }
 
 

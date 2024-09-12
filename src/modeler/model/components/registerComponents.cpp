@@ -25,6 +25,7 @@
 #include <CAD_modeler/model/components/gregoryNetMesh.hpp>
 #include <CAD_modeler/model/components/vector.hpp>
 #include <CAD_modeler/model/components/vectorMesh.hpp>
+#include <CAD_modeler/model/components/IsC0Cylinder.hpp>
 
 
 void RegisterAllComponents(Coordinator& coordinator)
@@ -54,4 +55,5 @@ void RegisterAllComponents(Coordinator& coordinator)
     coordinator.RegisterComponent<GregoryNetMesh>();
     coordinator.RegisterComponent<Vector>();
     coordinator.RegisterComponent<VectorMesh>();
+    coordinator.RegisterComponent<IsC0Cylinder>();
 }

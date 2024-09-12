@@ -83,6 +83,44 @@ Entity C0SurfaceSystem::CreateSurface(const Position& pos, const alg::Vec3& dire
 }
 
 
+Entity C0SurfaceSystem::CreateSurface(C0Patches &patches)
+{
+    auto cpRegistrySystem = coordinator->GetSystem<ControlPointsRegistrySystem>();
+
+    Entity surface = coordinator->CreateEntity();
+
+    auto handler = std::make_shared<ControlPointMovedHandler>(surface, *coordinator);
+
+    for (int i=0; i < patches.PointsInCol(); ++i) {
+        for (int j=0; j < patches.PointsInRow(); ++j) {
+            // Creating control points with temporary location
+            Entity cp = patches.GetPoint(j, i);
+
+            HandlerId cpHandler = coordinator->Subscribe(cp, std::static_pointer_cast<EventHandler<Position>>(handler));
+            patches.controlPointsHandlers.insert({cp, cpHandler});
+
+            coordinator->AddComponent<Unremovable>(cp, Unremovable());
+
+            cpRegistrySystem->RegisterControlPoint(surface, cp, Coordinator::GetSystemID<C0SurfaceSystem>());
+        }
+    }
+
+    Mesh mesh;
+    PatchesDensity density(5);
+
+    patches.deletionHandler = coordinator->Subscribe<C0Patches>(surface, deletionHandler);
+
+    coordinator->AddComponent<Name>(surface, nameGenerator.GenerateName("SurfaceC0_"));
+    coordinator->AddComponent<Mesh>(surface, mesh);
+    coordinator->AddComponent<C0Patches>(surface, patches);
+    coordinator->AddComponent<PatchesDensity>(surface, density);
+
+    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
+
+    return surface;
+}
+
+
 void C0SurfaceSystem::AddRowOfPatches(Entity surface, const Position& pos, const alg::Vec3& direction, float length, float width) const
 {
     coordinator->EditComponent<C0Patches>(surface,

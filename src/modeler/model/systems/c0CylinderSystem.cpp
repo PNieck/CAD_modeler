@@ -13,6 +13,7 @@
 #include "CAD_modeler/model/components/name.hpp"
 #include "CAD_modeler/model/components/rotation.hpp"
 #include "CAD_modeler/model/components/unremovable.hpp"
+#include "CAD_modeler/model/components/IsC0Cylinder.hpp"
 
 #include <numbers>
 
@@ -24,6 +25,7 @@ void C0CylinderSystem::RegisterSystem(Coordinator &coordinator)
     coordinator.RegisterRequiredComponent<C0CylinderSystem, C0Patches>();
     coordinator.RegisterRequiredComponent<C0CylinderSystem, PatchesDensity>();
     coordinator.RegisterRequiredComponent<C0CylinderSystem, Mesh>();
+    coordinator.RegisterRequiredComponent<C0CylinderSystem, IsC0Cylinder>();
 }
 
 
@@ -72,6 +74,7 @@ Entity C0CylinderSystem::CreateCylinder(const Position &pos, const alg::Vec3 &di
     coordinator->AddComponent<Mesh>(surface, mesh);
     coordinator->AddComponent<C0Patches>(surface, patches);
     coordinator->AddComponent<PatchesDensity>(surface, density);
+    coordinator->AddComponent<IsC0Cylinder>(surface, {});
 
     coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
 

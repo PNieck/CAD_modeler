@@ -21,7 +21,7 @@ std::vector<float> TorusParameters::GenerateVertices() const
 
             result[index] = VertexX(alpha, beta);
             result[index + 1] = VertexY(alpha, beta);
-            result[index + 2] = VertexZ(alpha);
+            result[index + 2] = VertexZ(alpha, beta);
         }
     }
 
@@ -52,9 +52,9 @@ std::vector<uint32_t> TorusParameters::GenerateEdges() const
     }
 
 
-    for (int i=0; i < meshDensityMajR; i++) {
+    // for (int i=0; i < meshDensityMajR; i++) {
         
-    }
+    // }
 
     return result;
 }
@@ -68,11 +68,13 @@ float TorusParameters::VertexX(float alpha, float beta) const
 
 float TorusParameters::VertexY(float alpha, float beta) const
 {
-    return (majorRadius + minorRadius * std::cosf(alpha)) * std::sin(beta);
+    //return (majorRadius + minorRadius * std::cosf(alpha)) * std::sin(beta);
+    return minorRadius * std::sin(alpha);
 }
 
 
-float TorusParameters::VertexZ(float alpha) const
+float TorusParameters::VertexZ(float alpha, float beta) const
 {
-    return minorRadius * std::sin(alpha);
+    return (majorRadius + minorRadius * std::cosf(alpha)) * std::sin(beta);
+    //return minorRadius * std::sin(alpha);
 }
