@@ -4,7 +4,7 @@
 
 
 MainMenuBar::MainMenuBar(GuiController &controller, const Model &model):
-    controller(controller), model(model)
+    controller(controller), model(model), fileDialog(ImGuiFileBrowserFlags_EnterNewFilename | ImGuiFileBrowserFlags_CreateNewDir)
 {
     fileDialog.SetTitle("Choose file to load");
     fileDialog.SetTypeFilters({ ".json"});
@@ -13,10 +13,17 @@ MainMenuBar::MainMenuBar(GuiController &controller, const Model &model):
 
 void MainMenuBar::Render()
 {
+    static bool savingScene = false;
+
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("File")) {
             if (ImGui::MenuItem("Load"))
                 fileDialog.Open();
+
+            if (ImGui::MenuItem("Save")) {
+                fileDialog.Open();
+                savingScene = true;
+            }
 
             ImGui::EndMenu();
         }
@@ -42,16 +49,19 @@ void MainMenuBar::Render()
         ImGui::EndMainMenuBar();
     }
 
-    if (true) {
-        fileDialog.Display();
+    fileDialog.Display();
 
-        if(fileDialog.HasSelected())
-        {
-            auto path = fileDialog.GetSelected().string();
-            fileDialog.ClearSelected();
+    if(fileDialog.HasSelected())
+    {
+        auto path = fileDialog.GetSelected().string();
+        fileDialog.ClearSelected();
 
-            controller.LoadScene(path);
-            fileDialog.Close();
+        if (savingScene) {
+            controller.SaveScene(path);
+            savingScene = false;
         }
+        else
+            controller.LoadScene(path);
+        fileDialog.Close();
     }
 }

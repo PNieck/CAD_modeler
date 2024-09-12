@@ -18,6 +18,9 @@ public:
     inline void LoadScene(const std::string& path)
         { model.LoadScene(path); }
 
+    inline void SaveScene(const std::string& path)
+        { model.SaveScene(path); }
+
     inline void SetEyeSeparation(float newValue)
         { model.cameraManager.SetEyeSeparation(newValue); }
 

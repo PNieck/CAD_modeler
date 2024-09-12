@@ -290,6 +290,9 @@ public:
     inline void LoadScene(const std::string& path)
         { saveManager.LoadScene(path, coordinator); }
 
+    inline void SaveScene(const std::string& path)
+        { saveManager.SaveScene(path, coordinator); }
+
     CameraManager cameraManager;
 
 private:
