@@ -36,7 +36,7 @@ file(GLOB_RECURSE SOURCE_LIST CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/src/model
 
 add_library(modeler_lib ${SOURCE_LIST} ${HEADER_LIST})
 target_include_directories(modeler_lib PUBLIC ../include)
-target_link_libraries(modeler_lib PRIVATE glfw glad imgui ecs algebra graph MGSerializer fileBrowser)
+target_link_libraries(modeler_lib PRIVATE glfw glad imgui ecs algebra graph fileBrowser)
 
 # Copy shaders
 add_custom_target(copy_shaders
