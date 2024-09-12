@@ -19,6 +19,10 @@ public:
         components.insert({hash, std::make_shared<ComponentCollection<T>>()});
     }
 
+    inline void RegisterNewEntity(Entity entity) {
+        componentsOfEntities.insert({entity, {}});
+    }
+
     template<typename T>
     inline void AddComponent(Entity entity, const T& component) {
         GetComponentCollection<T>()->AddComponent(entity, component);
