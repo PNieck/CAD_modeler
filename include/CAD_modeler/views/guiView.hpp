@@ -13,7 +13,7 @@ public:
     GuiView(GLFWwindow* window, GuiController& controller, const Model& model);
     ~GuiView();
 
-    void RenderGui() const;
+    void RenderGui();
 
 private:
     GuiController& controller;

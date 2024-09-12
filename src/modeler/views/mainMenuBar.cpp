@@ -3,10 +3,21 @@
 #include <imgui.h>
 
 
-void MainMenuBar::Render() const
+MainMenuBar::MainMenuBar(GuiController &controller, const Model &model):
+    controller(controller), model(model)
+{
+    fileDialog.SetTitle("Choose file to load");
+    fileDialog.SetTypeFilters({ ".json"});
+}
+
+
+void MainMenuBar::Render()
 {
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("File")) {
+            if (ImGui::MenuItem("Load"))
+                fileDialog.Open();
+
             ImGui::EndMenu();
         }
 
@@ -29,5 +40,18 @@ void MainMenuBar::Render() const
         }
 
         ImGui::EndMainMenuBar();
+    }
+
+    if (true) {
+        fileDialog.Display();
+
+        if(fileDialog.HasSelected())
+        {
+            auto path = fileDialog.GetSelected().string();
+            fileDialog.ClearSelected();
+
+            controller.LoadScene(path);
+            fileDialog.Close();
+        }
     }
 }

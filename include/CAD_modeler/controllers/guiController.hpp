@@ -15,6 +15,9 @@ public:
     inline bool WantCaptureMouse()
         { return ImGui::GetIO().WantCaptureMouse; }
 
+    inline void LoadScene(const std::string& path)
+        { model.LoadScene(path); }
+
     inline void SetEyeSeparation(float newValue)
         { model.cameraManager.SetEyeSeparation(newValue); }
 

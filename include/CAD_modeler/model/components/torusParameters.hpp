@@ -19,5 +19,5 @@ private:
     // TODO: add comments
     float VertexX(float alpha, float beta) const;
     float VertexY(float alpha, float beta) const;
-    float VertexZ(float alpha) const;
+    float VertexZ(float alpha, float beta) const;
 };

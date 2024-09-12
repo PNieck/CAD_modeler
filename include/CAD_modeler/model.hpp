@@ -3,6 +3,7 @@
 #include <ecs/coordinator.hpp>
 
 #include "model/cameraManager.hpp"
+#include "model/saveManager.hpp"
 
 #include "model/systems/toriSystem.hpp"
 #include "model/systems/gridSystem.hpp"
@@ -286,6 +287,9 @@ public:
     static inline constexpr ComponentId GetComponentId()
         { return ComponentsManager::GetComponentId<Comp>(); }
 
+    inline void LoadScene(const std::string& path)
+        { saveManager.LoadScene(path, coordinator); }
+
     CameraManager cameraManager;
 
 private:
@@ -311,6 +315,8 @@ private:
     std::shared_ptr<ControlPointsRegistrySystem> controlPointsRegistrySys;
     std::shared_ptr<GregoryPatchesSystem> gregoryPatchesSystem;
     std::shared_ptr<VectorSystem> vectorSystem;
+
+    SaveManager saveManager;
 
     alg::Vec3 PointFromViewportCoordinates(float x, float y);
     Line LineFromViewportCoordinates(float x, float y);

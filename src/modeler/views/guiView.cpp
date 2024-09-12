@@ -43,7 +43,7 @@ GuiView::~GuiView()
 }
 
 
-void GuiView::RenderGui() const
+void GuiView::RenderGui()
 {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
