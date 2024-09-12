@@ -1,6 +1,7 @@
 #pragma once
 
 #include "utils/mouseState.hpp"
+#include "utils/keyboardKey.hpp"
 #include "subController.hpp"
 
 #define GLFW_INCLUDE_NONE
@@ -19,6 +20,7 @@ public:
     inline void MouseRelease(MouseButton button) { mouseState.ButtonReleased(button); }
     void MouseMove(int x, int y);
     void ScrollMoved(int offset);
+    void KeyboardKeyPressed(KeyboardKey key);
 
 private:
     static constexpr float ROTATION_COEFF = 0.02f;

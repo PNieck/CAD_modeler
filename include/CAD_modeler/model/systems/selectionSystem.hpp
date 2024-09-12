@@ -1,12 +1,15 @@
 #pragma once
 
 #include <ecs/system.hpp>
+
 #include "../components/mesh.hpp"
 #include "../components/position.hpp"
 #include "../components/rotation.hpp"
 #include "../components/scale.hpp"
 #include "shaders/shaderRepository.hpp"
 #include "../../utilities/line.hpp"
+
+#include <vector>
 
 
 class SelectionSystem: public System {
@@ -29,6 +32,8 @@ public:
     // TODO: change to ray
     void SelectFromLine(const Line& line);
 
+    void SelectAllFromLine(const Line& line, float maxDist);
+
     void RenderMiddlePoint(const alg::Mat4x4& cameraMtx);
 
     inline Entity GetMiddlePoint() const
@@ -40,10 +45,16 @@ public:
 
     void RotateSelected(const Rotation& rotation);
 
+    void RenderSelectionCircle(float x, float y, float radius);
+
 private:
     Mesh pointsMesh;
+    Mesh circleMesh;
     ShaderRepository* shadersRepo;
     Entity middlePoint;
 
     void UpdateMiddlePointPosition();
+
+    std::vector<float> GenerateSelectionCircleVertices(float x, float y, float radius);
+    std::vector<uint32_t> GenerateSelectionCircleIndices();
 };

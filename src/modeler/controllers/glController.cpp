@@ -86,6 +86,21 @@ void GlController::MouseMove(int x, int y)
             offset.X() * ROTATION_COEFF
         );
     }
+
+    if (model.selectingEntities) {
+        auto [x, y] = MouseToViewportCoordinates();
+
+        model.selectionCircleX = x;
+        model.selectionCircleY = y;
+
+        if (mouseState.IsButtonClicked(MouseButton::Left)) {
+            model.SelectMultipleFromViewport(
+                model.selectionCircleX,
+                model.selectionCircleY,
+                model.selectionCircleRadius
+            );
+        }
+    }
 }
 
 
@@ -116,4 +131,10 @@ void GlController::ScrollMoved(int offset)
 
     float dist = model.cameraManager.GetDistanceFromTarget();
     model.cameraManager.SetDistanceFromTarget(dist*val);
+}
+
+
+void GlController::KeyboardKeyPressed(KeyboardKey key)
+{
+    model.selectingEntities = !model.selectingEntities;
 }

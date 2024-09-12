@@ -6,6 +6,7 @@
 #include "bicubicBezierSurfaceShader.hpp"
 #include "bicubicBSplineSurfaceShader.hpp"
 #include "gregoryPatchShader.hpp"
+#include "passThrough.hpp"
 
 
 class ShaderRepository {
@@ -28,6 +29,9 @@ public:
     inline const GregoryPatchShader& GetGregoryPatchShader() const
         { return gregoryPatchShader; }
 
+    inline const PassThroughShader& GetPassThroughShader() const
+        { return passThroughShader; }
+
 private:
     StdShader stdShader;
     GridShader gridShader;
@@ -35,4 +39,5 @@ private:
     BicubicBezierSurfaceShader bezierSurfaceShader;
     BicubicBSplineSurfaceShader bSplineSurfaceShader;
     GregoryPatchShader gregoryPatchShader;
+    PassThroughShader passThroughShader;
 };

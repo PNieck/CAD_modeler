@@ -186,6 +186,13 @@ void Model::TryToSelectFromViewport(float x, float y)
 }
 
 
+void Model::SelectMultipleFromViewport(float x, float y, float dist)
+{
+    Line line(LineFromViewportCoordinates(x, y));
+    selectionSystem->SelectAllFromLine(line, dist);
+}
+
+
 std::vector<GregoryPatchesSystem::Hole> Model::GetHolesPossibleToFill(const std::unordered_set<Entity> &entities) const
 {
     std::vector<C0Patches> c0Patches;
@@ -309,4 +316,11 @@ void Model::RenderSystemsObjects(const alg::Mat4x4 &viewMtx, const alg::Mat4x4 &
     controlNetSystem->Render(cameraMtx);
     gregoryPatchesSystem->Render(cameraMtx);
     vectorSystem->Render(cameraMtx);
+
+    if (selectingEntities)
+        selectionSystem->RenderSelectionCircle(
+            selectionCircleX,
+            selectionCircleY,
+            selectionCircleRadius
+        );
 }

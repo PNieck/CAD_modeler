@@ -48,6 +48,7 @@ GLFWwindow * Window::CreateGFLWwindow(int width, int height, const std::string &
     glfwSetCursorPosCallback(window, MouseMoveCallback);
     glfwSetMouseButtonCallback(window, MouseButtonCallback);
     glfwSetScrollCallback(window, ScrollCallback);
+    glfwSetKeyCallback(window, KeyboardButtonCallback);
 
     instances_cnt++;
 
@@ -155,4 +156,23 @@ void Window::ScrollCallback(GLFWwindow * glfwWindow, double xoffset, double yoff
 {
     Window* window = (Window*)glfwGetWindowUserPointer(glfwWindow);
     window->controller.ScrollMoved((int)yoffset);
+}
+
+
+void Window::KeyboardButtonCallback(GLFWwindow *glfwWindow, int key, int scancode, int action, int mods)
+{
+    if (action != GLFW_PRESS)
+        return;
+
+    Window* window = (Window*)glfwGetWindowUserPointer(glfwWindow);
+
+    switch (key)
+    {
+    case GLFW_KEY_C:
+        window->controller.KeyboardKeyPressed(KeyboardKey::c);
+        break;
+    
+    default:
+        break;
+    }
 }

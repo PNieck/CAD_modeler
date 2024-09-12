@@ -26,6 +26,7 @@ private:
     static void MouseMoveCallback(GLFWwindow* window, double xpos, double ypos);
     static void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
     static void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
+    static void KeyboardButtonCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
 
     static GLFWwindow* CreateGFLWwindow(int width, int height, const std::string &name);

@@ -5,6 +5,7 @@
 #include "../views/guiView.hpp"
 #include "../model.hpp"
 #include "utils/appState.hpp"
+#include "utils/keyboardKey.hpp"
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
@@ -21,6 +22,7 @@ public:
     void MouseReleased(MouseButton button);
     void MouseMoved(int x, int y);
     void ScrollMoved(int offset);
+    void KeyboardKeyPressed(KeyboardKey key);
 
     inline void SetAppState(AppState newAppState) { appState = newAppState; }
     inline AppState GetAppState() const { return appState; }

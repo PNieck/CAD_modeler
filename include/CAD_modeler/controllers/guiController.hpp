@@ -15,6 +15,9 @@ public:
     inline bool WantCaptureMouse()
         { return ImGui::GetIO().WantCaptureMouse; }
 
+    inline bool WantCaptureKeyboard()
+        { return ImGui::GetIO().WantCaptureKeyboard; }
+
     inline void LoadScene(const std::string& path)
         { model.LoadScene(path); }
 

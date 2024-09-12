@@ -158,6 +158,9 @@ void GuiView::RenderDefaultGui() const
         controller.SetAppState(AppState::AddingGregoryPatches);
     }
 
+    if (ImGui::Button("Deselect all"))
+        model.DeselectAllEntities();
+
     ImGui::Separator();
 
     RenderObjectsNames();

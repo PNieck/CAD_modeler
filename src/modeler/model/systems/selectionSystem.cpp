@@ -9,6 +9,8 @@
 #include <CAD_modeler/model/systems/pointsSystem.hpp>
 #include <CAD_modeler/model/systems/toriSystem.hpp>
 
+#include <CAD_modeler/utilities/angle.hpp>
+
 #include <stdexcept>
 
 
@@ -98,6 +100,24 @@ void SelectionSystem::SelectFromLine(const Line& line)
             Deselect(actEntity);
         else
             Select(actEntity);
+    }
+}
+
+
+void SelectionSystem::SelectAllFromLine(const Line &line, float maxDist)
+{
+    auto const& pointsSystem = coordinator->GetSystem<PointsSystem>();
+
+    for (auto const entity: pointsSystem->GetEntities()) {
+        auto const& position = coordinator->GetComponent<Position>(entity);
+
+        float t = alg::Dot(line.GetDirection(), position.vec - line.GetSamplePoint());
+        alg::Vec3 projection = line.GetPointOnLine(t);
+
+        float dis = alg::Distance(projection, position.vec);
+
+        if (dis <= maxDist)
+            Select(entity);
     }
 }
 
@@ -226,4 +246,56 @@ void SelectionSystem::RotateSelected(const Rotation & rotation)
             coordinator->SetComponent<Rotation>(entity, Rotation(quat));
         }
     }
+}
+
+
+void SelectionSystem::RenderSelectionCircle(float x, float y, float radius)
+{
+    circleMesh.Update(
+        GenerateSelectionCircleVertices(x, y, 0.05f),
+        GenerateSelectionCircleIndices()
+    );
+
+    auto const& shader = shadersRepo->GetPassThroughShader();
+
+    shader.Use();
+    shader.SetColor(alg::Vec4(1.0f));
+
+    glDrawElements(GL_LINE_LOOP, circleMesh.GetElementsCnt(), GL_UNSIGNED_INT, 0);
+}
+
+
+std::vector<float> SelectionSystem::GenerateSelectionCircleVertices(float x, float y, float radius)
+{
+    alg::Vec3 center(x, y, 0.0f);
+    std::vector<float> result;
+    result.reserve(20 * 3);
+
+    for (int i=0; i < 20; i++) {
+        alg::Vec3 v(0.0f, radius, 0.0f);
+
+        Angle angle = Angle::FromDegrees((360.f / 20.f) * i);
+        Rotation rot(alg::Vec3(0.0f, 0.0f, 1.0f), angle.ToRadians());
+
+        rot.Rotate(v);
+
+        alg::Vec3 point = center + v;
+
+        result.push_back(point.X());
+        result.push_back(point.Y());
+        result.push_back(point.Z());
+    }
+
+    return result;
+}
+
+
+std::vector<uint32_t> SelectionSystem::GenerateSelectionCircleIndices()
+{
+    std::vector<uint32_t> result(20);
+
+    for (int i=0; i < 20; i++)
+        result[i] = i;
+
+    return result;
 }

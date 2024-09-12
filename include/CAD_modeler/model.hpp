@@ -185,6 +185,8 @@ public:
 
     void TryToSelectFromViewport(float x, float y);
 
+    void SelectMultipleFromViewport(float x, float y, float dist);
+
     inline void Deselect(Entity entity)
         { return selectionSystem->Deselect(entity); }
 
@@ -294,6 +296,11 @@ public:
         { saveManager.SaveScene(path, coordinator); }
 
     CameraManager cameraManager;
+
+    bool selectingEntities = false;
+    float selectionCircleX = 0.0f;
+    float selectionCircleY = 0.0f;
+    float selectionCircleRadius = 0.2f;
 
 private:
     

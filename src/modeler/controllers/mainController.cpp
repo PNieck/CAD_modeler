@@ -53,3 +53,12 @@ void MainController::ScrollMoved(int offset)
 
     glController.ScrollMoved(offset);
 }
+
+
+void MainController::KeyboardKeyPressed(KeyboardKey key)
+{
+    // if (guiController.WantCaptureKeyboard())
+    //     return;
+    
+    glController.KeyboardKeyPressed(key);
+}
