@@ -247,6 +247,7 @@ void SaveManager::SaveScene(const std::string &path, Coordinator &coordinator)
     auto interCurveSys = coordinator.GetSystem<InterpolationCurveSystem>();
     auto c0SurfaceSys = coordinator.GetSystem<C0SurfaceSystem>();
     auto c2SurfaceSys = coordinator.GetSystem<C2SurfaceSystem>();
+    auto c2CylinderSys = coordinator.GetSystem<C2CylinderSystem>();
     auto nameSys = coordinator.GetSystem<NameSystem>();
 
     std::stack<Entity> fakeIDs;
@@ -433,6 +434,57 @@ void SaveManager::SaveScene(const std::string &path, Coordinator &coordinator)
         surfaceC2Json["parameterWrapped"]["v"] = coordinator.HasComponent<IsC0Cylinder>(surfaceC2);
 
         mainJson["geometry"].push_back(surfaceC2Json);
+    }
+
+
+    for (Entity cylinderC2: c2CylinderSys->GetEntities()) {
+        json cylinderC2Json;
+
+        cylinderC2Json["objectType"] = "bezierSurfaceC2";
+        cylinderC2Json["id"] = cylinderC2;
+        cylinderC2Json["name"] = nameSys->GetName(cylinderC2);
+
+        const auto& patches = coordinator.GetComponent<C2CylinderPatches>(cylinderC2);
+        cylinderC2Json["size"]["x"] = patches.PatchesInRow();
+        cylinderC2Json["size"]["y"] = patches.PatchesInCol()+2;
+
+        const auto& density = coordinator.GetComponent<PatchesDensity>(cylinderC2);
+
+        for (int rowPatch=0; rowPatch < patches.PatchesInRow(); rowPatch++ ) {
+            for (int colPatch=0; colPatch < patches.PatchesInCol()+2; colPatch++) {
+                json patchJson;
+
+                patchJson["objectType"] = "bezierPatchC2";
+                Entity fakeID = coordinator.CreateEntity();
+                patchJson["id"] = fakeID;
+                patchJson["name"] = "";
+                fakeIDs.push(fakeID);
+
+                patchJson["samples"]["x"] = density.GetDensity();
+                patchJson["samples"]["y"] = density.GetDensity();
+
+                for (int row=0; row < 4; row++) {
+                    for (int col=0; col < 4; col++) {
+                        json cpJson;
+                        Entity cp = patches.GetPoint(
+                            rowPatch + row,
+                            colPatch + col
+                        );
+
+                        cpJson["id"] = cp;
+                        patchJson["controlPoints"].push_back(cpJson);
+                        
+                    }
+                }
+
+                cylinderC2Json["patches"].push_back(patchJson);
+            }
+        }
+
+        cylinderC2Json["parameterWrapped"]["u"] = false;
+        cylinderC2Json["parameterWrapped"]["v"] = true;
+
+        mainJson["geometry"].push_back(cylinderC2Json);
     }
 
     output << std::setw(4) << mainJson;
