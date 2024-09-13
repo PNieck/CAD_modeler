@@ -902,6 +902,16 @@ void GuiView::DisplaySurfacePatches(Entity entity, const Patches &patches) const
         else
             controller.HidePatchesPolygon(entity);
     }
+
+    if (ImGui::Button("Select all control points")) {
+        for (int row=0; row < patches.PointsInRow(); row++) {
+            for (int col=0; col < patches.PointsInCol(); col++) {
+                Entity entity = patches.GetPoint(row, col);
+
+                controller.SelectEntity(entity);
+            }
+        }
+    }
 }
 
 
