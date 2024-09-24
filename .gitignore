@@ -2,3 +2,6 @@
 
 # Visual Studio Code config directory
 .vscode/
+
+# Temporary directory used during development
+tmp/
