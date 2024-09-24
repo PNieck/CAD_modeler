@@ -139,8 +139,8 @@ void SaveManager::LoadScene(const std::string &path, Coordinator &coordinator)
 
         else if (objectType == "bezierSurfaceC0") {
             C0Patches c0Patches(
-                geometry["size"]["x"],
-                geometry["size"]["y"]
+                geometry["size"]["y"],
+                geometry["size"]["x"]
             );
 
             int patchCol = 0;
@@ -154,7 +154,8 @@ void SaveManager::LoadScene(const std::string &path, Coordinator &coordinator)
                 for (int col=0; col < 4; col++) {
                     for (int row=0; row < 4; row++) {
                         int idx = row*4 + col;
-                        Entity cp = idMap[patch["controlPoints"][idx]["id"]];
+                        int fileID = patch["controlPoints"][idx]["id"];
+                        Entity cp = idMap[fileID];
 
                         int globalCol = col + startCol;
                         int globalRow = row + startRow;
@@ -175,8 +176,8 @@ void SaveManager::LoadScene(const std::string &path, Coordinator &coordinator)
 
         else if (objectType == "bezierSurfaceC2") {
             C2Patches c2Patches(
-                geometry["size"]["x"],
-                geometry["size"]["y"]
+                geometry["size"]["y"],
+                geometry["size"]["x"]
             );
 
             int patchCol = 0;
@@ -344,8 +345,8 @@ void SaveManager::SaveScene(const std::string &path, Coordinator &coordinator)
         surfaceC0Json["name"] = nameSys->GetName(surfaceC0);
 
         const auto& patches = coordinator.GetComponent<C0Patches>(surfaceC0);
-        surfaceC0Json["size"]["x"] = patches.PatchesInRow();
-        surfaceC0Json["size"]["y"] = patches.PatchesInCol();
+        surfaceC0Json["size"]["y"] = patches.PatchesInRow();
+        surfaceC0Json["size"]["x"] = patches.PatchesInCol();
 
         const auto& density = coordinator.GetComponent<PatchesDensity>(surfaceC0);
 
@@ -394,8 +395,8 @@ void SaveManager::SaveScene(const std::string &path, Coordinator &coordinator)
         surfaceC2Json["name"] = nameSys->GetName(surfaceC2);
 
         const auto& patches = coordinator.GetComponent<C2Patches>(surfaceC2);
-        surfaceC2Json["size"]["x"] = patches.PatchesInRow();
-        surfaceC2Json["size"]["y"] = patches.PatchesInCol();
+        surfaceC2Json["size"]["y"] = patches.PatchesInRow();
+        surfaceC2Json["size"]["x"] = patches.PatchesInCol();
 
         const auto& density = coordinator.GetComponent<PatchesDensity>(surfaceC2);
 
