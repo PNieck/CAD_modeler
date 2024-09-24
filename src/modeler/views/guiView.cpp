@@ -169,9 +169,17 @@ void GuiView::RenderDefaultGui() const
 
 void GuiView::RenderObjectsNames() const
 {
+    static bool hidePoints = false;
+
+    ImGui::Checkbox("Hide Points", &hidePoints);
+
     const auto& entities = model.EntitiesWithNames();
+    const auto& points = model.GetAllPoints();
 
     for (auto entity: entities) {
+        if (hidePoints && points.contains(entity))
+            continue;
+
         bool selected = model.IsSelected(entity);
 
         if (ImGui::Selectable(
@@ -886,14 +894,6 @@ void GuiView::DisplaySurfacePatches(Entity entity, const Patches &patches) const
 {
     ImGui::SeparatorText("Control Points");
 
-    for (int row=0; row < patches.PointsInRow(); row++) {
-        for (int col=0; col < patches.PointsInCol(); col++) {
-            Entity entity = patches.GetPoint(row, col);
-
-            ImGui::Text(model.GetEntityName(entity).c_str());
-        }
-    }
-
     bool hasNet = model.HasPatchesPolygon(entity);
 
     if (ImGui::Checkbox("Draw Control Points Net", &hasNet)) {
@@ -910,6 +910,14 @@ void GuiView::DisplaySurfacePatches(Entity entity, const Patches &patches) const
 
                 controller.SelectEntity(entity);
             }
+        }
+    }
+
+    for (int row=0; row < patches.PointsInRow(); row++) {
+        for (int col=0; col < patches.PointsInCol(); col++) {
+            Entity entity = patches.GetPoint(row, col);
+
+            ImGui::Text(model.GetEntityName(entity).c_str());
         }
     }
 }
