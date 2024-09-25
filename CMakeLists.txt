@@ -20,6 +20,7 @@ endif()
 
 include(FetchContent)
 include(cmake/submodule.cmake)
+include(cmake/compilerWarnings.cmake)
 
 # External dependencies
 add_subdirectory(extern)

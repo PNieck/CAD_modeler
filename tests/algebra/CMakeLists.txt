@@ -11,6 +11,7 @@ target_link_libraries(
 )
 
 gtest_discover_tests(vector_tests)
+enable_compiler_warings(vector_tests)
 
 
 add_executable(
@@ -27,6 +28,7 @@ target_link_libraries(
 )
 
 gtest_discover_tests(matrix_tests)
+enable_compiler_warings(matrix_tests)
 
 
 add_executable(
@@ -43,6 +45,7 @@ target_link_libraries(
 )
 
 gtest_discover_tests(quaternion_tests)
+enable_compiler_warings(quaternion_tests)
 
 
 add_executable(
@@ -58,6 +61,7 @@ target_link_libraries(
 )
 
 gtest_discover_tests(linearEquations_tests)
+enable_compiler_warings(linearEquations_tests)
 
 
 add_executable(
@@ -73,3 +77,4 @@ target_link_libraries(
 )
 
 gtest_discover_tests(cubicPolynomials_tests)
+enable_compiler_warings(cubicPolynomials_tests)
