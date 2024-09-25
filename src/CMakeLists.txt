@@ -6,7 +6,7 @@ file(GLOB_RECURSE ALGEBRA_LIB_SRCS CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/src/
 
 add_library(algebra ${ALGEBRA_LIB_SRCS} ${ALGEBRA_LIB_HEADERS})
 target_include_directories(algebra PUBLIC ../include)
-
+enable_compiler_warings(algebra)
 
 #
 # ECS library
@@ -16,6 +16,7 @@ file(GLOB_RECURSE ECS_LIB_SRCS CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/src/ecs/
 
 add_library(ecs ${ECS_LIB_SRCS} ${ECS_LIB_HEADERS})
 target_include_directories(ecs PUBLIC ../include)
+enable_compiler_warings(ecs)
 
 
 #
@@ -26,6 +27,7 @@ file(GLOB_RECURSE GRAPH_LIB_SRCS CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/src/gr
 
 add_library(graph ${GRAPH_LIB_SRCS} ${GRAPH_LIB_HEADERS})
 target_include_directories(graph PUBLIC ../include)
+enable_compiler_warings(graph)
 
 
 #
@@ -37,6 +39,7 @@ file(GLOB_RECURSE SOURCE_LIST CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/src/model
 add_library(modeler_lib ${SOURCE_LIST} ${HEADER_LIST})
 target_include_directories(modeler_lib PUBLIC ../include)
 target_link_libraries(modeler_lib PRIVATE glfw glad imgui ecs algebra graph fileBrowser nlohmann_json::nlohmann_json)
+enable_compiler_warings(modeler_lib)
 
 # Copy shaders
 add_custom_target(copy_shaders

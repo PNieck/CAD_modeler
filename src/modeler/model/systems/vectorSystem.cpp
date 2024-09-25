@@ -110,8 +110,8 @@ std::vector<float> VectorSystem::GenerateNetVertices(const Vector &vec) const
 
     alg::Vec3 tmp1 = (-vec).Normalize() * std::min(0.5f, 0.2f * vec.Length()) + vec;
 
-    alg::Vec3 tmp2 = tmp1 + alg::Vec3(0.0f, 0.2, 0.0f);
-    alg::Vec3 tmp3 = tmp1 - alg::Vec3(0.0f, 0.2, 0.0f);
+    alg::Vec3 tmp2 = tmp1 + alg::Vec3(0.0f, 0.2f, 0.0f);
+    alg::Vec3 tmp3 = tmp1 - alg::Vec3(0.0f, 0.2f, 0.0f);
 
     result.push_back(tmp2.X());
     result.push_back(tmp2.Y());

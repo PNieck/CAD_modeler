@@ -20,8 +20,8 @@ public:
     }
 
     // TODO: remove
-    inline void SetCoordinator(Coordinator* coordinator) {
-        this->coordinator = coordinator;
+    inline void SetCoordinator(Coordinator* coord) {
+        this->coordinator = coord;
     }
 
     inline const std::unordered_set<Entity>& GetEntities() const {

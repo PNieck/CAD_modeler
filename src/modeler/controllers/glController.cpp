@@ -88,10 +88,10 @@ void GlController::MouseMove(int x, int y)
     }
 
     if (model.selectingEntities) {
-        auto [x, y] = MouseToViewportCoordinates();
+        auto [viewportX, viewportY] = MouseToViewportCoordinates();
 
-        model.selectionCircleX = x;
-        model.selectionCircleY = y;
+        model.selectionCircleX = viewportX;
+        model.selectionCircleY = viewportY;
 
         if (mouseState.IsButtonClicked(MouseButton::Left)) {
             model.SelectMultipleFromViewport(
@@ -136,5 +136,7 @@ void GlController::ScrollMoved(int offset)
 
 void GlController::KeyboardKeyPressed(KeyboardKey key)
 {
+    (void)key;
+
     model.selectingEntities = !model.selectingEntities;
 }

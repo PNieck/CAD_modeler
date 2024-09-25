@@ -12,9 +12,9 @@ void GridSystem::RegisterSystem(Coordinator & coordinator)
 }
 
 
-void GridSystem::Init(ShaderRepository * shaderRepo)
+void GridSystem::Init(ShaderRepository * shaders)
 {
-    this->shaderRepo = shaderRepo;
+    this->shaderRepo = shaders;
 
     grid = coordinator->CreateEntity();
 

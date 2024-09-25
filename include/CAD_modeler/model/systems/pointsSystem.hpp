@@ -13,8 +13,8 @@ public:
 
     PointsSystem();
 
-    inline void Init(ShaderRepository* shaderRepo)
-        { this->shaderRepo = shaderRepo; }
+    inline void Init(ShaderRepository* shaders)
+        { this->shaderRepo = shaders; }
 
     Entity CreatePoint(const Position& pos = Position(), bool createName = true);
 

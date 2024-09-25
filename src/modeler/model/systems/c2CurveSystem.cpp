@@ -30,9 +30,9 @@ void C2CurveSystem::RegisterSystem(Coordinator & coordinator)
 }
 
 
-Entity C2CurveSystem::CreateC2Curve(const std::vector<Entity>& entities)
+Entity C2CurveSystem::CreateC2Curve(const std::vector<Entity>& cps)
 {
-    Entity curve = coordinator->GetSystem<CurveControlPointsSystem>()->CreateControlPoints(entities, Coordinator::GetSystemID<C2CurveSystem>());
+    Entity curve = coordinator->GetSystem<CurveControlPointsSystem>()->CreateControlPoints(cps, Coordinator::GetSystemID<C2CurveSystem>());
     auto const& controlPoints = coordinator->GetComponent<CurveControlPoints>(curve);
 
     C2CurveParameters params;
@@ -209,7 +209,7 @@ void C2CurveSystem::UpdateEntities() const
             UpdateBSplinePolygon(entity);
 
         if (params.showBezierControlPoints)
-            UpdateBezierControlPoints(entity, params);
+            UpdateBezierControlPoints(entity);
 
         toUpdateSystem->Unmark(entity);
     }
@@ -244,7 +244,7 @@ void C2CurveSystem::UpdateBSplinePolygon(Entity curve) const
 }
 
 
-void C2CurveSystem::UpdateBezierControlPoints(Entity curve, const C2CurveParameters & params) const
+void C2CurveSystem::UpdateBezierControlPoints(Entity curve) const
 {
     auto const& bezierControlPoints = coordinator->GetComponent<BezierControlPoints>(curve);
 
@@ -313,8 +313,6 @@ void C2CurveSystem::UpdateBezierCtrlPtsHandlers(Entity curve, BezierControlPoint
     if (bezierCtrlPts.Size() < MIN_CTRL_PTS_CNT)
         return;
 
-    auto const& bSplineCtrlPts = coordinator->GetComponent<CurveControlPoints>(curve);
-
     // Adding new ones
     auto handler = std::make_shared<BezierCtrlPtMovedHandler>(*coordinator, curve);
 
@@ -325,7 +323,7 @@ void C2CurveSystem::UpdateBezierCtrlPtsHandlers(Entity curve, BezierControlPoint
 }
 
 
-void C2CurveSystem::RenderBSplinePolygons(std::stack<Entity>& entities, const alg::Mat4x4& cameraMtx) const
+void C2CurveSystem::RenderBSplinePolygons(std::stack<Entity>& cps, const alg::Mat4x4& cameraMtx) const
 {
     auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
     auto const& shader = shaderRepo->GetStdShader();
@@ -334,9 +332,9 @@ void C2CurveSystem::RenderBSplinePolygons(std::stack<Entity>& entities, const al
     shader.SetColor(alg::Vec4(1.0f));
     shader.SetMVP(cameraMtx);
 
-    while (!entities.empty()) {
-        Entity entity = entities.top();
-        entities.pop();
+    while (!cps.empty()) {
+        Entity entity = cps.top();
+        cps.pop();
 
         bool selection = selectionSystem->IsSelected(entity);
 
@@ -354,7 +352,7 @@ void C2CurveSystem::RenderBSplinePolygons(std::stack<Entity>& entities, const al
 }
 
 
-void C2CurveSystem::RenderBezierPolygons(std::stack<Entity>& entities, const alg::Mat4x4& cameraMtx) const
+void C2CurveSystem::RenderBezierPolygons(std::stack<Entity>& cps, const alg::Mat4x4& cameraMtx) const
 {
     auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
     auto const& shader = shaderRepo->GetStdShader();
@@ -363,9 +361,9 @@ void C2CurveSystem::RenderBezierPolygons(std::stack<Entity>& entities, const alg
     shader.SetColor(alg::Vec4(1.0f));
     shader.SetMVP(cameraMtx);
 
-    while (!entities.empty()) {
-        Entity entity = entities.top();
-        entities.pop();
+    while (!cps.empty()) {
+        Entity entity = cps.top();
+        cps.pop();
 
         bool selection = selectionSystem->IsSelected(entity);
 
@@ -418,7 +416,7 @@ std::vector<alg::Vec3> C2CurveSystem::CreateBezierControlPointsPositions(const C
 
     std::vector<alg::Vec3> result;
 
-    int ctrlPtsCnt = BezierControlPointsCnt(controlPoints.size());
+    size_t ctrlPtsCnt = BezierControlPointsCnt(controlPoints.size());
     if (ctrlPtsCnt == 0)
         return result;
 

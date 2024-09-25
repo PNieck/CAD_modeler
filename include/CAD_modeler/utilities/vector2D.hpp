@@ -63,7 +63,7 @@ inline void Vector2D<t>::AddRows(unsigned int cnt)
 
     data.resize(rows);
 
-    for (int i = rows-cnt; i < rows; ++i) {
+    for (unsigned int i = rows-cnt; i < rows; ++i) {
         data[i].resize(cols);
     }
 }

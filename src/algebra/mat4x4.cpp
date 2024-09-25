@@ -136,7 +136,7 @@ std::optional<alg::Mat4x4> alg::Mat4x4::Inverse() const
                       data[8] * data[1] * data[6] - 
                       data[8] * data[2] * data[5];
 
-    result *= 1.0 / det;
+    result *= 1.0f / det;
 
     return result;
 }

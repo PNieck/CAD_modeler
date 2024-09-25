@@ -54,7 +54,7 @@ private:
     void UpdateEntities() const;
     void UpdateCurveMesh(Entity curve, const CurveControlPoints& cps) const;
     void UpdateBSplinePolygon(Entity curve) const;
-    void UpdateBezierControlPoints(Entity curve, const C2CurveParameters& params) const;
+    void UpdateBezierControlPoints(Entity curve) const;
     void UpdateBezierCtrlPtsHandlers(Entity curve, BezierControlPoints& cps) const;
 
     void RenderBSplinePolygons(std::stack<Entity>& entities, const alg::Mat4x4& cameraMtx) const;

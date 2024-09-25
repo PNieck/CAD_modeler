@@ -45,7 +45,7 @@ public:
 
     void RotateSelected(const Rotation& rotation);
 
-    void RenderSelectionCircle(float x, float y, float radius);
+    void RenderSelectionCircle(float x, float y);
 
 private:
     Mesh pointsMesh;

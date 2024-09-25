@@ -320,7 +320,6 @@ void Model::RenderSystemsObjects(const alg::Mat4x4 &viewMtx, const alg::Mat4x4 &
     if (selectingEntities)
         selectionSystem->RenderSelectionCircle(
             selectionCircleX,
-            selectionCircleY,
-            selectionCircleRadius
+            selectionCircleY
         );
 }

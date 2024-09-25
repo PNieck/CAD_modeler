@@ -12,3 +12,4 @@ target_link_libraries(
 )
 
 gtest_discover_tests(componets_manager_tests)
+enable_compiler_warings(componets_manager_tests)

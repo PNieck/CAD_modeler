@@ -22,7 +22,7 @@ public:
     inline const std::set<int>& GetNeighbors(int v) const
         { return adjacencyList[v]; }
 
-    inline int GetVerticesCnt() const
+    inline size_t GetVerticesCnt() const
         { return adjacencyList.size(); }
 
     inline bool HasEdge(int v1, int v2) const
