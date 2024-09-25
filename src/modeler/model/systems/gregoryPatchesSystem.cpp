@@ -425,7 +425,7 @@ void GregoryPatchesSystem::ShowControlNet(Entity gregoryPatches)
 
             mesh.Update(
                 GenerateNetVertices(triangle),
-                GenerateNetIndices(triangle)
+                GenerateNetIndices()
             );
 
             coordinator->AddComponent(gregoryPatches, mesh);
@@ -530,7 +530,7 @@ void GregoryPatchesSystem::UpdateMesh(Entity entity, const TriangleOfGregoryPatc
             [&triangle, this] (GregoryNetMesh& netMesh) {
                 netMesh.Update(
                     GenerateNetVertices(triangle),
-                    GenerateNetIndices(triangle)
+                    GenerateNetIndices()
                 );
             }
         );
@@ -758,7 +758,7 @@ void GregoryPatchesSystem::FillPatchesParameters(TriangleOfGregoryPatches& trian
 }
 
 
-void GregoryPatchesSystem::RenderNet(std::stack<Entity>& entities, const alg::Mat4x4 &cameraMtx) const
+void GregoryPatchesSystem::RenderNet(std::stack<Entity>& cps, const alg::Mat4x4 &cameraMtx) const
 {
     auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
     auto const& shader = shaderRepo->GetStdShader();
@@ -767,9 +767,9 @@ void GregoryPatchesSystem::RenderNet(std::stack<Entity>& entities, const alg::Ma
     shader.SetColor(alg::Vec4(1.0f));
     shader.SetMVP(cameraMtx);
 
-    while (!entities.empty()) {
-        Entity entity = entities.top();
-        entities.pop();
+    while (!cps.empty()) {
+        Entity entity = cps.top();
+        cps.pop();
 
         bool selection = selectionSystem->IsSelected(entity);
 
@@ -957,7 +957,7 @@ void AddSingleGregoryPatchToNetIndices(std::vector<uint32_t>& result, int startI
 }
 
 
-std::vector<uint32_t> GregoryPatchesSystem::GenerateNetIndices(const TriangleOfGregoryPatches& triangle) const
+std::vector<uint32_t> GregoryPatchesSystem::GenerateNetIndices() const
 {
     std::vector<uint32_t> result;
 

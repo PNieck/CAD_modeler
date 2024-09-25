@@ -58,8 +58,6 @@ void InterpolationCurveSystem::Render(const alg::Mat4x4& cameraMtx) const
     shader.SetMVP(cameraMtx);
 
     for (auto const entity: entities) {
-        auto const& controlPoints = coordinator->GetComponent<CurveControlPoints>(entity);
-
         bool selection = selectionSystem->IsSelected(entity);
 
         if (selection)
@@ -288,7 +286,7 @@ std::vector<alg::Vec3> InterpolationCurveSystem::LinearCoeffInPowerBasis(
     result[0] = (cpPos1.vec - cpPos0.vec - cubicPowerCoeff[0] * t*t*t) / t;
 
     for (int i=1; i < result.size(); ++i) {
-        float t = chordsLen[i-1];
+        t = chordsLen[i-1];
         result[i] = result[i-1] + 2.f*squarePowerCoeff[i-1]*t + 3.f*cubicPowerCoeff[i-1]*t*t;
     }
 

@@ -114,6 +114,8 @@ void Window::MouseMoveCallback(GLFWwindow * glfwWindow, double xpos, double ypos
 
 void Window::MouseButtonCallback(GLFWwindow * glfwWindow, int button, int action, int mods)
 {
+    (void)mods;
+
     Window* window = (Window*)glfwGetWindowUserPointer(glfwWindow);
     
     MouseButton mouseButton;
@@ -156,6 +158,8 @@ void Window::ScrollCallback(GLFWwindow * glfwWindow, double xoffset, double yoff
 {
     Window* window = (Window*)glfwGetWindowUserPointer(glfwWindow);
     window->controller.ScrollMoved((int)yoffset);
+
+    (void)xoffset;
 }
 
 
@@ -175,4 +179,7 @@ void Window::KeyboardButtonCallback(GLFWwindow *glfwWindow, int key, int scancod
     default:
         break;
     }
+
+    (void)scancode;
+    (void)mods;
 }

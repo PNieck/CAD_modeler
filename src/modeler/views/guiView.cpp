@@ -430,7 +430,7 @@ void GuiView::RenderAddingGregoryPatches() const
 {
     static bool entitiesSelected = false;
     static std::vector<GregoryPatchesSystem::Hole> holes;
-    static int selected = -1;
+    static int selectedItem = -1;
 
     if (!entitiesSelected) {
         ImGui::Text("Select up three C0 surfaces or patches");
@@ -457,7 +457,7 @@ void GuiView::RenderAddingGregoryPatches() const
         if (ImGui::Button("Accept")) {
             entitiesSelected = true;
             holes = model.GetHolesPossibleToFill(model.GetAllSelectedEntities());
-            selected = -1;
+            selectedItem = -1;
         }
 
         if (ImGui::Button("Cancel")) {
@@ -475,8 +475,8 @@ void GuiView::RenderAddingGregoryPatches() const
 
             ss << "Hole " << holeNb;
 
-            if (ImGui::Selectable(ss.str().c_str(), selected == holeNb)) {
-                selected = holeNb;
+            if (ImGui::Selectable(ss.str().c_str(), selectedItem == holeNb)) {
+                selectedItem = holeNb;
                 model.DeselectAllEntities();
                 for (int i=0; i < GregoryPatchesSystem::Hole::innerCpNb; i++) {
                     Entity entity = hole.GetInnerControlPoint(i);
@@ -488,19 +488,19 @@ void GuiView::RenderAddingGregoryPatches() const
         }
 
         if (ImGui::Button("Accept")) {
-            controller.FillHole(holes[selected - 1]);
+            controller.FillHole(holes[selectedItem - 1]);
 
             controller.SetAppState(AppState::Default);
             controller.DeselectAllEntities();
             entitiesSelected = false;
-            selected = -1;
+            selectedItem = -1;
         }
 
         if (ImGui::Button("Cancel")) {
             controller.SetAppState(AppState::Default);
             controller.DeselectAllEntities();
             entitiesSelected = false;
-            selected = -1;
+            selectedItem = -1;
         }
     }
     
@@ -906,18 +906,17 @@ void GuiView::DisplaySurfacePatches(Entity entity, const Patches &patches) const
     if (ImGui::Button("Select all control points")) {
         for (int row=0; row < patches.PointsInRow(); row++) {
             for (int col=0; col < patches.PointsInCol(); col++) {
-                Entity entity = patches.GetPoint(row, col);
-
-                controller.SelectEntity(entity);
+                Entity cp = patches.GetPoint(row, col);
+                controller.SelectEntity(cp);
             }
         }
     }
 
     for (int row=0; row < patches.PointsInRow(); row++) {
         for (int col=0; col < patches.PointsInCol(); col++) {
-            Entity entity = patches.GetPoint(row, col);
+            Entity cp = patches.GetPoint(row, col);
 
-            ImGui::Text(model.GetEntityName(entity).c_str());
+            ImGui::Text(model.GetEntityName(cp).c_str());
         }
     }
 }

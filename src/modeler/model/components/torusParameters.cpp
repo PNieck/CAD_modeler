@@ -6,8 +6,8 @@
 
 std::vector<float> TorusParameters::GenerateVertices() const
 {
-    float deltaAlpha = 2.f * std::numbers::pi / meshDensityMinR;
-    float deltaBeta = 2.f * std::numbers::pi / meshDensityMajR;
+    float deltaAlpha = 2.f * std::numbers::pi_v<float> / meshDensityMinR;
+    float deltaBeta = 2.f * std::numbers::pi_v<float> / meshDensityMajR;
 
     std::vector<float> result(meshDensityMinR * meshDensityMajR * 3);
 

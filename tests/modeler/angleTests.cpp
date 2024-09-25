@@ -6,7 +6,7 @@
 
 
 TEST(AngleTests, DegreesToRadians) {
-    const float eps = 0.001;
+    const float eps = 0.001f;
 
     EXPECT_NEAR(Angle::FromDegrees(0.f).ToRadians(), 0, eps);
     EXPECT_NEAR(Angle::FromDegrees(90.f).ToRadians(), std::numbers::pi_v<float> / 2.f, eps);

@@ -79,7 +79,7 @@ void SelectionSystem::SelectFromLine(const Line& line)
     auto const& pointsSystem = coordinator->GetSystem<PointsSystem>();
 
     float smallestDis = std::numeric_limits<float>::infinity();
-    Entity actEntity;
+    Entity actEntity = 0;
 
     for (auto const entity: pointsSystem->GetEntities()) {
         auto const& position = coordinator->GetComponent<Position>(entity);
@@ -127,7 +127,6 @@ void SelectionSystem::RenderMiddlePoint(const alg::Mat4x4& cameraMtx)
     if (entities.size() < 2)
         return;
 
-    auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
     auto const& shader = shadersRepo->GetStdShader();
 
     auto const& mesh = coordinator->GetComponent<Mesh>(middlePoint);
@@ -158,7 +157,7 @@ void SelectionSystem::UpdateMiddlePointPosition()
     }
 
     if (cnt != 0)
-        newPos.vec /= cnt;
+        newPos.vec /= static_cast<float>(cnt);
 
     coordinator->SetComponent<Position>(middlePoint, newPos);
 }
@@ -249,7 +248,7 @@ void SelectionSystem::RotateSelected(const Rotation & rotation)
 }
 
 
-void SelectionSystem::RenderSelectionCircle(float x, float y, float radius)
+void SelectionSystem::RenderSelectionCircle(float x, float y)
 {
     circleMesh.Update(
         GenerateSelectionCircleVertices(x, y, 0.05f),

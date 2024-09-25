@@ -7,12 +7,12 @@
 
 alg::Quat::Quat(float pitch, float yaw, float roll)
 {
-    float cz = cos(roll * 0.5);
-    float sz = sin(roll * 0.5);
-    float cx = cos(pitch * 0.5);
-    float sx = sin(pitch * 0.5);
-    float cy = cos(yaw * 0.5);
-    float sy = sin(yaw * 0.5);
+    float cz = cos(roll * 0.5f);
+    float sz = sin(roll * 0.5f);
+    float cx = cos(pitch * 0.5f);
+    float sx = sin(pitch * 0.5f);
+    float cy = cos(yaw * 0.5f);
+    float sy = sin(yaw * 0.5f);
 
     W() = cx * cy * cz + sx * sy * sz;
     X() = sx * cy * cz - cx * sy * sz;
@@ -56,7 +56,6 @@ alg::Quat alg::Quat::Conjugation() const
 
 alg::Mat4x4 alg::Quat::ToRotationMatrix() const
 {
-    float w2 = W() * W();
     float xy = X() * Y();
     float xz = X() * Z();
     float yz = Y() * Z();
