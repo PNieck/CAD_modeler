@@ -6,6 +6,8 @@
 #include "../components/position.hpp"
 #include "../components/torusParameters.hpp"
 
+#include <vector>
+
 
 class ToriSystem: public System {
 public:
@@ -23,4 +25,11 @@ private:
     NameGenerator nameGenerator;
 
     ShaderRepository* shadersRepo;
+
+    std::vector<float> GenerateMeshVertices(const TorusParameters& params) const;
+    std::vector<uint32_t> GenerateMeshIndices(const TorusParameters& params) const;
+
+    float VertexX(const TorusParameters& params, float alpha, float beta) const;
+    float VertexY(const TorusParameters& params, float alpha) const;
+    float VertexZ(const TorusParameters& params, float alpha, float beta) const;
 };
