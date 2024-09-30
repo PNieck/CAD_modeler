@@ -238,7 +238,7 @@ std::vector<float> C0CurveSystem::GenerateBezierPolygonVertices(const CurveContr
 }
 
 
-inline int ceiling(int x, int y) {
+inline size_t ceiling(size_t x, size_t y) {
     return (x + y - 1) / y;
 }
 
