@@ -114,4 +114,15 @@ namespace alg
                v1.Z() == v2.Z() &&
                v1.W() == v2.W();
     }
+
+
+    template <typename DataType>
+    Vector4<DataType> operator*(DataType scalar, const Vector4<DataType>& v) {
+        return Vector4<DataType>(
+            v.X() * scalar,
+            v.Y() * scalar,
+            v.Z() * scalar,
+            v.W() * scalar
+        );
+    }
 };
