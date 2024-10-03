@@ -5,6 +5,7 @@ add_executable(
     quaternionTests.cpp
     systemsOfLinearEquationsTests.cpp
     cubicPolynomialsTests.cpp
+    conjugateGradientMethodTests.cpp
 )
 
 target_link_libraries(
