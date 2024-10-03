@@ -32,6 +32,7 @@ private:
     void RenderAddingSurface(SurfaceType surfaceType) const;
     void RenderAddingCylinder(CylinderType CylinderType) const;
     void RenderAddingGregoryPatches() const;
+    void RenderAddingIntersectionCurve() const;
 
     void RenderAnaglyphsCameraSettings() const;
 
@@ -56,4 +57,8 @@ private:
 
     void DisplayNameEditor(Entity entity, const Name& name) const;
     
+
+    // Utils
+    void RenderSelectableEntitiesList(const std::unordered_set<Entity>& entities) const;
+
 };

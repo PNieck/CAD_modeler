@@ -134,4 +134,7 @@ public:
 
     inline void HidePatchesPolygon(Entity entity)
         { model.HidePatchesPolygon(entity); }
+
+    inline void FindIntersection(Entity e1, Entity e2)
+        { model.FindIntersection(e1, e2); }
 };

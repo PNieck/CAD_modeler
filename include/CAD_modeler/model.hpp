@@ -23,6 +23,7 @@
 #include "model/systems/controlPointsRegistrySystem.hpp"
 #include "model/systems/gregoryPatchesSystem.hpp"
 #include "model/systems/vectorSystem.hpp"
+#include "model/systems/intersectionsSystem.hpp"
 
 #include "model/systems/shaders/shaderRepository.hpp"
 
@@ -160,6 +161,15 @@ public:
     inline const std::unordered_set<Entity>& GetAllC0Surfaces() const
         { return c0SurfaceSystem->GetEntities(); }
 
+    inline const std::unordered_set<Entity>& GetAllC2Surfaces() const
+        { return c2SurfaceSystem->GetEntities(); }
+
+    inline const std::unordered_set<Entity>& GetAllC2Cylinders() const
+        { return c2CylinderSystem->GetEntities(); }
+
+    inline const std::unordered_set<Entity>& GetAllTori() const
+        { return toriSystem->GetEntities(); }
+
     void ChangeViewportSize(int width, int height);
 
     inline void SetCursorPosition(float x, float y, float z) const
@@ -209,7 +219,7 @@ public:
 
     template <>
     inline void SetComponent<TorusParameters>(Entity entity, const TorusParameters& params)
-        { toriSystem->SetTorusParameter(entity, params); }
+        { toriSystem->SetParameters(entity, params); }
 
     inline void DeleteEntity(Entity entity)
         { coordinator.DestroyEntity(entity); }
@@ -243,6 +253,9 @@ public:
 
     inline const std::unordered_set<Entity>& GetAllInterpolationCurves() const
         { return interpolationCurveSystem->GetEntities(); }
+
+    // inline const std::unordered_set<Entity>& GetAll() const
+    //     { return interpolationCurveSystem->GetEntities(); }
 
     inline const void ShowC2BSplinePolygon(Entity entity) const
         { return c2CurveSystem->ShowBSplinePolygon(entity); }
@@ -295,6 +308,9 @@ public:
     inline void SaveScene(const std::string& path)
         { saveManager.SaveScene(path, coordinator); }
 
+    inline void FindIntersection(Entity e1, Entity e2)
+        { intersectionSystem->FindIntersection(e1, e2); }
+
     CameraManager cameraManager;
 
     bool selectingEntities = false;
@@ -325,6 +341,7 @@ private:
     std::shared_ptr<ControlPointsRegistrySystem> controlPointsRegistrySys;
     std::shared_ptr<GregoryPatchesSystem> gregoryPatchesSystem;
     std::shared_ptr<VectorSystem> vectorSystem;
+    std::shared_ptr<IntersectionSystem> intersectionSystem;
 
     SaveManager saveManager;
 

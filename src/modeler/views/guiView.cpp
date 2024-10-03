@@ -75,6 +75,10 @@ void GuiView::RenderGui()
             RenderAddingCurveGui(CurveType::Interpolation);
             break;
 
+        case AppState::AddingIntersectionCurve:
+            RenderAddingIntersectionCurve();
+            break;
+
         case AppState::AddingC0Surface:
             RenderAddingSurface(SurfaceType::C0);
             break;
@@ -134,6 +138,11 @@ void GuiView::RenderDefaultGui() const
 
     if (ImGui::Button("Add interpolation curve")) {
         controller.SetAppState(AppState::AddingInterpolationCurve);
+        controller.DeselectAllEntities();
+    }
+
+    if (ImGui::Button("Add intersection curve")) {
+        controller.SetAppState(AppState::AddingIntersectionCurve);
         controller.DeselectAllEntities();
     }
 
@@ -504,6 +513,60 @@ void GuiView::RenderAddingGregoryPatches() const
         }
     }
     
+}
+
+
+void GuiView::RenderAddingIntersectionCurve() const
+{
+    ImGui::Text("Select two objects to intersect");
+
+    const auto& c0Surfaces = model.GetAllC0Surfaces();
+    if (!c0Surfaces.empty()) {
+        ImGui::SeparatorText("C0 Surfaces");
+        RenderSelectableEntitiesList(c0Surfaces);
+    }
+
+    const auto& c2Surfaces = model.GetAllC2Surfaces();
+    if (!c2Surfaces.empty()) {
+        ImGui::SeparatorText("C2 Surfaces");
+        RenderSelectableEntitiesList(c2Surfaces);
+    }
+
+
+    const auto& c2Cylinders = model.GetAllC2Cylinders();
+    if (!c2Surfaces.empty()) {
+        ImGui::SeparatorText("C2 Cylinders");
+        RenderSelectableEntitiesList(c2Cylinders);
+    }
+
+    const auto& tori = model.GetAllTori();
+    if (!tori.empty()) {
+        ImGui::SeparatorText("Tori");
+        RenderSelectableEntitiesList(tori);
+    }
+
+
+    if (ImGui::Button("Accept")) {
+        auto& entities = model.GetAllSelectedEntities();
+
+        if (entities.size() != 2)
+            ImGui::OpenPopup("Wrong numer of elements to intersect");
+        else {
+            Entity e1 = *entities.begin();
+            Entity e2 = *(++entities.begin());
+            controller.FindIntersection(e1, e2);
+        }
+    }
+
+    if (ImGui::BeginPopupModal("Wrong numer of elements to intersect", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+        ImGui::Text("Wrong number of selected entities to intersect. Two objects must be selected");
+        if (ImGui::Button("OK")) { ImGui::CloseCurrentPopup(); }
+        ImGui::EndPopup();
+    }
+
+
+    if (ImGui::Button("Cancel"))
+        controller.SetAppState(AppState::Default);
 }
 
 
@@ -943,4 +1006,21 @@ void GuiView::DisplayNameEditor(Entity entity, const Name& name) const
 
     if (ImGui::InputText("##objectName", &tmp))
         controller.ChangeEntityName(entity, tmp);
+}
+
+
+void GuiView::RenderSelectableEntitiesList(const std::unordered_set<Entity> &entities) const
+{
+    bool selected;
+
+    for (auto entity: entities) {
+        selected = model.IsSelected(entity);
+
+        if (ImGui::Selectable(
+            model.GetEntityName(entity).c_str(),
+            &selected
+        )) {
+            controller.SelectEntity(entity);
+        }
+    }
 }
