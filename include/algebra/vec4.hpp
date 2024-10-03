@@ -12,7 +12,7 @@ namespace alg
     public:
         Vector4() = default;
 
-        Vector4(DataType scalar) { data.fill(scalar); }
+        explicit Vector4(DataType scalar) { data.fill(scalar); }
 
         constexpr Vector4(DataType x, DataType y, DataType z, DataType w) {
             data[0] = x;
