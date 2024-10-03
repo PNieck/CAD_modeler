@@ -111,9 +111,9 @@ Position CalculatePositionInSinglePatch(const Position& cp1, const Position& cp2
     const float b3 = t * t * t;
 
     const alg::Vec3 result = cp1.vec * b0 +
-                       cp2.vec * b1 +
-                       cp3.vec * b2 +
-                       cp4.vec * b3;
+                             cp2.vec * b1 +
+                             cp3.vec * b2 +
+                             cp4.vec * b3;
 
     return { result };
 }
