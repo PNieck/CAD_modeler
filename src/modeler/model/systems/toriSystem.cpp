@@ -2,8 +2,6 @@
 
 #include <ecs/coordinator.hpp>
 
-#include <CAD_modeler/model/components/scale.hpp>
-#include <CAD_modeler/model/components/rotation.hpp>
 #include <CAD_modeler/model/components/mesh.hpp>
 #include <CAD_modeler/model/components/name.hpp>
 
@@ -32,21 +30,21 @@ void ToriSystem::Init(ShaderRepository * shaderRepo)
 
 Entity ToriSystem::AddTorus(const Position& pos, const TorusParameters& params)
 {
-    Entity torus = coordinator->CreateEntity();
+    const Entity torus = coordinator->CreateEntity();
 
     coordinator->AddComponent<Position>(torus, pos);
 
-    Scale scale;
+    const Scale scale;
     coordinator->AddComponent<Scale>(torus, scale);
 
-    Rotation rot;
+    const Rotation rot;
     coordinator->AddComponent<Rotation>(torus, rot);
 
     coordinator->AddComponent<TorusParameters>(torus, params);
     coordinator->AddComponent<Name>(torus, nameGenerator.GenerateName("Torus"));
 
-    auto vertices = GenerateMeshVertices(params);
-    auto indices = GenerateMeshIndices(params);
+    const auto vertices = GenerateMeshVertices(params);
+    const auto indices = GenerateMeshIndices(params);
 
     Mesh mesh;
     mesh.Update(vertices, indices);
@@ -56,7 +54,7 @@ Entity ToriSystem::AddTorus(const Position& pos, const TorusParameters& params)
 }
 
 
-void ToriSystem::SetTorusParameter(Entity entity, const TorusParameters& params)
+void ToriSystem::SetParameters(Entity entity, const TorusParameters& params)
 {
     coordinator->SetComponent<TorusParameters>(entity, params);
 
@@ -104,6 +102,93 @@ void ToriSystem::Render(const alg::Mat4x4& cameraMtx)
 }
 
 
+Position ToriSystem::PointOnTorus(Entity torus, float alpha, float beta) const
+{
+    return PointOnTorus(
+        coordinator->GetComponent<TorusParameters>(torus),
+        coordinator->GetComponent<Position>(torus),
+        coordinator->GetComponent<Rotation>(torus),
+        coordinator->GetComponent<Scale>(torus),
+        alpha,
+        beta
+    );
+}
+
+
+alg::Vec3 ToriSystem::PointOnTorus(const TorusParameters &params, float alpha, float beta) {
+    return {
+        (params.majorRadius + params.minorRadius * std::cos(alpha)) * std::cos(beta),
+        params.minorRadius * std::sin(alpha),
+        (params.majorRadius + params.minorRadius * std::cos(alpha)) * std::sin(beta)
+    };
+}
+
+
+Position ToriSystem::PointOnTorus(const TorusParameters &params, const Position &pos, const Rotation &rot, const Scale &scale, float alpha, float beta) const
+{
+    alg::Vec3 result = PointOnTorus(params, alpha, beta);
+
+    scale.TransformVector(result);
+    rot.Rotate(result);
+
+    return result + pos.vec;
+}
+
+
+alg::Vec3 ToriSystem::PartialDerivativeWithRespectToAlpha(const TorusParameters &params, const Rotation &rot,
+    const Scale &scale, const float alpha, const float beta) {
+    alg::Vec3 result(
+        -params.minorRadius * std::cos(beta) * std::sin(alpha),
+        params.minorRadius * std::cos(alpha),
+        -params.minorRadius * std::sin(beta) * std::sin(alpha)
+    );
+
+    scale.TransformVector(result);
+    rot.Rotate(result);
+
+    return result;
+}
+
+
+alg::Vec3 ToriSystem::PartialDerivativeWithRespectToAlpha(Entity e, float alpha, float beta) const
+{
+    return PartialDerivativeWithRespectToAlpha(
+        coordinator->GetComponent<TorusParameters>(e),
+        coordinator->GetComponent<Rotation>(e),
+        coordinator->GetComponent<Scale>(e),
+        alpha,
+        beta
+    );
+}
+
+
+alg::Vec3 ToriSystem::PartialDerivativeWithRespectToBeta(const TorusParameters &params, const Rotation &rot,
+                                                         const Scale &scale, const float alpha, const float beta) {
+    alg::Vec3 result (
+        -(params.minorRadius * std::cos(alpha) + params.majorRadius) * std::sin(beta),
+        0.f,
+        (params.minorRadius * std::cos(alpha) + params.majorRadius) * std::cos(beta)
+    );
+
+    scale.TransformVector(result);
+    rot.Rotate(result);
+
+    return result;
+}
+
+
+alg::Vec3 ToriSystem::PartialDerivativeWithRespectToBeta(Entity e, float alpha, float beta) const
+{
+    return PartialDerivativeWithRespectToBeta(
+        coordinator->GetComponent<TorusParameters>(e),
+        coordinator->GetComponent<Rotation>(e),
+        coordinator->GetComponent<Scale>(e),
+        alpha,
+        beta
+    );
+}
+
+
 std::vector<float> ToriSystem::GenerateMeshVertices(const TorusParameters &params) const
 {
     float deltaAlpha = 2.f * std::numbers::pi_v<float> / params.meshDensityMinR;
@@ -112,16 +197,18 @@ std::vector<float> ToriSystem::GenerateMeshVertices(const TorusParameters &param
     std::vector<float> result(params.meshDensityMinR * params.meshDensityMajR * 3);
 
     for (int actCirc = 0; actCirc < params.meshDensityMajR; actCirc++) {
-        float beta = deltaBeta * actCirc;
+        const float beta = deltaBeta * actCirc;
 
         for (int act_pt_in_circ = 0; act_pt_in_circ < params.meshDensityMinR; act_pt_in_circ++) {
             int index = (actCirc * params.meshDensityMinR + act_pt_in_circ) * 3;
 
             float alpha = deltaAlpha * act_pt_in_circ;
 
-            result[index] = VertexX(params, alpha, beta);
-            result[index + 1] = VertexY(params, alpha);
-            result[index + 2] = VertexZ(params, alpha, beta);
+            auto point = PointOnTorus(params, alpha, beta);
+
+            result[index] = point.X();
+            result[index + 1] = point.Y();
+            result[index + 2] = point.Z();
         }
     }
 
@@ -154,22 +241,4 @@ std::vector<uint32_t> ToriSystem::GenerateMeshIndices(const TorusParameters &par
     }
 
     return result;
-}
-
-
-float ToriSystem::VertexX(const TorusParameters& params, float alpha, float beta) const
-{
-    return (params.majorRadius + params.minorRadius * std::cos(alpha)) * std::cos(beta);
-}
-
-
-float ToriSystem::VertexY(const TorusParameters& params, float alpha) const
-{
-    return params.minorRadius * std::sin(alpha);
-}
-
-
-float ToriSystem::VertexZ(const TorusParameters& params, float alpha, float beta) const
-{
-    return (params.majorRadius + params.minorRadius * std::cos(alpha)) * std::sin(beta);
 }

@@ -4,6 +4,8 @@
 #include "utils/nameGenerator.hpp"
 #include "shaders/shaderRepository.hpp"
 #include "../components/position.hpp"
+#include "../components/rotation.hpp"
+#include "../components/scale.hpp"
 #include "../components/torusParameters.hpp"
 
 #include <vector>
@@ -17,9 +19,39 @@ public:
 
     Entity AddTorus(const Position& pos, const TorusParameters& params);
 
-    void SetTorusParameter(Entity entity, const TorusParameters& params);
+    void SetParameters(Entity entity, const TorusParameters& params);
 
     void Render(const alg::Mat4x4& cameraMtx);
+
+    Position PointOnTorus(Entity torus, float alpha, float beta) const;
+
+    static alg::Vec3 PointOnTorus(const TorusParameters& params, float alpha, float beta);
+    Position PointOnTorus(
+        const TorusParameters& params,
+        const Position& pos,
+        const Rotation& rot,
+        const Scale& scale,
+        float alpha,
+        float beta
+    ) const;
+
+    static alg::Vec3 PartialDerivativeWithRespectToAlpha(
+        const TorusParameters &params,
+        const Rotation &rot,
+        const Scale &scale,
+        float alpha,
+        float beta
+    );
+    [[nodiscard]] alg::Vec3 PartialDerivativeWithRespectToAlpha(Entity e, float alpha, float beta) const;
+
+    static alg::Vec3 PartialDerivativeWithRespectToBeta(
+        const TorusParameters &params,
+        const Rotation &rot,
+        const Scale &scale,
+        float alpha,
+        float beta
+    );
+    alg::Vec3 PartialDerivativeWithRespectToBeta(Entity e, float alpha, float beta) const;
 
 private:
     NameGenerator nameGenerator;
@@ -29,7 +61,5 @@ private:
     std::vector<float> GenerateMeshVertices(const TorusParameters& params) const;
     std::vector<uint32_t> GenerateMeshIndices(const TorusParameters& params) const;
 
-    float VertexX(const TorusParameters& params, float alpha, float beta) const;
-    float VertexY(const TorusParameters& params, float alpha) const;
-    float VertexZ(const TorusParameters& params, float alpha, float beta) const;
+    
 };
