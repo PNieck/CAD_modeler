@@ -108,8 +108,8 @@ std::optional<std::vector<float>> alg::ConjugationGradientMethod(
         std::vector<float> newSolution = FindMinimumInOneDirection2(functionToOptimise, oldSolution, searchDir, step);
 
         float v = LengthSquared(functionToOptimise.Gradient(newSolution));
-        float funVal = functionToOptimise.Value(newSolution);
-        std::cout << "Grad len sq: " << v << " function value: " << funVal << std::endl;
+        // float funVal = functionToOptimise.Value(newSolution);
+        // std::cout << "Grad len sq: " << v << " function value: " << funVal << std::endl;
         if (v < eps)
             return newSolution;
 

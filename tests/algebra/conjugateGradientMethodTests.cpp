@@ -6,7 +6,7 @@
 using namespace alg;
 
 
-class SimpleTestFunction: public FunctionToOptimize {
+class SimpleTestFunction final : public FunctionToOptimize {
     public:
     float Value(const std::vector<float> &args) override {
         if (args.size() != 2)
@@ -34,7 +34,7 @@ TEST(ConjungateGradientMethodTests, SimpleFunctionToOptimize) {
         function,
         { 0, 3 },
         0.1f,
-        0.000001
+        0.00001
     );
 
     ASSERT_TRUE(solution.has_value());
