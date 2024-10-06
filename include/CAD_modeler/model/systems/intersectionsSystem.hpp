@@ -45,5 +45,7 @@ private:
 
     std::optional<Solution> FindFirstIntersectionPoint(Entity e1, Entity e2);
 
+    Solution FindNextIntersectionPoint(Entity e1, Entity e2, Solution& prevSol);
+
     bool CheckIfSolutionIsInDomain(Solution &sol) const;
 };
