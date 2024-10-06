@@ -125,4 +125,10 @@ namespace alg
             v.W() * scalar
         );
     }
+
+
+    template <typename DataType>
+    inline DataType DistanceSquared(const Vector4<DataType>& v1, const Vector4<DataType>& v2) {
+        return (v1 - v2).LengthSquared();
+    }
 };
