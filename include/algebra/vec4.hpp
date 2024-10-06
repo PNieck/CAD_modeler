@@ -4,6 +4,8 @@
 
 #include <array>
 
+#include <ostream>
+
 
 namespace alg
 {
@@ -130,5 +132,13 @@ namespace alg
     template <typename DataType>
     inline DataType DistanceSquared(const Vector4<DataType>& v1, const Vector4<DataType>& v2) {
         return (v1 - v2).LengthSquared();
+    }
+
+
+    template <typename DataType>
+    std::ostream& operator<< (std::ostream& stream, const Vector4<DataType>& vec) {
+        stream << "[ " << vec.X() << ", " << vec.Y() << ", " << vec.Z() << ", " << vec.W() << " ]";
+
+        return stream;
     }
 };
