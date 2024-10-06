@@ -6,6 +6,7 @@ add_executable(
     systemsOfLinearEquationsTests.cpp
     cubicPolynomialsTests.cpp
     conjugateGradientMethodTests.cpp
+    newtonMethodTests.cpp
 )
 
 target_link_libraries(
