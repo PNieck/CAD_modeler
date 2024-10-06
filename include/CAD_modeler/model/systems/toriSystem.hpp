@@ -26,14 +26,15 @@ public:
     Position PointOnTorus(Entity torus, float alpha, float beta) const;
 
     static alg::Vec3 PointOnTorus(const TorusParameters& params, float alpha, float beta);
-    Position PointOnTorus(
+
+    static Position PointOnTorus(
         const TorusParameters& params,
         const Position& pos,
         const Rotation& rot,
         const Scale& scale,
         float alpha,
         float beta
-    ) const;
+    );
 
     static alg::Vec3 PartialDerivativeWithRespectToAlpha(
         const TorusParameters &params,
@@ -53,13 +54,22 @@ public:
     );
     alg::Vec3 PartialDerivativeWithRespectToBeta(Entity e, float alpha, float beta) const;
 
+    static alg::Vec3 NormalVec(
+        const TorusParameters &params,
+        const Rotation &rot,
+        const Scale &scale,
+        float alpha,
+        float beta
+    );
+    alg::Vec3 NormalVec(Entity e, float alpha, float beta) const;
+
 private:
     NameGenerator nameGenerator;
 
     ShaderRepository* shadersRepo;
 
-    std::vector<float> GenerateMeshVertices(const TorusParameters& params) const;
-    std::vector<uint32_t> GenerateMeshIndices(const TorusParameters& params) const;
+    void UpdateMesh(Entity e, const TorusParameters& params) const;
 
-    
+    static std::vector<float> GenerateMeshVertices(const TorusParameters& params);
+    static std::vector<uint32_t> GenerateMeshIndices(const TorusParameters& params);
 };

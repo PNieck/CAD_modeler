@@ -43,27 +43,17 @@ Entity ToriSystem::AddTorus(const Position& pos, const TorusParameters& params)
     coordinator->AddComponent<TorusParameters>(torus, params);
     coordinator->AddComponent<Name>(torus, nameGenerator.GenerateName("Torus"));
 
-    const auto vertices = GenerateMeshVertices(params);
-    const auto indices = GenerateMeshIndices(params);
-
-    Mesh mesh;
-    mesh.Update(vertices, indices);
-    coordinator->AddComponent<Mesh>(torus, mesh);
+    coordinator->AddComponent<Mesh>(torus, Mesh());
+    UpdateMesh(torus, params);
 
     return torus;
 }
 
 
-void ToriSystem::SetParameters(Entity entity, const TorusParameters& params)
+void ToriSystem::SetParameters(const Entity entity, const TorusParameters& params)
 {
     coordinator->SetComponent<TorusParameters>(entity, params);
-
-    auto vertices = GenerateMeshVertices(params);
-    auto indices = GenerateMeshIndices(params);
-
-    Mesh mesh = coordinator->GetComponent<Mesh>(entity);
-    mesh.Update(vertices, indices);
-    coordinator->SetComponent<Mesh>(entity, mesh);
+    UpdateMesh(entity, params);
 }
 
 
@@ -84,8 +74,8 @@ void ToriSystem::Render(const alg::Mat4x4& cameraMtx)
         auto const& position = coordinator->GetComponent<Position>(entity);
         auto const& scale = coordinator->GetComponent<Scale>(entity);
         auto const& rotation = coordinator->GetComponent<Rotation>(entity);
-        
-        bool selection = selectionSystem->IsSelected(entity);
+
+        const bool selection = selectionSystem->IsSelected(entity);
 
         if (selection)
             shader.SetColor(alg::Vec4(1.0f, 0.5f, 0.0f, 1.0f));
@@ -124,7 +114,7 @@ alg::Vec3 ToriSystem::PointOnTorus(const TorusParameters &params, float alpha, f
 }
 
 
-Position ToriSystem::PointOnTorus(const TorusParameters &params, const Position &pos, const Rotation &rot, const Scale &scale, float alpha, float beta) const
+Position ToriSystem::PointOnTorus(const TorusParameters &params, const Position &pos, const Rotation &rot, const Scale &scale, float alpha, float beta)
 {
     alg::Vec3 result = PointOnTorus(params, alpha, beta);
 
@@ -189,10 +179,47 @@ alg::Vec3 ToriSystem::PartialDerivativeWithRespectToBeta(Entity e, float alpha, 
 }
 
 
-std::vector<float> ToriSystem::GenerateMeshVertices(const TorusParameters &params) const
+alg::Vec3 ToriSystem::NormalVec(const TorusParameters &params, const Rotation &rot, const Scale &scale, const float alpha,
+                                const float beta)
 {
-    float deltaAlpha = 2.f * std::numbers::pi_v<float> / params.meshDensityMinR;
-    float deltaBeta = 2.f * std::numbers::pi_v<float> / params.meshDensityMajR;
+    const alg::Vec3 tangent1 = PartialDerivativeWithRespectToAlpha(params, rot, scale, alpha, beta);
+    const alg::Vec3 tangent2 = PartialDerivativeWithRespectToBeta(params, rot, scale, alpha, beta);
+
+    const alg::Vec3 result = alg::Cross(tangent1, tangent2);
+
+    return result.Normalize();
+}
+
+
+alg::Vec3 ToriSystem::NormalVec(Entity e, float alpha, float beta) const
+{
+    return NormalVec(
+        coordinator->GetComponent<TorusParameters>(e),
+        coordinator->GetComponent<Rotation>(e),
+        coordinator->GetComponent<Scale>(e),
+        alpha,
+        beta
+    );
+}
+
+
+void ToriSystem::UpdateMesh(Entity e, const TorusParameters &params) const
+{
+    coordinator->EditComponent<Mesh>(e,
+        [this, &params] (Mesh& mesh) {
+            mesh.Update(
+                GenerateMeshVertices(params),
+                GenerateMeshIndices(params)
+            );
+        }
+    );
+}
+
+
+std::vector<float> ToriSystem::GenerateMeshVertices(const TorusParameters &params)
+{
+    const float deltaAlpha = 2.f * std::numbers::pi_v<float> / params.meshDensityMinR;
+    const float deltaBeta = 2.f * std::numbers::pi_v<float> / params.meshDensityMajR;
 
     std::vector<float> result(params.meshDensityMinR * params.meshDensityMajR * 3);
 
@@ -216,7 +243,7 @@ std::vector<float> ToriSystem::GenerateMeshVertices(const TorusParameters &param
 }
 
 
-std::vector<uint32_t> ToriSystem::GenerateMeshIndices(const TorusParameters &params) const
+std::vector<uint32_t> ToriSystem::GenerateMeshIndices(const TorusParameters &params)
 {
     std::vector<uint32_t> result(
         params.meshDensityMinR * params.meshDensityMajR + params.meshDensityMajR + params.meshDensityMinR*params.meshDensityMajR + params.meshDensityMinR
@@ -230,7 +257,7 @@ std::vector<uint32_t> ToriSystem::GenerateMeshIndices(const TorusParameters &par
         result[params.meshDensityMinR * (i+1) + i] = std::numeric_limits<uint32_t>::max();
     }
 
-    uint32_t index = params.meshDensityMinR * params.meshDensityMajR + params.meshDensityMajR;
+    const uint32_t index = params.meshDensityMinR * params.meshDensityMajR + params.meshDensityMajR;
 
     for (int i = 0; i < params.meshDensityMinR; i++) {
         for (int j=0; j < params.meshDensityMajR; j++) {
