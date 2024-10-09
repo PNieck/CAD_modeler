@@ -62,6 +62,9 @@ private:
     IntersectionPoint FindFirstApproximation(Entity e1, Entity e2) const;
 
     [[nodiscard]]
+    std::optional<IntersectionPoint> FindFirstIntersectionPointDLib(Entity e1, Entity e2, const IntersectionPoint& initSol) const;
+
+    [[nodiscard]]
     std::optional<IntersectionPoint> FindFirstIntersectionPoint(Entity e1, Entity e2, const IntersectionPoint& initSol) const;
 
     std::optional<IntersectionPoint> FindNextIntersectionPoint(Entity e1, Entity e2, IntersectionPoint &prevSol, float step) const;

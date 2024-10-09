@@ -59,6 +59,10 @@ void IntersectionSystem::FindIntersection(Entity e1, Entity e2, float step)
 
     const auto initSol = FindFirstApproximation(e1, e2);
     auto solOpt = FindFirstIntersectionPoint(e1, e2, initSol);
+    if (!solOpt.has_value()) {
+        std::cout << "WARNING: using dlib to calculate first intersection point" << std::endl;
+        solOpt = FindFirstIntersectionPointDLib(e1, e2, initSol);
+    }
 
     if (!solOpt.has_value()) {
         std::cout << "Cannot find first point\n";
@@ -196,7 +200,50 @@ private:
 };
 
 
-std::optional<IntersectionSystem::IntersectionPoint> IntersectionSystem::FindFirstIntersectionPoint(Entity e1, Entity e2,
+class DistanceBetweenPoints: public alg::FunctionToOptimize {
+public:
+    explicit DistanceBetweenPoints(const std::shared_ptr<ToriSystem> &toriSys, Entity e1, Entity e2):
+        toriSys(toriSys), e1(e1), e2(e2) {}
+
+    float Value(const std::vector<float> &args) override {
+        const auto point1 = toriSys->PointOnTorus(e1, args[0], args[1]);
+        const auto point2 = toriSys->PointOnTorus(e2, args[2], args[3]);
+
+        return alg::DistanceSquared(point1.vec, point2.vec);
+    }
+
+
+    std::vector<float> Gradient(const std::vector<float> &args) override {
+        const auto point1 = toriSys->PointOnTorus(e1, args[0], args[1]);
+        const auto point2 = toriSys->PointOnTorus(e2, args[2], args[3]);
+
+        const auto partDivV1 = toriSys->PartialDerivativeWithRespectToAlpha(e1, args[0], args[1]);
+        const auto partDivV2 = toriSys->PartialDerivativeWithRespectToAlpha(e2, args[2], args[3]);
+
+        const auto partDivU1 = toriSys->PartialDerivativeWithRespectToBeta(e1, args[0], args[1]);
+        const auto partDivU2 = toriSys->PartialDerivativeWithRespectToBeta(e2, args[2], args[3]);
+
+        const float xDiv = point1.GetX() - point2.GetX();
+        const float yDiv = point1.GetY() - point2.GetY();
+        const float zDiv = point1.GetZ() - point2.GetZ();
+
+        std::vector<float> result(4);
+
+        result[0] = 2.f * (xDiv*partDivV1.X() + yDiv*partDivV1.Y() + zDiv*partDivV1.Z());   // df/dv1
+        result[1] = 2.f * (xDiv*partDivU1.X() + yDiv*partDivU1.Y() + zDiv*partDivU1.Z());   // df/du1
+        result[2] = -2.f * (xDiv*partDivV2.X() + yDiv*partDivV2.Y() + zDiv*partDivV2.Z());  // df/dv2
+        result[3] = -2.f * (xDiv*partDivU2.X() + yDiv*partDivU2.Y() + zDiv*partDivU2.Z());  // df/du2
+
+        return result;
+    }
+
+private:
+    std::shared_ptr<ToriSystem> toriSys;
+    Entity e1, e2;
+};
+
+
+std::optional<IntersectionSystem::IntersectionPoint> IntersectionSystem::FindFirstIntersectionPointDLib(Entity e1, Entity e2,
     const IntersectionPoint& initSol) const
 {
     columnVector startingPoint = {
@@ -211,20 +258,50 @@ std::optional<IntersectionSystem::IntersectionPoint> IntersectionSystem::FindFir
     const Function fun(toriSys, e1, e2);
     const FunctionDer funDer(toriSys, e1, e2);
 
-    std::cout << "Difference between analytic derivative and numerical approximation of derivative: " 
-         << dlib::length(dlib::derivative(fun)(startingPoint) - funDer(startingPoint)) << std::endl;
-
-    std::cout << "Analytic der: " << funDer(startingPoint) << " numbric der: " << dlib::derivative(fun)(startingPoint) << std::endl;
-
     dlib::find_min(dlib::bfgs_search_strategy(),
                    dlib::objective_delta_stop_strategy(1e-7).be_verbose(),
                    fun, funDer, startingPoint, 0);
+
 
     IntersectionPoint result(
         static_cast<float>(startingPoint(0)),
         static_cast<float>(startingPoint(1)),
         static_cast<float>(startingPoint(2)),
         static_cast<float>(startingPoint(3))
+    );
+
+    if (ErrorRate(e1, e2, result) > 1e-5)
+        return std::nullopt;
+
+    return result;
+}
+
+
+std::optional<IntersectionSystem::IntersectionPoint> IntersectionSystem::FindFirstIntersectionPoint(Entity e1,
+    Entity e2, const IntersectionPoint &initSol) const
+{
+    const std::vector<float> startingPoint = {
+        initSol.V1(),
+        initSol.U1(),
+        initSol.V2(),
+        initSol.U2()
+    };
+
+    const auto toriSys = coordinator->GetSystem<ToriSystem>();
+
+    DistanceBetweenPoints fun(toriSys, e1, e2);
+    const auto sol = alg::ConjugationGradientMethod(fun,
+                                                    startingPoint,
+                                                    0.01f, 1e-5);
+
+    if (!sol.has_value())
+        return std::nullopt;
+
+    IntersectionPoint result(
+        sol.value()[0],
+        sol.value()[1],
+        sol.value()[2],
+        sol.value()[3]
     );
 
     if (ErrorRate(e1, e2, result) > 1e-5)

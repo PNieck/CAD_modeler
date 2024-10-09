@@ -32,9 +32,9 @@ float DotProduct(const std::vector<float>& vec1, const std::vector<float>& vec2)
 
 
 std::vector<float> FindMinimumInOneDirection2(
-    alg::FunctionToOptimize &function, const std::vector<float> &initSol, const std::vector<float>& dir, float initStep) {
-
-    float eps = 0.000001;
+    alg::FunctionToOptimize &function, const std::vector<float> &initSol, const std::vector<float>& dir, float initStep)
+{
+    const float eps = 0.000001;
 
     std::vector<float> oldSol(initSol.begin(), initSol.end());
     std::vector<float> newSol(initSol.begin(), initSol.end());
@@ -42,10 +42,9 @@ std::vector<float> FindMinimumInOneDirection2(
     float step = initStep;
 
     do {
-        //std::swap(oldSol, newSol);
-        std::vector<float> tmp = oldSol;
-        oldSol = newSol;
-        newSol = tmp;
+        std::vector<float> tmp(std::move(oldSol));
+        oldSol = std::move(newSol);
+        newSol = std::move(tmp);
 
         for (int i=0; i < initSol.size(); i++)
             newSol[i] = oldSol[i] + step * dir[i];
@@ -122,9 +121,8 @@ std::optional<std::vector<float>> alg::ConjugationGradientMethod(
         for (int j=0; j < solutionEstimation.size(); j++)
             searchDir[j] = -gradient[j] + coef * searchDir[j];
 
-        //std::swap(newSolution, oldSolution);
-        std::vector<float> tmp = oldSolution;
-        oldSolution = newSolution;
-        newSolution = tmp;
+        std::vector<float> tmp(std::move(oldSolution));
+        oldSolution = std::move(newSolution);
+        newSolution = std::move(tmp);
     }
 }
