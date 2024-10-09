@@ -976,6 +976,11 @@ void GuiView::DisplaySurfacePatches(Entity entity, const Patches &patches) const
         }
     }
 
+    ImGui::SeparatorText("Surface size");
+    ImGui::Text("Patches in one direction: %d", patches.PatchesInCol());
+    ImGui::Text("Patches in second direction: %d", patches.PatchesInRow());
+
+    ImGui::SeparatorText("Control points");
     for (int row=0; row < patches.PointsInRow(); row++) {
         for (int col=0; col < patches.PointsInCol(); col++) {
             Entity cp = patches.GetPoint(row, col);
