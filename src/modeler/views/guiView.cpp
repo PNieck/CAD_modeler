@@ -8,7 +8,6 @@
 #include <backends/imgui_impl_opengl3.h>
 #include <misc/cpp/imgui_stdlib.h>
 
-#include <algorithm>
 #include <iterator>
 #include <stdexcept>
 #include <optional>
@@ -248,9 +247,9 @@ void GuiView::RenderAddingCurveGui(CurveType curveType) const
                 controller.SelectEntity(entity);
             }
             else {
-                auto it = std::find(controlPoints.begin(), controlPoints.end(), entity);
+                const auto it = std::ranges::find(controlPoints, entity);
                 controlPoints.erase(it);
-                if (controlPoints.size() == 0)
+                if (controlPoints.empty())
                     controller.DeleteEntity(curve);
                 else
                     controller.DeleteControlPointFromCurve(curve, entity);
@@ -298,7 +297,7 @@ int GetSurfaceColsCnt(Entity surface, SurfaceType surfaceType, const Model& mode
 void GuiView::RenderAddingSurface(SurfaceType surfaceType) const
 {
     static std::optional<Entity> entity;
-    static const alg::Vec3 dir(0.f, 1.f, 0.f);
+    static constexpr alg::Vec3 dir(0.f, 1.f, 0.f);
     static float width, length;
     
     if (!entity.has_value()) {
@@ -384,13 +383,12 @@ int GetCylinderColsCnt(Entity cylinder, CylinderType CylinderType, const Model& 
 void GuiView::RenderAddingCylinder(CylinderType cylinderType) const
 {
     static std::optional<Entity> entity;
-    static float oldRadius, newRadius;
-    static float oldLen, newLen;
-    static const alg::Vec3 dir(0.f, 1.f, 0.f);
+    static float newRadius;
+    static float newLen;
+    static constexpr alg::Vec3 dir(0.f, 1.f, 0.f);
     
     if (!entity.has_value()) {
         entity = controller.AddCylinder(cylinderType);
-        oldRadius = newRadius = 1.0f;
         newLen = 1.f;
     }
 
@@ -673,8 +671,8 @@ void GuiView::RenderSingleObjectProperties(Entity entity) const
 
 void GuiView::RenderMultipleObjectProperties() const
 {
-    Entity midPoint = model.GetMiddlePoint();
-    const Position& pos = model.GetComponent<Position>(midPoint);
+    const Entity midPoint = model.GetMiddlePoint();
+    const auto& pos = model.GetComponent<Position>(midPoint);
 
     float x = pos.GetX();
     float y = pos.GetY();
@@ -862,7 +860,7 @@ void GuiView::DisplayCurveControlPoints(Entity entity, const CurveControlPoints&
 
         for (auto point: points) {
             // TODO: rewrite with set intersection
-            if (std::find(params.GetPoints().begin(), params.GetPoints().end(), point) == params.GetPoints().end()) {
+            if (std::ranges::find(params.GetPoints(), point) == params.GetPoints().end()) {
                 if (pointsWithNames.contains(point) && ImGui::Selectable(model.GetEntityName(point).c_str(), false)) {
                     CurveType curveType;
                     
