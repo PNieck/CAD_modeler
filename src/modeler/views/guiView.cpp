@@ -545,20 +545,23 @@ void GuiView::RenderAddingIntersectionCurve() const
         RenderSelectableEntitiesList(tori);
     }
 
+    static float step = 0.1f;
+
+    ImGui::DragFloat("Step", &step, 0.001f, 1e-5);
 
     if (ImGui::Button("Accept")) {
         auto& entities = model.GetAllSelectedEntities();
 
         if (entities.size() != 2)
-            ImGui::OpenPopup("Wrong numer of elements to intersect");
+            ImGui::OpenPopup("Wrong number of elements to intersect");
         else {
-            Entity e1 = *entities.begin();
-            Entity e2 = *(++entities.begin());
-            controller.FindIntersection(e1, e2);
+            const Entity e1 = *entities.begin();
+            const Entity e2 = *(++entities.begin());
+            controller.FindIntersection(e1, e2, step);
         }
     }
 
-    if (ImGui::BeginPopupModal("Wrong numer of elements to intersect", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (ImGui::BeginPopupModal("Wrong number of elements to intersect", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
         ImGui::Text("Wrong number of selected entities to intersect. Two objects must be selected");
         if (ImGui::Button("OK")) { ImGui::CloseCurrentPopup(); }
         ImGui::EndPopup();

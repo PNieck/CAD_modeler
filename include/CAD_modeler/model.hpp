@@ -308,8 +308,8 @@ public:
     inline void SaveScene(const std::string& path)
         { saveManager.SaveScene(path, coordinator); }
 
-    inline void FindIntersection(Entity e1, Entity e2)
-        { intersectionSystem->FindIntersection(e1, e2); }
+    inline void FindIntersection(Entity e1, Entity e2, float step)
+        { intersectionSystem->FindIntersection(e1, e2, step); }
 
     CameraManager cameraManager;
 
