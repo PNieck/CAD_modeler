@@ -15,10 +15,10 @@ TEST(QuaternionTests, RotationMatricesComparison) {
     glm::quat glmQuat(4.0, 1.0, 2.0, 3.0);
 
     algQuat = algQuat.Normalize();
-    glmQuat = glm::normalize(glmQuat);
+    glmQuat = normalize(glmQuat);
 
     auto algMat = algQuat.ToRotationMatrix();
-    auto glmMat = glm::toMat4(glmQuat);
+    auto glmMat = toMat4(glmQuat);
 
     for (int row=0; row < alg::Mat4x4::Rows; ++row) {
         for (int col=0; col < alg::Mat4x4::Cols; ++col) {
@@ -27,7 +27,7 @@ TEST(QuaternionTests, RotationMatricesComparison) {
         std::cout << "\n";
     }
 
-    std::cout << glm::to_string(glmMat);
+    std::cout << to_string(glmMat);
 
     for (int row=0; row < alg::Mat4x4::Rows; ++row) {
         for (int col=0; col < alg::Mat4x4::Cols; ++col) {
@@ -42,7 +42,7 @@ TEST(QuaternionTests, NormalizationComparison) {
     glm::quat glmQuat(4.0, 1.0, 2.0, 3.0);
 
     algQuat = algQuat.Normalize();
-    glmQuat = glm::normalize(glmQuat);
+    glmQuat = normalize(glmQuat);
 
     ASSERT_FLOAT_EQ(algQuat.X(), glmQuat.x);
     ASSERT_FLOAT_EQ(algQuat.Y(), glmQuat.y);
@@ -52,11 +52,11 @@ TEST(QuaternionTests, NormalizationComparison) {
 
 
 TEST(QuaternionTests, EulerAngles) {
-    alg::Quat algQuat(1.0, 2.0, 3.0, 4.0);
-    glm::quat glmQuat(4.0, 1.0, 2.0, 3.0);
+    const alg::Quat algQuat(1.0, 2.0, 3.0, 4.0);
+    constexpr glm::quat glmQuat(4.0, 1.0, 2.0, 3.0);
 
     auto algEuler = algQuat.ToRollPitchYaw();
-    auto glmEuler = glm::eulerAngles(glmQuat);
+    const auto glmEuler = eulerAngles(glmQuat);
 
     EXPECT_FLOAT_EQ(algEuler.X(), glmEuler.x);
     EXPECT_FLOAT_EQ(algEuler.Y(), glmEuler.y);
