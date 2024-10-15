@@ -2,6 +2,7 @@
 
 #include <array>
 #include <cmath>
+#include <ostream>
 
 
 namespace alg
@@ -200,4 +201,13 @@ namespace alg
         
         return cross.Normalize();
     }
+
+
+    template <typename DataType>
+    std::ostream& operator<< (std::ostream& stream, const Vector3<DataType>& vec) {
+        stream << "[ " << vec.X() << ", " << vec.Y() << ", " << vec.Z() << " ]";
+
+        return stream;
+    }
+
 };
