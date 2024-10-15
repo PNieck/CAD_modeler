@@ -63,6 +63,8 @@ namespace alg
 
         static Quat Identity()
             { return Quat(0.0f, 0.0f, 0.0f, 1.0f); }
+
+        static Quat FromVectors(const Vec3& v1, const Vec3& v2);
         
     private:
         Vec4 data;

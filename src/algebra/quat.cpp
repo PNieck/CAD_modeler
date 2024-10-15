@@ -3,6 +3,7 @@
 #include <cmath>
 #include <numbers>
 #include <algorithm>
+#include <cassert>
 
 
 alg::Quat::Quat(float pitch, float yaw, float roll)
@@ -112,4 +113,32 @@ alg::Quat alg::Quat::operator*(const alg::Quat& q) const
         W() * q.Z() + X() * q.Y() - Y() * q.X() + Z() * q.W(),  // k
         W() * q.W() - X() * q.X() - Y() * q.Y() - Z() * q.Z()   // 1
     );
+}
+
+
+alg::Quat alg::Quat::FromVectors(const Vec3 &v1, const Vec3 &v2)
+{
+    assert(v1.LengthSquared() != 0.f);
+    assert(v2.LengthSquared() != 0.f);
+
+    const Vec3 uv1 = v1.Normalize();
+    const Vec3 uv2 = v2.Normalize();
+
+    const float dot = Dot(uv1, uv2);
+
+    if (dot > 0.999999f) {
+        /* if vectors are close to parallel */
+        return Identity();
+    }
+    if (dot < -0.999999f) {
+        /* if vectors are close to antiparallel */
+        /* calculating quaternion, which rotates 180 degrees along axis perpendicular to `v1` and `v2` */
+        Vec3 perpen = GetPerpendicularVec(uv1);
+        return { perpen.X(), perpen.Y(), perpen.Z(), 0.f };
+    }
+
+    auto cross = Cross(uv1, uv2);
+    return Quat(
+        cross.X(), cross.Y(), cross.Z(), 1.f + dot
+    ).Normalize();
 }
