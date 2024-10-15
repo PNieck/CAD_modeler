@@ -62,3 +62,44 @@ TEST(QuaternionTests, EulerAngles) {
     EXPECT_FLOAT_EQ(algEuler.Y(), glmEuler.y);
     EXPECT_FLOAT_EQ(algEuler.Z(), glmEuler.z);
 }
+
+
+TEST(QuaternionTests, CheckingQuaternionBetweenVectors) {
+    constexpr alg::Vec3 v1(1.f, 2.f, 3.f);
+    alg::Vec3 v2(5.f, 6.0f, 7.f);
+
+    const alg::Quat q = alg::Quat::FromVectors(v1, v2);
+    const alg::Vec3 rotated = q.Rotate(v1);
+
+    // Scaling v2 so it has the same length as v1
+    v2 = v2.Normalize() * v1.Length();
+
+    EXPECT_FLOAT_EQ(v2.X(), rotated.X());
+    EXPECT_FLOAT_EQ(v2.Y(), rotated.Y());
+    EXPECT_FLOAT_EQ(v2.Z(), rotated.Z());
+}
+
+
+TEST(QuaternionTests, IndentityQuaternionBetweenTheSameVectors) {
+    constexpr alg::Vec3 v1(1.f, 2.f, 3.f);
+
+    const alg::Quat q = alg::Quat::FromVectors(v1, v1);
+
+    ASSERT_EQ(q.X(), alg::Quat::Identity().X());
+    ASSERT_EQ(q.Y(), alg::Quat::Identity().Y());
+    ASSERT_EQ(q.Z(), alg::Quat::Identity().Z());
+    ASSERT_EQ(q.W(), alg::Quat::Identity().W());
+}
+
+
+TEST(QuaternionTests, QuaternionBetweenAntiparallelVectors) {
+    constexpr alg::Vec3 v1(1.f, 2.f, 3.f);
+    alg::Vec3 v2 = -v1;
+
+    const alg::Quat q = alg::Quat::FromVectors(v1, v2);
+    const alg::Vec3 rotated = q.Rotate(v1);
+
+    EXPECT_FLOAT_EQ(v2.X(), rotated.X());
+    EXPECT_FLOAT_EQ(v2.Y(), rotated.Y());
+    EXPECT_FLOAT_EQ(v2.Z(), rotated.Z());
+}
