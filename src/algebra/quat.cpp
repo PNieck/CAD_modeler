@@ -1,19 +1,18 @@
 #include <algebra/quat.hpp>
 
 #include <cmath>
-#include <numbers>
 #include <algorithm>
 #include <cassert>
 
 
 alg::Quat::Quat(float pitch, float yaw, float roll)
 {
-    float cz = cos(roll * 0.5f);
-    float sz = sin(roll * 0.5f);
-    float cx = cos(pitch * 0.5f);
-    float sx = sin(pitch * 0.5f);
-    float cy = cos(yaw * 0.5f);
-    float sy = sin(yaw * 0.5f);
+    const float cz = cos(roll * 0.5f);
+    const float sz = sin(roll * 0.5f);
+    const float cx = cos(pitch * 0.5f);
+    const float sx = sin(pitch * 0.5f);
+    const float cy = cos(yaw * 0.5f);
+    const float sy = sin(yaw * 0.5f);
 
     W() = cx * cy * cz + sx * sy * sz;
     X() = sx * cy * cz - cx * sy * sz;
@@ -33,36 +32,28 @@ alg::Quat::Quat(const alg::Vec3 &axis, float angle)
 }
 
 
-alg::Vec3 alg::Quat::Rotate(const alg::Vec3& v) const
+alg::Vec3 alg::Quat::Rotate(const Vec3& v) const
 {
     alg::Quat tmp(v.X(), v.Y(), v.Z(), 0.0f);
 
     tmp = (*this) * tmp * this->Conjugation();
 
-    return alg::Vec3(
+    return {
         tmp.X(),
         tmp.Y(),
         tmp.Z()
-    );
-}
-
-
-alg::Quat alg::Quat::Conjugation() const
-{
-    return Quat(
-        -X(), -Y(), -Z(), W()
-    );
+    };
 }
 
 
 alg::Mat4x4 alg::Quat::ToRotationMatrix() const
 {
-    float xy = X() * Y();
-    float xz = X() * Z();
-    float yz = Y() * Z();
-    float wx = W() * X();
-    float wz = W() * Z();
-    float wy = W() * Y();
+    const float xy = X() * Y();
+    const float xz = X() * Z();
+    const float yz = Y() * Z();
+    const float wx = W() * X();
+    const float wz = W() * Z();
+    const float wy = W() * Y();
     
     alg::Mat4x4 rot(
         1.f - 2.f*(Y()*Y() + Z()*Z()),            2.f*(xy - wz),            2.f*(xz + wy), 0.f,
@@ -89,7 +80,7 @@ alg::Vec3 alg::Quat::ToRollPitchYaw() const
     else
         pitch = std::atan2(y, x);
 
-    float yaw = std::asin(std::clamp(-2.f * (X() * Z() - W() * Y()), -1.f, 1.f));
+    const float yaw = std::asin(std::clamp(-2.f * (X() * Z() - W() * Y()), -1.f, 1.f));
 
     y = 2.f * (X() * Y() + W() * Z());
     x = W() * W() + X() * X() - Y() * Y() - Z() * Z();
@@ -101,18 +92,18 @@ alg::Vec3 alg::Quat::ToRollPitchYaw() const
     else
         roll = std::atan2(y, x);
 
-    return alg::Vec3(pitch, yaw, roll);
+    return {pitch, yaw, roll};
 }
 
 
-alg::Quat alg::Quat::operator*(const alg::Quat& q) const
+alg::Quat alg::Quat::operator*(const Quat& q) const
 {
-    return Quat(
+    return {
         W() * q.X() + X() * q.W() + Y() * q.Z() - Z() * q.Y(),  // i
         W() * q.Y() - X() * q.Z() + Y() * q.W() + Z() * q.X(),  // j
         W() * q.Z() + X() * q.Y() - Y() * q.X() + Z() * q.W(),  // k
         W() * q.W() - X() * q.X() - Y() * q.Y() - Z() * q.Z()   // 1
-    );
+    };
 }
 
 

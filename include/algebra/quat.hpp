@@ -50,9 +50,10 @@ namespace alg
 
         alg::Vec3 Rotate(const alg::Vec3& v) const;
         
-        Quat Conjugation() const;
+        Quat Conjugation() const
+            { return { -X(), -Y(), -Z(), W() }; }
 
-        inline Quat Normalize()
+        inline Quat Normalize() const
             { return Quat(data.Normalize()); }
 
         alg::Mat4x4 ToRotationMatrix() const;
