@@ -6,8 +6,8 @@
 
 #include <variant>
 
-#include "systems/cameraSystem.hpp"
-#include "systems/anaglyphsCameraSystem.hpp"
+#include "../systems/cameraSystem.hpp"
+#include "../systems/anaglyphsCameraSystem.hpp"
 
 
 class CameraManager {

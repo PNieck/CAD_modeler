@@ -1,4 +1,4 @@
-#include <CAD_modeler/model/cameraManager.hpp>
+#include <CAD_modeler/model/managers/cameraManager.hpp>
 
 #include <CAD_modeler/utilities/angle.hpp>
 #include <CAD_modeler/model/systems/positionSystem.hpp>
@@ -173,30 +173,30 @@ void CameraManager::SetCurrentEye(AnaglyphsCameraSystem::Eye eye)
 }
 
 
-void CameraManager::SetEyeSeparation(float eyeSeparation)
+void CameraManager::SetEyeSeparation(float eyeSep)
 {
-    this->eyeSeparation = eyeSeparation;
+    this->eyeSeparation = eyeSep;
 
     if (GetCurrentCameraType() != CameraType::Anaglyphs)
         return;
 
     auto sys = std::get<AnaglyphsSys>(currentCameraSys);
     auto params = sys->GetParameters();
-    params.eyeSeparation = eyeSeparation;
+    params.eyeSeparation = eyeSep;
     sys->SetParameters(params);
 }
 
 
-void CameraManager::SetConvergence(float convergence)
+void CameraManager::SetConvergence(float conv)
 {
-    this->convergence = convergence;
+    this->convergence = conv;
 
     if (GetCurrentCameraType() != CameraType::Anaglyphs)
         return;
 
     auto sys = std::get<AnaglyphsSys>(currentCameraSys);
     auto params = sys->GetParameters();
-    params.convergence = convergence;
+    params.convergence = conv;
     sys->SetParameters(params);
 }
 

@@ -2,8 +2,8 @@
 
 #include <ecs/coordinator.hpp>
 
-#include "model/cameraManager.hpp"
-#include "model/saveManager.hpp"
+#include "model/managers/cameraManager.hpp"
+#include "model/managers/saveManager.hpp"
 
 #include "model/systems/toriSystem.hpp"
 #include "model/systems/gridSystem.hpp"
