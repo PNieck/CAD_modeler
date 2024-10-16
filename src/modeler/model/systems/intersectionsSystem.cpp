@@ -124,7 +124,7 @@ private:
 IntersectionSystem::IntersectionPoint IntersectionSystem::FindFirstApproximation(const Entity e1, const Entity e2) const
 {
     constexpr float maxVal = 2.f * std::numbers::pi_v<float>;
-    constexpr int oneDimSamplesCnt = 10;
+    constexpr int oneDimSamplesCnt = 15;
     constexpr float delta = maxVal / static_cast<float>(oneDimSamplesCnt);
 
     const auto toriSys = coordinator->GetSystem<ToriSystem>();

@@ -5,6 +5,7 @@
 
 #include "shaders/shaderRepository.hpp"
 #include "../components/c0Patches.hpp"
+#include "../components/position.hpp"
 #include "controlNetSystem.hpp"
 
 
@@ -21,12 +22,14 @@ public:
     inline int GetColsCnt(Entity surface) const
         { return coordinator->GetComponent<C0Patches>(surface).PatchesInCol(); }
 
-    void MergeControlPoints(Entity curve, Entity oldCP, Entity newCP, SystemId system);
+    void MergeControlPoints(Entity patches, Entity oldCP, Entity newCP, SystemId system);
 
     void ShowBezierNet(Entity surface);
 
     inline void HideBezierNet(Entity surface)
         { coordinator->GetSystem<ControlNetSystem>()->DeleteControlPointsNet(surface); }
+
+    Position PointOnPatches(Entity entity, float u, float v) const;
 
     void Render(const alg::Mat4x4& cameraMtx) const;
 

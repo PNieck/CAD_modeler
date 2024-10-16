@@ -62,6 +62,73 @@ void C0PatchesSystem::ShowBezierNet(Entity surface)
 }
 
 
+alg::Vec4 CubicBernsteinPolynomial(const float t) {
+    const float oneMinusT = 1.0 - t;
+
+    return {
+        oneMinusT * oneMinusT * oneMinusT,
+        3.f * oneMinusT * oneMinusT * t,
+        3.f * oneMinusT * t * t,
+        t * t * t
+    };
+}
+
+
+Position C0PatchesSystem::PointOnPatches(Entity entity, float u, float v) const
+{
+    auto const& patches = coordinator->GetComponent<C0Patches>(entity);
+
+    assert(v >= 0.f && static_cast<float>(patches.PatchesInRow()) >= v);
+    assert(u >= 0.f && static_cast<float>(patches.PatchesInCol()) >= u);
+
+    const float vFloor = std::floor(v);
+    const float uFloor = std::floor(u);
+
+    int firstRow = static_cast<int>(vFloor) * 3;
+    if (v == static_cast<float>(patches.PatchesInRow()))
+        --firstRow;
+
+    int firstCol = static_cast<int>(uFloor) * 3;
+    if (u == static_cast<float>(patches.PatchesInCol()))
+        --firstCol;
+
+    const float vNormalized = v - vFloor;
+    const float uNormalized = u - uFloor;
+
+    const auto bu = CubicBernsteinPolynomial(uNormalized);
+    const auto bv = CubicBernsteinPolynomial(vNormalized);
+
+    const auto& p00 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow, firstCol));
+    const auto& p01 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow, firstCol + 1));
+    const auto& p02 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow, firstCol + 2));
+    const auto& p03 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow, firstCol + 3));
+
+    const auto& p10 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 1, firstCol));
+    const auto& p11 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 1, firstCol + 1));
+    const auto& p12 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 1, firstCol + 2));
+    const auto& p13 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 1, firstCol + 3));
+
+    const auto& p20 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 2, firstCol));
+    const auto& p21 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 2, firstCol + 1));
+    const auto& p22 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 2, firstCol + 2));
+    const auto& p23 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 2, firstCol + 3));
+
+    const auto& p30 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 3, firstCol));
+    const auto& p31 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 3, firstCol + 1));
+    const auto& p32 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 3, firstCol + 2));
+    const auto& p33 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 3, firstCol + 3));
+
+    // Result of bu*p
+    const auto a0 = bu.X()*p00.vec + bu.Y()*p10.vec + bu.Z()*p20.vec + bu.W()*p30.vec;
+    const auto a1 = bu.X()*p01.vec + bu.Y()*p11.vec + bu.Z()*p21.vec + bu.W()*p31.vec;
+    const auto a2 = bu.X()*p02.vec + bu.Y()*p12.vec + bu.Z()*p22.vec + bu.W()*p32.vec;
+    const auto a3 = bu.X()*p03.vec + bu.Y()*p13.vec + bu.Z()*p23.vec + bu.W()*p33.vec;
+
+    // pos = bu * p * bv^T
+    return a0*bv.X() + a1*bv.Y() + a2*bv.Z() + a3*bv.W();
+}
+
+
 void C0PatchesSystem::Render(const alg::Mat4x4& cameraMtx) const
 {
     if (entities.empty()) {
