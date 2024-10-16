@@ -1,8 +1,7 @@
 #pragma once
 
-#include <ecs/coordinator.hpp>
+#include "model.hpp"
 
-#include "managers/cameraManager.hpp"
 #include "managers/saveManager.hpp"
 
 #include "systems/toriSystem.hpp"
@@ -25,20 +24,16 @@
 #include "systems/vectorSystem.hpp"
 #include "systems/intersectionsSystem.hpp"
 
-#include "systems/shaders/shaderRepository.hpp"
-
 #include "components/scale.hpp"
 #include "components/rotation.hpp"
 
 #include "../utilities/line.hpp"
 
 
-class Modeler
+class Modeler final: public Model
 {
 public:
     Modeler(int viewportWidth, int viewportHeight);
-
-    void RenderFrame();
 
     void AddTorus();
 
@@ -311,18 +306,12 @@ public:
     inline void FindIntersection(Entity e1, Entity e2, float step)
         { intersectionSystem->FindIntersection(e1, e2, step); }
 
-    CameraManager cameraManager;
-
     bool selectingEntities = false;
     float selectionCircleX = 0.0f;
     float selectionCircleY = 0.0f;
     float selectionCircleRadius = 0.2f;
 
 private:
-    
-    Coordinator coordinator;
-    ShaderRepository shadersRepo;
-
     std::shared_ptr<ToriSystem> toriSystem;
     std::shared_ptr<GridSystem> gridSystem;
     std::shared_ptr<CursorSystem> cursorSystem;
@@ -348,9 +337,5 @@ private:
     alg::Vec3 PointFromViewportCoordinates(float x, float y);
     Line LineFromViewportCoordinates(float x, float y);
 
-    void RenderAnaglyphsFrame();
-
-    void RenderPerspectiveFrame();
-
-    void RenderSystemsObjects(const alg::Mat4x4& viewMtx, const alg::Mat4x4& persMtx, float nearPlane, float farPlane) const;
+    void RenderSystemsObjects(const alg::Mat4x4& viewMtx, const alg::Mat4x4& persMtx, float nearPlane, float farPlane) const override;
 };
