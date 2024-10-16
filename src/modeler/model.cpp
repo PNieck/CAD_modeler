@@ -2,7 +2,6 @@
 
 #include <CAD_modeler/utilities/line.hpp>
 #include <CAD_modeler/utilities/plane.hpp>
-#include <CAD_modeler/utilities/angle.hpp>
 
 #include <CAD_modeler/model/components/registerComponents.hpp>
 #include <CAD_modeler/model/components/cameraParameters.hpp>
@@ -41,6 +40,7 @@ Model::Model(int viewport_width, int viewport_height):
     ControlPointsRegistrySystem::RegisterSystem(coordinator);
     GregoryPatchesSystem::RegisterSystem(coordinator);
     VectorSystem::RegisterSystem(coordinator);
+    IntersectionSystem::RegisterSystem(coordinator);
 
     toriSystem = coordinator.GetSystem<ToriSystem>();
     gridSystem = coordinator.GetSystem<GridSystem>();
@@ -61,6 +61,7 @@ Model::Model(int viewport_width, int viewport_height):
     controlPointsRegistrySys = coordinator.GetSystem<ControlPointsRegistrySystem>();
     gregoryPatchesSystem = coordinator.GetSystem<GregoryPatchesSystem>();
     vectorSystem = coordinator.GetSystem<VectorSystem>();
+    intersectionSystem = coordinator.GetSystem<IntersectionSystem>();
 
     cameraManager.Init(viewport_width, viewport_height);
     gridSystem->Init(&shadersRepo);

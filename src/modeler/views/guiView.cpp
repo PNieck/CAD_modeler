@@ -8,7 +8,6 @@
 #include <backends/imgui_impl_opengl3.h>
 #include <misc/cpp/imgui_stdlib.h>
 
-#include <algorithm>
 #include <iterator>
 #include <stdexcept>
 #include <optional>
@@ -75,6 +74,10 @@ void GuiView::RenderGui()
             RenderAddingCurveGui(CurveType::Interpolation);
             break;
 
+        case AppState::AddingIntersectionCurve:
+            RenderAddingIntersectionCurve();
+            break;
+
         case AppState::AddingC0Surface:
             RenderAddingSurface(SurfaceType::C0);
             break;
@@ -134,6 +137,11 @@ void GuiView::RenderDefaultGui() const
 
     if (ImGui::Button("Add interpolation curve")) {
         controller.SetAppState(AppState::AddingInterpolationCurve);
+        controller.DeselectAllEntities();
+    }
+
+    if (ImGui::Button("Add intersection curve")) {
+        controller.SetAppState(AppState::AddingIntersectionCurve);
         controller.DeselectAllEntities();
     }
 
@@ -239,9 +247,9 @@ void GuiView::RenderAddingCurveGui(CurveType curveType) const
                 controller.SelectEntity(entity);
             }
             else {
-                auto it = std::find(controlPoints.begin(), controlPoints.end(), entity);
+                const auto it = std::ranges::find(controlPoints, entity);
                 controlPoints.erase(it);
-                if (controlPoints.size() == 0)
+                if (controlPoints.empty())
                     controller.DeleteEntity(curve);
                 else
                     controller.DeleteControlPointFromCurve(curve, entity);
@@ -289,7 +297,7 @@ int GetSurfaceColsCnt(Entity surface, SurfaceType surfaceType, const Model& mode
 void GuiView::RenderAddingSurface(SurfaceType surfaceType) const
 {
     static std::optional<Entity> entity;
-    static const alg::Vec3 dir(0.f, 1.f, 0.f);
+    static constexpr alg::Vec3 dir(0.f, 1.f, 0.f);
     static float width, length;
     
     if (!entity.has_value()) {
@@ -375,13 +383,12 @@ int GetCylinderColsCnt(Entity cylinder, CylinderType CylinderType, const Model& 
 void GuiView::RenderAddingCylinder(CylinderType cylinderType) const
 {
     static std::optional<Entity> entity;
-    static float oldRadius, newRadius;
-    static float oldLen, newLen;
-    static const alg::Vec3 dir(0.f, 1.f, 0.f);
+    static float newRadius;
+    static float newLen;
+    static constexpr alg::Vec3 dir(0.f, 1.f, 0.f);
     
     if (!entity.has_value()) {
         entity = controller.AddCylinder(cylinderType);
-        oldRadius = newRadius = 1.0f;
         newLen = 1.f;
     }
 
@@ -507,6 +514,63 @@ void GuiView::RenderAddingGregoryPatches() const
 }
 
 
+void GuiView::RenderAddingIntersectionCurve() const
+{
+    ImGui::Text("Select two objects to intersect");
+
+    const auto& c0Surfaces = model.GetAllC0Surfaces();
+    if (!c0Surfaces.empty()) {
+        ImGui::SeparatorText("C0 Surfaces");
+        RenderSelectableEntitiesList(c0Surfaces);
+    }
+
+    const auto& c2Surfaces = model.GetAllC2Surfaces();
+    if (!c2Surfaces.empty()) {
+        ImGui::SeparatorText("C2 Surfaces");
+        RenderSelectableEntitiesList(c2Surfaces);
+    }
+
+
+    const auto& c2Cylinders = model.GetAllC2Cylinders();
+    if (!c2Surfaces.empty()) {
+        ImGui::SeparatorText("C2 Cylinders");
+        RenderSelectableEntitiesList(c2Cylinders);
+    }
+
+    const auto& tori = model.GetAllTori();
+    if (!tori.empty()) {
+        ImGui::SeparatorText("Tori");
+        RenderSelectableEntitiesList(tori);
+    }
+
+    static float step = 0.1f;
+
+    ImGui::DragFloat("Step", &step, 0.001f, 1e-5);
+
+    if (ImGui::Button("Accept")) {
+        auto& entities = model.GetAllSelectedEntities();
+
+        if (entities.size() != 2)
+            ImGui::OpenPopup("Wrong number of elements to intersect");
+        else {
+            const Entity e1 = *entities.begin();
+            const Entity e2 = *(++entities.begin());
+            controller.FindIntersection(e1, e2, step);
+        }
+    }
+
+    if (ImGui::BeginPopupModal("Wrong number of elements to intersect", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+        ImGui::Text("Wrong number of selected entities to intersect. Two objects must be selected");
+        if (ImGui::Button("OK")) { ImGui::CloseCurrentPopup(); }
+        ImGui::EndPopup();
+    }
+
+
+    if (ImGui::Button("Cancel"))
+        controller.SetAppState(AppState::Default);
+}
+
+
 void GuiView::RenderAnaglyphsCameraSettings() const
 {
     float eyeSeparation = model.cameraManager.GetEyeSeparation();
@@ -607,8 +671,8 @@ void GuiView::RenderSingleObjectProperties(Entity entity) const
 
 void GuiView::RenderMultipleObjectProperties() const
 {
-    Entity midPoint = model.GetMiddlePoint();
-    const Position& pos = model.GetComponent<Position>(midPoint);
+    const Entity midPoint = model.GetMiddlePoint();
+    const auto& pos = model.GetComponent<Position>(midPoint);
 
     float x = pos.GetX();
     float y = pos.GetY();
@@ -796,7 +860,7 @@ void GuiView::DisplayCurveControlPoints(Entity entity, const CurveControlPoints&
 
         for (auto point: points) {
             // TODO: rewrite with set intersection
-            if (std::find(params.GetPoints().begin(), params.GetPoints().end(), point) == params.GetPoints().end()) {
+            if (std::ranges::find(params.GetPoints(), point) == params.GetPoints().end()) {
                 if (pointsWithNames.contains(point) && ImGui::Selectable(model.GetEntityName(point).c_str(), false)) {
                     CurveType curveType;
                     
@@ -912,6 +976,11 @@ void GuiView::DisplaySurfacePatches(Entity entity, const Patches &patches) const
         }
     }
 
+    ImGui::SeparatorText("Surface size");
+    ImGui::Text("Patches in one direction: %d", patches.PatchesInCol());
+    ImGui::Text("Patches in second direction: %d", patches.PatchesInRow());
+
+    ImGui::SeparatorText("Control points");
     for (int row=0; row < patches.PointsInRow(); row++) {
         for (int col=0; col < patches.PointsInCol(); col++) {
             Entity cp = patches.GetPoint(row, col);
@@ -943,4 +1012,21 @@ void GuiView::DisplayNameEditor(Entity entity, const Name& name) const
 
     if (ImGui::InputText("##objectName", &tmp))
         controller.ChangeEntityName(entity, tmp);
+}
+
+
+void GuiView::RenderSelectableEntitiesList(const std::unordered_set<Entity> &entities) const
+{
+    bool selected;
+
+    for (auto entity: entities) {
+        selected = model.IsSelected(entity);
+
+        if (ImGui::Selectable(
+            model.GetEntityName(entity).c_str(),
+            &selected
+        )) {
+            controller.SelectEntity(entity);
+        }
+    }
 }

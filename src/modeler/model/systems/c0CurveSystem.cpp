@@ -102,20 +102,20 @@ Position CalculatePositionInSinglePatch(const Position& cp1, const Position& cp2
     assert(t >= 0.0f);
     assert(t <= 1.0f);
 
-    float oneMinutT = 1 - t;
+    const float oneMinusT = 1 - t;
 
     // Bernstein polynomials
-    float b0 = oneMinutT * oneMinutT * oneMinutT;
-    float b1 = 3 * oneMinutT * oneMinutT * t;
-    float b2 = 3 * oneMinutT * t * t;
-    float b3 = t * t * t;
+    const float b0 = oneMinusT * oneMinusT * oneMinusT;
+    const float b1 = 3 * oneMinusT * oneMinusT * t;
+    const float b2 = 3 * oneMinusT * t * t;
+    const float b3 = t * t * t;
 
-    alg::Vec3 result = cp1.vec * b0 +
-                       cp2.vec * b1 +
-                       cp3.vec * b2 +
-                       cp4.vec * b3;
+    const alg::Vec3 result = cp1.vec * b0 +
+                             cp2.vec * b1 +
+                             cp3.vec * b2 +
+                             cp4.vec * b3;
 
-    return Position(result);
+    return { result };
 }
 
 
@@ -238,7 +238,7 @@ std::vector<float> C0CurveSystem::GenerateBezierPolygonVertices(const CurveContr
 }
 
 
-inline int ceiling(int x, int y) {
+inline size_t ceiling(size_t x, size_t y) {
     return (x + y - 1) / y;
 }
 

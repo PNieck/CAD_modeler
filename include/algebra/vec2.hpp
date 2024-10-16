@@ -9,7 +9,7 @@ namespace alg
     class Vector2 {
     public:
         Vector2() = default;
-        Vector2(DataType scalar) { data.fill(scalar); }
+        explicit Vector2(DataType scalar) { data.fill(scalar); }
         Vector2(DataType v1, DataType v2)
             { data[0] = v1; data[1] = v2; }
 

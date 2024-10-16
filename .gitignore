@@ -1,7 +1,10 @@
+# Build files
 [Bb]uild/
+cmake-build*
 
-# Visual Studio Code config directory
+# Code editors settings
 .vscode/
+.idea/
 
 # Temporary directory used during development
 tmp/

@@ -10,6 +10,8 @@
 
 class Patches {
 public:
+    virtual ~Patches() = default;
+
     Patches(int rows=1, int cols=1):
         controlPoints(rows, cols) {};
 

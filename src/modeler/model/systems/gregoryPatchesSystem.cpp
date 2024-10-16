@@ -973,6 +973,8 @@ std::vector<uint32_t> GregoryPatchesSystem::GenerateNetIndices() const
 
 void GregoryPatchesSystem::DeletionHandler::HandleEvent(Entity entity, const TriangleOfGregoryPatches &component, EventType eventType)
 {
+    (void)entity;
+
     if (eventType != EventType::ComponentDeleted)
         return;
 
@@ -987,6 +989,9 @@ void GregoryPatchesSystem::DeletionHandler::HandleEvent(Entity entity, const Tri
 
 void GregoryPatchesSystem::ControlPointMovedHandler::HandleEvent(Entity entity, const Position& component, EventType eventType)
 {
+    (void)entity;
+    (void)component;
+
     if (eventType == EventType::ComponentDeleted) {
         coordinator.DestroyEntity(targetObject);
         return;

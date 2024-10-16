@@ -4,6 +4,8 @@
 
 #include <array>
 
+#include <ostream>
+
 
 namespace alg
 {
@@ -12,7 +14,7 @@ namespace alg
     public:
         Vector4() = default;
 
-        Vector4(DataType scalar) { data.fill(scalar); }
+        explicit Vector4(DataType scalar) { data.fill(scalar); }
 
         constexpr Vector4(DataType x, DataType y, DataType z, DataType w) {
             data[0] = x;
@@ -113,5 +115,30 @@ namespace alg
                v1.Y() == v2.Y() &&
                v1.Z() == v2.Z() &&
                v1.W() == v2.W();
+    }
+
+
+    template <typename DataType>
+    Vector4<DataType> operator*(DataType scalar, const Vector4<DataType>& v) {
+        return Vector4<DataType>(
+            v.X() * scalar,
+            v.Y() * scalar,
+            v.Z() * scalar,
+            v.W() * scalar
+        );
+    }
+
+
+    template <typename DataType>
+    inline DataType DistanceSquared(const Vector4<DataType>& v1, const Vector4<DataType>& v2) {
+        return (v1 - v2).LengthSquared();
+    }
+
+
+    template <typename DataType>
+    std::ostream& operator<< (std::ostream& stream, const Vector4<DataType>& vec) {
+        stream << "[ " << vec.X() << ", " << vec.Y() << ", " << vec.Z() << ", " << vec.W() << " ]";
+
+        return stream;
     }
 };

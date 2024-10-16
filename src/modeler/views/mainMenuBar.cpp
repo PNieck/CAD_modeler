@@ -46,6 +46,20 @@ void MainMenuBar::Render()
             ImGui::EndMenu();
         }
 
+#       ifndef NDEBUG
+            static bool renderImGuiDemo = false;
+            if (ImGui::BeginMenu("Debug")) {
+                if (ImGui::MenuItem("Show Imgui demo window", NULL, renderImGuiDemo))
+                    renderImGuiDemo = !renderImGuiDemo;
+
+                ImGui::EndMenu();
+            }
+
+            if (renderImGuiDemo)
+                ImGui::ShowDemoWindow();
+                
+#       endif  // NDEBUG
+
         ImGui::EndMainMenuBar();
     }
 

@@ -1,80 +1,21 @@
 add_executable(
-    vector_tests
+    algebra_tests
     vectorTests.cpp
-)
-
-target_link_libraries(
-    vector_tests
-    PRIVATE
-    GTest::gtest_main
-    algebra
-)
-
-gtest_discover_tests(vector_tests)
-enable_compiler_warings(vector_tests)
-
-
-add_executable(
-    matrix_tests
     matrixTests.cpp
-)
-
-target_link_libraries(
-    matrix_tests
-    PRIVATE
-    GTest::gtest_main
-    algebra
-    glm
-)
-
-gtest_discover_tests(matrix_tests)
-enable_compiler_warings(matrix_tests)
-
-
-add_executable(
-    quaternion_tests
     quaternionTests.cpp
+    systemsOfLinearEquationsTests.cpp
+    cubicPolynomialsTests.cpp
+    conjugateGradientMethodTests.cpp
+    newtonMethodTests.cpp
 )
 
 target_link_libraries(
-    quaternion_tests
+    algebra_tests
     PRIVATE
     GTest::gtest_main
     algebra
     glm
 )
 
-gtest_discover_tests(quaternion_tests)
-enable_compiler_warings(quaternion_tests)
-
-
-add_executable(
-    linearEquations_tests
-    systemsOfLinearEquationsTests.cpp
-)
-
-target_link_libraries(
-    linearEquations_tests
-    PRIVATE
-    GTest::gtest_main
-    algebra
-)
-
-gtest_discover_tests(linearEquations_tests)
-enable_compiler_warings(linearEquations_tests)
-
-
-add_executable(
-    cubicPolynomials_tests
-    cubicPolynomialsTests.cpp
-)
-
-target_link_libraries(
-    cubicPolynomials_tests
-    PRIVATE
-    GTest::gtest_main
-    algebra
-)
-
-gtest_discover_tests(cubicPolynomials_tests)
-enable_compiler_warings(cubicPolynomials_tests)
+gtest_discover_tests(algebra_tests)
+enable_compiler_warings(algebra_tests)

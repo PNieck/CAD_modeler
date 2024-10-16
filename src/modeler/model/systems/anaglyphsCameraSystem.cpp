@@ -1,5 +1,7 @@
 #include <CAD_modeler/model/systems/anaglyphsCameraSystem.hpp>
 
+#include <stdexcept>
+
 
 void AnaglyphsCameraSystem::RegisterSystem(Coordinator &coordinator)
 {
@@ -64,6 +66,9 @@ alg::Mat4x4 AnaglyphsCameraSystem::PerspectiveMatrix() const
         left = params.nearPlane * (convPlaneWidth - params.eyeSeparation) / (2.f * params.convergence);
         right = -params.nearPlane * (convPlaneWidth + params.eyeSeparation) / (2.f * params.convergence);
         break;
+
+    default:
+        throw std::runtime_error("Unknown eye type");
     }
 
     return alg::Frustum(
