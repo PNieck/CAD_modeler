@@ -1,7 +1,7 @@
 #pragma once
 
 #include "utils/appState.hpp"
-#include "../modeler.hpp"
+#include "../model/modeler.hpp"
 
 
 class MainController;

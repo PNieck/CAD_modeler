@@ -2,41 +2,41 @@
 
 #include <ecs/coordinator.hpp>
 
-#include "model/managers/cameraManager.hpp"
-#include "model/managers/saveManager.hpp"
+#include "managers/cameraManager.hpp"
+#include "managers/saveManager.hpp"
 
-#include "model/systems/toriSystem.hpp"
-#include "model/systems/gridSystem.hpp"
-#include "model/systems/cursorSystem.hpp"
-#include "model/systems/pointsSystem.hpp"
-#include "model/systems/nameSystem.hpp"
-#include "model/systems/selectionSystem.hpp"
-#include "model/systems/c0CurveSystem.hpp"
-#include "model/systems/c2CurveSystem.hpp"
-#include "model/systems/interpolationCurveSystem.hpp"
-#include "model/systems/c0SurfaceSystem.hpp"
-#include "model/systems/c0CylinderSystem.hpp"
-#include "model/systems/c0PatchesSystem.hpp"
-#include "model/systems/c2SurfacesSystem.hpp"
-#include "model/systems/c2CylinderSystem.hpp"
-#include "model/systems/controlNetSystem.hpp"
-#include "model/systems/controlPointsRegistrySystem.hpp"
-#include "model/systems/gregoryPatchesSystem.hpp"
-#include "model/systems/vectorSystem.hpp"
-#include "model/systems/intersectionsSystem.hpp"
+#include "systems/toriSystem.hpp"
+#include "systems/gridSystem.hpp"
+#include "systems/cursorSystem.hpp"
+#include "systems/pointsSystem.hpp"
+#include "systems/nameSystem.hpp"
+#include "systems/selectionSystem.hpp"
+#include "systems/c0CurveSystem.hpp"
+#include "systems/c2CurveSystem.hpp"
+#include "systems/interpolationCurveSystem.hpp"
+#include "systems/c0SurfaceSystem.hpp"
+#include "systems/c0CylinderSystem.hpp"
+#include "systems/c0PatchesSystem.hpp"
+#include "systems/c2SurfacesSystem.hpp"
+#include "systems/c2CylinderSystem.hpp"
+#include "systems/controlNetSystem.hpp"
+#include "systems/controlPointsRegistrySystem.hpp"
+#include "systems/gregoryPatchesSystem.hpp"
+#include "systems/vectorSystem.hpp"
+#include "systems/intersectionsSystem.hpp"
 
-#include "model/systems/shaders/shaderRepository.hpp"
+#include "systems/shaders/shaderRepository.hpp"
 
-#include "model/components/scale.hpp"
-#include "model/components/rotation.hpp"
+#include "components/scale.hpp"
+#include "components/rotation.hpp"
 
-#include "utilities/line.hpp"
+#include "../utilities/line.hpp"
 
 
 class Modeler
 {
 public:
-    Modeler(int viewport_width, int viewport_height);
+    Modeler(int viewportWidth, int viewportHeight);
 
     void RenderFrame();
 

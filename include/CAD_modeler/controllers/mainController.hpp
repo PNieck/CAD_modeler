@@ -3,7 +3,7 @@
 #include "glController.hpp"
 #include "guiController.hpp"
 #include "../views/guiView.hpp"
-#include "../modeler.hpp"
+#include "../model/modeler.hpp"
 #include "utils/appState.hpp"
 #include "utils/keyboardKey.hpp"
 

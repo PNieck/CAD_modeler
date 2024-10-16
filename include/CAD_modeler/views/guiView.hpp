@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../controllers/guiController.hpp"
-#include "../modeler.hpp"
+#include "../model/modeler.hpp"
 #include "mainMenuBar.hpp"
 
 #define GLFW_INCLUDE_NONE

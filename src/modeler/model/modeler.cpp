@@ -1,4 +1,4 @@
-#include <CAD_modeler/modeler.hpp>
+#include <CAD_modeler/model/modeler.hpp>
 
 #include <CAD_modeler/utilities/line.hpp>
 #include <CAD_modeler/utilities/plane.hpp>
@@ -12,7 +12,7 @@
 #include <stdexcept>
 
 
-Modeler::Modeler(int viewport_width, int viewport_height):
+Modeler::Modeler(int viewportWidth, int viewportHeight):
     cameraManager(coordinator)
 {
     glEnable(GL_PRIMITIVE_RESTART);
@@ -63,7 +63,7 @@ Modeler::Modeler(int viewport_width, int viewport_height):
     vectorSystem = coordinator.GetSystem<VectorSystem>();
     intersectionSystem = coordinator.GetSystem<IntersectionSystem>();
 
-    cameraManager.Init(viewport_width, viewport_height);
+    cameraManager.Init(viewportWidth, viewportHeight);
     gridSystem->Init(&shadersRepo);
     cursorSystem->Init(&shadersRepo);
     selectionSystem->Init(&shadersRepo);
