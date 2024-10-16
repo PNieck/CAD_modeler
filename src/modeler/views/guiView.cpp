@@ -14,7 +14,7 @@
 #include <sstream>
 
 
-GuiView::GuiView(GLFWwindow* window, GuiController& controller, const Model& model):
+GuiView::GuiView(GLFWwindow* window, GuiController& controller, const Modeler& model):
     controller(controller), model(model), menuBar(controller, model)
 {
     // FIXME: function, which generates glsl version string
@@ -261,7 +261,7 @@ void GuiView::RenderAddingCurveGui(CurveType curveType) const
 
 
 // TODO: delete this function
-int GetSurfaceRowsCnt(Entity surface, SurfaceType surfaceType, const Model& model)
+int GetSurfaceRowsCnt(Entity surface, SurfaceType surfaceType, const Modeler& model)
 {
     switch (surfaceType)
     {
@@ -278,7 +278,7 @@ int GetSurfaceRowsCnt(Entity surface, SurfaceType surfaceType, const Model& mode
 
 
 // TODO: delete this function
-int GetSurfaceColsCnt(Entity surface, SurfaceType surfaceType, const Model& model)
+int GetSurfaceColsCnt(Entity surface, SurfaceType surfaceType, const Modeler& model)
 {
     switch (surfaceType)
     {
@@ -347,7 +347,7 @@ void GuiView::RenderAddingSurface(SurfaceType surfaceType) const
 }
 
 // TODO: delete this function
-int GetCylinderRowsCnt(Entity cylinder, CylinderType CylinderType, const Model& model)
+int GetCylinderRowsCnt(Entity cylinder, CylinderType CylinderType, const Modeler& model)
 {
     switch (CylinderType)
     {
@@ -364,7 +364,7 @@ int GetCylinderRowsCnt(Entity cylinder, CylinderType CylinderType, const Model& 
 
 
 // TODO: delete this function
-int GetCylinderColsCnt(Entity cylinder, CylinderType CylinderType, const Model& model)
+int GetCylinderColsCnt(Entity cylinder, CylinderType CylinderType, const Modeler& model)
 {
     switch (CylinderType)
     {
@@ -625,46 +625,46 @@ void GuiView::RenderSingleObjectProperties(Entity entity) const
 {
     auto const& components = model.GetEntityComponents(entity);
 
-    if (components.contains(Model::GetComponentId<Position>()))
+    if (components.contains(Modeler::GetComponentId<Position>()))
         DisplayPositionProperty(entity, model.GetComponent<Position>(entity));
 
-    if (components.contains(Model::GetComponentId<Scale>()))
+    if (components.contains(Modeler::GetComponentId<Scale>()))
         DisplayScaleProperty(entity, model.GetComponent<Scale>(entity));
 
-    if (components.contains(Model::GetComponentId<Rotation>()))
+    if (components.contains(Modeler::GetComponentId<Rotation>()))
         DisplayRotationProperty(entity, model.GetComponent<Rotation>(entity));
 
-    if (components.contains(Model::GetComponentId<TorusParameters>()))
+    if (components.contains(Modeler::GetComponentId<TorusParameters>()))
         DisplayTorusProperty(entity, model.GetComponent<TorusParameters>(entity));
 
-    if (components.contains(Model::GetComponentId<Name>()))
+    if (components.contains(Modeler::GetComponentId<Name>()))
         DisplayNameEditor(entity, model.GetComponent<Name>(entity));
 
-    if (components.contains(Model::GetComponentId<CurveControlPoints>()))
+    if (components.contains(Modeler::GetComponentId<CurveControlPoints>()))
         DisplayCurveControlPoints(entity, model.GetComponent<CurveControlPoints>(entity));
 
-    if (components.contains(Model::GetComponentId<C0CurveParameters>()))
+    if (components.contains(Modeler::GetComponentId<C0CurveParameters>()))
         DisplayC0CurveParameters(entity, model.GetComponent<C0CurveParameters>(entity));
 
-    if (components.contains(Model::GetComponentId<C2CurveParameters>()))
+    if (components.contains(Modeler::GetComponentId<C2CurveParameters>()))
         DisplayC2CurveParameters(entity, model.GetComponent<C2CurveParameters>(entity));
 
-    if (components.contains(Model::GetComponentId<PatchesDensity>()))
+    if (components.contains(Modeler::GetComponentId<PatchesDensity>()))
         DisplaySurfaceDensityParameter(entity, model.GetComponent<PatchesDensity>(entity));
 
-    if (components.contains(Model::GetComponentId<C0Patches>()))
+    if (components.contains(Modeler::GetComponentId<C0Patches>()))
         DisplaySurfacePatches(entity, model.GetComponent<C0Patches>(entity));
 
-    if (components.contains(Model::GetComponentId<C2Patches>()))
+    if (components.contains(Modeler::GetComponentId<C2Patches>()))
         DisplaySurfacePatches(entity, model.GetComponent<C2Patches>(entity));
 
-    if (components.contains(Model::GetComponentId<C2CylinderPatches>()))
+    if (components.contains(Modeler::GetComponentId<C2CylinderPatches>()))
         DisplaySurfacePatches(entity, model.GetComponent<C2CylinderPatches>(entity));
 
-    if (components.contains(Model::GetComponentId<TriangleOfGregoryPatches>()))
+    if (components.contains(Modeler::GetComponentId<TriangleOfGregoryPatches>()))
         DisplayGregoryPatchesParameters(entity, model.GetComponent<TriangleOfGregoryPatches>(entity));
 
-    if (!components.contains(Model::GetComponentId<Unremovable>()))
+    if (!components.contains(Modeler::GetComponentId<Unremovable>()))
         DisplayEntityDeletionOption(entity);
 }
 

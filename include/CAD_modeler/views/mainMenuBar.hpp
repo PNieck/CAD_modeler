@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../controllers/guiController.hpp"
-#include "../model.hpp"
+#include "../modeler.hpp"
 
 #include <imgui.h>
 #include <imfilebrowser.h>
@@ -9,13 +9,13 @@
 
 class MainMenuBar {
 public:
-    MainMenuBar(GuiController& controller, const Model& model);
+    MainMenuBar(GuiController& controller, const Modeler& model);
 
     void Render();
 
 private:
     GuiController& controller;
-    const Model& model;
+    const Modeler& model;
 
     ImGui::FileBrowser fileDialog;
 };

@@ -3,7 +3,7 @@
 #include "glController.hpp"
 #include "guiController.hpp"
 #include "../views/guiView.hpp"
-#include "../model.hpp"
+#include "../modeler.hpp"
 #include "utils/appState.hpp"
 #include "utils/keyboardKey.hpp"
 
@@ -28,7 +28,7 @@ public:
     inline AppState GetAppState() const { return appState; }
 
 private:
-    Model model;
+    Modeler model;
 
     GlController glController;
     GuiController guiController;

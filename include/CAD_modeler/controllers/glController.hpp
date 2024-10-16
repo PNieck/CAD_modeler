@@ -12,7 +12,7 @@
 
 class GlController: public SubController {
 public:
-    GlController(Model& model, GLFWwindow* window, MainController& controller);
+    GlController(Modeler& model, GLFWwindow* window, MainController& controller);
 
     inline void WindowSizeChanged(int width, int height) { model.ChangeViewportSize(width, height); }
 

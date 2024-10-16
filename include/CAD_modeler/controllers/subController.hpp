@@ -1,7 +1,7 @@
 #pragma once
 
 #include "utils/appState.hpp"
-#include "../model.hpp"
+#include "../modeler.hpp"
 
 
 class MainController;
@@ -9,7 +9,7 @@ class MainController;
 
 class SubController {
 public:
-    SubController(Model& model, MainController& controller):
+    SubController(Modeler& model, MainController& controller):
         model(model),  mainController(controller) {}
 
 
@@ -17,7 +17,7 @@ public:
     void SetAppState(AppState newState) const;
 
 protected:
-    Model& model;
+    Modeler& model;
 
 private:
     MainController& mainController;

@@ -1,4 +1,4 @@
-#include <CAD_modeler/model.hpp>
+#include <CAD_modeler/modeler.hpp>
 
 #include <CAD_modeler/utilities/line.hpp>
 #include <CAD_modeler/utilities/plane.hpp>
@@ -12,7 +12,7 @@
 #include <stdexcept>
 
 
-Model::Model(int viewport_width, int viewport_height):
+Modeler::Modeler(int viewport_width, int viewport_height):
     cameraManager(coordinator)
 {
     glEnable(GL_PRIMITIVE_RESTART);
@@ -90,7 +90,7 @@ Model::Model(int viewport_width, int viewport_height):
 }
 
 
-void Model::RenderFrame()
+void Modeler::RenderFrame()
 {
     switch (cameraManager.GetCurrentCameraType())
     {
@@ -108,7 +108,7 @@ void Model::RenderFrame()
 }
 
 
-void Model::AddTorus()
+void Modeler::AddTorus()
 {
     Position cursorPos = cursorSystem->GetPosition();
 
@@ -124,7 +124,7 @@ void Model::AddTorus()
 }
 
 
-void Model::MergeControlPoints(Entity e1, Entity e2)
+void Modeler::MergeControlPoints(Entity e1, Entity e2)
 {
     auto registrySys = coordinator.GetSystem<ControlPointsRegistrySystem>();
     auto curveCPSys = coordinator.GetSystem<CurveControlPointsSystem>();
@@ -161,7 +161,7 @@ void Model::MergeControlPoints(Entity e1, Entity e2)
 }
 
 
-void Model::ChangeViewportSize(int width, int height)
+void Modeler::ChangeViewportSize(int width, int height)
 {
     glViewport(0, 0, width, height);
 
@@ -173,28 +173,28 @@ void Model::ChangeViewportSize(int width, int height)
 }
 
 
-Entity Model::Add3DPointFromViewport(float x, float y)
+Entity Modeler::Add3DPointFromViewport(float x, float y)
 {
     Position newPos(PointFromViewportCoordinates(x, y));
     return pointsSystem->CreatePoint(newPos);
 }
 
 
-void Model::TryToSelectFromViewport(float x, float y)
+void Modeler::TryToSelectFromViewport(float x, float y)
 {
     Line line(LineFromViewportCoordinates(x, y));
     selectionSystem->SelectFromLine(line);
 }
 
 
-void Model::SelectMultipleFromViewport(float x, float y, float dist)
+void Modeler::SelectMultipleFromViewport(float x, float y, float dist)
 {
     Line line(LineFromViewportCoordinates(x, y));
     selectionSystem->SelectAllFromLine(line, dist);
 }
 
 
-std::vector<GregoryPatchesSystem::Hole> Model::GetHolesPossibleToFill(const std::unordered_set<Entity> &entities) const
+std::vector<GregoryPatchesSystem::Hole> Modeler::GetHolesPossibleToFill(const std::unordered_set<Entity> &entities) const
 {
     std::vector<C0Patches> c0Patches;
     c0Patches.reserve(entities.size());
@@ -206,7 +206,7 @@ std::vector<GregoryPatchesSystem::Hole> Model::GetHolesPossibleToFill(const std:
 }
 
 
-alg::Vec3 Model::PointFromViewportCoordinates(float x, float y)
+alg::Vec3 Modeler::PointFromViewportCoordinates(float x, float y)
 {
     auto cameraParams = cameraManager.GetBaseParams();
     auto const& cameraTarget = cameraParams.target;
@@ -229,7 +229,7 @@ alg::Vec3 Model::PointFromViewportCoordinates(float x, float y)
 }
 
 
-Line Model::LineFromViewportCoordinates(float x, float y)
+Line Modeler::LineFromViewportCoordinates(float x, float y)
 {
     auto cameraType = cameraManager.GetCurrentCameraType();
     if (cameraType == CameraManager::CameraType::Anaglyphs)
@@ -261,7 +261,7 @@ Line Model::LineFromViewportCoordinates(float x, float y)
 }
 
 
-void Model::RenderAnaglyphsFrame()
+void Modeler::RenderAnaglyphsFrame()
 {
     glClear(GL_COLOR_BUFFER_BIT);
 
@@ -287,7 +287,7 @@ void Model::RenderAnaglyphsFrame()
 }
 
 
-void Model::RenderPerspectiveFrame()
+void Modeler::RenderPerspectiveFrame()
 {
     alg::Mat4x4 persMtx = cameraManager.PerspectiveMtx();
     alg::Mat4x4 viewMtx = cameraManager.ViewMtx();
@@ -299,7 +299,7 @@ void Model::RenderPerspectiveFrame()
 }
 
 
-void Model::RenderSystemsObjects(const alg::Mat4x4 &viewMtx, const alg::Mat4x4 &persMtx, float nearPlane, float farPlane) const
+void Modeler::RenderSystemsObjects(const alg::Mat4x4 &viewMtx, const alg::Mat4x4 &persMtx, float nearPlane, float farPlane) const
 {
     alg::Mat4x4 cameraMtx = persMtx * viewMtx;
 

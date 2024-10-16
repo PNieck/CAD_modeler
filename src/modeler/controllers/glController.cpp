@@ -6,7 +6,7 @@
 #include <stdexcept>
 
 
-GlController::GlController(Model& model, GLFWwindow* window, MainController& controller):
+GlController::GlController(Modeler& model, GLFWwindow* window, MainController& controller):
     window(window), SubController(model, controller)
 {
 }

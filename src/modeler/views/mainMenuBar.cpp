@@ -3,7 +3,7 @@
 #include <imgui.h>
 
 
-MainMenuBar::MainMenuBar(GuiController &controller, const Model &model):
+MainMenuBar::MainMenuBar(GuiController &controller, const Modeler &model):
     controller(controller), model(model), fileDialog(ImGuiFileBrowserFlags_EnterNewFilename | ImGuiFileBrowserFlags_CreateNewDir)
 {
     fileDialog.SetTitle("Choose file to load");

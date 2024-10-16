@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../controllers/guiController.hpp"
-#include "../model.hpp"
+#include "../modeler.hpp"
 #include "mainMenuBar.hpp"
 
 #define GLFW_INCLUDE_NONE
@@ -10,14 +10,14 @@
 
 class GuiView {
 public:
-    GuiView(GLFWwindow* window, GuiController& controller, const Model& model);
+    GuiView(GLFWwindow* window, GuiController& controller, const Modeler& model);
     ~GuiView();
 
     void RenderGui();
 
 private:
     GuiController& controller;
-    const Model& model;
+    const Modeler& model;
 
     MainMenuBar menuBar;
 

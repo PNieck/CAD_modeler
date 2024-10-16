@@ -3,7 +3,7 @@
 #include <stdexcept>
 
 
-GuiController::GuiController(Model & model, MainController & controller):
+GuiController::GuiController(Modeler & model, MainController & controller):
     SubController(model, controller)
 {
 }

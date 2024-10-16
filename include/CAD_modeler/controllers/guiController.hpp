@@ -10,7 +10,7 @@
 
 class GuiController: public SubController {
 public:
-    GuiController(Model& model, MainController& controller);
+    GuiController(Modeler& model, MainController& controller);
 
     inline bool WantCaptureMouse()
         { return ImGui::GetIO().WantCaptureMouse; }

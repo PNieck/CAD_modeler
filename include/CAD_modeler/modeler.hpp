@@ -33,10 +33,10 @@
 #include "utilities/line.hpp"
 
 
-class Model
+class Modeler
 {
 public:
-    Model(int viewport_width, int viewport_height);
+    Modeler(int viewport_width, int viewport_height);
 
     void RenderFrame();
 
