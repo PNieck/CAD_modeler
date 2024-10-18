@@ -4,13 +4,13 @@
 MouseState::MouseState():
     oldMousePos(0), actMousePos(0)
 {
-    for (int i = 0; i < BUTTON_CNT; i++) {
-        buttonClicked[i] = false;
+    for (bool& i : buttonClicked) {
+        i = false;
     }
 }
 
 
-void MouseState::Moved(int x, int y)
+void MouseState::Moved(const int x, const int y)
 {
     oldMousePos = actMousePos;
 

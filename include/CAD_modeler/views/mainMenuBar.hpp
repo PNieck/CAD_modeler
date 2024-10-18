@@ -1,21 +1,23 @@
 #pragma once
 
-#include "../controllers/guiController.hpp"
 #include "../model/modeler.hpp"
 
 #include <imgui.h>
 #include <imfilebrowser.h>
 
 
+class ModelerController;
+
+
 class MainMenuBar {
 public:
-    MainMenuBar(GuiController& controller, const Modeler& model);
+    MainMenuBar(ModelerController& controller, Modeler& model);
 
     void Render();
 
 private:
-    GuiController& controller;
-    const Modeler& model;
+    ModelerController& controller;
+    Modeler& model;
 
     ImGui::FileBrowser fileDialog;
 };

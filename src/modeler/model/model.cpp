@@ -1,5 +1,7 @@
 #include <CAD_modeler/model/model.hpp>
 
+#include "glad/glad.h"
+
 
 Model::Model(const int viewportWidth, const int viewportHeight):
     cameraManager(coordinator)
@@ -34,6 +36,27 @@ void Model::RenderFrame()
         default:
             throw std::runtime_error("Unknown camera type");
     }
+}
+
+
+void Model::ChangeViewportSize(int width, int height)
+{
+    glViewport(0, 0, width, height);
+
+    auto params = cameraManager.GetBaseParams();
+    params.viewportWidth = width;
+    params.viewportHeight = height;
+
+    cameraManager.SetBaseParams(params);
+}
+
+
+std::tuple<int, int> Model::GetViewportSize() const
+{
+    GLint viewportSize[4];
+    glGetIntegerv(GL_VIEWPORT, viewportSize);
+
+    return std::make_tuple(viewportSize[2], viewportSize[3]);
 }
 
 

@@ -1,7 +1,7 @@
 #pragma once
 
 
-enum class AppState {
+enum class ModelerState {
     Default,
 
     Adding3dPoints,

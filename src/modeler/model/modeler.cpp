@@ -137,18 +137,6 @@ void Modeler::MergeControlPoints(Entity e1, Entity e2)
 }
 
 
-void Modeler::ChangeViewportSize(int width, int height)
-{
-    glViewport(0, 0, width, height);
-
-    auto params = cameraManager.GetBaseParams();
-    params.viewportWidth = width;
-    params.viewportHeight = height;
-
-    cameraManager.SetBaseParams(params);
-}
-
-
 Entity Modeler::Add3DPointFromViewport(float x, float y)
 {
     Position newPos(PointFromViewportCoordinates(x, y));

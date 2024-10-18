@@ -9,6 +9,8 @@
 void GridSystem::RegisterSystem(Coordinator & coordinator)
 {
     coordinator.RegisterSystem<GridSystem>();
+
+    coordinator.RegisterComponent<Mesh>();
 }
 
 
@@ -19,14 +21,14 @@ void GridSystem::Init(ShaderRepository * shaders)
     grid = coordinator->CreateEntity();
 
     Mesh mesh;
-    std::vector<float> vertices = {
+    const std::vector vertices = {
          1.0f,  1.0f, 0.0f,
          1.0f, -1.0f, 0.0f,
         -1.0f, -1.0f, 0.0f,
         -1.0f,  1.0f, 0.0f
     };
 
-    std::vector<uint32_t> indices = {
+    const std::vector<uint32_t> indices = {
         0, 1, 3, // First triangle
         1, 2, 3  // Second triangle
     };

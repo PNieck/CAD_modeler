@@ -13,6 +13,11 @@ public:
 
     void RenderFrame();
 
+    void ChangeViewportSize(int width, int height);
+
+    [[nodiscard]]
+    std::tuple<int, int> GetViewportSize() const;
+
     CameraManager cameraManager;
 protected:
     Coordinator coordinator;

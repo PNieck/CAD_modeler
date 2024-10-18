@@ -165,8 +165,6 @@ public:
     inline const std::unordered_set<Entity>& GetAllTori() const
         { return toriSystem->GetEntities(); }
 
-    void ChangeViewportSize(int width, int height);
-
     inline void SetCursorPosition(float x, float y, float z) const
         { cursorSystem->SetPosition(alg::Vec3(x, y, z)); }
 
@@ -249,13 +247,10 @@ public:
     inline const std::unordered_set<Entity>& GetAllInterpolationCurves() const
         { return interpolationCurveSystem->GetEntities(); }
 
-    // inline const std::unordered_set<Entity>& GetAll() const
-    //     { return interpolationCurveSystem->GetEntities(); }
-
-    inline const void ShowC2BSplinePolygon(Entity entity) const
+    inline void ShowC2BSplinePolygon(Entity entity) const
         { return c2CurveSystem->ShowBSplinePolygon(entity); }
 
-    inline const void HideC2BSplinePolygon(Entity entity) const
+    inline void HideC2BSplinePolygon(Entity entity) const
         { return c2CurveSystem->HideBSplinePolygon(entity); }
 
     inline const void ShowC2BezierPolygon(Entity entity) const
