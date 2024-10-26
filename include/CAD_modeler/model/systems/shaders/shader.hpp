@@ -29,8 +29,10 @@ public:
     void setFloat(const std::string &name, float value) const;
     void setMatrix4(const std::string &name, const alg::Mat4x4 &matrix) const;
     void setVec4(const std::string& name, const alg::Vec4& vec) const;
+    void setVec3(const std::string& name, const alg::Vec3& vec) const;
 
 private:
+    [[nodiscard]]
     int findUniformLocation(const std::string &name) const;
 
     static unsigned int compileSingleShader(const char* path, GLenum shaderType);
@@ -39,5 +41,5 @@ private:
 
 class UniformNotFoundInShader: std::exception {
 public:
-     const char * what() const override;
+     const char * what() const noexcept override;
 };

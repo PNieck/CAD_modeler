@@ -3,7 +3,7 @@
 #include "utils/mouseState.hpp"
 #include "../model/model.hpp"
 
-#include <iostream>
+
 class SubController {
 protected:
     static constexpr float ROTATION_COEF = 0.02f;
@@ -16,10 +16,7 @@ protected:
         { model.ChangeViewportSize(width, height); }
 
     inline static void MouseRelease(const MouseButton button)
-    {
-        mouseState.ButtonReleased(button);
-        std::cout << "button released" << std::endl;
-    }
+        { mouseState.ButtonReleased(button); }
 
     inline static void MouseClick(const MouseButton button)
         { mouseState.ButtonClicked(button); }

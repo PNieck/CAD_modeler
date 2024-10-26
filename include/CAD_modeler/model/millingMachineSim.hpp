@@ -3,6 +3,7 @@
 #include "model.hpp"
 
 #include "systems/gridSystem.hpp"
+#include "systems/millingMachineSystem.hpp"
 
 
 class MillingMachineSim final: public Model {
@@ -14,4 +15,5 @@ private:
         float farPlane) const override;
 
     std::shared_ptr<GridSystem> gridSystem;
+    std::shared_ptr<MillingMachineSystem> millingMachineSystem;
 };

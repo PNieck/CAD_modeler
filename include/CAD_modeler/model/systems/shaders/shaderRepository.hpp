@@ -7,6 +7,7 @@
 #include "bicubicBSplineSurfaceShader.hpp"
 #include "gregoryPatchShader.hpp"
 #include "passThrough.hpp"
+#include "millingShader.hpp"
 
 
 class ShaderRepository {
@@ -44,6 +45,10 @@ public:
     const PassThroughShader& GetPassThroughShader() const
         { return passThroughShader; }
 
+    [[nodiscard]]
+    const MillingShader& GetMillingShader() const
+        { return millingShader; }
+
 private:
     StdShader stdShader;
     GridShader gridShader;
@@ -52,6 +57,7 @@ private:
     BicubicBSplineSurfaceShader bSplineSurfaceShader;
     GregoryPatchShader gregoryPatchShader;
     PassThroughShader passThroughShader;
+    MillingShader millingShader;
 
     ShaderRepository() = default;
     ShaderRepository(const ShaderRepository&) = delete;
