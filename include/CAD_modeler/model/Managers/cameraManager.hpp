@@ -19,18 +19,24 @@ public:
 
     using Eye = AnaglyphsCameraSystem::Eye;
 
-    CameraManager(Coordinator& coordinator);
+    explicit CameraManager(Coordinator& coordinator);
 
     void Init(int viewportWidth, int viewportHeight);
 
+    [[nodiscard]]
     alg::Mat4x4 PerspectiveMtx() const;
+
+    [[nodiscard]]
     alg::Mat4x4 ViewMtx() const;
 
     void RotateCamera(float x, float y);
 
+    [[nodiscard]]
     float GetDistanceFromTarget() const;
+
     void SetDistanceFromTarget(float newDist);
 
+    [[nodiscard]]
     CameraType GetCurrentCameraType() const;
     
     void SetCameraType(CameraType camType);
@@ -38,19 +44,24 @@ public:
     // Works only when anaglyph camera type is selected
     void SetCurrentEye(Eye eye);
 
-    inline float GetEyeSeparation() const
+    [[nodiscard]]
+    float GetEyeSeparation() const
         { return eyeSeparation; }
 
-    inline float GetConvergence() const
+    [[nodiscard]]
+    float GetConvergence() const
         { return convergence; }
 
     void SetEyeSeparation(float eyeSeparation);
     void SetConvergence(float convergence);
 
+    [[nodiscard]]
     CameraParameters GetBaseParams() const;
+
     void SetBaseParams(const CameraParameters& params);
 
-    inline Position GetCameraPosition() const
+    [[nodiscard]]
+    Position GetCameraPosition() const
         { return coordinator.GetComponent<Position>(GetCameraEntity()); }
 
 private:
@@ -68,5 +79,6 @@ private:
 
     void SwitchToAnaglyphsCameraType();
 
+    [[nodiscard]]
     Entity GetCameraEntity() const;
 };
