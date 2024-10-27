@@ -20,8 +20,8 @@ Shader::Shader(
         throw std::runtime_error("Tesselation evaluation shader is required when tesselation control is used");
     }
 
-    unsigned int vertex = compileSingleShader(vertexPath, GL_VERTEX_SHADER);
-    unsigned int fragment = compileSingleShader(fragmentPath, GL_FRAGMENT_SHADER);
+    const unsigned int vertex = compileSingleShader(vertexPath, GL_VERTEX_SHADER);
+    const unsigned int fragment = compileSingleShader(fragmentPath, GL_FRAGMENT_SHADER);
     unsigned int tesselationControl;
     unsigned int tesselationEvaluation;
     unsigned int geometry;
@@ -55,9 +55,9 @@ Shader::Shader(
     glGetProgramiv(id, GL_LINK_STATUS, &success);
     if(!success)
     {
-        const int infoLogSize = 512;
+        constexpr int infoLogSize = 512;
         char infoLog[infoLogSize];
-        glGetProgramInfoLog(id, infoLogSize, NULL, infoLog);
+        glGetProgramInfoLog(id, infoLogSize, nullptr, infoLog);
         throw std::runtime_error(infoLog);
     }
 
@@ -81,7 +81,7 @@ Shader::~Shader()
 }
 
 
-void Shader::setBool(const std::string &name, bool value) const
+void Shader::setBool(const std::string &name, const bool value) const
 {
     setInt(name, (int)value);
 }
@@ -89,28 +89,28 @@ void Shader::setBool(const std::string &name, bool value) const
 
 void Shader::setInt(const std::string & name, int value) const
 {
-    int location = findUniformLocation(name);
+    const int location = findUniformLocation(name);
     glUniform1i(location, (int)value);
 }
 
 
 void Shader::setFloat(const std::string & name, float value) const
 {
-    int location = findUniformLocation(name);
+    const int location = findUniformLocation(name);
     glUniform1f(location, value);
 }
 
 
 void Shader::setMatrix4(const std::string & name, const alg::Mat4x4& matrix) const
 {
-    int location = findUniformLocation(name);
+    const int location = findUniformLocation(name);
     glUniformMatrix4fv(location, 1, GL_FALSE, matrix.Data());
 }
 
 
 void Shader::setVec4(const std::string & name, const alg::Vec4& vec) const
 {
-    int location = findUniformLocation(name);
+    const int location = findUniformLocation(name);
     glUniform4fv(location, 1, vec.Data());
 }
 
@@ -124,7 +124,7 @@ void Shader::setVec3(const std::string &name, const alg::Vec3 &vec) const
 
 int Shader::findUniformLocation(const std::string & name) const
 {
-    int location = glGetUniformLocation(id, name.c_str());
+    const int location = glGetUniformLocation(id, name.c_str());
 
     if (location == -1) {
         throw UniformNotFoundInShader();
@@ -142,9 +142,6 @@ const char * UniformNotFoundInShader::what() const noexcept
 
 unsigned int Shader::compileSingleShader(const char* path, GLenum shaderType)
 {
-    const int infoLogSize = 512;
-    char infoLog[infoLogSize];
-
     std::ifstream shaderFile;
 
     // Ensure ifstream object can throw exceptions
@@ -155,18 +152,20 @@ unsigned int Shader::compileSingleShader(const char* path, GLenum shaderType)
     shaderStream << shaderFile.rdbuf();
     shaderFile.close();
 
-    std::string shaderCode = shaderStream.str();
+    const std::string shaderCode = shaderStream.str();
     const char* shaderCodeCStr = shaderCode.c_str();
 
-    unsigned int shader = glCreateShader(shaderType);
-    glShaderSource(shader, 1, &shaderCodeCStr, NULL);
+    const unsigned int shader = glCreateShader(shaderType);
+    glShaderSource(shader, 1, &shaderCodeCStr, nullptr);
     glCompileShader(shader);
 
     // Checking for compilation error
     int success;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
     if (!success) {
-        glGetShaderInfoLog(shader, infoLogSize, NULL, infoLog);
+        constexpr int infoLogSize = 512;
+        char infoLog[infoLogSize];
+        glGetShaderInfoLog(shader, infoLogSize, nullptr, infoLog);
         throw std::runtime_error(infoLog);
     }
 
