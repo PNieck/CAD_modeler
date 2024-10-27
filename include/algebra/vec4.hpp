@@ -12,6 +12,8 @@ namespace alg
     template <typename DataType>
     class Vector4 {
     public:
+        static constexpr size_t dim = 4;
+
         Vector4() = default;
 
         explicit Vector4(DataType scalar) { data.fill(scalar); }
