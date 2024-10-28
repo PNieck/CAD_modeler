@@ -10,4 +10,7 @@ class MillingMachinePathsSystem {
 public:
     static MillingMachinePath ParseGCode(const std::string& filePath);
     static  MillingCutter ParseCutter(const std::string& filePath);
+
+private:
+    static constexpr float scale = 0.01f;
 };

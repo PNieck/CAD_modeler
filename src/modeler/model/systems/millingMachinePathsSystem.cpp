@@ -64,7 +64,7 @@ MillingMachinePath MillingMachinePathsSystem::ParseGCode(const std::string &file
                 throw std::invalid_argument("Invalid GCode file");
 
             // Different coordinate systems conventions
-            result.commands.emplace_back(id, x/100.f, z/100.f, y/100.f);
+            result.commands.emplace_back(id, x*scale, z*scale, y*scale);
         }
     }
 
@@ -92,7 +92,7 @@ MillingCutter MillingMachinePathsSystem::ParseCutter(const std::string &filePath
     else
         throw std::invalid_argument("Invalid file");
 
-    const float radius = static_cast<float>(std::stoi(match[2].str())) / 2.f / 1000.f;
+    const float radius = static_cast<float>(std::stoi(match[2].str())) / 2.f * scale;
 
     return { radius, cutterType };
 }
