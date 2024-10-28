@@ -20,6 +20,7 @@ public:
     MainController(GLFWwindow* window, int windowWidth, int windowHeight);
     
     void Render();
+    void Update(double dt);
 
     void SizeChanged(int width, int height);
     void MouseClicked(MouseButton button);

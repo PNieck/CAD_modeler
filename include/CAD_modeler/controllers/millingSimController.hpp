@@ -8,6 +8,9 @@ class MillingSimController: public SubController {
 public:
     explicit MillingSimController(MillingMachineSim& millingSim);
 
+    void Update(const double dt)
+        { simulator.Update(dt); }
+
     inline void WindowSizeChanged(const int width, const int height) const
         { SubController::WindowSizeChanged(width, height, simulator); }
 

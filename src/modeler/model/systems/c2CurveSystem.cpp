@@ -455,7 +455,7 @@ std::vector<float> C2CurveSystem::GenerateCurveMeshVertices(const CurveControlPo
 
     auto controlPointsPositions = CreateBezierControlPointsPositions(params);
 
-    result.reserve(controlPointsPositions.size() * 3);
+    result.reserve(controlPointsPositions.size() * alg::Vec3::dim);
 
     for (auto& vec: controlPointsPositions) {
         result.push_back(vec.X());

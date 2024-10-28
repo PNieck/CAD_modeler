@@ -6,8 +6,8 @@ uniform mat4 MVP;
 uniform sampler2D heightMap;
 
 uniform vec3 mainHeightMapCorner;
-uniform float heightMapWidth;
-uniform float heightMapLength;
+uniform float heightMapXLen;
+uniform float heightMapZLen;
 
 
 void main()
@@ -28,12 +28,12 @@ void main()
     vec3 q1 = (q11 - q10) * u + q10;
     vec3 pointCoord = (q1 - q0) * v + q0;
 
-    float pointWidth = abs(mainHeightMapCorner.x - pointCoord.x);
-    float pointLenght = abs(mainHeightMapCorner.z - pointCoord.z);
+    float pointX = abs(pointCoord.x - mainHeightMapCorner.x);
+    float pointZ = abs(pointCoord.z - mainHeightMapCorner.z);
 
     vec2 texCoord;
-    texCoord.x = pointWidth / heightMapWidth;
-    texCoord.y = pointLenght / heightMapLength;
+    texCoord.x = pointX / heightMapXLen;
+    texCoord.y = pointZ / heightMapZLen;
 
     // lookup texel at patch coordinate for height and scale + shift as desired
     pointCoord.y += texture(heightMap, texCoord).r;

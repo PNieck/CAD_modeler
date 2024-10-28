@@ -10,6 +10,9 @@ Model::Model(const int viewportWidth, const int viewportHeight):
     glEnable(GL_PRIMITIVE_RESTART);
     glPrimitiveRestartIndex(std::numeric_limits<uint32_t>::max());
 
+
+    glEnable(GL_DEPTH_TEST);
+
     cameraManager.Init(viewportWidth, viewportHeight);
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -39,7 +42,7 @@ void Model::RenderFrame()
 }
 
 
-void Model::ChangeViewportSize(int width, int height)
+void Model::ChangeViewportSize(const int width, const int height)
 {
     glViewport(0, 0, width, height);
 
@@ -62,13 +65,14 @@ std::tuple<int, int> Model::GetViewportSize() const
 
 void Model::RenderAnaglyphsFrame()
 {
-    glClear(GL_COLOR_BUFFER_BIT);
+    glDepthMask(GL_TRUE);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Render picture for the left eye
     cameraManager.SetCurrentEye(CameraManager::Eye::Left);
     alg::Mat4x4 persMtx = cameraManager.PerspectiveMtx();
     alg::Mat4x4 viewMtx = cameraManager.ViewMtx();
-    auto camParams = cameraManager.GetBaseParams();
+    const auto camParams = cameraManager.GetBaseParams();
 
     glColorMask(true, false, false, false);
     RenderSystemsObjects(viewMtx, persMtx, camParams.nearPlane, camParams.farPlane);
@@ -92,7 +96,8 @@ void Model::RenderPerspectiveFrame() const
     const alg::Mat4x4 viewMtx = cameraManager.ViewMtx();
     const auto camParams = cameraManager.GetBaseParams();
 
-    glClear(GL_COLOR_BUFFER_BIT);
+    glDepthMask(GL_TRUE);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     RenderSystemsObjects(viewMtx, persMtx, camParams.nearPlane, camParams.farPlane);
 }

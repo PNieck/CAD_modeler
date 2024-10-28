@@ -7,7 +7,6 @@
 
 #include <memory>
 #include <functional>
-#include <concepts>
 
 
 class Coordinator {
@@ -37,14 +36,14 @@ public:
 
 
     Entity CreateEntity() {
-        Entity result = entitiesMgr.CreateEntity();
+        const Entity result = entitiesMgr.CreateEntity();
         componentMgr.RegisterNewEntity(result);
 
         return result;
     }
 
 
-    void DestroyEntity(Entity entity) {
+    void DestroyEntity(const Entity entity) {
         eventMgr.EntityDeleted(entity);
         componentMgr.EntityDeleted(entity);
         systemsMgr.EntityDeleted(entity);
@@ -53,7 +52,18 @@ public:
 
 
     template <typename Comp>
-    void AddComponent(Entity entity, const Comp& component) {
+    void AddComponent(const Entity entity, const Comp& component) {
+        componentMgr.AddComponent<Comp>(entity, component);
+
+        auto const& componentsSet = componentMgr.GetEntityComponents(entity);
+        systemsMgr.EntityGainedComponent<Comp>(entity, componentsSet);
+
+        eventMgr.ComponentAdded<Comp>(entity, component);
+    }
+
+
+    template <typename Comp>
+    void AddComponent(const Entity entity, Comp&& component) {
         componentMgr.AddComponent<Comp>(entity, component);
 
         auto const& componentsSet = componentMgr.GetEntityComponents(entity);

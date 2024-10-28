@@ -3,16 +3,18 @@
 #include <fstream>
 #include <regex>
 #include <cassert>
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 
-MillingMachinePaths MillingMachinePathsSystem::ParseGCode(const std::string &filePath)
+MillingMachinePath MillingMachinePathsSystem::ParseGCode(const std::string &filePath)
 {
     std::ifstream file;
-    MillingMachinePaths result;
+    MillingMachinePath result;
 
     std::regex lineRegex(R"(^N(\d+)G01((X)(-?\d+\.\d+))?((Y)(-?\d+\.\d+))?((Z)(-?\d+\.\d+))?$)");
 
-    // Ensure ifstream object can throw exceptions
     file.open(filePath);
 
     std::string lineStr;
@@ -22,8 +24,14 @@ MillingMachinePaths MillingMachinePathsSystem::ParseGCode(const std::string &fil
         if (std::regex_match(lineStr, match, lineRegex)) {
             assert(match.size() == 11);
 
+            int id;
             float x, y, z;
             bool coordinatesFound = false;
+
+            if (match[1].str().empty())
+                throw std::invalid_argument("Invalid GCode file");
+
+            id = std::stoi(match[1].str());
 
             if (!match[3].str().empty()) {
                 assert(match[3].str() == "X");
@@ -31,7 +39,7 @@ MillingMachinePaths MillingMachinePathsSystem::ParseGCode(const std::string &fil
                 coordinatesFound = true;
             }
             else {
-                x = result.GetPositions().front().GetX();
+                x = result.commands.back().destination.GetX();
             }
 
             if (!match[6].str().empty()) {
@@ -40,7 +48,7 @@ MillingMachinePaths MillingMachinePathsSystem::ParseGCode(const std::string &fil
                 coordinatesFound = true;
             }
             else {
-                y = result.GetPositions().front().GetY();
+                y = result.commands.back().destination.GetY();
             }
 
             if (!match[9].str().empty()) {
@@ -49,16 +57,42 @@ MillingMachinePaths MillingMachinePathsSystem::ParseGCode(const std::string &fil
                 coordinatesFound = true;
             }
             else {
-                z = result.GetPositions().front().GetZ();
+                z = result.commands.back().destination.GetZ();
             }
 
             if (!coordinatesFound)
-                throw std::runtime_error("Invalid GCode file");
+                throw std::invalid_argument("Invalid GCode file");
 
             // Different coordinate systems conventions
-            result.PushFront(Position{x/100.f, z/100.f, y/100.f});
+            result.commands.emplace_back(id, x/100.f, z/100.f, y/100.f);
         }
     }
 
+    file.close();
+
     return result;
+}
+
+
+MillingCutter MillingMachinePathsSystem::ParseCutter(const std::string &filePath)
+{
+    const fs::path path(filePath);
+    const std::regex extensionRegex(R"(^\.([kf])(\d+)$)");
+    std::smatch match;
+
+    const std::string str = path.extension().string();
+    if (!std::regex_match(str, match, extensionRegex))
+        throw std::invalid_argument("Invalid file");
+
+    MillingCutter::Type cutterType;
+    if (match[1].str() == "k")
+        cutterType = MillingCutter::Type::Round;
+    else if (match[1].str() == "f")
+        cutterType = MillingCutter::Type::Flat;
+    else
+        throw std::invalid_argument("Invalid file");
+
+    const float radius = static_cast<float>(std::stoi(match[2].str())) / 2.f / 1000.f;
+
+    return { radius, cutterType };
 }

@@ -1,11 +1,13 @@
 #pragma once
 
-#include "../components/millingMachinePaths.hpp"
+#include "../components/MillingMachinePath.hpp"
+#include "../components/millingCutter.hpp"
 
 #include <string>
 
 
 class MillingMachinePathsSystem {
 public:
-    static MillingMachinePaths ParseGCode(const std::string& filePath);
+    static MillingMachinePath ParseGCode(const std::string& filePath);
+    static  MillingCutter ParseCutter(const std::string& filePath);
 };

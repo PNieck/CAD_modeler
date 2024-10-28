@@ -7,7 +7,7 @@ MainController::MainController(GLFWwindow* window, const int windowWidth, const 
     millSimController(millingSim),
     modelerController(modeler),
     guiController(window),
-    actModelType(ModelType::Modeler),
+    actModelType(ModelType::MillerMachineSim),
     modelChooser(*this)
 {
 }
@@ -93,6 +93,13 @@ void MainController::Render()
     }
 
     guiController.PostFrameRender();
+}
+
+
+void MainController::Update(double dt)
+{
+    if (actModelType == ModelType::MillerMachineSim)
+        millSimController.Update(dt);
 }
 
 

@@ -54,6 +54,7 @@ void GridSystem::Render(const alg::Mat4x4& viewMtx, const alg::Mat4x4& projMtx, 
     gridShader.SetProjectionMatrix(projMtx);
     
     gridMesh.Use();
+    glDepthMask(GL_FALSE);
     glDrawElements(GL_TRIANGLES, gridMesh.GetElementsCnt(), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 }

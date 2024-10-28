@@ -5,6 +5,7 @@
 
 #include <unordered_map>
 #include <memory>
+#include <ranges>
 #include <set>
 
 
@@ -30,6 +31,12 @@ public:
     }
 
     template<typename T>
+    inline void AddComponent(Entity entity, T&& component) {
+        GetComponentCollection<T>()->AddComponent(entity, component);
+        componentsOfEntities[entity].insert(GetComponentId<T>());
+    }
+
+    template<typename T>
     inline void DeleteComponent(Entity entity) {
         GetComponentCollection<T>()->DeleteComponent(entity);
         componentsOfEntities[entity].erase(GetComponentId<T>());
@@ -40,14 +47,15 @@ public:
         return GetComponentCollection<T>()->GetComponent(entity);
     }
 
-    inline const std::set<ComponentId>& GetEntityComponents(Entity entity) const {
+    [[nodiscard]]
+    const std::set<ComponentId>& GetEntityComponents(const Entity entity) const {
         return componentsOfEntities.at(entity);
     }
 
-    void EntityDeleted(Entity entity) {
+    void EntityDeleted(const Entity entity) {
         componentsOfEntities.erase(entity);
-        for (auto const& pair: components) {
-            pair.second->EntityDestroyed(entity);
+        for (const auto &val: components | std::views::values) {
+            val->EntityDestroyed(entity);
         }
     }
 
