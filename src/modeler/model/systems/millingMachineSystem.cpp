@@ -119,14 +119,14 @@ void MillingMachineSystem::Update(const double dt)
 }
 
 
-void MillingMachineSystem::Render(const alg::Mat4x4& view, const alg::Mat4x4& perspective)
+void MillingMachineSystem::Render(const alg::Mat4x4& view, const alg::Mat4x4& perspective, const alg::Vec3& camPos)
 {
     const auto& shaderRepo = ShaderRepository::GetInstance();
     const auto& shader = shaderRepo.GetMillingShader();
 
     shader.Use();
     glBindTexture(GL_TEXTURE_2D, heightmap);
-    shader.SetColor(alg::Vec4(1.0f));
+    shader.SetCameraPosition(camPos);
 
     const auto cameraMtx = perspective * view;
 
@@ -224,7 +224,7 @@ float MillingMachineSystem::CutterY(const MillingCutter& cutter, const Position&
             return cutterPos.GetY();
 
         case MillingCutter::Type::Round:
-            return cutter.radius - std::sqrt(radiusSq - lenSq);
+            return cutter.radius - std::sqrt(radiusSq - lenSq) + cutterPos.GetY();
 
         default:
             throw std::runtime_error("Unknown cutter type");

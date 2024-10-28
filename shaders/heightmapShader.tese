@@ -9,13 +9,12 @@ uniform vec3 mainHeightMapCorner;
 uniform float heightMapXLen;
 uniform float heightMapZLen;
 
+out vec3 worldPos;
+out vec3 normal;
 
-void main()
+
+vec3 PointPosition(float u, float v)
 {
-    // get patch coordinate
-    float u = gl_TessCoord.x;
-    float v = gl_TessCoord.y;
-
     // ----------------------------------------------------------------------
     // retrieve input quad coordinates
     vec3 q00 = gl_in[0].gl_Position.xyz;
@@ -35,10 +34,25 @@ void main()
     texCoord.x = pointX / heightMapXLen;
     texCoord.y = pointZ / heightMapZLen;
 
-    // lookup texel at patch coordinate for height and scale + shift as desired
     pointCoord.y += texture(heightMap, texCoord).r;
 
-    // ----------------------------------------------------------------------
-    // output patch point position in clip space
-    gl_Position = MVP * vec4(pointCoord, 1.f);
+    return pointCoord;
+}
+
+
+void main()
+{
+    const float eps = 1e-5;
+
+    // get patch coordinate
+    float u = gl_TessCoord.x;
+    float v = gl_TessCoord.y;
+
+    worldPos = PointPosition(u, v);
+    vec3 tangent = normalize(PointPosition(u+eps, v) - worldPos);
+    vec3 bitangent = normalize(PointPosition(u, v+eps) - worldPos);
+
+    normal = cross(bitangent, tangent);
+
+    gl_Position = MVP * vec4(worldPos, 1.f);
 }

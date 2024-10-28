@@ -8,13 +8,10 @@ public:
     MillingShader():
         Shader(
             "../../shaders/passThroughShader.vert",
-            "../../shaders/stdShader.frag",
+            "../../shaders/phongShader.frag",
             "../../shaders/heightmapShader.tesc",
             "../../shaders/heightmapShader.tese"
         ) {}
-
-    void SetColor(const alg::Vec4& color) const
-        { setVec4("color", color); }
 
     void SetMVP(const alg::Mat4x4& matrix) const
         { setMatrix4("MVP", matrix); }
@@ -30,6 +27,9 @@ public:
 
     void SetHeightMapZLen(const float height) const
         { setFloat("heightMapZLen", height); }
+
+    void SetCameraPosition(const alg::Vec3& pos) const
+        { setVec3("cameraPos", pos); }
 
     void Use() const
         { use(); }

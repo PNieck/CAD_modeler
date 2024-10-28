@@ -24,7 +24,7 @@ public:
 
     void Update(double dt);
 
-    void Render(const alg::Mat4x4& view, const alg::Mat4x4& perspective);
+    void Render(const alg::Mat4x4& view, const alg::Mat4x4& perspective, const alg::Vec3& camPos);
 
 private:
     unsigned int heightmap = 0;
@@ -36,9 +36,9 @@ private:
     float cutterSpeed = 15.f/60.f;
     int actCommand = 1;
     std::vector<float> textureData;
-    alg::Vec3 mainHeightMapCorner = alg::Vec3(-1.f, 0.f, -1.f);
-    float heightMapZLen = 2.f;
-    float heightMapXLen = 2.f;
+    alg::Vec3 mainHeightMapCorner = alg::Vec3(-0.75f, 0.f, -0.75f);
+    float heightMapZLen = 1.5f;
+    float heightMapXLen = 1.5f;
     int heightMapXResolution = 0;
     int heightMapZResolution = 0;
 
