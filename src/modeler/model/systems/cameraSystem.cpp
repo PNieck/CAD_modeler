@@ -45,14 +45,10 @@ alg::Mat4x4 CameraSystem::PerspectiveMatrix() const
     const float v3 = (params.farPlane + params.nearPlane)/(params.farPlane - params.nearPlane);
     const float v4 = -2.f * (params.farPlane * params.nearPlane) / (params.farPlane - params.nearPlane);
 
-    alg::Mat4x4 result(
-        v2, 0.0f, 0.0f, 0.0f,
-        0.0f, v1, 0.0f, 0.0f,
-        0.0f, 0.0f, -v3, v4,
-        0.0f, 0.0f, -1.0f, 0.0f
-    );
-
-    result.TransposeSelf();
-
-    return result;
+    return {
+         v2, 0.f, 0.f,  0.f,
+        0.f,  v1, 0.f,  0.f,
+        0.f, 0.f, -v3, -1.f,
+        0.f, 0.f,  v4,  0.f
+    };
 }
