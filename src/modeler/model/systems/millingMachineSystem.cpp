@@ -6,6 +6,9 @@
 #include <CAD_modeler/model/components/MillingMachinePath.hpp>
 #include <CAD_modeler/model/components/scale.hpp>
 
+#include <CAD_modeler/utilities/linePlotter.hpp>
+#include <CAD_modeler/utilities/line.hpp>
+
 #include <ecs/coordinator.hpp>
 
 #include <algebra/vec3.hpp>
@@ -152,7 +155,7 @@ void MillingMachineSystem::Update(const double dt)
         return;
 
     const auto&[commands] = coordinator->GetComponent<MillingMachinePath>(*entities.begin());
-    const auto& cutterPos = coordinator->GetComponent<Position>(millingCutter);
+    auto cutterPos = coordinator->GetComponent<Position>(millingCutter);
     float dist = dt * cutterSpeed;
 
     do {
@@ -164,12 +167,14 @@ void MillingMachineSystem::Update(const double dt)
             const float traveledDist = alg::Distance(prevDest.vec, cutterPos.vec);
             const alg::Vec3 newCutterPos = prevDest.vec + (traveledDist + dist) * (actDest.vec - prevDest.vec).Normalize();
 
-            MillSection(newCutterPos, newCutterPos);
+            MillSection(cutterPos, newCutterPos);
 
             coordinator->SetComponent<Position>(millingCutter, newCutterPos);
             return;
         }
 
+        MillSection(cutterPos, actDest.vec);
+        cutterPos = actDest;
         actCommand++;
         dist -= remainingCommandDist;
     } while (actCommand < commands.size());
@@ -236,31 +241,60 @@ void MillingMachineSystem::MillSection(const Position& oldCutterPos, const Posit
     // Step 1 Mill around starting position
     const auto& cutterParams = coordinator->GetComponent<MillingCutter>(millingCutter);
 
-    float pixelXLen = heightMapXLen / static_cast<float>(heightMapXResolution);
-    float pixelZLen = heightMapZLen / static_cast<float>(heightMapZResolution);
+    const float pixelXLen = heightMapXLen / static_cast<float>(heightMapXResolution);
+    const float pixelZLen = heightMapZLen / static_cast<float>(heightMapZResolution);
 
     auto diff = oldCutterPos.vec - mainHeightMapCorner;
-    int oldPosPixelX = static_cast<int>(std::round(diff.X() / pixelXLen));
-    int oldPosPixelZ = static_cast<int>(std::round(diff.Z() / pixelZLen));
+    const int oldPosPixelX = static_cast<int>(std::round(diff.X() / pixelXLen));
+    const int oldPosPixelZ = static_cast<int>(std::round(diff.Z() / pixelZLen));
 
-    int radiusInPixelsX = static_cast<int>(std::ceil(cutterParams.radius / pixelXLen));
-    int radiusInPixelsZ = static_cast<int>(std::ceil(cutterParams.radius / pixelZLen));
-    int startPixelX = oldPosPixelX - radiusInPixelsX;
-    int startPixelZ = oldPosPixelZ - radiusInPixelsZ;
+    diff = newCutterPos.vec - mainHeightMapCorner;
+    const int newPosPixelX = static_cast<int>(std::round(diff.X() / pixelXLen));
+    const int newPosPixelZ = static_cast<int>(std::round(diff.Z() / pixelZLen));
 
-    for (int row = startPixelX; row <= startPixelX + 2*radiusInPixelsZ; row++) {
-        for (int col = startPixelZ; col <= startPixelZ + 2*radiusInPixelsX; col++) {
+    const int radiusInPixelsX = static_cast<int>(std::ceil(cutterParams.radius / pixelXLen));
+    const int radiusInPixelsZ = static_cast<int>(std::ceil(cutterParams.radius / pixelZLen));
+    const int startPixelX = oldPosPixelX - radiusInPixelsX;
+    const int startPixelZ = oldPosPixelZ - radiusInPixelsZ;
+
+    for (int row = startPixelX; row <= startPixelX + 2*radiusInPixelsX; row++) {
+        for (int col = startPixelZ; col <= startPixelZ + 2*radiusInPixelsZ; col++) {
             if (row < 0 || row >= heightMapZResolution || col < 0 || col >= heightMapXResolution)
                 continue;
 
-
-            float globalX = row * pixelXLen + mainHeightMapCorner.X();
-            float globalZ = col * pixelZLen + mainHeightMapCorner.Z();
+            const float globalX = static_cast<float>(row) * pixelXLen + mainHeightMapCorner.X();
+            const float globalZ = static_cast<float>(col) * pixelZLen + mainHeightMapCorner.Z();
 
             float cutterY = CutterY(cutterParams, oldCutterPos, globalX, globalZ);
 
             textureData[col*heightMapXResolution + row] = std::min(textureData[col*heightMapXResolution + row], cutterY);
         }
+    }
+
+    // Step 2: Milling along the whole line
+    const auto points = LinePlotter::DeterminePlotLines(
+        oldPosPixelX, oldPosPixelZ,
+        newPosPixelX, newPosPixelZ,
+        2*std::max(radiusInPixelsX, radiusInPixelsZ)
+    );
+
+    const Line line = Line::FromTwoPoints(oldCutterPos.vec, newCutterPos.vec);
+
+    for (auto const& point : points) {
+        const int col = point.Y();
+        const int row = point.X();
+
+        if (row < 0 || row >= heightMapZResolution || col < 0 || col >= heightMapXResolution)
+            continue;
+
+        const float globalX = static_cast<float>(row) * pixelXLen + mainHeightMapCorner.X();
+        const float globalZ = static_cast<float>(col) * pixelZLen + mainHeightMapCorner.Z();
+
+        auto cutterPos = line.ProjectPointToLine(alg::Vec3(globalX, 0.f, globalZ));
+
+        float cutterY = CutterY(cutterParams, cutterPos, globalX, globalZ);
+
+        textureData[col*heightMapXResolution + row] = std::min(textureData[col*heightMapXResolution + row], cutterY);
     }
 
     glBindTexture(GL_TEXTURE_2D, heightmap);
