@@ -27,7 +27,7 @@ private:
     static constexpr float DRAG_ANGLE_SPEED = 0.5f;
     static constexpr float MIN_SCALE = 0.01f;
 
-    void RenderDefaultGui();
+    void RenderDefaultGui() const;
     void RenderAdd3DPointsGui();
 
     void RenderAddingCurveGui(CurveType curveType);

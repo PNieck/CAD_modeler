@@ -7,7 +7,6 @@
 #include <imgui.h>
 #include <misc/cpp/imgui_stdlib.h>
 
-#include <iterator>
 #include <stdexcept>
 #include <optional>
 #include <sstream>
@@ -85,7 +84,7 @@ void ModelerGuiView::RenderGui()
 }
 
 
-void ModelerGuiView::RenderDefaultGui()
+void ModelerGuiView::RenderDefaultGui() const
 {
     if (ImGui::Button("Add 3D points")) {
         controller.SetModelerState(ModelerState::Adding3dPoints);

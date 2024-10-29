@@ -31,7 +31,7 @@ void MillingMachineSystem::RegisterSystem(Coordinator &coordinator)
 }
 
 
-void MillingMachineSystem::CreateMaterial(const int xResolution, const int zResolution)
+void MillingMachineSystem::Init(const int xResolution, const int zResolution)
 {
     glGenTextures(1, &heightmap);
     glActiveTexture(GL_TEXTURE0);
@@ -42,7 +42,7 @@ void MillingMachineSystem::CreateMaterial(const int xResolution, const int zReso
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
     textureData.resize(xResolution * zResolution);
-    std::ranges::fill(textureData, 1.f);
+    std::ranges::fill(textureData, initMaterialThickness);
 
     glTexImage2D(
         GL_TEXTURE_2D, 0, GL_R32F, xResolution, zResolution, 0, GL_RED, GL_FLOAT, textureData.data());
@@ -82,6 +82,67 @@ void MillingMachineSystem::AddPaths(MillingMachinePath &&paths, const MillingCut
     coordinator->SetComponent<Position>(millingCutter, paths.commands[0].destination);
     coordinator->AddComponent<Scale>(millingCutter, Scale(1.f/cutter.radius));
     coordinator->AddComponent<MillingCutter>(millingCutter, cutter);
+}
+
+
+void MillingMachineSystem::SetMaterialResolution(const int xRes, const int zRes)
+{
+    heightMapXResolution = xRes;
+    heightMapZResolution = zRes;
+
+    textureData.resize(xRes * zRes);
+    ResetMaterial();
+}
+
+
+void MillingMachineSystem::SetMaterialSize(const float xLen, const float zLen)
+{
+    heightMapXLen = xLen;
+    heightMapZLen = zLen;
+
+    mainHeightMapCorner.X() = -xLen / 2.f;
+    mainHeightMapCorner.Z() = -zLen / 2.f;
+
+    material.Update(
+        GenerateVertices(),
+        GenerateIndices()
+    );
+}
+
+
+void MillingMachineSystem::SetInitMaterialThickness(const float thickness)
+{
+    initMaterialThickness = thickness;
+    ResetMaterial();
+}
+
+
+void MillingMachineSystem::SetBaseLevel(const float level)
+{
+    mainHeightMapCorner.Y() = level;
+
+    material.Update(
+        GenerateVertices(),
+        GenerateIndices()
+    );
+}
+
+
+void MillingMachineSystem::ResetMaterial()
+{
+    std::ranges::fill(textureData, initMaterialThickness);
+
+    glTexImage2D(
+        GL_TEXTURE_2D, 0, GL_R32F, heightMapXResolution, heightMapZResolution, 0, GL_RED, GL_FLOAT, textureData.data());
+}
+
+
+std::optional<MillingCutter> MillingMachineSystem::GetMiliingCutter() const
+{
+    if (entities.empty())
+        return std::nullopt;
+
+    return coordinator->GetComponent<MillingCutter>(millingCutter);
 }
 
 
@@ -291,6 +352,3 @@ std::vector<uint32_t> MillingMachineSystem::GeneratePathsIndices(const MillingMa
 
     return result;
 }
-
-
-

@@ -5,8 +5,7 @@
 
 
 template <typename t>
-class Vector2D
-{
+class Vector2D {
 public:
     Vector2D(unsigned int rows, unsigned int cols);
 
@@ -26,10 +25,10 @@ public:
     inline void DeleteCol()
         { DeleteCols(1); }
 
-    inline unsigned int Rows() const
+    unsigned int Rows() const
         { return rows; }
 
-    inline unsigned int Cols() const
+    unsigned int Cols() const
         { return cols; }
 
     inline t& At(int row, int col)
@@ -57,7 +56,7 @@ inline Vector2D<t>::Vector2D(unsigned int rows, unsigned int cols):
 
 
 template <typename t>
-inline void Vector2D<t>::AddRows(unsigned int cnt)
+inline void Vector2D<t>::AddRows(const unsigned int cnt)
 {
     rows += cnt;
 
@@ -70,7 +69,7 @@ inline void Vector2D<t>::AddRows(unsigned int cnt)
 
 
 template <typename t>
-inline void Vector2D<t>::AddCols(unsigned int cnt)
+inline void Vector2D<t>::AddCols(const unsigned int cnt)
 {
     cols += cnt;
 
@@ -81,18 +80,18 @@ inline void Vector2D<t>::AddCols(unsigned int cnt)
 
 
 template <typename t>
-inline void Vector2D<t>::DeleteRows(unsigned int cnt)
+inline void Vector2D<t>::DeleteRows(const unsigned int cnt)
 {
-    rows = std::max(0u, rows - cnt);
+    rows = std::max<unsigned int>(0u, rows - cnt);
 
     data.resize(rows);
 }
 
 
 template <typename t>
-inline void Vector2D<t>::DeleteCols(unsigned int cnt)
+inline void Vector2D<t>::DeleteCols(const unsigned int cnt)
 {
-    cols = std::max(0u, cols - cnt);
+    cols = std::max<unsigned int>(0u, cols - cnt);
 
     for (auto& row: data) {
         row.resize(cols);

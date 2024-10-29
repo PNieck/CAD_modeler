@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../model/millingMachineSim.hpp"
+#include "../views/millingSimulatorView.hpp"
 #include "subController.hpp"
 
 
@@ -8,7 +9,7 @@ class MillingSimController: public SubController {
 public:
     explicit MillingSimController(MillingMachineSim& millingSim);
 
-    void Update(const double dt)
+    void Update(const double dt) const
         { simulator.Update(dt); }
 
     inline void WindowSizeChanged(const int width, const int height) const
@@ -26,8 +27,9 @@ public:
     inline void ScrollMoved(const int offset) const
         { SubController::ScrollMoved(offset, simulator); }
 
-    void Render() const;
+    void Render();
 
 private:
     MillingMachineSim& simulator;
+    MillingSimulatorView view;
 };

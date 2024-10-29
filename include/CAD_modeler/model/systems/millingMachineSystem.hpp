@@ -4,6 +4,8 @@
 
 #include <algebra/mat4x4.hpp>
 
+#include <optional>
+
 #include "../components/mesh.hpp"
 #include "../components/MillingMachinePath.hpp"
 #include "../components/millingCutter.hpp"
@@ -13,18 +15,64 @@ class MillingMachineSystem: public System {
 public:
     static void RegisterSystem(Coordinator& coordinator);
 
-    void CreateMaterial(int xResolution, int zResolution);
+    void Init(int xResolution, int zResolution);
     void AddPaths(MillingMachinePath&& paths, const MillingCutter& cutter);
 
     void StartMachine()
         { cutterRuns = true; }
 
+    [[nodiscard]]
+    bool MachineRuns() const
+        { return cutterRuns; }
+
     void StopMachine()
         { cutterRuns = false; }
+
+    [[nodiscard]]
+    int GetMaterialXResolution() const
+        { return heightMapXResolution; }
+
+    [[nodiscard]]
+    int GetMaterialZResolution() const
+        { return heightMapZResolution; }
+
+    void SetMaterialResolution(int xRes, int zRes);
+
+    [[nodiscard]]
+    float GetMaterialXLength() const
+        { return heightMapXLen; }
+
+    [[nodiscard]]
+    float GetMaterialZLength() const
+        { return heightMapZLen; }
+
+    void SetMaterialSize(float xLen, float zLen);
+
+    float GetInitMaterialThckness()
+        { return initMaterialThickness; }
+
+    void SetInitMaterialThickness(float thickness);
+
+    float GetBaseLevel()
+        { return mainHeightMapCorner.Y(); }
+
+    void SetBaseLevel(float level);
+
+    void SetCutterSpeed(const float newSpeed)
+        { cutterSpeed = newSpeed; }
+
+    float GetCuterSpeed() const
+        { return cutterSpeed; }
+
+    void ResetMaterial();
+
+    std::optional<MillingCutter> GetMiliingCutter() const;
 
     void Update(double dt);
 
     void Render(const alg::Mat4x4& view, const alg::Mat4x4& perspective, const alg::Vec3& camPos);
+
+
 
 private:
     unsigned int heightmap = 0;
@@ -41,6 +89,7 @@ private:
     float heightMapXLen = 1.5f;
     int heightMapXResolution = 0;
     int heightMapZResolution = 0;
+    float initMaterialThickness = 1.f;
 
     void MillSection(const Position& oldCutterPos, const Position& newCutterPos);
 

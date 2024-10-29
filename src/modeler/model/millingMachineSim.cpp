@@ -16,21 +16,22 @@ MillingMachineSim::MillingMachineSim(const int viewportWidth, const int viewport
 
     gridSystem->Init(&shadersRepo);
 
-    millingMachineSystem->CreateMaterial(1000, 1000);
-
-    auto paths = MillingMachinePathsSystem::ParseGCode("C:\\Users\\piotr\\source\\repos\\CAD_modeler\\tmp\\1.k16");
-    const auto cutter = MillingMachinePathsSystem::ParseCutter("C:\\Users\\piotr\\source\\repos\\CAD_modeler\\tmp\\1.k16");
-    millingMachineSystem->AddPaths(std::move(paths), cutter);
-
-    millingMachineSystem->StartMachine();
-
-    //glEnable(GL_DEPTH_TEST);
+    millingMachineSystem->Init(1000, 1000);
 }
 
 
 void MillingMachineSim::Update(const double dt) const
 {
     millingMachineSystem->Update(dt);
+}
+
+
+void MillingMachineSim::AddMillingPath(const std::string &filePath) const
+{
+    auto paths = MillingMachinePathsSystem::ParseGCode(filePath);
+    const auto cutter = MillingMachinePathsSystem::ParseCutter(filePath);
+
+    millingMachineSystem->AddPaths(std::move(paths), cutter);
 }
 
 

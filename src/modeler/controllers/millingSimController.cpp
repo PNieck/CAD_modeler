@@ -2,11 +2,12 @@
 
 
 MillingSimController::MillingSimController(MillingMachineSim &millingSim):
-    simulator(millingSim)
+    simulator(millingSim), view(*this, simulator)
 {
 }
 
-void MillingSimController::Render() const
+void MillingSimController::Render()
 {
     simulator.RenderFrame();
+    view.RenderGui();
 }

@@ -68,8 +68,7 @@ void MainMenuBar::Render()
 
     fileDialog.Display();
 
-    if(fileDialog.HasSelected())
-    {
+    if(fileDialog.HasSelected()) {
         const auto path = fileDialog.GetSelected().string();
         fileDialog.ClearSelected();
 
