@@ -83,9 +83,6 @@ void MillingSimulatorView::RenderMaterialOptions() const
     if (ImGui::DragFloat("Material base level", &base))
         model.SetMaterialBaseLevel(base);
 
-    if (ImGui::Button("Reset material"))
-        model.ResetMaterial();
-
     ImGui::EndDisabled();
 }
 
@@ -106,11 +103,17 @@ void MillingSimulatorView::RenderSimulationOptions() const
         model.StartSimulation();
 
     ImGui::EndDisabled();
+    ImGui::SameLine();
 
     ImGui::BeginDisabled(!simulationRuns);
     if (ImGui::Button("Stop"))
         model.StopSimulation();
 
+    ImGui::EndDisabled();
+
+    ImGui::BeginDisabled(simulationRuns);
+    if (ImGui::Button("Reset"))
+        model.ResetSimulation();
     ImGui::EndDisabled();
 }
 

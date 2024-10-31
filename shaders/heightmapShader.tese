@@ -43,14 +43,17 @@ vec3 PointPosition(float u, float v)
 void main()
 {
     const float eps = 1e-5;
+    ivec2 texSize = textureSize(heightMap, 0);
+    float pixelXLen = heightMapXLen / texSize.x;
+    float pixelZLen = heightMapZLen / texSize.y;
 
     // get patch coordinate
     float u = gl_TessCoord.x;
     float v = gl_TessCoord.y;
 
     worldPos = PointPosition(u, v);
-    vec3 tangent = normalize(PointPosition(u+eps, v) - worldPos);
-    vec3 bitangent = normalize(PointPosition(u, v+eps) - worldPos);
+    vec3 tangent = normalize(PointPosition(u+pixelXLen, v) - worldPos);
+    vec3 bitangent = normalize(PointPosition(u, v+pixelZLen) - worldPos);
 
     normal = cross(bitangent, tangent);
 

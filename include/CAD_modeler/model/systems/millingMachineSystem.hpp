@@ -5,6 +5,8 @@
 #include <algebra/mat4x4.hpp>
 
 #include <optional>
+#include <vector>
+#include <string>
 
 #include "../components/mesh.hpp"
 #include "../components/MillingMachinePath.hpp"
@@ -49,7 +51,8 @@ public:
 
     void SetMaterialSize(float xLen, float zLen);
 
-    float GetInitMaterialThckness()
+    [[nodiscard]]
+    float GetInitMaterialThickness() const
         { return initMaterialThickness; }
 
     void SetInitMaterialThickness(float thickness);
@@ -67,7 +70,12 @@ public:
 
     void ResetMaterial();
 
-    std::optional<MillingCutter> GetMiliingCutter() const;
+    void ResetSimulation();
+
+    [[nodiscard]]
+    std::optional<MillingCutter> GetMillingCutter() const;
+
+    void SetCutterHeight(float height) const;
 
     void Update(double dt);
 
@@ -92,7 +100,7 @@ private:
     float heightMapXLen = 1.5f;
     int heightMapXResolution = 0;
     int heightMapZResolution = 0;
-    float initMaterialThickness = 1.f;
+    float initMaterialThickness = 0.5f;
 
     MillingWarningsRepo millingWarnings;
 
@@ -105,6 +113,7 @@ private:
     std::vector<float> GenerateVertices();
     std::vector<uint32_t> GenerateIndices();
 
-    std::vector<float> GeneratePathsVertices(const MillingMachinePath& paths);
-    std::vector<uint32_t> GeneratePathsIndices(const MillingMachinePath& paths);
+    static std::vector<float> GeneratePathsVertices(const MillingMachinePath& paths);
+
+    static std::vector<uint32_t> GeneratePathsIndices(const MillingMachinePath& paths);
 };

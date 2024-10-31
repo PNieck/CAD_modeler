@@ -64,7 +64,7 @@ MillingMachinePath MillingMachinePathsSystem::ParseGCode(const std::string &file
                 throw std::invalid_argument("Invalid GCode file");
 
             // Different coordinate systems conventions
-            result.commands.emplace_back(id, x*scale, z*scale, y*scale);
+            result.commands.emplace_back(id, y*scale, z*scale, x*scale);
         }
     }
 

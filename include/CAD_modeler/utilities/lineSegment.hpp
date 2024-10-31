@@ -1,14 +1,18 @@
 #pragma once
 
-#include <glm/glm.hpp>
+#include <algebra/vec3.hpp>
 
 
 class LineSegment {
 public:
-    LineSegment(const glm::vec& startingPoint, const glm::vec3 direction):
-        startingPoint(startingPoint), direction(glm::normalize(direction)) {}
+    LineSegment(const alg::Vec3& startPoint, const alg::Vec3& endPoint):
+        startingPoint(startPoint), direction((endPoint - startPoint).Normalize()), maxT((endPoint - startPoint).Length()) {}
+
+    alg::Vec3 NearestPoint(const alg::Vec3& point) const;
 
 private:
-    glm::vec3 startingPoint;
-    glm::vec3 direction;
+    alg::Vec3 startingPoint;
+    alg::Vec3 direction;
+
+    float maxT;
 };

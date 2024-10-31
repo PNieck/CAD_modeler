@@ -1,24 +1,24 @@
 #include <CAD_modeler/utilities/linePlotter.hpp>
 
 
-std::deque<alg::IVec2> LinePlotter::DeterminePlotLines(int x0, int y0, int x1, int y1, int thickness)
+std::tuple<std::deque<alg::IVec2>, LinePlotter::LineType> LinePlotter::DeterminePlotLines(int x0, int y0, int x1, int y1)
 {
     if (std::abs(y1 - y0) < std::abs(x1 - x0)) {
         if (x0 > x1)
-            return PlotLineLow(x1, y1, x0, y0, thickness);
+            return { PlotLineLow(x1, y1, x0, y0), LineType::Low };
         else
-            return PlotLineLow(x0, y0, x1, y1, thickness);
+            return { PlotLineLow(x0, y0, x1, y1), LineType::Low };
     }
     else {
         if (y0 > y1)
-            return PlotLineHigh(x1, y1, x0, y0, thickness);
+            return { PlotLineHigh(x1, y1, x0, y0), LineType::High };
         else
-            return PlotLineHigh(x0, y0, x1, y1, thickness);
+            return { PlotLineHigh(x0, y0, x1, y1), LineType::High };
     }
 }
 
 
-std::deque<alg::IVec2> LinePlotter::PlotLineLow(int x0, int y0, int x1, int y1, int thickness)
+std::deque<alg::IVec2> LinePlotter::PlotLineLow(int x0, int y0, int x1, int y1)
 {
     std::deque<alg::IVec2> result;
 
@@ -35,9 +35,7 @@ std::deque<alg::IVec2> LinePlotter::PlotLineLow(int x0, int y0, int x1, int y1, 
     int y = y0;
 
     for (int x = x0; x <= x1; x++) {
-        for (int i= -thickness/2-1; i < thickness/2+1; i++) {
-            result.emplace_back(x, y+i);
-        }
+        result.emplace_back(x, y);
 
 
         if (D > 0) {
@@ -52,7 +50,7 @@ std::deque<alg::IVec2> LinePlotter::PlotLineLow(int x0, int y0, int x1, int y1, 
 }
 
 
-std::deque<alg::IVec2> LinePlotter::PlotLineHigh(int x0, int y0, int x1, int y1, int thickness)
+std::deque<alg::IVec2> LinePlotter::PlotLineHigh(int x0, int y0, int x1, int y1)
 {
     std::deque<alg::IVec2> result;
 
@@ -69,9 +67,7 @@ std::deque<alg::IVec2> LinePlotter::PlotLineHigh(int x0, int y0, int x1, int y1,
     int x = x0;
 
     for (int y = y0; y <= y1; y++) {
-        for (int i= -thickness/2-1; i < thickness/2+1; i++) {
-            result.emplace_back(x+i, y);
-        }
+        result.emplace_back(x, y);
 
         if (D > 0) {
             x += xi;

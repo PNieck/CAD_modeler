@@ -35,7 +35,7 @@ public:
         { millingMachineSystem->SetMaterialSize(xLen, zLen); }
 
     float GetMaterialThickness()
-        { return millingMachineSystem->GetInitMaterialThckness(); }
+        { return millingMachineSystem->GetInitMaterialThickness(); }
 
     void SetMaterialThickness(float thickness)
         { millingMachineSystem->SetInitMaterialThickness(thickness); }
@@ -43,11 +43,11 @@ public:
     float GetMaterialBaseLevel() const
         { return millingMachineSystem->GetBaseLevel(); }
 
-    void SetMaterialBaseLevel(float level)
+    void SetMaterialBaseLevel(const float level)
         { millingMachineSystem->SetBaseLevel(level); }
 
-    void ResetMaterial()
-        { millingMachineSystem->ResetMaterial(); }
+    void ResetSimulation() const
+        { millingMachineSystem->ResetSimulation(); }
 
     void StartSimulation() const
         { millingMachineSystem->StartMachine(); }
@@ -61,13 +61,19 @@ public:
     void SetCutterSpeed(float speed)
         { millingMachineSystem->SetCutterSpeed(speed); }
 
+    void SetCutterHeight(float height)
+        { millingMachineSystem->SetCutterHeight(height); }
+
     [[nodiscard]]
     std::optional<MillingCutter> GetMillingCutter() const
-        { return millingMachineSystem->GetMiliingCutter(); }
+        { return millingMachineSystem->GetMillingCutter(); }
 
     [[nodiscard]]
     bool MillingMachineRuns() const
         { return millingMachineSystem->MachineRuns(); }
+
+    const auto& GetMillingWarnings() const
+        { return millingMachineSystem->GetWarnings(); }
 
 private:
     void RenderSystemsObjects(const alg::Mat4x4 &viewMtx, const alg::Mat4x4 &persMtx, float nearPlane,
