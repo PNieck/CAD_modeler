@@ -6,20 +6,22 @@
 
 #include <optional>
 #include <vector>
-#include <string>
 
 #include "../components/mesh.hpp"
 #include "../components/MillingMachinePath.hpp"
 #include "../components/millingCutter.hpp"
 #include "../components/millingWarningsRepo.hpp"
+#include "../components/texture2D.hpp"
 
 
 class MillingMachineSystem: public System {
 public:
     static void RegisterSystem(Coordinator& coordinator);
 
+    MillingMachineSystem();
+
     void Init(int xResolution, int zResolution);
-    void AddPaths(MillingMachinePath&& paths, const MillingCutter& cutter);
+    void AddPaths(MillingMachinePath&& paths, const MillingCutter& cutter) const;
 
     void StartMachine()
         { cutterRuns = true; }
@@ -33,11 +35,11 @@ public:
 
     [[nodiscard]]
     int GetMaterialXResolution() const
-        { return heightMapXResolution; }
+        { return heightmap.GetWidth(); }
 
     [[nodiscard]]
     int GetMaterialZResolution() const
-        { return heightMapZResolution; }
+        { return heightmap.GetHeight(); }
 
     void SetMaterialResolution(int xRes, int zRes);
 
@@ -65,6 +67,7 @@ public:
     void SetCutterSpeed(const float newSpeed)
         { cutterSpeed = newSpeed; }
 
+    [[nodiscard]]
     float GetCuterSpeed() const
         { return cutterSpeed; }
 
@@ -86,7 +89,7 @@ public:
         { return millingWarnings; }
 
 private:
-    unsigned int heightmap = 0;
+    Texture2D heightmap;
 
     Mesh material;
     Entity millingCutter = 0;
@@ -98,8 +101,6 @@ private:
     alg::Vec3 mainHeightMapCorner = alg::Vec3(-0.75f, 0.f, -0.75f);
     float heightMapZLen = 1.5f;
     float heightMapXLen = 1.5f;
-    int heightMapXResolution = 0;
-    int heightMapZResolution = 0;
     float initMaterialThickness = 0.5f;
 
     MillingWarningsRepo millingWarnings;

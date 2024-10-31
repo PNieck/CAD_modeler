@@ -35,24 +35,18 @@ void MillingMachineSystem::RegisterSystem(Coordinator &coordinator)
 }
 
 
+MillingMachineSystem::MillingMachineSystem():
+    heightmap(0, 0, nullptr, Texture2D::Red32BitFloat, Texture2D::Red)
+{
+}
+
+
 void MillingMachineSystem::Init(const int xResolution, const int zResolution)
 {
-    glGenTextures(1, &heightmap);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, heightmap);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-    heightMapXResolution = xResolution;
-    heightMapZResolution = zResolution;
-
     textureData.resize(xResolution * zResolution);
     std::ranges::fill(textureData, initMaterialThickness);
 
-    glTexImage2D(
-        GL_TEXTURE_2D, 0, GL_R32F, xResolution, zResolution, 0, GL_RED, GL_FLOAT, textureData.data());
+    heightmap.ChangeSize(xResolution, zResolution, textureData.data(), Texture2D::Red);
 
     material.Update(
         GenerateVertices(),
@@ -70,7 +64,7 @@ void MillingMachineSystem::Init(const int xResolution, const int zResolution)
 }
 
 
-void MillingMachineSystem::AddPaths(MillingMachinePath &&paths, const MillingCutter& cutter)
+void MillingMachineSystem::AddPaths(MillingMachinePath &&paths, const MillingCutter& cutter) const
 {
     const Entity pathsEntity = coordinator->CreateEntity();
 
@@ -106,11 +100,9 @@ void MillingMachineSystem::AddPaths(MillingMachinePath &&paths, const MillingCut
 
 void MillingMachineSystem::SetMaterialResolution(const int xRes, const int zRes)
 {
-    heightMapXResolution = xRes;
-    heightMapZResolution = zRes;
-
     textureData.resize(xRes * zRes);
-    ResetMaterial();
+    std::ranges::fill(textureData, initMaterialThickness);
+    heightmap.ChangeSize(xRes, zRes, textureData.data(), Texture2D::Red);
 }
 
 
@@ -151,8 +143,7 @@ void MillingMachineSystem::ResetMaterial()
 {
     std::ranges::fill(textureData, initMaterialThickness);
 
-    glTexImage2D(
-        GL_TEXTURE_2D, 0, GL_R32F, heightMapXResolution, heightMapZResolution, 0, GL_RED, GL_FLOAT, textureData.data());
+    heightmap.Update(textureData.data(), Texture2D::Red);
 }
 
 
@@ -206,9 +197,12 @@ void MillingMachineSystem::Update(const double dt)
             MillSection(cutterPos, newCutterPos);
 
             coordinator->SetComponent<Position>(millingCutter, newCutterPos);
-            glBindTexture(GL_TEXTURE_2D, heightmap);
-            glTexImage2D(
-                GL_TEXTURE_2D, 0, GL_R32F, heightMapXResolution, heightMapZResolution, 0, GL_RED, GL_FLOAT, textureData.data());
+
+            heightmap.Update(textureData.data(), Texture2D::Red);
+
+            // glBindTexture(GL_TEXTURE_2D, heightmap);
+            // glTexImage2D(
+            //     GL_TEXTURE_2D, 0, GL_R32F, heightMapXResolution, heightMapZResolution, 0, GL_RED, GL_FLOAT, textureData.data());
             return;
         }
 
@@ -221,9 +215,12 @@ void MillingMachineSystem::Update(const double dt)
     StopMachine();
     actCommand = 1;
     coordinator->SetComponent<Position>(millingCutter, commands[0].destination);
-    glBindTexture(GL_TEXTURE_2D, heightmap);
-    glTexImage2D(
-        GL_TEXTURE_2D, 0, GL_R32F, heightMapXResolution, heightMapZResolution, 0, GL_RED, GL_FLOAT, textureData.data());
+
+    heightmap.Update(textureData.data(), Texture2D::Red);
+
+    // glBindTexture(GL_TEXTURE_2D, heightmap);
+    // glTexImage2D(
+    //     GL_TEXTURE_2D, 0, GL_R32F, heightMapXResolution, heightMapZResolution, 0, GL_RED, GL_FLOAT, textureData.data());
 }
 
 
@@ -233,7 +230,7 @@ void MillingMachineSystem::Render(const alg::Mat4x4& view, const alg::Mat4x4& pe
     const auto& shader = shaderRepo.GetMillingShader();
 
     shader.Use();
-    glBindTexture(GL_TEXTURE_2D, heightmap);
+    heightmap.Use();
     shader.SetCameraPosition(camPos);
 
     const auto cameraMtx = perspective * view;
@@ -283,8 +280,8 @@ void MillingMachineSystem::MillSection(const Position& oldCutterPos, const Posit
     // Step 1 Mill around starting position
     const auto& cutterParams = coordinator->GetComponent<MillingCutter>(millingCutter);
 
-    const float pixelXLen = heightMapXLen / static_cast<float>(heightMapXResolution);
-    const float pixelZLen = heightMapZLen / static_cast<float>(heightMapZResolution);
+    const float pixelXLen = heightMapXLen / static_cast<float>(heightmap.GetWidth());
+    const float pixelZLen = heightMapZLen / static_cast<float>(heightmap.GetHeight());
 
     auto diff = oldCutterPos.vec - mainHeightMapCorner;
     const int oldPosPixelX = static_cast<int>(std::round(diff.X() / pixelXLen));
@@ -304,7 +301,7 @@ void MillingMachineSystem::MillSection(const Position& oldCutterPos, const Posit
 
     for (int row = startPixelX; row <= startPixelX + 2*radiusInPixelsX; row++) {
         for (int col = startPixelZ; col <= startPixelZ + 2*radiusInPixelsZ; col++) {
-            if (row < 0 || row >= heightMapZResolution || col < 0 || col >= heightMapXResolution)
+            if (row < 0 || row >= heightmap.GetHeight() || col < 0 || col >= heightmap.GetWidth())
                 continue;
 
             const float globalX = static_cast<float>(row) * pixelXLen + mainHeightMapCorner.X();
@@ -341,10 +338,10 @@ void MillingMachineSystem::MillSection(const Position& oldCutterPos, const Posit
         }
 
         for (int i = -cutterRadius; i <= cutterRadius; i++) {
-            int row = lineTyp == LinePlotter::LineType::High ? point.X() + i : point.X();
-            int col = lineTyp == LinePlotter::LineType::Low ? point.Y() + i : point.Y();
+            const int row = lineTyp == LinePlotter::LineType::High ? point.X() + i : point.X();
+            const int col = lineTyp == LinePlotter::LineType::Low ? point.Y() + i : point.Y();
 
-            if (row < 0 || row >= heightMapZResolution || col < 0 || col >= heightMapXResolution)
+            if (row < 0 || row >= heightmap.GetHeight() || col < 0 || col >= heightmap.GetWidth())
                 continue;
 
             const float globalX = static_cast<float>(row) * pixelXLen + mainHeightMapCorner.X();
@@ -385,13 +382,13 @@ float MillingMachineSystem::CutterY(const MillingCutter& cutter, const Position&
 
 float MillingMachineSystem::UpdateHeightMap(const int row, const int col, const float cutterY, const float cutterHeight, const bool pathToDown)
 {
-    const float diff = std::max(textureData[col*heightMapXResolution + row] - cutterY, 0.f);
+    const float diff = std::max(textureData[col*heightmap.GetWidth() + row] - cutterY, 0.f);
     if (diff > 0.0f) {
-        const float value = textureData[col*heightMapXResolution + row] - diff;
-        textureData[col*heightMapXResolution + row] = value;
+        const float value = textureData[col*heightmap.GetWidth() + row] - diff;
+        textureData[col*heightmap.GetWidth() + row] = value;
     }
 
-    if (textureData[col*heightMapXResolution + row] - mainHeightMapCorner.Y() < 0.f) {
+    if (textureData[col*heightmap.GetWidth() + row] - mainHeightMapCorner.Y() < 0.f) {
         auto const& path = coordinator->GetComponent<MillingMachinePath>(*entities.begin());
         const auto commandId = path.commands[actCommand].id;
         millingWarnings.AddWarning(commandId, MillingWarningsRepo::MillingUnderTheBase);
@@ -416,8 +413,8 @@ float MillingMachineSystem::UpdateHeightMap(const int row, const int col, const 
 std::vector<float> MillingMachineSystem::GenerateVertices()
 {
     std::vector<float> result;
-    const int pointsInX = heightMapXResolution / 25 + 1;
-    const int pointsInZ = heightMapZResolution / 25 + 1;
+    const int pointsInX = heightmap.GetWidth() / 50 + 1;
+    const int pointsInZ = heightmap.GetHeight() / 50 + 1;
 
     result.reserve(pointsInX * pointsInZ * alg::Vec3::dim);
 
@@ -440,8 +437,8 @@ std::vector<uint32_t> MillingMachineSystem::GenerateIndices()
 {
     std::vector<uint32_t> result;
 
-    const int pointsInX = heightMapXResolution / 25 + 1;
-    const int pointsInZ = heightMapZResolution / 25 + 1;
+    const int pointsInX = heightmap.GetWidth() / 50 + 1;
+    const int pointsInZ = heightmap.GetHeight() / 50 + 1;
 
     for (int row = 0; row < pointsInZ - 1; row ++) {
         for (int col = 0; col < pointsInX - 1; col++) {
