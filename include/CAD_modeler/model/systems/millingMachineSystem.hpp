@@ -9,6 +9,7 @@
 #include "../components/mesh.hpp"
 #include "../components/MillingMachinePath.hpp"
 #include "../components/millingCutter.hpp"
+#include "../components/millingWarningsRepo.hpp"
 
 
 class MillingMachineSystem: public System {
@@ -72,7 +73,9 @@ public:
 
     void Render(const alg::Mat4x4& view, const alg::Mat4x4& perspective, const alg::Vec3& camPos);
 
-
+    [[nodiscard]]
+    const auto& GetWarnings() const
+        { return millingWarnings; }
 
 private:
     unsigned int heightmap = 0;
@@ -91,9 +94,13 @@ private:
     int heightMapZResolution = 0;
     float initMaterialThickness = 1.f;
 
+    MillingWarningsRepo millingWarnings;
+
     void MillSection(const Position& oldCutterPos, const Position& newCutterPos);
 
     static float CutterY(const MillingCutter& cutter, const Position& cutterPos, float x, float z);
+
+    float UpdateHeightMap(int row, int col, float cutterY, float cutterHeight, bool pathToDown);
 
     std::vector<float> GenerateVertices();
     std::vector<uint32_t> GenerateIndices();

@@ -30,4 +30,5 @@ private:
     void RenderMaterialOptions() const;
     void RenderSimulationOptions() const;
     void RenderCutterInformation() const;
+    void RenderWarnings() const;
 };

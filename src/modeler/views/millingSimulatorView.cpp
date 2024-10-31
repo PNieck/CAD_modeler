@@ -18,6 +18,7 @@ void MillingSimulatorView::RenderGui()
     RenderMaterialOptions();
     RenderSimulationOptions();
     RenderCutterInformation();
+    RenderWarnings();
 
     ImGui::End();
 }
@@ -138,6 +139,34 @@ void MillingSimulatorView::RenderCutterInformation() const
 
         default:
             throw std::runtime_error("Unknown cutter type");
+    }
+
+    ImGui::BeginDisabled(model.MillingMachineRuns());
+    float height = cutter->height;
+    if (ImGui::DragFloat("Height", &height))
+        model.SetCutterHeight(height);
+    ImGui::EndDisabled();
+}
+
+
+void MillingSimulatorView::RenderWarnings() const
+{
+    ImGui::SeparatorText("Warnings");
+
+    auto const& warningsRepo = model.GetMillingWarnings();
+    if (warningsRepo.Empty()) {
+        ImGui::Text("No warnings");
+    }
+
+    for (const auto&[commandId, warningsTypes] : warningsRepo.GetWarnings()) {
+        if (warningsTypes | MillingWarningsRepo::MillingStraightDown)
+            ImGui::Text("Milling straight down during %d command", commandId);
+
+        if (warningsTypes | MillingWarningsRepo::MillingTooDeep)
+            ImGui::Text("Milling too deep during %d command", commandId);
+
+        if (warningsTypes | MillingWarningsRepo::MillingUnderTheBase)
+            ImGui::Text("Milling under the base during %d command", commandId);
     }
 }
 

@@ -327,6 +327,36 @@ float MillingMachineSystem::CutterY(const MillingCutter& cutter, const Position&
 }
 
 
+float MillingMachineSystem::UpdateHeightMap(const int row, const int col, const float cutterY, const float cutterHeight, const bool pathToDown)
+{
+    const float diff = std::max(textureData[col*heightMapXResolution + row] - cutterY, 0.f);
+    if (diff > 0.0f) {
+        const float value = textureData[col*heightMapXResolution + row] - diff;
+        textureData[col*heightMapXResolution + row] = value;
+    }
+
+    if (textureData[col*heightMapXResolution + row] - mainHeightMapCorner.Y() < 0.f) {
+        auto const& path = coordinator->GetComponent<MillingMachinePath>(*entities.begin());
+        const auto commandId = path.commands[actCommand].id;
+        millingWarnings.AddWarning(commandId, MillingWarningsRepo::MillingUnderTheBase);
+    }
+
+    if (diff > cutterHeight) {
+        auto const& path = coordinator->GetComponent<MillingMachinePath>(*entities.begin());
+        const auto commandId = path.commands[actCommand].id;
+        millingWarnings.AddWarning(commandId, MillingWarningsRepo::MillingTooDeep);
+    }
+
+    if (pathToDown && diff > 0.f) {
+        auto const& path = coordinator->GetComponent<MillingMachinePath>(*entities.begin());
+        const auto commandId = path.commands[actCommand].id;
+        millingWarnings.AddWarning(commandId, MillingWarningsRepo::MillingStraightDown);
+    }
+
+    return diff;
+}
+
+
 std::vector<float> MillingMachineSystem::GenerateVertices()
 {
     std::vector<float> result;
