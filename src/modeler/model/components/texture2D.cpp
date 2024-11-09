@@ -23,10 +23,10 @@ void Texture2D::Update(const float *data, const InputDataFormat inputFormat) con
 }
 
 
-void Texture2D::ChangeSize(const int width, const int height, const float *data, const InputDataFormat inputFormat)
+void Texture2D::ChangeSize(const int texWidth, const int texHeight, const float *data, const InputDataFormat inputFormat)
 {
-    this->width = width;
-    this->height = height;
+    width = texWidth;
+    height = texHeight;
     glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, inputFormat, GL_FLOAT, data);
 }
 

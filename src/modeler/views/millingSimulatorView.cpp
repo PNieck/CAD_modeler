@@ -1,7 +1,5 @@
 #include <CAD_modeler/views/millingSimulatorView.hpp>
 
-#include <imgui.h>
-
 
 MillingSimulatorView::MillingSimulatorView(MillingSimController &controller, MillingMachineSim &model):
     controller(controller), model(model)
@@ -110,11 +108,17 @@ void MillingSimulatorView::RenderSimulationOptions() const
         model.StopSimulation();
 
     ImGui::EndDisabled();
+    ImGui::SameLine();
 
     ImGui::BeginDisabled(simulationRuns);
     if (ImGui::Button("Reset"))
         model.ResetSimulation();
     ImGui::EndDisabled();
+
+    ImGui::SameLine();
+
+    if (ImGui::Button("Instant"))
+        model.StartInstantSimulation();
 }
 
 

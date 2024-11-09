@@ -6,12 +6,14 @@
 
 #include <optional>
 #include <vector>
+#include <thread>
 
 #include "../components/mesh.hpp"
 #include "../components/MillingMachinePath.hpp"
 #include "../components/millingCutter.hpp"
 #include "../components/millingWarningsRepo.hpp"
 #include "../components/texture2D.hpp"
+#include "../../utilities/asyncWorker.hpp"
 
 
 class MillingMachineSystem: public System {
@@ -32,6 +34,13 @@ public:
 
     void StopMachine()
         { cutterRuns = false; }
+
+    void StartInstantMilling();
+
+    void StopInstantMilling();
+
+    bool InstantMillingRuns() const
+        { return instantWorker.IsWorking(); }
 
     [[nodiscard]]
     int GetMaterialXResolution() const
@@ -103,7 +112,11 @@ private:
     float heightMapXLen = 1.5f;
     float initMaterialThickness = 0.5f;
 
+    AsyncWorker instantWorker;
+
     MillingWarningsRepo millingWarnings;
+
+    void InstantMillingThreadFunc(std::stop_token stoken);
 
     void MillSection(const Position& oldCutterPos, const Position& newCutterPos);
 

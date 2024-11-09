@@ -55,6 +55,9 @@ public:
     void StopSimulation() const
         { millingMachineSystem->StopMachine(); }
 
+    void StartInstantSimulation() const
+        { millingMachineSystem->StartInstantMilling(); }
+
     float GetCutterSpeed() const
         { return millingMachineSystem->GetCuterSpeed(); }
 

@@ -19,7 +19,7 @@ public:
 
     void Update(const float *data, InputDataFormat inputFormat) const;
 
-    void ChangeSize(int width, int height, const float *data, InputDataFormat inputFormat);
+    void ChangeSize(int texWidth, int texHeight, const float *data, InputDataFormat inputFormat);
 
     void Use() const
         { glBindTexture(GL_TEXTURE_2D, id); }

@@ -19,6 +19,8 @@
 #include <cmath>
 #include <limits>
 #include <stack>
+#include <thread>
+#include <cassert>
 
 
 void MillingMachineSystem::RegisterSystem(Coordinator &coordinator)
@@ -36,7 +38,10 @@ void MillingMachineSystem::RegisterSystem(Coordinator &coordinator)
 
 
 MillingMachineSystem::MillingMachineSystem():
-    heightmap(0, 0, nullptr, Texture2D::Red32BitFloat, Texture2D::Red)
+    heightmap(0, 0, nullptr, Texture2D::Red32BitFloat, Texture2D::Red),
+    instantWorker([this](std::stop_token token) {
+        InstantMillingThreadFunc(token);
+    })
 {
 }
 
@@ -95,6 +100,18 @@ void MillingMachineSystem::AddPaths(MillingMachinePath &&paths, const MillingCut
         coordinator->SetComponent(millingCutter, cutter);
     else
         coordinator->AddComponent<MillingCutter>(millingCutter, cutter);
+}
+
+
+void MillingMachineSystem::StartInstantMilling()
+{
+    instantWorker.StartWork();
+}
+
+
+void MillingMachineSystem::StopInstantMilling()
+{
+    instantWorker.JoinWorker();
 }
 
 
@@ -178,6 +195,13 @@ void MillingMachineSystem::SetCutterHeight(float height) const
 
 void MillingMachineSystem::Update(const double dt)
 {
+    if (InstantMillingRuns()) {
+        if (instantWorker.WaitsForJoin()) {
+            instantWorker.JoinWorker();
+            heightmap.Update(textureData.data(), Texture2D::Red);
+        }
+    }
+
     if (!cutterRuns || entities.empty())
         return;
 
@@ -199,10 +223,6 @@ void MillingMachineSystem::Update(const double dt)
             coordinator->SetComponent<Position>(millingCutter, newCutterPos);
 
             heightmap.Update(textureData.data(), Texture2D::Red);
-
-            // glBindTexture(GL_TEXTURE_2D, heightmap);
-            // glTexImage2D(
-            //     GL_TEXTURE_2D, 0, GL_R32F, heightMapXResolution, heightMapZResolution, 0, GL_RED, GL_FLOAT, textureData.data());
             return;
         }
 
@@ -217,10 +237,6 @@ void MillingMachineSystem::Update(const double dt)
     coordinator->SetComponent<Position>(millingCutter, commands[0].destination);
 
     heightmap.Update(textureData.data(), Texture2D::Red);
-
-    // glBindTexture(GL_TEXTURE_2D, heightmap);
-    // glTexImage2D(
-    //     GL_TEXTURE_2D, 0, GL_R32F, heightMapXResolution, heightMapZResolution, 0, GL_RED, GL_FLOAT, textureData.data());
 }
 
 
@@ -239,7 +255,6 @@ void MillingMachineSystem::Render(const alg::Mat4x4& view, const alg::Mat4x4& pe
     shader.SetHeightMapXLen(heightMapXLen);
     shader.SetMainHeightmapCorner(mainHeightMapCorner);
     shader.SetMVP(cameraMtx);
-    //shader.SetProjection00(perspective(0, 0));
 
     material.Use();
     glPatchParameteri(GL_PATCH_VERTICES, 4);
@@ -272,6 +287,25 @@ void MillingMachineSystem::Render(const alg::Mat4x4& view, const alg::Mat4x4& pe
     cutterMesh.Use();
 
     glDrawElements(GL_TRIANGLES, cutterMesh.GetElementsCnt(), GL_UNSIGNED_INT, nullptr);
+}
+
+
+void MillingMachineSystem::InstantMillingThreadFunc(std::stop_token stoken)
+{
+    if (entities.empty())
+        return;
+
+    const auto&[commands] = coordinator->GetComponent<MillingMachinePath>(*entities.begin());
+
+    while (actCommand < commands.size() && !stoken.stop_requested()) {
+        const auto& prevDest = commands[actCommand - 1].destination;
+        const auto& actDest = commands[actCommand].destination;
+
+        MillSection(prevDest, actDest);
+        actCommand++;
+    }
+
+    actCommand = 1;
 }
 
 

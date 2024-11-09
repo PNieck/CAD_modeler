@@ -16,7 +16,7 @@ MillingMachineSim::MillingMachineSim(const int viewportWidth, const int viewport
 
     gridSystem->Init(&shadersRepo);
 
-    millingMachineSystem->Init(300, 300);
+    millingMachineSystem->Init(1000, 1000);
 }
 
 
