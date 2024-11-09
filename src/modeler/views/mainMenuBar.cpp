@@ -1,9 +1,11 @@
 #include <CAD_modeler/views/mainMenuBar.hpp>
 
+#include <CAD_modeler/controllers/modelerController.hpp>
+
 #include <imgui.h>
 
 
-MainMenuBar::MainMenuBar(GuiController &controller, const Model &model):
+MainMenuBar::MainMenuBar(ModelerController& controller, Modeler& model):
     controller(controller), model(model), fileDialog(ImGuiFileBrowserFlags_EnterNewFilename | ImGuiFileBrowserFlags_CreateNewDir)
 {
     fileDialog.SetTitle("Choose file to load");
@@ -29,27 +31,28 @@ void MainMenuBar::Render()
         }
 
         if (ImGui::BeginMenu("Camera")) {
-            auto cameraType = model.cameraManager.GetCurrentCameraType();
+            const auto cameraType = model.cameraManager.GetCurrentCameraType();
 
-            if (ImGui::MenuItem("Normal", NULL, cameraType == CameraManager::CameraType::Perspective)) {
-                controller.SetCameraType(GuiController::CameraType::Perspective);
+            if (ImGui::MenuItem("Normal", nullptr, cameraType == CameraManager::CameraType::Perspective)) {
+                model.cameraManager.SetCameraType(CameraManager::CameraType::Perspective);
 
-                if (controller.GetAppState() == AppState::AnaglyphsSettings)
-                    controller.SetAppState(AppState::Default);
+                if (controller.GetModelerState() == ModelerState::AnaglyphsSettings)
+                    controller.SetModelerState(ModelerState::Default);
             }
 
-            if (ImGui::MenuItem("Anaglyphs", NULL, cameraType == CameraManager::CameraType::Anaglyphs)) {
-                controller.SetCameraType(GuiController::CameraType::Anaglyphs);
-                controller.SetAppState(AppState::AnaglyphsSettings);
+            if (ImGui::MenuItem("Anaglyphs", nullptr, cameraType == CameraManager::CameraType::Anaglyphs)) {
+                model.cameraManager.SetCameraType(CameraManager::CameraType::Anaglyphs);
+                controller.SetModelerState(ModelerState::AnaglyphsSettings);
             }
 
             ImGui::EndMenu();
         }
 
-#       ifndef NDEBUG
+#       ifndef NDEBUG // is true only during debug compilation
+
             static bool renderImGuiDemo = false;
             if (ImGui::BeginMenu("Debug")) {
-                if (ImGui::MenuItem("Show Imgui demo window", NULL, renderImGuiDemo))
+                if (ImGui::MenuItem("Show ImGui demo window", nullptr, renderImGuiDemo))
                     renderImGuiDemo = !renderImGuiDemo;
 
                 ImGui::EndMenu();
@@ -65,17 +68,16 @@ void MainMenuBar::Render()
 
     fileDialog.Display();
 
-    if(fileDialog.HasSelected())
-    {
-        auto path = fileDialog.GetSelected().string();
+    if(fileDialog.HasSelected()) {
+        const auto path = fileDialog.GetSelected().string();
         fileDialog.ClearSelected();
 
         if (savingScene) {
-            controller.SaveScene(path);
+            model.SaveScene(path);
             savingScene = false;
         }
         else
-            controller.LoadScene(path);
+            model.LoadScene(path);
         fileDialog.Close();
     }
 }

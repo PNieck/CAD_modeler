@@ -32,10 +32,8 @@ void C2CurveSystem::RegisterSystem(Coordinator & coordinator)
 
 Entity C2CurveSystem::CreateC2Curve(const std::vector<Entity>& cps)
 {
-    Entity curve = coordinator->GetSystem<CurveControlPointsSystem>()->CreateControlPoints(cps, Coordinator::GetSystemID<C2CurveSystem>());
+    const Entity curve = coordinator->GetSystem<CurveControlPointsSystem>()->CreateControlPoints(cps, Coordinator::GetSystemID<C2CurveSystem>());
     auto const& controlPoints = coordinator->GetComponent<CurveControlPoints>(curve);
-
-    C2CurveParameters params;
 
     Mesh mesh;
     mesh.Update(
@@ -43,7 +41,7 @@ Entity C2CurveSystem::CreateC2Curve(const std::vector<Entity>& cps)
         GenerateCurveMeshIndices(controlPoints)
     );
 
-    coordinator->AddComponent<C2CurveParameters>(curve, params);
+    coordinator->AddComponent<C2CurveParameters>(curve, C2CurveParameters());
     coordinator->AddComponent<Mesh>(curve, mesh);
     coordinator->AddComponent<Name>(curve, nameGenerator.GenerateName("CurveC2_"));
 
@@ -51,7 +49,7 @@ Entity C2CurveSystem::CreateC2Curve(const std::vector<Entity>& cps)
 }
 
 
-void C2CurveSystem::ShowBSplinePolygon(Entity entity)
+void C2CurveSystem::ShowBSplinePolygon(const Entity entity)
 {
     coordinator->EditComponent<C2CurveParameters>(entity,
         [](C2CurveParameters& params) {
@@ -71,7 +69,7 @@ void C2CurveSystem::ShowBSplinePolygon(Entity entity)
 }
 
 
-void C2CurveSystem::HideBSplinePolygon(Entity entity)
+void C2CurveSystem::HideBSplinePolygon(const Entity entity)
 {
     coordinator->EditComponent<C2CurveParameters>(entity,
         [](C2CurveParameters& params) {
@@ -83,7 +81,7 @@ void C2CurveSystem::HideBSplinePolygon(Entity entity)
 }
 
 
-void C2CurveSystem::ShowBezierPolygon(Entity entity)
+void C2CurveSystem::ShowBezierPolygon(const Entity entity)
 {
     coordinator->EditComponent<C2CurveParameters>(entity,
         [](C2CurveParameters& params) {
@@ -93,7 +91,7 @@ void C2CurveSystem::ShowBezierPolygon(Entity entity)
 }
 
 
-void C2CurveSystem::HideBezierPolygon(Entity entity)
+void C2CurveSystem::HideBezierPolygon(const Entity entity)
 {
     coordinator->EditComponent<C2CurveParameters>(entity,
         [](C2CurveParameters& params) {
@@ -103,7 +101,7 @@ void C2CurveSystem::HideBezierPolygon(Entity entity)
 }
 
 
-void C2CurveSystem::ShowBezierControlPoints(Entity entity)
+void C2CurveSystem::ShowBezierControlPoints(const Entity entity)
 {
     coordinator->EditComponent<C2CurveParameters>(entity,
         [](C2CurveParameters& params) {
@@ -127,7 +125,7 @@ void C2CurveSystem::ShowBezierControlPoints(Entity entity)
 }
 
 
-void C2CurveSystem::HideBezierControlPoints(Entity entity)
+void C2CurveSystem::HideBezierControlPoints(const Entity entity)
 {
     coordinator->EditComponent<C2CurveParameters>(entity,
         [](C2CurveParameters& params) {
@@ -165,7 +163,7 @@ void C2CurveSystem::Render(const alg::Mat4x4& cameraMtx) const
         if (params.drawBezierPolygon)
             bezierPolygonsToDraw.push(entity);
 
-        bool selection = selectionSystem->IsSelected(entity);
+        const bool selection = selectionSystem->IsSelected(entity);
 
         if (selection)
             shader.SetColor(alg::Vec4(1.0f, 0.5f, 0.0f, 1.0f));
@@ -192,9 +190,9 @@ void C2CurveSystem::UpdateEntities() const
 {
     auto const& toUpdateSystem = coordinator->GetSystem<ToUpdateSystem>();
 
-    auto toUpdate = intersect(toUpdateSystem->GetEntities(), entities);
+    const auto toUpdate = intersect(toUpdateSystem->GetEntities(), entities);
 
-    for (auto entity: toUpdate) {
+    for (const auto entity: toUpdate) {
         auto const& cps = coordinator->GetComponent<CurveControlPoints>(entity);
         if (cps.Size() == 0) {
             coordinator->DestroyEntity(entity);
@@ -362,10 +360,10 @@ void C2CurveSystem::RenderBezierPolygons(std::stack<Entity>& cps, const alg::Mat
     shader.SetMVP(cameraMtx);
 
     while (!cps.empty()) {
-        Entity entity = cps.top();
+        const Entity entity = cps.top();
         cps.pop();
 
-        bool selection = selectionSystem->IsSelected(entity);
+        const bool selection = selectionSystem->IsSelected(entity);
 
         if (selection)
             shader.SetColor(alg::Vec4(1.0f, 0.5f, 0.0f, 1.0f));
@@ -373,7 +371,7 @@ void C2CurveSystem::RenderBezierPolygons(std::stack<Entity>& cps, const alg::Mat
         auto const& mesh = coordinator->GetComponent<Mesh>(entity);
         mesh.Use();
 
-	    glDrawElements(GL_LINE_STRIP, mesh.GetElementsCnt(), GL_UNSIGNED_INT, 0);
+	    glDrawElements(GL_LINE_STRIP, mesh.GetElementsCnt(), GL_UNSIGNED_INT, nullptr);
 
         if (selection)
             shader.SetColor(alg::Vec4(1.0f));
@@ -384,12 +382,12 @@ void C2CurveSystem::RenderBezierPolygons(std::stack<Entity>& cps, const alg::Mat
 BezierControlPoints C2CurveSystem::CreateBezierControlPoints(const CurveControlPoints & params) const
 {
     BezierControlPoints bezierControlPoints;
-    auto pointsSystem = coordinator->GetSystem<PointsSystem>();
+    const auto pointsSystem = coordinator->GetSystem<PointsSystem>();
 
-    auto pointsPositions = CreateBezierControlPointsPositions(params);
+    const auto pointsPositions = CreateBezierControlPointsPositions(params);
 
     for (auto& vec: pointsPositions) {
-        Entity point = pointsSystem->CreatePoint(Position(vec), false);
+        const Entity point = pointsSystem->CreatePoint(Position(vec), false);
         bezierControlPoints.AddControlPoint(point);
         coordinator->AddComponent<Unremovable>(point, Unremovable());
     }
@@ -402,7 +400,7 @@ void C2CurveSystem::DeleteBezierControlPoints(Entity entity) const
 {
     auto const& bezierControlPoints = coordinator->GetComponent<BezierControlPoints>(entity);
 
-    for (auto point: bezierControlPoints.GetPoints()) {
+    for (const auto point: bezierControlPoints.GetPoints()) {
         coordinator->DestroyEntity(point);
     }
 
@@ -416,7 +414,7 @@ std::vector<alg::Vec3> C2CurveSystem::CreateBezierControlPointsPositions(const C
 
     std::vector<alg::Vec3> result;
 
-    size_t ctrlPtsCnt = BezierControlPointsCnt(controlPoints.size());
+    const size_t ctrlPtsCnt = BezierControlPointsCnt(controlPoints.size());
     if (ctrlPtsCnt == 0)
         return result;
 
@@ -427,9 +425,9 @@ std::vector<alg::Vec3> C2CurveSystem::CreateBezierControlPointsPositions(const C
     auto const& pos3 = coordinator->GetComponent<Position>(controlPoints[2]);
 
     // Adding the first point
-    alg::Vec3 g0 = (1.f/3.f) * pos1.vec + (2.f/3.f) * pos2.vec;
-    alg::Vec3 f1 = (2.f/3.f) * pos2.vec + (1.f/3.f) * pos3.vec;
-    alg::Vec3 e0 = (g0 + f1) * 0.5f;
+    const alg::Vec3 g0 = (1.f/3.f) * pos1.vec + (2.f/3.f) * pos2.vec;
+    const alg::Vec3 f1 = (2.f/3.f) * pos2.vec + (1.f/3.f) * pos3.vec;
+    const alg::Vec3 e0 = (g0 + f1) * 0.5f;
     result.push_back(e0);
 
     for (int i=1; i < controlPoints.size() - 2 ; ++i) {
@@ -457,7 +455,7 @@ std::vector<float> C2CurveSystem::GenerateCurveMeshVertices(const CurveControlPo
 
     auto controlPointsPositions = CreateBezierControlPointsPositions(params);
 
-    result.reserve(controlPointsPositions.size() * 3);
+    result.reserve(controlPointsPositions.size() * alg::Vec3::dim);
 
     for (auto& vec: controlPointsPositions) {
         result.push_back(vec.X());
@@ -472,7 +470,7 @@ std::vector<float> C2CurveSystem::GenerateCurveMeshVertices(const CurveControlPo
 std::vector<uint32_t> C2CurveSystem::GenerateCurveMeshIndices(const CurveControlPoints& params) const
 {
     auto const& controlPoints = params.GetPoints();
-    int segments = std::max<int>(controlPoints.size() - 3, 0);
+    const int segments = std::max<int>(controlPoints.size() - 3, 0);
     std::vector<uint32_t> result;
     result.reserve(4*segments);
 
@@ -494,7 +492,7 @@ std::vector<float> C2CurveSystem::GenerateBSplinePolygonVertices(const CurveCont
     std::vector<float> result;
     result.reserve(3 * controlPoints.size());
 
-    for (Entity entity: controlPoints) {
+    for (const Entity entity: controlPoints) {
         auto const& pos = coordinator->GetComponent<Position>(entity);
 
         result.push_back(pos.GetX());
@@ -535,7 +533,7 @@ void C2CurveSystem::BezierCtrlPtMovedHandler::HandleEvent(Entity entity, const P
         return;
 
     auto const& bezierCPs = coordinator.GetComponent<BezierControlPoints>(c2Curve).GetPoints();
-    auto index = std::find(bezierCPs.begin(), bezierCPs.end(), entity) - bezierCPs.begin();
+    const auto index = std::ranges::find(bezierCPs, entity) - bezierCPs.begin();
 
     if (index >= bezierCPs.size())
         return;
@@ -587,8 +585,8 @@ void C2CurveSystem::BezierCtrlPtMovedHandler::LastCPMoved(const std::vector<Enti
 
     auto const& secondToLastBSplineCP = coordinator.GetComponent<Position>(bSplineCPs.at(bSplineCPs.size() - 2));
 
-    auto afterLastBezierPos = 2.f * lastBezierCP.vec - secondToLastBezierCP.vec;
-    auto lastBSplineNewPos = (afterLastBezierPos - secondToLastBSplineCP.vec) * 3.f + secondToLastBSplineCP.vec;
+    const auto afterLastBezierPos = 2.f * lastBezierCP.vec - secondToLastBezierCP.vec;
+    const auto lastBSplineNewPos = (afterLastBezierPos - secondToLastBSplineCP.vec) * 3.f + secondToLastBSplineCP.vec;
 
     coordinator.SetComponent<Position>(bSplineCPs.at(bSplineCPs.size() - 1), Position(lastBSplineNewPos));
 }
@@ -596,12 +594,12 @@ void C2CurveSystem::BezierCtrlPtMovedHandler::LastCPMoved(const std::vector<Enti
 
 void C2CurveSystem::BezierCtrlPtMovedHandler::FirstFromFullLineMoved(const std::vector<Entity>& bezierCPs, const std::vector<Entity>& bSplineCPs, int bezierCtrlPtIndex) const
 {
-    int bSplineCPToModifyIndex = (bezierCtrlPtIndex+1)/3 + 1;
+    const int bSplineCPToModifyIndex = (bezierCtrlPtIndex+1)/3 + 1;
 
     auto const& bSplineCPToStay = coordinator.GetComponent<Position>(bSplineCPs[bSplineCPToModifyIndex - 1]);
     auto const& newBezierPos = coordinator.GetComponent<Position>(bezierCPs[bezierCtrlPtIndex]);
 
-    auto newPos = (newBezierPos.vec - bSplineCPToStay.vec) * 0.5f + newBezierPos.vec;
+    const auto newPos = (newBezierPos.vec - bSplineCPToStay.vec) * 0.5f + newBezierPos.vec;
 
     coordinator.SetComponent<Position>(bSplineCPs.at(bSplineCPToModifyIndex), Position(newPos));
 }
@@ -609,13 +607,13 @@ void C2CurveSystem::BezierCtrlPtMovedHandler::FirstFromFullLineMoved(const std::
 
 void C2CurveSystem::BezierCtrlPtMovedHandler::SecondFromFullLineMoved(const std::vector<Entity>& bezierCPs, const std::vector<Entity>& bSplineCPs, int bezierCtrlPtIndex) const
 {
-    int bSplineCPToModifyIndex = bezierCtrlPtIndex/3 + 1;
+    const int bSplineCPToModifyIndex = bezierCtrlPtIndex/3 + 1;
 
     auto const& prevCP = coordinator.GetComponent<Position>(bSplineCPs[bSplineCPToModifyIndex - 1]);
     auto const& nextCP = coordinator.GetComponent<Position>(bSplineCPs[bSplineCPToModifyIndex + 1]);
     auto const& newBezierPos = coordinator.GetComponent<Position>(bezierCPs[bezierCtrlPtIndex]);
 
-    auto newPos = (3.f*newBezierPos.vec - 0.5f*(prevCP.vec + nextCP.vec)) * 0.5f;
+    const auto newPos = (3.f*newBezierPos.vec - 0.5f*(prevCP.vec + nextCP.vec)) * 0.5f;
 
     coordinator.SetComponent<Position>(bSplineCPs.at(bSplineCPToModifyIndex), Position(newPos));
 }
@@ -623,12 +621,12 @@ void C2CurveSystem::BezierCtrlPtMovedHandler::SecondFromFullLineMoved(const std:
 
 void C2CurveSystem::BezierCtrlPtMovedHandler::ThirdFromFullLineMoved(const std::vector<Entity>& bezierCPs, const std::vector<Entity>& bSplineCPs, int bezierCtrlPtIndex) const
 {
-    int bSplineCPToModifyIndex = (bezierCtrlPtIndex-1)/3 + 1;
+    const int bSplineCPToModifyIndex = (bezierCtrlPtIndex-1)/3 + 1;
 
     auto const& bSplineCPToStay = coordinator.GetComponent<Position>(bSplineCPs[bSplineCPToModifyIndex + 1]);
     auto const& newBezierPos = coordinator.GetComponent<Position>(bezierCPs[bezierCtrlPtIndex]);
 
-    auto newPos = (newBezierPos.vec - bSplineCPToStay.vec) * 0.5f + newBezierPos.vec;
+    const auto newPos = (newBezierPos.vec - bSplineCPToStay.vec) * 0.5f + newBezierPos.vec;
 
     coordinator.SetComponent<Position>(bSplineCPs.at(bSplineCPToModifyIndex), Position(newPos));
 }

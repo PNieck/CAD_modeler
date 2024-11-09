@@ -1,4 +1,4 @@
-#include <CAD_modeler/model.hpp>
+#include <CAD_modeler/model/modeler.hpp>
 
 #include <CAD_modeler/utilities/line.hpp>
 #include <CAD_modeler/utilities/plane.hpp>
@@ -9,15 +9,14 @@
 #include <CAD_modeler/model/systems/toUpdateSystem.hpp>
 #include <CAD_modeler/model/systems/curveControlPointsSystem.hpp>
 
+#include <CAD_modeler/model/systems/shaders/shaderRepository.hpp>
+
 #include <stdexcept>
 
 
-Model::Model(int viewport_width, int viewport_height):
-    cameraManager(coordinator)
+Modeler::Modeler(const int viewportWidth, const int viewportHeight):
+    Model(viewportWidth, viewportHeight)
 {
-    glEnable(GL_PRIMITIVE_RESTART);
-    glPrimitiveRestartIndex(std::numeric_limits<uint32_t>::max());
-
     RegisterAllComponents(coordinator);
 
     ToriSystem::RegisterSystem(coordinator);
@@ -63,7 +62,9 @@ Model::Model(int viewport_width, int viewport_height):
     vectorSystem = coordinator.GetSystem<VectorSystem>();
     intersectionSystem = coordinator.GetSystem<IntersectionSystem>();
 
-    cameraManager.Init(viewport_width, viewport_height);
+    ShaderRepository& shadersRepo = ShaderRepository::GetInstance();
+
+    cameraManager.Init(viewportWidth, viewportHeight);
     gridSystem->Init(&shadersRepo);
     cursorSystem->Init(&shadersRepo);
     selectionSystem->Init(&shadersRepo);
@@ -80,35 +81,10 @@ Model::Model(int viewport_width, int viewport_height):
     controlNetSystem->Init(&shadersRepo);
     gregoryPatchesSystem->Init(&shadersRepo);
     vectorSystem->Init(&shadersRepo);
-
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-    glEnable(GL_LINE_SMOOTH);
-    glLineWidth(1.0);
-    glEnable(GL_BLEND);
-    glDepthMask(GL_FALSE);
-    glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
 }
 
 
-void Model::RenderFrame()
-{
-    switch (cameraManager.GetCurrentCameraType())
-    {
-    case CameraManager::CameraType::Perspective:
-        RenderPerspectiveFrame();
-        break;
-
-    case CameraManager::CameraType::Anaglyphs:
-        RenderAnaglyphsFrame();
-        break;
-    
-    default:
-        throw std::runtime_error("Unknown camera type");
-    }
-}
-
-
-void Model::AddTorus()
+void Modeler::AddTorus()
 {
     Position cursorPos = cursorSystem->GetPosition();
 
@@ -124,7 +100,7 @@ void Model::AddTorus()
 }
 
 
-void Model::MergeControlPoints(Entity e1, Entity e2)
+void Modeler::MergeControlPoints(Entity e1, Entity e2)
 {
     auto registrySys = coordinator.GetSystem<ControlPointsRegistrySystem>();
     auto curveCPSys = coordinator.GetSystem<CurveControlPointsSystem>();
@@ -161,40 +137,28 @@ void Model::MergeControlPoints(Entity e1, Entity e2)
 }
 
 
-void Model::ChangeViewportSize(int width, int height)
-{
-    glViewport(0, 0, width, height);
-
-    auto params = cameraManager.GetBaseParams();
-    params.viewportWidth = width;
-    params.viewportHeight = height;
-
-    cameraManager.SetBaseParams(params);
-}
-
-
-Entity Model::Add3DPointFromViewport(float x, float y)
+Entity Modeler::Add3DPointFromViewport(float x, float y)
 {
     Position newPos(PointFromViewportCoordinates(x, y));
     return pointsSystem->CreatePoint(newPos);
 }
 
 
-void Model::TryToSelectFromViewport(float x, float y)
+void Modeler::TryToSelectFromViewport(float x, float y)
 {
     Line line(LineFromViewportCoordinates(x, y));
     selectionSystem->SelectFromLine(line);
 }
 
 
-void Model::SelectMultipleFromViewport(float x, float y, float dist)
+void Modeler::SelectMultipleFromViewport(float x, float y, float dist)
 {
     Line line(LineFromViewportCoordinates(x, y));
     selectionSystem->SelectAllFromLine(line, dist);
 }
 
 
-std::vector<GregoryPatchesSystem::Hole> Model::GetHolesPossibleToFill(const std::unordered_set<Entity> &entities) const
+std::vector<GregoryPatchesSystem::Hole> Modeler::GetHolesPossibleToFill(const std::unordered_set<Entity> &entities) const
 {
     std::vector<C0Patches> c0Patches;
     c0Patches.reserve(entities.size());
@@ -206,7 +170,7 @@ std::vector<GregoryPatchesSystem::Hole> Model::GetHolesPossibleToFill(const std:
 }
 
 
-alg::Vec3 Model::PointFromViewportCoordinates(float x, float y)
+alg::Vec3 Modeler::PointFromViewportCoordinates(float x, float y)
 {
     auto cameraParams = cameraManager.GetBaseParams();
     auto const& cameraTarget = cameraParams.target;
@@ -229,7 +193,7 @@ alg::Vec3 Model::PointFromViewportCoordinates(float x, float y)
 }
 
 
-Line Model::LineFromViewportCoordinates(float x, float y)
+Line Modeler::LineFromViewportCoordinates(float x, float y)
 {
     auto cameraType = cameraManager.GetCurrentCameraType();
     if (cameraType == CameraManager::CameraType::Anaglyphs)
@@ -261,45 +225,7 @@ Line Model::LineFromViewportCoordinates(float x, float y)
 }
 
 
-void Model::RenderAnaglyphsFrame()
-{
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    // Render picture for the left eye
-    cameraManager.SetCurrentEye(CameraManager::Eye::Left);
-    alg::Mat4x4 persMtx = cameraManager.PerspectiveMtx();
-    alg::Mat4x4 viewMtx = cameraManager.ViewMtx();
-    auto camParams = cameraManager.GetBaseParams();
-
-    glColorMask(true, false, false, false);
-    RenderSystemsObjects(viewMtx, persMtx, camParams.nearPlane, camParams.farPlane);
-
-    // Render picture for right eye
-    cameraManager.SetCurrentEye(CameraManager::Eye::Right);
-    persMtx = cameraManager.PerspectiveMtx();
-    viewMtx = cameraManager.ViewMtx();
-
-    glColorMask(false, true, true, false);
-    RenderSystemsObjects(viewMtx, persMtx, camParams.nearPlane, camParams.farPlane);
-
-    // Setting mask back to normal
-    glColorMask(true, true, true, true);
-}
-
-
-void Model::RenderPerspectiveFrame()
-{
-    alg::Mat4x4 persMtx = cameraManager.PerspectiveMtx();
-    alg::Mat4x4 viewMtx = cameraManager.ViewMtx();
-    auto camParams = cameraManager.GetBaseParams();
-
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    RenderSystemsObjects(viewMtx, persMtx, camParams.nearPlane, camParams.farPlane);
-}
-
-
-void Model::RenderSystemsObjects(const alg::Mat4x4 &viewMtx, const alg::Mat4x4 &persMtx, float nearPlane, float farPlane) const
+void Modeler::RenderSystemsObjects(const alg::Mat4x4 &viewMtx, const alg::Mat4x4 &persMtx, float nearPlane, float farPlane) const
 {
     alg::Mat4x4 cameraMtx = persMtx * viewMtx;
 

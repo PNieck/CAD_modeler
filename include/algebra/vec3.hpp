@@ -10,6 +10,8 @@ namespace alg
     template <typename DataType>
     class Vector3 {
     public:
+        static constexpr size_t dim = 3;
+
         Vector3() = default;
         explicit Vector3(DataType scalar) { data.fill(scalar); }
         constexpr Vector3(DataType v1, DataType v2, DataType v3) {

@@ -1,104 +1,76 @@
-#include <CAD_modeler/views/guiView.hpp>
+#include <CAD_modeler/views/modelerGuiView.hpp>
 
 #include <CAD_modeler/utilities/angle.hpp>
 #include <CAD_modeler/model/components/unremovable.hpp>
+#include <CAD_modeler/controllers/modelerController.hpp>
 
 #include <imgui.h>
-#include <backends/imgui_impl_glfw.h>
-#include <backends/imgui_impl_opengl3.h>
 #include <misc/cpp/imgui_stdlib.h>
 
-#include <iterator>
 #include <stdexcept>
 #include <optional>
 #include <sstream>
 
 
-GuiView::GuiView(GLFWwindow* window, GuiController& controller, const Model& model):
+ModelerGuiView::ModelerGuiView(ModelerController& controller, Modeler& model):
     controller(controller), model(model), menuBar(controller, model)
 {
-    // FIXME: function, which generates glsl version string
-    const char* glsl_version = "#version 410";
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO();
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-
-    ImGui::StyleColorsDark();
-
-    ImGui_ImplGlfw_InitForOpenGL(window, true);
-#ifdef __EMSCRIPTEN__
-    ImGui_ImplGlfw_InstallEmscriptenCanvasResizeCallback("#canvas");
-#endif
-    ImGui_ImplOpenGL3_Init(glsl_version);
 }
 
 
-GuiView::~GuiView()
+void ModelerGuiView::RenderGui()
 {
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();
-}
-
-
-void GuiView::RenderGui()
-{
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
-
     ImGui::Begin("Modeler");
 
     menuBar.Render();
     
-    switch (controller.GetAppState())
+    switch (controller.GetModelerState())
     {
-        case AppState::Default:
+        case ModelerState::Default:
             RenderDefaultGui();
             break;
 
-        case AppState::Adding3dPoints:
+        case ModelerState::Adding3dPoints:
             RenderAdd3DPointsGui();
             break;
 
-        case AppState::AddingC0Curve:
+        case ModelerState::AddingC0Curve:
             RenderAddingCurveGui(CurveType::C0);
             break;
 
-        case AppState::AddingC2Curve:
+        case ModelerState::AddingC2Curve:
             RenderAddingCurveGui(CurveType::C2);
             break;
 
-        case AppState::AddingInterpolationCurve:
+        case ModelerState::AddingInterpolationCurve:
             RenderAddingCurveGui(CurveType::Interpolation);
             break;
 
-        case AppState::AddingIntersectionCurve:
+        case ModelerState::AddingIntersectionCurve:
             RenderAddingIntersectionCurve();
             break;
 
-        case AppState::AddingC0Surface:
+        case ModelerState::AddingC0Surface:
             RenderAddingSurface(SurfaceType::C0);
             break;
 
-        case AppState::AddingC2Surface:
+        case ModelerState::AddingC2Surface:
             RenderAddingSurface(SurfaceType::C2);
             break;
 
-        case AppState::AddingC0Cylinder:
+        case ModelerState::AddingC0Cylinder:
             RenderAddingCylinder(CylinderType::C0);
             break;
 
-        case AppState::AddingC2Cylinder:
+        case ModelerState::AddingC2Cylinder:
             RenderAddingCylinder(CylinderType::C2);
             break;
 
-        case AppState::AddingGregoryPatches:
+        case ModelerState::AddingGregoryPatches:
             RenderAddingGregoryPatches();
             break;
 
-        case AppState::AnaglyphsSettings:
+        case ModelerState::AnaglyphsSettings:
             RenderAnaglyphsCameraSettings();
             break;
 
@@ -109,61 +81,58 @@ void GuiView::RenderGui()
     ImGui::End();
 
     RenderObjectsProperties();
-
-    ImGui::Render();
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
 
-void GuiView::RenderDefaultGui() const
+void ModelerGuiView::RenderDefaultGui() const
 {
     if (ImGui::Button("Add 3D points")) {
-        controller.SetAppState(AppState::Adding3dPoints);
+        controller.SetModelerState(ModelerState::Adding3dPoints);
     }
 
     if (ImGui::Button("Add torus")) {
-        controller.AddTorus();
+        model.AddTorus();
     }
 
     if (ImGui::Button("Add C0 curve")) {
-        controller.SetAppState(AppState::AddingC0Curve);
-        controller.DeselectAllEntities();
+        controller.SetModelerState(ModelerState::AddingC0Curve);
+        model.DeselectAllEntities();
     }
 
     if (ImGui::Button("Add C2 curve")) {
-        controller.SetAppState(AppState::AddingC2Curve);
-        controller.DeselectAllEntities();
+        controller.SetModelerState(ModelerState::AddingC2Curve);
+        model.DeselectAllEntities();
     }
 
     if (ImGui::Button("Add interpolation curve")) {
-        controller.SetAppState(AppState::AddingInterpolationCurve);
-        controller.DeselectAllEntities();
+        controller.SetModelerState(ModelerState::AddingInterpolationCurve);
+        model.DeselectAllEntities();
     }
 
     if (ImGui::Button("Add intersection curve")) {
-        controller.SetAppState(AppState::AddingIntersectionCurve);
-        controller.DeselectAllEntities();
+        controller.SetModelerState(ModelerState::AddingIntersectionCurve);
+        model.DeselectAllEntities();
     }
 
     if (ImGui::Button("Add C0 surface")) {
-        controller.SetAppState(AppState::AddingC0Surface);
+        controller.SetModelerState(ModelerState::AddingC0Surface);
     }
 
     if (ImGui::Button("Add C2 surface")) {
-        controller.SetAppState(AppState::AddingC2Surface);
+        controller.SetModelerState(ModelerState::AddingC2Surface);
     }
 
     if (ImGui::Button("Add C0 cylinder")) {
-        controller.SetAppState(AppState::AddingC0Cylinder);
+        controller.SetModelerState(ModelerState::AddingC0Cylinder);
     }
 
     if (ImGui::Button("Add C2 cylinder")) {
-        controller.SetAppState(AppState::AddingC2Cylinder);
+        controller.SetModelerState(ModelerState::AddingC2Cylinder);
     }
 
     if (ImGui::Button("Add Gregory patches")) {
+        controller.SetModelerState(ModelerState::AddingGregoryPatches);
         model.DeselectAllEntities();
-        controller.SetAppState(AppState::AddingGregoryPatches);
     }
 
     if (ImGui::Button("Deselect all"))
@@ -175,7 +144,7 @@ void GuiView::RenderDefaultGui() const
 }
 
 
-void GuiView::RenderObjectsNames() const
+void ModelerGuiView::RenderObjectsNames() const
 {
     static bool hidePoints = false;
 
@@ -195,31 +164,31 @@ void GuiView::RenderObjectsNames() const
             &selected
         )) {
             if (selected)
-                controller.SelectEntity(entity);
+                model.Select(entity);
             else
-                controller.DeselectEntity(entity);
+                model.Deselect(entity);
         }
     } 
 }
 
 
-void GuiView::RenderAdd3DPointsGui() const
+void ModelerGuiView::RenderAdd3DPointsGui()
 {
     if (ImGui::Button("Finish adding points")) {
-        controller.SetAppState(AppState::Default);
+        controller.SetModelerState(ModelerState::Default);
     }
 }
 
 
-void GuiView::RenderAddingCurveGui(CurveType curveType) const
+void ModelerGuiView::RenderAddingCurveGui(const CurveType curveType)
 {
     static std::unordered_set<Entity> controlPoints;
     static Entity curve;
 
     if (ImGui::Button("Finish adding points")) {
         controlPoints.clear();
-        controller.SetAppState(AppState::Default);
-        controller.DeselectAllEntities();
+        controller.SetModelerState(ModelerState::Default);
+        model.DeselectAllEntities();
     }    
 
     ImGui::SeparatorText("Select control points");
@@ -241,60 +210,26 @@ void GuiView::RenderAddingCurveGui(CurveType curveType) const
             if (newSelected) {
                 controlPoints.insert(entity);
                 if (controlPoints.size() == 1)
-                    curve = controller.AddCurve({entity}, curveType);
+                    curve = AddCurve({entity}, curveType);
                 else 
-                    controller.AddControlPointToCurve(curve, entity, curveType);
-                controller.SelectEntity(entity);
+                    AddControlPointToCurve(curve, entity, curveType);
+                model.Select(entity);
             }
             else {
                 const auto it = std::ranges::find(controlPoints, entity);
                 controlPoints.erase(it);
                 if (controlPoints.empty())
-                    controller.DeleteEntity(curve);
+                    model.DeleteEntity(curve);
                 else
-                    controller.DeleteControlPointFromCurve(curve, entity);
-                controller.DeselectEntity(entity);
+                    model.DeleteControlPointFromCurve(curve, entity);
+                model.Deselect(entity);
             }
         }
     } 
 }
 
 
-// TODO: delete this function
-int GetSurfaceRowsCnt(Entity surface, SurfaceType surfaceType, const Model& model)
-{
-    switch (surfaceType)
-    {
-    case SurfaceType::C0:
-        return model.GetRowsCntOfC0Patches(surface);
-    
-    case SurfaceType::C2:
-        return model.GetRowsCntOfC2Patches(surface);
-    
-    default:
-        throw std::runtime_error("Unknown surface type");
-    }
-}
-
-
-// TODO: delete this function
-int GetSurfaceColsCnt(Entity surface, SurfaceType surfaceType, const Model& model)
-{
-    switch (surfaceType)
-    {
-    case SurfaceType::C0:
-        return model.GetColsOfC0Patches(surface);
-    
-    case SurfaceType::C2:
-        return model.GetColsCntOfC2Patches(surface);
-    
-    default:
-        throw std::runtime_error("Unknown surface type");
-    }
-}
-
-
-void GuiView::RenderAddingSurface(SurfaceType surfaceType) const
+void ModelerGuiView::RenderAddingSurface(const SurfaceType surfaceType)
 {
     static std::optional<Entity> entity;
     static constexpr alg::Vec3 dir(0.f, 1.f, 0.f);
@@ -304,11 +239,11 @@ void GuiView::RenderAddingSurface(SurfaceType surfaceType) const
         width = 1.0f;
         length = 1.0f;
 
-        entity = controller.AddSurface(surfaceType, dir, length, width);
+        entity = AddSurface(surfaceType, dir, length, width);
     }
 
-    int rows = GetSurfaceRowsCnt(entity.value(), surfaceType, model);
-    int cols = GetSurfaceColsCnt(entity.value(), surfaceType, model);
+    int rows = GetSurfaceRowsCnt(entity.value(), surfaceType);
+    int cols = GetSurfaceColsCnt(entity.value(), surfaceType);
     bool valueChanged = false;
 
     ImGui::InputInt("Rows", &rows);
@@ -318,69 +253,36 @@ void GuiView::RenderAddingSurface(SurfaceType surfaceType) const
     valueChanged |= ImGui::DragFloat("Width", &width, DRAG_FLOAT_SPEED);
 
     if (valueChanged)
-        controller.RecalculateSurface(entity.value(), surfaceType,  dir, length, width);
+        RecalculateSurface(entity.value(), surfaceType,  dir, length, width);
 
-    if (rows != GetSurfaceRowsCnt(entity.value(), surfaceType, model)) {
-        while (rows > GetSurfaceRowsCnt(entity.value(), surfaceType, model)) {
-            controller.AddRowOfSurfacePatches(entity.value(), surfaceType, dir, length, width);
+    if (rows != GetSurfaceRowsCnt(entity.value(), surfaceType)) {
+        while (rows > GetSurfaceRowsCnt(entity.value(), surfaceType)) {
+            AddRowOfSurfacePatches(entity.value(), surfaceType, dir, length, width);
         }
 
-        while (rows < GetSurfaceRowsCnt(entity.value(), surfaceType, model)) {
-            controller.DeleteRowOfSurfacePatches(entity.value(), surfaceType, dir, length, width);
+        while (rows < GetSurfaceRowsCnt(entity.value(), surfaceType)) {
+            DeleteRowOfSurfacePatches(entity.value(), surfaceType, dir, length, width);
         }
     }
 
-    if (cols != GetSurfaceColsCnt(entity.value(), surfaceType, model)) {
-        while (cols > GetSurfaceColsCnt(entity.value(), surfaceType, model)) {
-            controller.AddColOfSurfacePatches(entity.value(), surfaceType, dir, length, width);
+    if (cols != GetSurfaceColsCnt(entity.value(), surfaceType)) {
+        while (cols > GetSurfaceColsCnt(entity.value(), surfaceType)) {
+            AddColOfSurfacePatches(entity.value(), surfaceType, dir, length, width);
         }
 
-        while (cols < GetSurfaceColsCnt(entity.value(), surfaceType, model)) {
-            controller.DeleteColOfSurfacePatches(entity.value(), surfaceType, dir, length, width);
+        while (cols < GetSurfaceColsCnt(entity.value(), surfaceType)) {
+            DeleteColOfSurfacePatches(entity.value(), surfaceType, dir, length, width);
         }
     }
 
     if (ImGui::Button("Finish adding")) {
-        controller.SetAppState(AppState::Default);
+        controller.SetModelerState(ModelerState::Default);
         entity.reset();
     }
 }
 
-// TODO: delete this function
-int GetCylinderRowsCnt(Entity cylinder, CylinderType CylinderType, const Model& model)
-{
-    switch (CylinderType)
-    {
-    case CylinderType::C0:
-        return model.GetRowsCntOfC0Patches(cylinder);
-    
-    case CylinderType::C2:
-        return model.GetRowsCntOfC2Cylinder(cylinder);
-    
-    default:
-        throw std::runtime_error("Unknown surface type");
-    }
-}
 
-
-// TODO: delete this function
-int GetCylinderColsCnt(Entity cylinder, CylinderType CylinderType, const Model& model)
-{
-    switch (CylinderType)
-    {
-    case CylinderType::C0:
-        return model.GetColsOfC0Patches(cylinder);
-    
-    case CylinderType::C2:
-        return model.GetColsCntOfC2Cylinder(cylinder);
-    
-    default:
-        throw std::runtime_error("Unknown surface type");
-    }
-}
-
-
-void GuiView::RenderAddingCylinder(CylinderType cylinderType) const
+void ModelerGuiView::RenderAddingCylinder(const CylinderType cylinderType)
 {
     static std::optional<Entity> entity;
     static float newRadius;
@@ -388,12 +290,12 @@ void GuiView::RenderAddingCylinder(CylinderType cylinderType) const
     static constexpr alg::Vec3 dir(0.f, 1.f, 0.f);
     
     if (!entity.has_value()) {
-        entity = controller.AddCylinder(cylinderType);
+        entity = AddCylinder(cylinderType);
         newLen = 1.f;
     }
 
-    int rows = GetCylinderRowsCnt(entity.value(), cylinderType, model);
-    int cols = GetCylinderColsCnt(entity.value(), cylinderType, model);
+    int rows = GetCylinderRowsCnt(entity.value(), cylinderType);
+    int cols = GetCylinderColsCnt(entity.value(), cylinderType);
     bool valueChanged = false;
 
     ImGui::InputInt("Rows", &rows);
@@ -403,37 +305,37 @@ void GuiView::RenderAddingCylinder(CylinderType cylinderType) const
     valueChanged |= ImGui::DragFloat("Length", &newLen, DRAG_FLOAT_SPEED);
 
     if (valueChanged) {
-        controller.RecalculateCylinder(entity.value(), cylinderType, dir * newLen, newRadius);
+        RecalculateCylinder(entity.value(), cylinderType, dir * newLen, newRadius);
     }
 
-    if (rows != GetCylinderRowsCnt(entity.value(), cylinderType, model)) {
-        while (rows > GetCylinderRowsCnt(entity.value(), cylinderType, model)) {
-            controller.AddRowOfCylinderPatches(entity.value(), cylinderType, dir * newLen, newRadius);
+    if (rows != GetCylinderRowsCnt(entity.value(), cylinderType)) {
+        while (rows > GetCylinderRowsCnt(entity.value(), cylinderType)) {
+            AddRowOfCylinderPatches(entity.value(), cylinderType, dir * newLen, newRadius);
         }
 
-        while (rows < GetCylinderRowsCnt(entity.value(), cylinderType, model)) {
-            controller.DeleteRowOfCylinderPatches(entity.value(), cylinderType, dir * newLen, newRadius);
+        while (rows < GetCylinderRowsCnt(entity.value(), cylinderType)) {
+            DeleteRowOfCylinderPatches(entity.value(), cylinderType, dir * newLen, newRadius);
         }
     }
 
-    if (cols != GetCylinderColsCnt(entity.value(), cylinderType, model)) {
-        while (cols > GetCylinderColsCnt(entity.value(), cylinderType, model)) {
-            controller.AddColOfCylinderPatches(entity.value(), cylinderType, dir * newLen, newRadius);
+    if (cols != GetCylinderColsCnt(entity.value(), cylinderType)) {
+        while (cols > GetCylinderColsCnt(entity.value(), cylinderType)) {
+            AddColOfCylinderPatches(entity.value(), cylinderType, dir * newLen, newRadius);
         }
 
-        while (cols < GetCylinderColsCnt(entity.value(), cylinderType, model)) {
-            controller.DeleteColOfCylinderPatches(entity.value(), cylinderType, dir * newLen, newRadius);
+        while (cols < GetCylinderColsCnt(entity.value(), cylinderType)) {
+            DeleteColOfCylinderPatches(entity.value(), cylinderType, dir * newLen, newRadius);
         }
     }
 
     if (ImGui::Button("Finish adding")) {
-        controller.SetAppState(AppState::Default);
+        controller.SetModelerState(ModelerState::Default);
         entity.reset();
     }
 }
 
 
-void GuiView::RenderAddingGregoryPatches() const
+void ModelerGuiView::RenderAddingGregoryPatches()
 {
     static bool entitiesSelected = false;
     static std::vector<GregoryPatchesSystem::Hole> holes;
@@ -444,7 +346,7 @@ void GuiView::RenderAddingGregoryPatches() const
 
         const auto& c0Surfaces = model.GetAllC0Surfaces();
 
-        for (auto surface: c0Surfaces) {
+        for (const auto surface: c0Surfaces) {
             bool selected = model.IsSelected(surface);
 
             if (ImGui::Selectable(
@@ -454,10 +356,10 @@ void GuiView::RenderAddingGregoryPatches() const
                 if (selected) {
                     // TODO: add error message
                     if (model.GetAllSelectedEntities().size() < 3)
-                        controller.SelectEntity(surface);
+                        model.Select(surface);
                 }
                 else
-                    controller.DeselectEntity(surface);
+                    model.Deselect(surface);
             }
         }
 
@@ -468,8 +370,8 @@ void GuiView::RenderAddingGregoryPatches() const
         }
 
         if (ImGui::Button("Cancel")) {
-            controller.SetAppState(AppState::Default);
-            controller.DeselectAllEntities();
+            controller.SetModelerState(ModelerState::Default);
+            model.DeselectAllEntities();
             entitiesSelected = false;
         }
     }
@@ -486,8 +388,7 @@ void GuiView::RenderAddingGregoryPatches() const
                 selectedItem = holeNb;
                 model.DeselectAllEntities();
                 for (int i=0; i < GregoryPatchesSystem::Hole::innerCpNb; i++) {
-                    Entity entity = hole.GetInnerControlPoint(i);
-                    controller.SelectEntity(entity);
+                    model.Select(hole.GetInnerControlPoint(i));
                 }
             }
 
@@ -495,17 +396,17 @@ void GuiView::RenderAddingGregoryPatches() const
         }
 
         if (ImGui::Button("Accept")) {
-            controller.FillHole(holes[selectedItem - 1]);
+            model.FillHole(holes[selectedItem - 1]);
+            controller.SetModelerState(ModelerState::Default);
 
-            controller.SetAppState(AppState::Default);
-            controller.DeselectAllEntities();
+            model.DeselectAllEntities();
             entitiesSelected = false;
             selectedItem = -1;
         }
 
         if (ImGui::Button("Cancel")) {
-            controller.SetAppState(AppState::Default);
-            controller.DeselectAllEntities();
+            controller.SetModelerState(ModelerState::Default);
+            model.DeselectAllEntities();
             entitiesSelected = false;
             selectedItem = -1;
         }
@@ -514,7 +415,7 @@ void GuiView::RenderAddingGregoryPatches() const
 }
 
 
-void GuiView::RenderAddingIntersectionCurve() const
+void ModelerGuiView::RenderAddingIntersectionCurve()
 {
     ImGui::Text("Select two objects to intersect");
 
@@ -545,17 +446,17 @@ void GuiView::RenderAddingIntersectionCurve() const
 
     static float step = 0.1f;
 
-    ImGui::DragFloat("Step", &step, 0.001f, 1e-5);
+    ImGui::DragFloat("Step", &step, 0.001f, 1e-5f);
 
     if (ImGui::Button("Accept")) {
-        auto& entities = model.GetAllSelectedEntities();
+        auto const& entities = model.GetAllSelectedEntities();
 
         if (entities.size() != 2)
             ImGui::OpenPopup("Wrong number of elements to intersect");
         else {
             const Entity e1 = *entities.begin();
             const Entity e2 = *(++entities.begin());
-            controller.FindIntersection(e1, e2, step);
+            model.FindIntersection(e1, e2, step);
         }
     }
 
@@ -567,11 +468,11 @@ void GuiView::RenderAddingIntersectionCurve() const
 
 
     if (ImGui::Button("Cancel"))
-        controller.SetAppState(AppState::Default);
+        controller.SetModelerState(ModelerState::Default);
 }
 
 
-void GuiView::RenderAnaglyphsCameraSettings() const
+void ModelerGuiView::RenderAnaglyphsCameraSettings()
 {
     float eyeSeparation = model.cameraManager.GetEyeSeparation();
     float convergence = model.cameraManager.GetConvergence();
@@ -579,17 +480,17 @@ void GuiView::RenderAnaglyphsCameraSettings() const
     ImGui::Text("Anaglyphs camera settings");
 
     if (ImGui::DragFloat("Eye separation", &eyeSeparation, DRAG_FLOAT_SPEED))
-        controller.SetEyeSeparation(eyeSeparation);
+        model.cameraManager.SetEyeSeparation(eyeSeparation);
     
     if (ImGui::DragFloat("Convergence", &convergence, DRAG_FLOAT_SPEED))
-        controller.SetConvergence(convergence);
+        model.cameraManager.SetConvergence(convergence);
 
     if (ImGui::Button("Ok"))
-        controller.SetAppState(AppState::Default);
+        controller.SetModelerState(ModelerState::Default);
 }
 
 
-void GuiView::RenderObjectsProperties() const
+void ModelerGuiView::RenderObjectsProperties() const
 {
     auto const& selectedEntities = model.GetAllSelectedEntities();
 
@@ -611,8 +512,8 @@ void GuiView::RenderObjectsProperties() const
     }
 
     if (selectedEntities.size() == 2) {
-        Entity e1 = *selectedEntities.begin();
-        Entity e2 = *(++selectedEntities.begin());
+        const Entity e1 = *selectedEntities.begin();
+        const Entity e2 = *(++selectedEntities.begin());
 
         RenderMergingControlPointsOptionButton(e1, e2);
     }
@@ -621,55 +522,55 @@ void GuiView::RenderObjectsProperties() const
 }
 
 
-void GuiView::RenderSingleObjectProperties(Entity entity) const
+void ModelerGuiView::RenderSingleObjectProperties(const Entity entity) const
 {
     auto const& components = model.GetEntityComponents(entity);
 
-    if (components.contains(Model::GetComponentId<Position>()))
+    if (components.contains(Modeler::GetComponentId<Position>()))
         DisplayPositionProperty(entity, model.GetComponent<Position>(entity));
 
-    if (components.contains(Model::GetComponentId<Scale>()))
+    if (components.contains(Modeler::GetComponentId<Scale>()))
         DisplayScaleProperty(entity, model.GetComponent<Scale>(entity));
 
-    if (components.contains(Model::GetComponentId<Rotation>()))
+    if (components.contains(Modeler::GetComponentId<Rotation>()))
         DisplayRotationProperty(entity, model.GetComponent<Rotation>(entity));
 
-    if (components.contains(Model::GetComponentId<TorusParameters>()))
+    if (components.contains(Modeler::GetComponentId<TorusParameters>()))
         DisplayTorusProperty(entity, model.GetComponent<TorusParameters>(entity));
 
-    if (components.contains(Model::GetComponentId<Name>()))
+    if (components.contains(Modeler::GetComponentId<Name>()))
         DisplayNameEditor(entity, model.GetComponent<Name>(entity));
 
-    if (components.contains(Model::GetComponentId<CurveControlPoints>()))
+    if (components.contains(Modeler::GetComponentId<CurveControlPoints>()))
         DisplayCurveControlPoints(entity, model.GetComponent<CurveControlPoints>(entity));
 
-    if (components.contains(Model::GetComponentId<C0CurveParameters>()))
+    if (components.contains(Modeler::GetComponentId<C0CurveParameters>()))
         DisplayC0CurveParameters(entity, model.GetComponent<C0CurveParameters>(entity));
 
-    if (components.contains(Model::GetComponentId<C2CurveParameters>()))
+    if (components.contains(Modeler::GetComponentId<C2CurveParameters>()))
         DisplayC2CurveParameters(entity, model.GetComponent<C2CurveParameters>(entity));
 
-    if (components.contains(Model::GetComponentId<PatchesDensity>()))
+    if (components.contains(Modeler::GetComponentId<PatchesDensity>()))
         DisplaySurfaceDensityParameter(entity, model.GetComponent<PatchesDensity>(entity));
 
-    if (components.contains(Model::GetComponentId<C0Patches>()))
+    if (components.contains(Modeler::GetComponentId<C0Patches>()))
         DisplaySurfacePatches(entity, model.GetComponent<C0Patches>(entity));
 
-    if (components.contains(Model::GetComponentId<C2Patches>()))
+    if (components.contains(Modeler::GetComponentId<C2Patches>()))
         DisplaySurfacePatches(entity, model.GetComponent<C2Patches>(entity));
 
-    if (components.contains(Model::GetComponentId<C2CylinderPatches>()))
+    if (components.contains(Modeler::GetComponentId<C2CylinderPatches>()))
         DisplaySurfacePatches(entity, model.GetComponent<C2CylinderPatches>(entity));
 
-    if (components.contains(Model::GetComponentId<TriangleOfGregoryPatches>()))
+    if (components.contains(Modeler::GetComponentId<TriangleOfGregoryPatches>()))
         DisplayGregoryPatchesParameters(entity, model.GetComponent<TriangleOfGregoryPatches>(entity));
 
-    if (!components.contains(Model::GetComponentId<Unremovable>()))
+    if (!components.contains(Modeler::GetComponentId<Unremovable>()))
         DisplayEntityDeletionOption(entity);
 }
 
 
-void GuiView::RenderMultipleObjectProperties() const
+void ModelerGuiView::RenderMultipleObjectProperties() const
 {
     const Entity midPoint = model.GetMiddlePoint();
     const auto& pos = model.GetComponent<Position>(midPoint);
@@ -686,7 +587,7 @@ void GuiView::RenderMultipleObjectProperties() const
     valueChanged |= ImGui::DragFloat("Z##Pos", &z, DRAG_FLOAT_SPEED);
 
     if (valueChanged)
-        controller.TranslateSelected(Position(x, y, z));
+        model.ChangeSelectedEntitiesPosition(Position(x, y, z));
 
     x = 1.0f;
     y = 1.0f;
@@ -700,9 +601,9 @@ void GuiView::RenderMultipleObjectProperties() const
     valueChanged |= ImGui::DragFloat("Z##Scale", &z, DRAG_FLOAT_SPEED, MIN_SCALE, 0.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
 
     if (valueChanged)
-        controller.ScaleSelected(Scale(x, y, z));
-    
-    Rotation rotation;
+        model.ChangeSelectedEntitiesScale(Scale(x, y, z));
+
+    const Rotation rotation;
 
     auto vector = rotation.GetRollPitchRoll();
     vector.X() = Angle::FromRadians(vector.X()).ToDegrees();
@@ -718,29 +619,29 @@ void GuiView::RenderMultipleObjectProperties() const
     valueChanged |= ImGui::DragFloat("Z##Rotation", &vector.Z(), DRAG_ANGLE_SPEED, -180.0f, 180.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
 
     if (valueChanged) {
-        Rotation newRot(
+        const Rotation newRot(
             Angle::FromDegrees(vector.X()).ToRadians(),
             Angle::FromDegrees(vector.Y()).ToRadians(),
             Angle::FromDegrees(vector.Z()).ToRadians()
         );
 
-        controller.RotateSelected(newRot);
+        model.RotateSelectedEntities(newRot);
     }
 }
 
 
-void GuiView::RenderMergingControlPointsOptionButton(Entity e1, Entity e2) const
+void ModelerGuiView::RenderMergingControlPointsOptionButton(Entity e1, Entity e2) const
 {
     ImGui::Separator();
 
     if (model.IsAControlPoint(e1) && model.IsAControlPoint(e2)) {
         if (ImGui::Button("Merge control points"))
-            controller.MergeControlPoints(e1, e2);
+            model.MergeControlPoints(e1, e2);
     }
 }
 
 
-void GuiView::DisplayPositionProperty(Entity entity, const Position& pos) const
+void ModelerGuiView::DisplayPositionProperty(const Entity entity, const Position& pos) const
 {
     float x = pos.GetX();
     float y = pos.GetY();
@@ -754,11 +655,11 @@ void GuiView::DisplayPositionProperty(Entity entity, const Position& pos) const
     valueChanged |= ImGui::DragFloat("Z##Pos", &z, DRAG_FLOAT_SPEED);
 
     if (valueChanged)
-        controller.ChangeComponent<Position>(entity, Position(x, y, z));
+        model.SetComponent<Position>(entity, Position(x, y, z));
 }
 
 
-void GuiView::DisplayScaleProperty(Entity entity, const Scale& scale) const
+void ModelerGuiView::DisplayScaleProperty(const Entity entity, const Scale& scale) const
 {
     float x = scale.GetX();
     float y = scale.GetY();
@@ -772,11 +673,11 @@ void GuiView::DisplayScaleProperty(Entity entity, const Scale& scale) const
     valueChanged |= ImGui::DragFloat("Z##Scale", &z, DRAG_FLOAT_SPEED, MIN_SCALE, 0.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
 
     if (valueChanged)
-        controller.ChangeComponent<Scale>(entity, Scale(x, y, z));
+        model.SetComponent<Scale>(entity, Scale(x, y, z));
 }
 
 
-void GuiView::DisplayRotationProperty(Entity entity, const Rotation & rotation) const
+void ModelerGuiView::DisplayRotationProperty(const Entity entity, const Rotation& rotation) const
 {
     auto vector = rotation.GetRollPitchRoll();
     vector.X() = Angle::FromRadians(vector.X()).ToDegrees();
@@ -791,18 +692,18 @@ void GuiView::DisplayRotationProperty(Entity entity, const Rotation & rotation) 
     valueChanged |= ImGui::DragFloat("Z##Rotation", &vector.Z(), DRAG_ANGLE_SPEED, -180.0f, 180.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
 
     if (valueChanged) {
-        Rotation newRot(
+        const Rotation newRot(
             Angle::FromDegrees(vector.X()).ToRadians(),
             Angle::FromDegrees(vector.Y()).ToRadians(),
             Angle::FromDegrees(vector.Z()).ToRadians()
         );
 
-        controller.ChangeComponent<Rotation>(entity, newRot);
+        model.SetComponent<Rotation>(entity, newRot);
     }
 }
 
 
-void GuiView::DisplayTorusProperty(Entity entity, const TorusParameters& params) const
+void ModelerGuiView::DisplayTorusProperty(const Entity entity, const TorusParameters& params) const
 {
     float R = params.majorRadius;
     float r = params.minorRadius;
@@ -819,31 +720,31 @@ void GuiView::DisplayTorusProperty(Entity entity, const TorusParameters& params)
     valueChanged |= ImGui::DragInt("Mesh density along minor radius", &minDensity, 0.2f, 3, 100, "%d", ImGuiSliderFlags_AlwaysClamp);
 
     if (valueChanged) {
-        TorusParameters newParams {
+        const TorusParameters newParams {
             .majorRadius = R,
             .minorRadius = r,
             .meshDensityMinR = minDensity,
             .meshDensityMajR = majDensity,
         };
 
-        controller.ChangeComponent<TorusParameters>(entity, newParams);
+        model.SetComponent<TorusParameters>(entity, newParams);
     }
 }
 
 
-void GuiView::DisplayCurveControlPoints(Entity entity, const CurveControlPoints& params) const
+void ModelerGuiView::DisplayCurveControlPoints(const Entity entity, const CurveControlPoints& params) const
 {
     ImGui::SeparatorText("Control Points");
 
     int selected = -1;
     int n = 0;
-    for (auto controlPoint: params.GetPoints()) {
+    for (const auto controlPoint: params.GetPoints()) {
         if (ImGui::Selectable(model.GetEntityName(controlPoint).c_str(), selected == n))
             selected = n;
         if (ImGui::BeginPopupContextItem()) {
             selected = n;
             if (ImGui::Button("Delete control point")) {
-                controller.DeleteControlPointFromCurve(entity, controlPoint);
+                model.DeleteControlPointFromCurve(entity, controlPoint);
             }
             ImGui::EndPopup();
         }
@@ -873,7 +774,7 @@ void GuiView::DisplayCurveControlPoints(Entity entity, const CurveControlPoints&
                     else
                         throw std::runtime_error("Unknown curve type");
 
-                    controller.AddControlPointToCurve(entity, point, curveType);
+                    AddControlPointToCurve(entity, point, curveType);
                 }
             }
         }
@@ -883,7 +784,7 @@ void GuiView::DisplayCurveControlPoints(Entity entity, const CurveControlPoints&
 }
 
 
-void GuiView::DisplayC0CurveParameters(Entity entity, const C0CurveParameters & params) const
+void ModelerGuiView::DisplayC0CurveParameters(const Entity entity, const C0CurveParameters & params) const
 {
     bool drawPolygon = params.drawPolygon;
 
@@ -892,12 +793,12 @@ void GuiView::DisplayC0CurveParameters(Entity entity, const C0CurveParameters & 
     if (drawPolygon != params.drawPolygon) {
         C0CurveParameters newParams;
         newParams.drawPolygon = drawPolygon;
-        controller.ChangeComponent<C0CurveParameters>(entity, newParams);
+        model.SetComponent<C0CurveParameters>(entity, newParams);
     }
 }
 
 
-void GuiView::DisplayC2CurveParameters(Entity entity, const C2CurveParameters & params) const
+void ModelerGuiView::DisplayC2CurveParameters(const Entity entity, const C2CurveParameters & params) const
 {
     bool drawPolygon = params.drawBSplinePolygon;
 
@@ -934,27 +835,27 @@ void GuiView::DisplayC2CurveParameters(Entity entity, const C2CurveParameters & 
 }
 
 
-void GuiView::DisplayEntityDeletionOption(Entity entity) const
+void ModelerGuiView::DisplayEntityDeletionOption(const Entity entity) const
 {
     if (ImGui::Button("Delete object")) {
-        controller.DeleteEntity(entity);
+        model.DeleteEntity(entity);
     }
 }
 
 
-void GuiView::DisplaySurfaceDensityParameter(Entity entity, const PatchesDensity &density) const
+void ModelerGuiView::DisplaySurfaceDensityParameter(const Entity entity, const PatchesDensity &density) const
 {
     int d = density.GetDensity();
 
     ImGui::DragInt("Mesh density", &d, 1.f, PatchesDensity::MinDensity, PatchesDensity::MaxDensity);
 
     if (d != density.GetDensity()) {
-        controller.SetNewSurfaceDensity(entity, PatchesDensity(d));
+        model.SetSurfaceDensity(entity, PatchesDensity(d));
     }
 }
 
 
-void GuiView::DisplaySurfacePatches(Entity entity, const Patches &patches) const
+void ModelerGuiView::DisplaySurfacePatches(const Entity entity, const Patches &patches) const
 {
     ImGui::SeparatorText("Control Points");
 
@@ -962,16 +863,15 @@ void GuiView::DisplaySurfacePatches(Entity entity, const Patches &patches) const
 
     if (ImGui::Checkbox("Draw Control Points Net", &hasNet)) {
         if (hasNet)
-            controller.ShowPatchesPolygon(entity, patches);
+            model.ShowPatchesPolygon(entity, patches);
         else
-            controller.HidePatchesPolygon(entity);
+            model.HidePatchesPolygon(entity);
     }
 
     if (ImGui::Button("Select all control points")) {
         for (int row=0; row < patches.PointsInRow(); row++) {
             for (int col=0; col < patches.PointsInCol(); col++) {
-                Entity cp = patches.GetPoint(row, col);
-                controller.SelectEntity(cp);
+                model.Select(patches.GetPoint(row, col));
             }
         }
     }
@@ -983,50 +883,49 @@ void GuiView::DisplaySurfacePatches(Entity entity, const Patches &patches) const
     ImGui::SeparatorText("Control points");
     for (int row=0; row < patches.PointsInRow(); row++) {
         for (int col=0; col < patches.PointsInCol(); col++) {
-            Entity cp = patches.GetPoint(row, col);
-
+            const Entity cp = patches.GetPoint(row, col);
             ImGui::Text(model.GetEntityName(cp).c_str());
         }
     }
 }
 
 
-void GuiView::DisplayGregoryPatchesParameters(Entity entity, const TriangleOfGregoryPatches &triangle) const
+void ModelerGuiView::DisplayGregoryPatchesParameters(const Entity entity, const TriangleOfGregoryPatches &triangle) const
 {
     bool hasNet = triangle.hasNet;
 
     if (ImGui::Checkbox("Draw Control Points Net", &hasNet)) {
         if (hasNet)
-            controller.ShowGregoryNet(entity);
+            model.ShowGregoryNet(entity);
         else
-            controller.HideGregoryNet(entity);
+            model.HideGregoryNet(entity);
     }
 }
 
 
-void GuiView::DisplayNameEditor(Entity entity, const Name& name) const
+void ModelerGuiView::DisplayNameEditor(const Entity entity, const Name& name) const
 {
     Name tmp = name;
 
     ImGui::SeparatorText("Object name");
 
     if (ImGui::InputText("##objectName", &tmp))
-        controller.ChangeEntityName(entity, tmp);
+        model.ChangeEntityName(entity, tmp);
 }
 
 
-void GuiView::RenderSelectableEntitiesList(const std::unordered_set<Entity> &entities) const
+void ModelerGuiView::RenderSelectableEntitiesList(const std::unordered_set<Entity> &entities) const
 {
     bool selected;
 
-    for (auto entity: entities) {
+    for (const auto entity: entities) {
         selected = model.IsSelected(entity);
 
         if (ImGui::Selectable(
             model.GetEntityName(entity).c_str(),
             &selected
         )) {
-            controller.SelectEntity(entity);
+            model.Select(entity);
         }
     }
 }

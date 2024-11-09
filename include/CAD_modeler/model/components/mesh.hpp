@@ -11,9 +11,12 @@ public:
 
     void Update(const std::vector<float>& vertices, const std::vector<uint32_t>& indices);
 
-    inline unsigned int GetElementsCnt() const { return elementsCnt; }
+    [[nodiscard]]
+    int GetElementsCnt() const
+        { return elementsCnt; }
 
-    inline void Use() const { glBindVertexArray(VAO); }
+    void Use() const
+        { glBindVertexArray(VAO); }
 
 private:
     /// @brief OpenGl vector array object
@@ -25,5 +28,5 @@ private:
     /// @brief OpenGl element buffer object
     unsigned int EBO;
 
-    unsigned int elementsCnt;
+    int elementsCnt;
 };

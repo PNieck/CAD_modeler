@@ -1,15 +1,31 @@
 #include <CAD_modeler/controllers/subController.hpp>
 
-#include <CAD_modeler/controllers/mainController.hpp>
+
+MouseState SubController::mouseState = {};
 
 
-AppState SubController::GetAppState() const
+void SubController::MouseMove(const int x, const int y, Model &model)
 {
-    return mainController.GetAppState();
+    mouseState.Moved(x, y);
+
+    if (mouseState.IsButtonClicked(MouseButton::Middle)) {
+        auto offset = mouseState.TranslationGet();
+        model.cameraManager.RotateCamera(
+            offset.Y() * ROTATION_COEF,
+            offset.X() * ROTATION_COEF
+        );
+    }
 }
 
 
-void SubController::SetAppState(AppState newState) const
+void SubController::ScrollMoved(const int offset, Model &model)
 {
-    mainController.SetAppState(newState);
+    float val = offset * SCROLL_COEF;
+
+    if (val < 0.0f) {
+        val = -1.0f / val;
+    }
+
+    const float dist = model.cameraManager.GetDistanceFromTarget();
+    model.cameraManager.SetDistanceFromTarget(dist*val);
 }

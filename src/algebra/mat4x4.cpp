@@ -212,16 +212,16 @@ alg::Mat4x4 alg::operator*(const Mat4x4 & mat1, const Mat4x4 & mat2)
 
 alg::Mat4x4 alg::TranslationMtx(const Vec3 &vec)
 {
-    return alg::Mat4x4(
+    return {
            1.0f,    0.0f,    0.0f, 0.0f,
            0.0f,    1.0f,    0.0f, 0.0f,
            0.0f,    0.0f,    1.0f, 0.0f,
         vec.X(), vec.Y(), vec.Z(), 1.0f
-    );
+    };
 }
 
 
-alg::Mat4x4 alg::LookAt(const Vec3 &camPos, const Vec3 &dir, const Vec3 &upVector)
+alg::Mat4x4 alg::LookAt(const Vec3 &cameraPos, const Vec3 &dir, const Vec3 &upVector)
 {
     assert(dir.LengthSquared() != 0.f);
     assert(upVector.LengthSquared() != 0.f);
@@ -229,7 +229,7 @@ alg::Mat4x4 alg::LookAt(const Vec3 &camPos, const Vec3 &dir, const Vec3 &upVecto
     alg::Vec3 right = Cross(upVector, dir).Normalize();
     alg::Vec3 up = Cross(dir, right).Normalize();
 
-    alg::Mat4x4 translation = TranslationMtx(-camPos);
+    const alg::Mat4x4 translation = TranslationMtx(-cameraPos);
 
     // Matrix which translates canonical coordinate system to camera one
     alg::Mat4x4 coordTransform(

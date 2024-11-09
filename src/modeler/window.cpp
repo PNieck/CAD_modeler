@@ -6,7 +6,7 @@
 unsigned int Window::instances_cnt = 0;
 
 
-Window::Window(int width, int height, const std::string & name):
+Window::Window(const int width, const int height, const std::string & name):
     window(CreateGFLWwindow(width, height, name)), controller(window, width, height)
 {
     // Set window pointer to this class for all callback
@@ -27,14 +27,14 @@ Window::~Window()
 }
 
 
-GLFWwindow * Window::CreateGFLWwindow(int width, int height, const std::string &name)
+GLFWwindow * Window::CreateGFLWwindow(const int width, const int height, const std::string &name)
 {
     if (instances_cnt == 0) {
         InitializeGLFW();
     }
 
-    GLFWwindow* window = glfwCreateWindow(width, height, name.c_str(), NULL, NULL);
-    if (window == NULL)
+    GLFWwindow* window = glfwCreateWindow(width, height, name.c_str(), nullptr, nullptr);
+    if (window == nullptr)
     {
         glfwTerminate();
         throw WindowCreationError("Cannot create window");
@@ -77,7 +77,7 @@ void Window::DeinitializeGLFW()
 
 void Window::InitializeGlad()
 {
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+    if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)))
     {
         glfwTerminate();
         throw WindowCreationError("Cannot initialize Glad");
@@ -87,8 +87,16 @@ void Window::InitializeGlad()
 
 void Window::RunMessageLoop()
 {
+    double time = glfwGetTime();
+
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
+
+        const double newTime = glfwGetTime();
+        const double dt = newTime - time;
+        time = newTime;
+
+        controller.Update(dt);
 
         controller.Render();
 

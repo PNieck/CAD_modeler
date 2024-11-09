@@ -4,13 +4,11 @@
 
 #include "shaders/shaderRepository.hpp"
 #include "../components/curveControlPoints.hpp"
-#include "../components/c0CurveParameters.hpp"
 #include "../components/position.hpp"
 #include "utils/nameGenerator.hpp"
 #include "curveControlPointsSystem.hpp"
 
 #include <vector>
-#include <tuple>
 #include <stack>
 
 

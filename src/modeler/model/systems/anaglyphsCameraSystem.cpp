@@ -6,6 +6,9 @@
 void AnaglyphsCameraSystem::RegisterSystem(Coordinator &coordinator)
 {
     coordinator.RegisterSystem<AnaglyphsCameraSystem>();
+
+    coordinator.RegisterComponent<Position>();
+    coordinator.RegisterComponent<AnaglyphsCameraParameters>();
 }
 
 

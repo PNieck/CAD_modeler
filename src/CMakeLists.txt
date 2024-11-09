@@ -38,7 +38,20 @@ file(GLOB_RECURSE SOURCE_LIST CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/src/model
 
 add_library(modeler_lib ${SOURCE_LIST} ${HEADER_LIST})
 target_include_directories(modeler_lib PUBLIC ../include)
-target_link_libraries(modeler_lib PUBLIC glfw glad imgui ecs algebra graph fileBrowser nlohmann_json::nlohmann_json dlib::dlib)
+target_link_libraries(
+    modeler_lib
+    PUBLIC
+    glfw
+    glad
+    imgui
+    ecs
+    algebra
+    graph
+    fileBrowser
+    nlohmann_json::nlohmann_json
+    dlib::dlib
+    imguiLoadingSpinner
+)
 enable_compiler_warings(modeler_lib)
 
 # Copy shaders
@@ -46,6 +59,12 @@ add_custom_target(copy_shaders
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/shaders ${CMAKE_BINARY_DIR}/shaders
 )
 add_dependencies(modeler_lib copy_shaders)
+
+# Copy models
+add_custom_target(copy_models
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/models ${CMAKE_BINARY_DIR}/models
+)
+add_dependencies(modeler_lib copy_models)
 
 
 # For IDEs

@@ -1,44 +1,39 @@
 #pragma once
 
-#include <ecs/coordinator.hpp>
+#include "model.hpp"
 
-#include "model/cameraManager.hpp"
-#include "model/saveManager.hpp"
+#include "managers/saveManager.hpp"
 
-#include "model/systems/toriSystem.hpp"
-#include "model/systems/gridSystem.hpp"
-#include "model/systems/cursorSystem.hpp"
-#include "model/systems/pointsSystem.hpp"
-#include "model/systems/nameSystem.hpp"
-#include "model/systems/selectionSystem.hpp"
-#include "model/systems/c0CurveSystem.hpp"
-#include "model/systems/c2CurveSystem.hpp"
-#include "model/systems/interpolationCurveSystem.hpp"
-#include "model/systems/c0SurfaceSystem.hpp"
-#include "model/systems/c0CylinderSystem.hpp"
-#include "model/systems/c0PatchesSystem.hpp"
-#include "model/systems/c2SurfacesSystem.hpp"
-#include "model/systems/c2CylinderSystem.hpp"
-#include "model/systems/controlNetSystem.hpp"
-#include "model/systems/controlPointsRegistrySystem.hpp"
-#include "model/systems/gregoryPatchesSystem.hpp"
-#include "model/systems/vectorSystem.hpp"
-#include "model/systems/intersectionsSystem.hpp"
+#include "systems/toriSystem.hpp"
+#include "systems/gridSystem.hpp"
+#include "systems/cursorSystem.hpp"
+#include "systems/pointsSystem.hpp"
+#include "systems/nameSystem.hpp"
+#include "systems/selectionSystem.hpp"
+#include "systems/c0CurveSystem.hpp"
+#include "systems/c2CurveSystem.hpp"
+#include "systems/interpolationCurveSystem.hpp"
+#include "systems/c0SurfaceSystem.hpp"
+#include "systems/c0CylinderSystem.hpp"
+#include "systems/c0PatchesSystem.hpp"
+#include "systems/c2SurfacesSystem.hpp"
+#include "systems/c2CylinderSystem.hpp"
+#include "systems/controlNetSystem.hpp"
+#include "systems/controlPointsRegistrySystem.hpp"
+#include "systems/gregoryPatchesSystem.hpp"
+#include "systems/vectorSystem.hpp"
+#include "systems/intersectionsSystem.hpp"
 
-#include "model/systems/shaders/shaderRepository.hpp"
+#include "components/scale.hpp"
+#include "components/rotation.hpp"
 
-#include "model/components/scale.hpp"
-#include "model/components/rotation.hpp"
-
-#include "utilities/line.hpp"
+#include "../utilities/line.hpp"
 
 
-class Model
+class Modeler final: public Model
 {
 public:
-    Model(int viewport_width, int viewport_height);
-
-    void RenderFrame();
+    Modeler(int viewportWidth, int viewportHeight);
 
     void AddTorus();
 
@@ -170,8 +165,6 @@ public:
     inline const std::unordered_set<Entity>& GetAllTori() const
         { return toriSystem->GetEntities(); }
 
-    void ChangeViewportSize(int width, int height);
-
     inline void SetCursorPosition(float x, float y, float z) const
         { cursorSystem->SetPosition(alg::Vec3(x, y, z)); }
 
@@ -254,13 +247,10 @@ public:
     inline const std::unordered_set<Entity>& GetAllInterpolationCurves() const
         { return interpolationCurveSystem->GetEntities(); }
 
-    // inline const std::unordered_set<Entity>& GetAll() const
-    //     { return interpolationCurveSystem->GetEntities(); }
-
-    inline const void ShowC2BSplinePolygon(Entity entity) const
+    inline void ShowC2BSplinePolygon(Entity entity) const
         { return c2CurveSystem->ShowBSplinePolygon(entity); }
 
-    inline const void HideC2BSplinePolygon(Entity entity) const
+    inline void HideC2BSplinePolygon(Entity entity) const
         { return c2CurveSystem->HideBSplinePolygon(entity); }
 
     inline const void ShowC2BezierPolygon(Entity entity) const
@@ -311,18 +301,12 @@ public:
     inline void FindIntersection(Entity e1, Entity e2, float step)
         { intersectionSystem->FindIntersection(e1, e2, step); }
 
-    CameraManager cameraManager;
-
     bool selectingEntities = false;
     float selectionCircleX = 0.0f;
     float selectionCircleY = 0.0f;
     float selectionCircleRadius = 0.2f;
 
 private:
-    
-    Coordinator coordinator;
-    ShaderRepository shadersRepo;
-
     std::shared_ptr<ToriSystem> toriSystem;
     std::shared_ptr<GridSystem> gridSystem;
     std::shared_ptr<CursorSystem> cursorSystem;
@@ -348,9 +332,5 @@ private:
     alg::Vec3 PointFromViewportCoordinates(float x, float y);
     Line LineFromViewportCoordinates(float x, float y);
 
-    void RenderAnaglyphsFrame();
-
-    void RenderPerspectiveFrame();
-
-    void RenderSystemsObjects(const alg::Mat4x4& viewMtx, const alg::Mat4x4& persMtx, float nearPlane, float farPlane) const;
+    void RenderSystemsObjects(const alg::Mat4x4& viewMtx, const alg::Mat4x4& persMtx, float nearPlane, float farPlane) const override;
 };

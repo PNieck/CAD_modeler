@@ -8,6 +8,8 @@ namespace alg
     template <typename DataType>
     class Vector2 {
     public:
+        static constexpr size_t dim = 2;
+
         Vector2() = default;
         explicit Vector2(DataType scalar) { data.fill(scalar); }
         Vector2(DataType v1, DataType v2)

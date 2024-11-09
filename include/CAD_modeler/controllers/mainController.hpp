@@ -1,11 +1,15 @@
 #pragma once
 
-#include "glController.hpp"
 #include "guiController.hpp"
-#include "../views/guiView.hpp"
-#include "../model.hpp"
-#include "utils/appState.hpp"
+#include "millingSimController.hpp"
+#include "modelerController.hpp"
+#include "utils/modelTypes.hpp"
 #include "utils/keyboardKey.hpp"
+
+#include "../model/modeler.hpp"
+#include "../model/millingMachineSim.hpp"
+
+#include "../views/modelChooser.hpp"
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
@@ -13,27 +17,34 @@
 
 class MainController {
 public:
-    MainController(GLFWwindow* window, int window_width, int window_height);
+    MainController(GLFWwindow* window, int windowWidth, int windowHeight);
     
     void Render();
+    void Update(double dt);
 
-    inline void SizeChanged(int width, int height) { glController.WindowSizeChanged(width, height); }
+    void SizeChanged(int width, int height);
     void MouseClicked(MouseButton button);
     void MouseReleased(MouseButton button);
     void MouseMoved(int x, int y);
     void ScrollMoved(int offset);
     void KeyboardKeyPressed(KeyboardKey key);
 
-    inline void SetAppState(AppState newAppState) { appState = newAppState; }
-    inline AppState GetAppState() const { return appState; }
+    [[nodiscard]]
+    inline ModelType GetModelType() const
+        { return actModelType; }
+
+    void SetModelType(const ModelType modelType)
+        { actModelType = modelType; }
 
 private:
-    Model model;
+    Modeler modeler;
+    MillingMachineSim millingSim;
 
-    GlController glController;
+    MillingSimController millSimController;
+    ModelerController modelerController;
     GuiController guiController;
 
-    GuiView guiView;
+    ModelType actModelType;
 
-    AppState appState;
+    ModelChooser modelChooser;
 };

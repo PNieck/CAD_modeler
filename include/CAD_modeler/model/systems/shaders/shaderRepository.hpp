@@ -7,30 +7,47 @@
 #include "bicubicBSplineSurfaceShader.hpp"
 #include "gregoryPatchShader.hpp"
 #include "passThrough.hpp"
+#include "millingShader.hpp"
 
 
 class ShaderRepository {
 public:
-    inline const StdShader& GetStdShader() const
+    static ShaderRepository& GetInstance() {
+        static ShaderRepository instance;
+        return instance;
+    }
+
+    [[nodiscard]]
+    const StdShader& GetStdShader() const
         { return stdShader; }
 
-    inline const GridShader& GetGridShader() const
+    [[nodiscard]]
+    const GridShader& GetGridShader() const
         { return gridShader; }
 
-    inline const CubicBezierCurveShader& GetBezierCurveShader() const
+    [[nodiscard]]
+    const CubicBezierCurveShader& GetBezierCurveShader() const
         { return bezierCurveShader; }
 
-    inline const BicubicBezierSurfaceShader& GetBezierSurfaceShader() const
+    [[nodiscard]]
+    const BicubicBezierSurfaceShader& GetBezierSurfaceShader() const
         { return bezierSurfaceShader; }
 
-    inline const BicubicBSplineSurfaceShader& GetBSplineSurfaceShader() const
+    [[nodiscard]]
+    const BicubicBSplineSurfaceShader& GetBSplineSurfaceShader() const
         { return bSplineSurfaceShader; }
 
-    inline const GregoryPatchShader& GetGregoryPatchShader() const
+    [[nodiscard]]
+    const GregoryPatchShader& GetGregoryPatchShader() const
         { return gregoryPatchShader; }
 
-    inline const PassThroughShader& GetPassThroughShader() const
+    [[nodiscard]]
+    const PassThroughShader& GetPassThroughShader() const
         { return passThroughShader; }
+
+    [[nodiscard]]
+    const MillingShader& GetMillingShader() const
+        { return millingShader; }
 
 private:
     StdShader stdShader;
@@ -40,4 +57,10 @@ private:
     BicubicBSplineSurfaceShader bSplineSurfaceShader;
     GregoryPatchShader gregoryPatchShader;
     PassThroughShader passThroughShader;
+    MillingShader millingShader;
+
+    ShaderRepository() = default;
+    ShaderRepository(const ShaderRepository&) = delete;
+    ShaderRepository(ShaderRepository&&) = delete;
+    ShaderRepository& operator=(const ShaderRepository&) = delete;
 };

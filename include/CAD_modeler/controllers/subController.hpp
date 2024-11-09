@@ -1,24 +1,27 @@
 #pragma once
 
-#include "utils/appState.hpp"
-#include "../model.hpp"
-
-
-class MainController;
+#include "utils/mouseState.hpp"
+#include "../model/model.hpp"
 
 
 class SubController {
-public:
-    SubController(Model& model, MainController& controller):
-        model(model),  mainController(controller) {}
-
-
-    AppState GetAppState() const;
-    void SetAppState(AppState newState) const;
-
 protected:
-    Model& model;
+    static constexpr float ROTATION_COEF = 0.02f;
+    static constexpr float TRANSLATION_COEF = 0.01f;
+    static constexpr float SCROLL_COEF = 0.7f;
 
-private:
-    MainController& mainController;
+    static MouseState mouseState;
+
+    inline static void WindowSizeChanged(const int width, const int height, Model& model)
+        { model.ChangeViewportSize(width, height); }
+
+    inline static void MouseRelease(const MouseButton button)
+        { mouseState.ButtonReleased(button); }
+
+    inline static void MouseClick(const MouseButton button)
+        { mouseState.ButtonClicked(button); }
+
+    static void MouseMove(int x, int y, Model& model);
+
+    static void ScrollMoved(int offset, Model& model);
 };

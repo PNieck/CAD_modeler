@@ -1,21 +1,24 @@
 #pragma once
 
-#include "../controllers/guiController.hpp"
-#include "../model.hpp"
+#include "../model/modeler.hpp"
 
+// ImGui header must be included before imfilebrowser one
 #include <imgui.h>
 #include <imfilebrowser.h>
 
 
+class ModelerController;
+
+
 class MainMenuBar {
 public:
-    MainMenuBar(GuiController& controller, const Model& model);
+    MainMenuBar(ModelerController& controller, Modeler& model);
 
     void Render();
 
 private:
-    GuiController& controller;
-    const Model& model;
+    ModelerController& controller;
+    Modeler& model;
 
     ImGui::FileBrowser fileDialog;
 };

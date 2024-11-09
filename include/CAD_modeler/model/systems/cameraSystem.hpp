@@ -15,27 +15,33 @@ public:
 
     void Init(const CameraParameters& params, const Position& cameraPos);
 
+    [[nodiscard]]
     alg::Mat4x4 ViewMatrix() const;
+
+    [[nodiscard]]
     alg::Mat4x4 PerspectiveMatrix() const;
 
 
-    inline Position GetCameraPos() const
+    [[nodiscard]]
+    Position GetCameraPos() const
         { return coordinator->GetComponent<Position>(camera); }
 
-    inline void SetCameraPos(const Position& pos)
+    inline void SetCameraPos(const Position& pos) const
         { coordinator->SetComponent<Position>(camera, pos); }
 
-    inline CameraParameters GetParameters() const
+    [[nodiscard]]
+    CameraParameters GetParameters() const
         { return coordinator->GetComponent<CameraParameters>(camera); }
 
-    inline void SetParameters(const CameraParameters& params)
+    inline void SetParameters(const CameraParameters& params) const
         { coordinator->SetComponent<CameraParameters>(camera, params); }
 
-    inline Entity GetCameraEntity() const
+    [[nodiscard]]
+    Entity GetCameraEntity() const
         { return camera; }
 
 private:
-    static constexpr alg::Vec3 globalUp = alg::Vec3(0.0f, 1.0f, 0.0f);
+    static constexpr auto globalUp = alg::Vec3(0.0f, 1.0f, 0.0f);
 
-    Entity camera;
+    Entity camera = 0;
 };
