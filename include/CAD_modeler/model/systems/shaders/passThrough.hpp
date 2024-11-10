@@ -12,8 +12,8 @@ public:
         ) {}
 
     inline void SetColor(const alg::Vec4& color) const
-        { setVec4("color", color); }
+        { SetVec4("color", color); }
 
     inline void Use() const
-        { use(); }
+        { Shader::Use(); }
 };

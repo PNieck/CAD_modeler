@@ -14,23 +14,23 @@ public:
         ) {}
 
     void SetMVP(const alg::Mat4x4& matrix) const
-        { setMatrix4("MVP", matrix); }
+        { SetMatrix4("MVP", matrix); }
 
     void SetProjection00(const float val) const
-        { setFloat("projection00", val); }
+        { SetFloat("projection00", val); }
 
     void SetMainHeightmapCorner(const alg::Vec3& coord) const
-        { setVec3("mainHeightMapCorner", coord); }
+        { SetVec3("mainHeightMapCorner", coord); }
 
     void SetHeightMapXLen(const float width) const
-        { setFloat("heightMapXLen", width); }
+        { SetFloat("heightMapXLen", width); }
 
     void SetHeightMapZLen(const float height) const
-        { setFloat("heightMapZLen", height); }
+        { SetFloat("heightMapZLen", height); }
 
     void SetCameraPosition(const alg::Vec3& pos) const
-        { setVec3("cameraPos", pos); }
+        { SetVec3("cameraPos", pos); }
 
     void Use() const
-        { use(); }
+        { Shader::Use(); }
 };

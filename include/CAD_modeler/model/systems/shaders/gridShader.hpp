@@ -12,17 +12,17 @@ public:
         ) {}
 
     inline void SetFarPlane(float farPlane) const
-        { setFloat("far", farPlane); }
+        { SetFloat("far", farPlane); }
 
     inline void SetNearPlane(float nearPlane) const
-        { setFloat("near", nearPlane); }
+        { SetFloat("near", nearPlane); }
 
     inline void SetViewMatrix(const alg::Mat4x4& viewMtx) const
-        { setMatrix4("view", viewMtx); }
+        { SetMatrix4("view", viewMtx); }
 
     inline void SetProjectionMatrix(const alg::Mat4x4& projMtx) const
-        { setMatrix4("proj", projMtx); }
+        { SetMatrix4("proj", projMtx); }
 
     inline void Use() const
-        { use(); }
+        { Shader::Use(); }
 };

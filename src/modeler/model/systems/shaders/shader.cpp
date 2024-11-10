@@ -20,20 +20,20 @@ Shader::Shader(
         throw std::runtime_error("Tesselation evaluation shader is required when tesselation control is used");
     }
 
-    const unsigned int vertex = compileSingleShader(vertexPath, GL_VERTEX_SHADER);
-    const unsigned int fragment = compileSingleShader(fragmentPath, GL_FRAGMENT_SHADER);
-    unsigned int tesselationControl;
-    unsigned int tesselationEvaluation;
-    unsigned int geometry;
+    const unsigned int vertex = CompileSingleShader(vertexPath, GL_VERTEX_SHADER);
+    const unsigned int fragment = CompileSingleShader(fragmentPath, GL_FRAGMENT_SHADER);
+    unsigned int tesselationControl = 0;
+    unsigned int tesselationEvaluation = 0;
+    unsigned int geometry = 0;
 
     if (tesselationControlPath != nullptr)
-        tesselationControl = compileSingleShader(tesselationControlPath, GL_TESS_CONTROL_SHADER);
+        tesselationControl = CompileSingleShader(tesselationControlPath, GL_TESS_CONTROL_SHADER);
 
     if (tesselationEvaluationPath != nullptr)
-        tesselationEvaluation = compileSingleShader(tesselationEvaluationPath, GL_TESS_EVALUATION_SHADER);
+        tesselationEvaluation = CompileSingleShader(tesselationEvaluationPath, GL_TESS_EVALUATION_SHADER);
 
     if (geometryPath != nullptr)
-        geometry = compileSingleShader(geometryPath, GL_GEOMETRY_SHADER);
+        geometry = CompileSingleShader(geometryPath, GL_GEOMETRY_SHADER);
 
     id = glCreateProgram();
 
@@ -81,48 +81,48 @@ Shader::~Shader()
 }
 
 
-void Shader::setBool(const std::string &name, const bool value) const
+void Shader::SetBool(const std::string &name, const bool value) const
 {
-    setInt(name, (int)value);
+    SetInt(name, (int)value);
 }
 
 
-void Shader::setInt(const std::string & name, int value) const
+void Shader::SetInt(const std::string & name, int value) const
 {
-    const int location = findUniformLocation(name);
+    const int location = FindUniformLocation(name);
     glUniform1i(location, (int)value);
 }
 
 
-void Shader::setFloat(const std::string & name, float value) const
+void Shader::SetFloat(const std::string & name, float value) const
 {
-    const int location = findUniformLocation(name);
+    const int location = FindUniformLocation(name);
     glUniform1f(location, value);
 }
 
 
-void Shader::setMatrix4(const std::string & name, const alg::Mat4x4& matrix) const
+void Shader::SetMatrix4(const std::string & name, const alg::Mat4x4& matrix) const
 {
-    const int location = findUniformLocation(name);
+    const int location = FindUniformLocation(name);
     glUniformMatrix4fv(location, 1, GL_FALSE, matrix.Data());
 }
 
 
-void Shader::setVec4(const std::string & name, const alg::Vec4& vec) const
+void Shader::SetVec4(const std::string & name, const alg::Vec4& vec) const
 {
-    const int location = findUniformLocation(name);
+    const int location = FindUniformLocation(name);
     glUniform4fv(location, 1, vec.Data());
 }
 
 
-void Shader::setVec3(const std::string &name, const alg::Vec3 &vec) const
+void Shader::SetVec3(const std::string &name, const alg::Vec3 &vec) const
 {
-    const int location = findUniformLocation(name);
+    const int location = FindUniformLocation(name);
     glUniform3fv(location, 1, vec.Data());
 }
 
 
-int Shader::findUniformLocation(const std::string & name) const
+int Shader::FindUniformLocation(const std::string & name) const
 {
     const int location = glGetUniformLocation(id, name.c_str());
 
@@ -140,7 +140,7 @@ const char * UniformNotFoundInShader::what() const noexcept
 }
 
 
-unsigned int Shader::compileSingleShader(const char* path, GLenum shaderType)
+unsigned int Shader::CompileSingleShader(const char* path, GLenum shaderType)
 {
     std::ifstream shaderFile;
 

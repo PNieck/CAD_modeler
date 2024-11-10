@@ -21,21 +21,21 @@ public:
 
     ~Shader();
 
-    inline void use() const
+    inline void Use() const
         { glUseProgram(id); }
 
-    void setBool(const std::string &name, bool value) const;
-    void setInt(const std::string &name, int value) const;
-    void setFloat(const std::string &name, float value) const;
-    void setMatrix4(const std::string &name, const alg::Mat4x4 &matrix) const;
-    void setVec4(const std::string& name, const alg::Vec4& vec) const;
-    void setVec3(const std::string& name, const alg::Vec3& vec) const;
+    void SetBool(const std::string &name, bool value) const;
+    void SetInt(const std::string &name, int value) const;
+    void SetFloat(const std::string &name, float value) const;
+    void SetMatrix4(const std::string &name, const alg::Mat4x4 &matrix) const;
+    void SetVec4(const std::string& name, const alg::Vec4& vec) const;
+    void SetVec3(const std::string& name, const alg::Vec3& vec) const;
 
 private:
     [[nodiscard]]
-    int findUniformLocation(const std::string &name) const;
+    int FindUniformLocation(const std::string &name) const;
 
-    static unsigned int compileSingleShader(const char* path, GLenum shaderType);
+    static unsigned int CompileSingleShader(const char* path, GLenum shaderType);
 };
 
 
