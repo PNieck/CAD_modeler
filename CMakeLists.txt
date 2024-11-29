@@ -19,7 +19,6 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
 endif()
 
 include(FetchContent)
-include(cmake/submodule.cmake)
 include(cmake/compilerWarnings.cmake)
 
 # External dependencies
