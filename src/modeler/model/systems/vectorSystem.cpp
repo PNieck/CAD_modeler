@@ -19,14 +19,14 @@ void VectorSystem::RegisterSystem(Coordinator &coordinator)
 
 Entity VectorSystem::AddVector(const alg::Vec3& vec, const Position& pos)
 {
-    Entity entity = coordinator->CreateEntity();
+    const Entity entity = coordinator->CreateEntity();
     AddVector(entity, vec, pos);
 
     return entity;
 }
 
 
-void VectorSystem::AddVector(Entity entity, const alg::Vec3 &vec, const Position &pos)
+void VectorSystem::AddVector(const Entity entity, const alg::Vec3 &vec, const Position &pos)
 {
     coordinator->AddComponent<VectorMesh>(entity, VectorMesh());
     coordinator->AddComponent<Position>(entity, pos);
@@ -36,7 +36,7 @@ void VectorSystem::AddVector(Entity entity, const alg::Vec3 &vec, const Position
 }
 
 
-void VectorSystem::AddVector(Entity entity, const alg::Vec3 &vec)
+void VectorSystem::AddVector(const Entity entity, const alg::Vec3 &vec)
 {
     if (!coordinator->HasComponent<Position>(entity))
         coordinator->AddComponent<Position>(entity, Position(0.0f));
@@ -60,8 +60,8 @@ void VectorSystem::Render(const alg::Mat4x4 &cameraMtx) const
     shader.Use();
     shader.SetColor(alg::Vec4(1.0f));
 
-    for (auto entity: entities) {
-        bool selection = selectionSystem->IsSelected(entity);
+    for (const auto entity: entities) {
+        const bool selection = selectionSystem->IsSelected(entity);
         auto const& position = coordinator->GetComponent<Position>(entity);
 
         if (selection)
@@ -72,7 +72,7 @@ void VectorSystem::Render(const alg::Mat4x4 &cameraMtx) const
         auto const& mesh = coordinator->GetComponent<VectorMesh>(entity);
         mesh.Use();
 
-	    glDrawElements(GL_LINE_STRIP, mesh.GetElementsCnt(), GL_UNSIGNED_INT, 0);
+	    glDrawElements(GL_LINE_STRIP, mesh.GetElementsCnt(), GL_UNSIGNED_INT, nullptr);
 
         if (selection)
             shader.SetColor(alg::Vec4(1.0f));
@@ -80,7 +80,7 @@ void VectorSystem::Render(const alg::Mat4x4 &cameraMtx) const
 }
 
 
-void VectorSystem::UpdateMesh(Entity entity)
+void VectorSystem::UpdateMesh(Entity entity) const
 {
     coordinator->EditComponent<VectorMesh>(entity,
         [this, entity](VectorMesh& mesh) {
@@ -95,7 +95,7 @@ void VectorSystem::UpdateMesh(Entity entity)
 }
 
 
-std::vector<float> VectorSystem::GenerateNetVertices(const Vector &vec) const
+std::vector<float> VectorSystem::GenerateNetVertices(const Vector &vec)
 {
     std::vector<float> result;
     result.reserve(12);
@@ -108,7 +108,7 @@ std::vector<float> VectorSystem::GenerateNetVertices(const Vector &vec) const
     result.push_back(vec.Y());
     result.push_back(vec.Z());
 
-    alg::Vec3 tmp1 = (-vec).Normalize() * std::min(0.5f, 0.2f * vec.Length()) + vec;
+    const alg::Vec3 tmp1 = (-vec).Normalize() * std::min(0.5f, 0.2f * vec.Length()) + vec;
 
     alg::Vec3 tmp2 = tmp1 + alg::Vec3(0.0f, 0.2f, 0.0f);
     alg::Vec3 tmp3 = tmp1 - alg::Vec3(0.0f, 0.2f, 0.0f);
@@ -125,7 +125,7 @@ std::vector<float> VectorSystem::GenerateNetVertices(const Vector &vec) const
 }
 
 
-std::vector<uint32_t> VectorSystem::GenerateNetIndices() const
+std::vector<uint32_t> VectorSystem::GenerateNetIndices()
 {
     return {
         0, 1, 2, 1, 3

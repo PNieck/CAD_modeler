@@ -13,7 +13,7 @@ class VectorSystem: public System {
 public:
     static void RegisterSystem(Coordinator& coordinator);
 
-    inline void Init(ShaderRepository* shadersRepo)
+    void Init(ShaderRepository* shadersRepo)
         { this->shaderRepo = shadersRepo; }
 
     Entity AddVector(const alg::Vec3& vec, const Position& pos);
@@ -23,10 +23,13 @@ public:
     void Render(const alg::Mat4x4& cameraMtx) const;
 
 private:
-    ShaderRepository* shaderRepo;
+    ShaderRepository* shaderRepo{};
 
-    void UpdateMesh(Entity entity);
+    void UpdateMesh(Entity entity) const;
 
-    std::vector<float> GenerateNetVertices(const Vector& vec) const;
-    std::vector<uint32_t> GenerateNetIndices() const;
+    [[nodiscard]]
+    static std::vector<float> GenerateNetVertices(const Vector& vec);
+
+    [[nodiscard]]
+    static std::vector<uint32_t> GenerateNetIndices();
 };
