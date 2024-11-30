@@ -2,8 +2,8 @@
 
 #include <ecs/system.hpp>
 #include <ecs/coordinator.hpp>
-#include "../components/position.hpp"
-#include "../components/anaglypsCameraParameters.hpp"
+#include "../../components/position.hpp"
+#include "../../components/anaglypsCameraParameters.hpp"
 
 
 

@@ -7,7 +7,6 @@
 #include <CAD_modeler/model/components/name.hpp>
 #include <CAD_modeler/model/components/unremovable.hpp>
 
-#include <CAD_modeler/model/systems/cameraSystem.hpp>
 #include <CAD_modeler/model/systems/selectionSystem.hpp>
 
 

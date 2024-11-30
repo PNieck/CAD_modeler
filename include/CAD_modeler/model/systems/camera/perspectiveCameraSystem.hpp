@@ -3,13 +3,13 @@
 #include <ecs/system.hpp>
 #include <ecs/coordinator.hpp>
 
-#include "../components/position.hpp"
-#include "../components/cameraParameters.hpp"
+#include "../../components/position.hpp"
+#include "../../components/cameraParameters.hpp"
 
 #include <algebra/mat4x4.hpp>
 
 
-class CameraSystem: public System {
+class PerspectiveCameraSystem: public System {
 public:
     static void RegisterSystem(Coordinator& coordinator);
 

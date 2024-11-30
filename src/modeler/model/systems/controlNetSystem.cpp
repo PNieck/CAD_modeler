@@ -2,7 +2,6 @@
 
 #include <CAD_modeler/model/components/position.hpp>
 
-#include <CAD_modeler/model/systems/cameraSystem.hpp>
 #include <CAD_modeler/model/systems/selectionSystem.hpp>
 
 

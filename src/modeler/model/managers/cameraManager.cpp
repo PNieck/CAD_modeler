@@ -14,11 +14,11 @@ CameraManager::CameraManager(Coordinator &coordinator):
 void CameraManager::Init(int viewportWidth, int viewportHeight)
 {
     // Register all systems needed by this module
-    CameraSystem::RegisterSystem(coordinator);
+    PerspectiveCameraSystem::RegisterSystem(coordinator);
     AnaglyphsCameraSystem::RegisterSystem(coordinator);
     PositionSystem::RegisterSystem(coordinator);
 
-    auto perspectiveCamSys = coordinator.GetSystem<CameraSystem>();
+    auto perspectiveCamSys = coordinator.GetSystem<PerspectiveCameraSystem>();
     auto anaglyphsCamSys = coordinator.GetSystem<AnaglyphsCameraSystem>();
 
     Position initCamPos(0.0f, 0.0f, 10.0f);
@@ -37,7 +37,7 @@ void CameraManager::Init(int viewportWidth, int viewportHeight)
     perspectiveCamSys->Init(persCamParams, initCamPos);
     anaglyphsCamSys->Init(anaCamParams, initCamPos);
 
-    currentCameraSys = coordinator.GetSystem<CameraSystem>();
+    currentCameraSys = coordinator.GetSystem<PerspectiveCameraSystem>();
 }
 
 
@@ -132,7 +132,7 @@ void CameraManager::SetCameraType(CameraType camType)
 void CameraManager::SwitchToPerspectiveCameraType()
 {
     auto oldSys = std::get<AnaglyphsSys>(currentCameraSys);
-    auto newSys = coordinator.GetSystem<CameraSystem>();
+    auto newSys = coordinator.GetSystem<PerspectiveCameraSystem>();
 
     AnaglyphsCameraParameters oldParams = oldSys->GetParameters();
     Position camPos = oldSys->GetCameraPos();
