@@ -11,8 +11,8 @@ void SubController::MouseMove(const int x, const int y, Model &model)
     if (mouseState.IsButtonClicked(MouseButton::Middle)) {
         auto offset = mouseState.TranslationGet();
         model.cameraManager.RotateCamera(
-            offset.Y() * ROTATION_COEF,
-            offset.X() * ROTATION_COEF
+            offset.X() * ROTATION_COEF,
+            offset.Y() * ROTATION_COEF
         );
     }
 }

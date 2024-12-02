@@ -73,7 +73,7 @@ void CameraManager::RotateCamera(float x, float y)
     auto params = GetBaseParams();
     Entity camera = GetCameraEntity();
 
-    positionSys->RotateAround(camera, params.target, x, y, 0.f);
+    positionSys->RotateAround(camera, params.target, x, y);
 }
 
 
