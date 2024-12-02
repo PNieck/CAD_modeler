@@ -13,7 +13,7 @@ namespace alg
         static constexpr size_t dim = 3;
 
         Vector3() = default;
-        explicit Vector3(DataType scalar) { data.fill(scalar); }
+        explicit constexpr Vector3(DataType scalar) { data.fill(scalar); }
         constexpr Vector3(DataType v1, DataType v2, DataType v3) {
             data[0] = v1;
             data[1] = v2;
