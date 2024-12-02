@@ -19,12 +19,13 @@ namespace alg
             float _30, float _31, float _32, float _33
         );
 
-        inline float& operator()(size_t row, size_t col)
+        inline float& operator()(const size_t row, const size_t col)
             { return data[row * Rows + col]; }
 
-        inline float operator()(size_t row, size_t col) const
+        inline float operator()(const size_t row, const size_t col) const
             { return data[row * Rows + col]; }
 
+        [[nodiscard]]
         std::optional<Mat4x4> Inverse() const;
 
         void TransposeSelf();
@@ -32,7 +33,8 @@ namespace alg
         inline float* Data()
             { return data.data(); }
 
-        inline const float* Data() const
+        [[nodiscard]]
+        const float* Data() const
             { return data.data(); }
 
         static constexpr int Rows = 4;
@@ -40,21 +42,23 @@ namespace alg
 
         Mat4x4& operator*=(float scalar);
 
-        friend alg::Vec4 operator*(const Mat4x4& mat, const Vec4& vec);
-        friend alg::Vec4 operator*(const Vec4& vec, const Mat4x4& mat);
-        friend alg::Mat4x4 operator*(const Mat4x4& mat1, const Mat4x4& mat2);
+        friend Vec4 operator*(const Mat4x4& mat, const Vec4& vec);
+        friend Vec4 operator*(const Vec4& vec, const Mat4x4& mat);
+        friend Mat4x4 operator*(const Mat4x4& mat1, const Mat4x4& mat2);
 
     private:
         std::array<float, Rows*Cols> data;
     };
 
 
-    alg::Mat4x4 TranslationMtx(const Vec3& vector);
+    Mat4x4 TranslationMtx(const Vec3& vector);
+
 
     Mat4x4 TranslationInverseMtx(const Vec3& vector);
 
-    alg::Mat4x4 LookAt(const Vec3& cameraPos, const Vec3& direction, const Vec3& upVector);
+
+    Mat4x4 LookAt(const Vec3& cameraPos, const Vec3& direction, const Vec3& upVector);
 
 
-    alg::Mat4x4 Frustum(float near, float far, float left, float right, float top, float bottom);
+    Mat4x4 Frustum(float near, float far, float left, float right, float top, float bottom);
 }

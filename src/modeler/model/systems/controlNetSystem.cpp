@@ -13,9 +13,9 @@ void ControlNetSystem::RegisterSystem(Coordinator &coordinator)
 }
 
 
-void ControlNetSystem::AddControlPointsNet(Entity entity, const Patches &patches)
+void ControlNetSystem::AddControlPointsNet(const Entity entity, const Patches &patches)
 {
-    ControlNetMesh mesh;
+    const ControlNetMesh mesh;
     coordinator->AddComponent<ControlNetMesh>(entity, mesh);
 
     Update(entity, patches);
@@ -34,8 +34,8 @@ void ControlNetSystem::Render(const alg::Mat4x4& cameraMtx) const
     shader.SetColor(alg::Vec4(1.0f));
     shader.SetMVP(cameraMtx);
 
-    for (Entity entity: entities) {
-        bool selection = selectionSystem->IsSelected(entity);
+    for (const Entity entity: entities) {
+        const bool selection = selectionSystem->IsSelected(entity);
 
         if (selection)
             shader.SetColor(alg::Vec4(1.0f, 0.5f, 0.0f, 1.0f));
@@ -51,7 +51,7 @@ void ControlNetSystem::Render(const alg::Mat4x4& cameraMtx) const
 }
 
 
-void ControlNetSystem::Update(Entity entity, const Patches& patches)
+void ControlNetSystem::Update(const Entity entity, const Patches& patches)
 {
     coordinator->EditComponent<ControlNetMesh>(entity,
         [this, &patches] (ControlNetMesh& mesh) {
@@ -71,8 +71,8 @@ std::vector<float> ControlNetSystem::GenerateVertices(const Patches &patches) co
 
     for (int row = 0; row < patches.PointsInRow(); row++) {
         for (int col = 0; col < patches.PointsInCol(); col++) {
-            Entity cp = patches.GetPoint(row, col);
-            Position pos = coordinator->GetComponent<Position>(cp);
+            const Entity cp = patches.GetPoint(row, col);
+            auto pos = coordinator->GetComponent<Position>(cp);
 
             result.push_back(pos.GetX());
             result.push_back(pos.GetY());
