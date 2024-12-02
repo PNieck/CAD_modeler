@@ -51,6 +51,7 @@ namespace alg
 
     alg::Mat4x4 TranslationMtx(const Vec3& vector);
 
+    Mat4x4 TranslationInverseMtx(const Vec3& vector);
 
     alg::Mat4x4 LookAt(const Vec3& cameraPos, const Vec3& direction, const Vec3& upVector);
 
