@@ -7,7 +7,6 @@
 #include <CAD_modeler/model/components/name.hpp>
 #include <CAD_modeler/model/components/unremovable.hpp>
 
-#include <CAD_modeler/model/systems/cameraSystem.hpp>
 #include <CAD_modeler/model/systems/selectionSystem.hpp>
 
 
@@ -26,14 +25,14 @@ void CursorSystem::Init(ShaderRepository* shadersRepo)
 
     cursor = coordinator->CreateEntity();
 
-    Position pos(0.0f);
+    const Position pos(0.0f);
     coordinator->AddComponent<Position>(cursor, pos);
 
     Mesh mesh;
-    std::vector<float> vertices {
+    const std::vector<float> vertices {
         0.0f, 0.0f, 0.0f
     };
-    std::vector<uint32_t> indices { 0 };
+    const std::vector<uint32_t> indices { 0 };
     
     mesh.Update(vertices, indices);
     
@@ -51,7 +50,7 @@ void CursorSystem::Render(const alg::Mat4x4& cameraMtx)
 
     auto const& mesh = coordinator->GetComponent<Mesh>(cursor);
     auto const& position = coordinator->GetComponent<Position>(cursor);
-    bool selected = selectionSystem->IsSelected(cursor);
+    const bool selected = selectionSystem->IsSelected(cursor);
 
     shader.Use();
 
@@ -60,7 +59,7 @@ void CursorSystem::Render(const alg::Mat4x4& cameraMtx)
     else
         shader.SetColor(alg::Vec4(0.5f, 0.0f, 1.0f, 1.0f));
 
-    alg::Mat4x4 modelMtx = position.TranslationMatrix();
+    const alg::Mat4x4 modelMtx = position.TranslationMatrix();
     shader.SetMVP(cameraMtx * modelMtx);
 
     mesh.Use();

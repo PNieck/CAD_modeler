@@ -221,6 +221,17 @@ alg::Mat4x4 alg::TranslationMtx(const Vec3 &vec)
 }
 
 
+alg::Mat4x4 alg::TranslationInverseMtx(const Vec3& vec)
+{
+    return {
+         1.0f,     0.0f,     0.0f, 0.0f,
+         0.0f,     1.0f,     0.0f, 0.0f,
+         0.0f,     0.0f,     1.0f, 0.0f,
+     -vec.X(), -vec.Y(), -vec.Z(), 1.0f
+    };
+}
+
+
 alg::Mat4x4 alg::LookAt(const Vec3 &cameraPos, const Vec3 &dir, const Vec3 &upVector)
 {
     assert(dir.LengthSquared() != 0.f);

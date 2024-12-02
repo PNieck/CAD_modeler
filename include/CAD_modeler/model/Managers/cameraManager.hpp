@@ -2,12 +2,10 @@
 
 #include <ecs/coordinator.hpp>
 
-#include <algebra/mat4x4.hpp>
-
 #include <variant>
 
-#include "../systems/cameraSystem.hpp"
-#include "../systems/anaglyphsCameraSystem.hpp"
+#include "../systems/camera/perspectiveCameraSystem.hpp"
+#include "../systems/camera/anaglyphsCameraSystem.hpp"
 
 
 class CameraManager {
@@ -41,7 +39,7 @@ public:
     
     void SetCameraType(CameraType camType);
 
-    // Works only when anaglyph camera type is selected
+    // Works only when anaglyphs camera type is selected
     void SetCurrentEye(Eye eye);
 
     [[nodiscard]]
@@ -67,7 +65,7 @@ public:
 private:
     Coordinator& coordinator;
 
-    using PerspectiveSys = std::shared_ptr<CameraSystem>;
+    using PerspectiveSys = std::shared_ptr<PerspectiveCameraSystem>;
     using AnaglyphsSys = std::shared_ptr<AnaglyphsCameraSystem>;
 
     std::variant<PerspectiveSys, AnaglyphsSys> currentCameraSys;

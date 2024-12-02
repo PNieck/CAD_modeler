@@ -18,19 +18,21 @@ float PositionSystem::Distance(Entity e, Position p) const
     return alg::Distance(pos.vec, p.vec);
 }
 
-void PositionSystem::RotateAround(Entity target, const Position &pivot, float x, float y, float z)
+
+void PositionSystem::RotateAround(const Entity target, const Position &pivot, const float x, const float y)
 {
-    Position const& position = coordinator->GetComponent<Position>(target);
+    auto const& position = coordinator->GetComponent<Position>(target);
+    auto posSub = position.vec - pivot.vec;
 
-    alg::Mat4x4 translationMtx = pivot.TranslationMatrix();
-    alg::Mat4x4 translationInv = translationMtx.Inverse().value();
+    alg::Quat q1(alg::Vec3(0.f, 1.f, 0.f), x);
 
-    alg::Quat q(x, y, z);
-    alg::Vec4 pos(position.vec, 1.0f);
+    const auto axis = alg::Cross(posSub, alg::Vec3(0.f, 1.f, 0.f));
+    q1 = q1 * alg::Quat(axis, y);
 
-    pos = translationMtx * q.ToRotationMatrix() * translationInv * pos;
+    posSub = q1.Rotate(posSub);
+    auto newPos = posSub + pivot.vec;
 
-    coordinator->SetComponent<Position>(target, Position(pos.X(), pos.Y(), pos.Z()));
+    coordinator->SetComponent<Position>(target, Position(newPos.X(), newPos.Y(), newPos.Z()));
 }
 
 

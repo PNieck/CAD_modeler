@@ -11,19 +11,19 @@ CameraManager::CameraManager(Coordinator &coordinator):
     coordinator(coordinator) {}
 
 
-void CameraManager::Init(int viewportWidth, int viewportHeight)
+void CameraManager::Init(const int viewportWidth, const int viewportHeight)
 {
     // Register all systems needed by this module
-    CameraSystem::RegisterSystem(coordinator);
+    PerspectiveCameraSystem::RegisterSystem(coordinator);
     AnaglyphsCameraSystem::RegisterSystem(coordinator);
     PositionSystem::RegisterSystem(coordinator);
 
-    auto perspectiveCamSys = coordinator.GetSystem<CameraSystem>();
-    auto anaglyphsCamSys = coordinator.GetSystem<AnaglyphsCameraSystem>();
+    const auto perspectiveCamSys = coordinator.GetSystem<PerspectiveCameraSystem>();
+    const auto anaglyphsCamSys = coordinator.GetSystem<AnaglyphsCameraSystem>();
 
-    Position initCamPos(0.0f, 0.0f, 10.0f);
+    const Position initCamPos(0.0f, 0.0f, 10.0f);
 
-    CameraParameters persCamParams {
+    const CameraParameters persCamParams {
         .target = Position(0.0f),
         .viewportWidth = viewportWidth,
         .viewportHeight = viewportHeight,
@@ -32,12 +32,12 @@ void CameraManager::Init(int viewportWidth, int viewportHeight)
         .farPlane = 100.0f,
     };
 
-    AnaglyphsCameraParameters anaCamParams(persCamParams, 0.5, 10.f);
+    const AnaglyphsCameraParameters anaCamParams(persCamParams, 0.5, 10.f);
 
     perspectiveCamSys->Init(persCamParams, initCamPos);
     anaglyphsCamSys->Init(anaCamParams, initCamPos);
 
-    currentCameraSys = coordinator.GetSystem<CameraSystem>();
+    currentCameraSys = coordinator.GetSystem<PerspectiveCameraSystem>();
 }
 
 
@@ -67,21 +67,21 @@ alg::Mat4x4 CameraManager::ViewMtx() const
 }
 
 
-void CameraManager::RotateCamera(float x, float y)
+void CameraManager::RotateCamera(const float x, const float y)
 {
-    auto positionSys = coordinator.GetSystem<PositionSystem>();
-    auto params = GetBaseParams();
-    Entity camera = GetCameraEntity();
+    const auto positionSys = coordinator.GetSystem<PositionSystem>();
+    const auto params = GetBaseParams();
+    const Entity camera = GetCameraEntity();
 
-    positionSys->RotateAround(camera, params.target, x, y, 0.f);
+    positionSys->RotateAround(camera, params.target, x, y);
 }
 
 
 float CameraManager::GetDistanceFromTarget() const
 {
-    auto positionSys = coordinator.GetSystem<PositionSystem>();
-    auto params = GetBaseParams();
-    Entity camera = GetCameraEntity();
+    const auto positionSys = coordinator.GetSystem<PositionSystem>();
+    const auto params = GetBaseParams();
+    const Entity camera = GetCameraEntity();
 
     return positionSys->Distance(camera, params.target);
 }
@@ -132,7 +132,7 @@ void CameraManager::SetCameraType(CameraType camType)
 void CameraManager::SwitchToPerspectiveCameraType()
 {
     auto oldSys = std::get<AnaglyphsSys>(currentCameraSys);
-    auto newSys = coordinator.GetSystem<CameraSystem>();
+    auto newSys = coordinator.GetSystem<PerspectiveCameraSystem>();
 
     AnaglyphsCameraParameters oldParams = oldSys->GetParameters();
     Position camPos = oldSys->GetCameraPos();

@@ -1,4 +1,4 @@
-#include <CAD_modeler/model/systems/anaglyphsCameraSystem.hpp>
+#include <CAD_modeler/model/systems/camera/anaglyphsCameraSystem.hpp>
 
 #include <stdexcept>
 

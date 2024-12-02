@@ -2,7 +2,6 @@
 
 #include <ecs/coordinator.hpp>
 
-#include <CAD_modeler/model/systems/cameraSystem.hpp>
 #include <CAD_modeler/model/components/mesh.hpp>
 
 

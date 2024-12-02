@@ -1,20 +1,20 @@
-#include <CAD_modeler/model/systems/cameraSystem.hpp>
+#include <CAD_modeler/model/systems/camera/perspectiveCameraSystem.hpp>
 
 #include <CAD_modeler/model/components/cameraParameters.hpp>
 #include <CAD_modeler/model/components/position.hpp>
 #include <CAD_modeler/model/components/rotation.hpp>
 
 
-void CameraSystem::RegisterSystem(Coordinator & coordinator)
+void PerspectiveCameraSystem::RegisterSystem(Coordinator & coordinator)
 {
-    coordinator.RegisterSystem<CameraSystem>();
+    coordinator.RegisterSystem<PerspectiveCameraSystem>();
 
     coordinator.RegisterComponent<Position>();
     coordinator.RegisterComponent<CameraParameters>();
 }
 
 
-void CameraSystem::Init(const CameraParameters& params, const Position& cameraPos)
+void PerspectiveCameraSystem::Init(const CameraParameters& params, const Position& cameraPos)
 {
     camera = coordinator->CreateEntity();
 
@@ -23,7 +23,7 @@ void CameraSystem::Init(const CameraParameters& params, const Position& cameraPo
 }
 
 
-alg::Mat4x4 CameraSystem::ViewMatrix() const
+alg::Mat4x4 PerspectiveCameraSystem::ViewMatrix() const
 {
     auto const& position = coordinator->GetComponent<Position>(camera);
     auto const& params = coordinator->GetComponent<CameraParameters>(camera);
@@ -34,7 +34,7 @@ alg::Mat4x4 CameraSystem::ViewMatrix() const
 }
 
 
-alg::Mat4x4 CameraSystem::PerspectiveMatrix() const
+alg::Mat4x4 PerspectiveCameraSystem::PerspectiveMatrix() const
 {
     auto const& params = coordinator->GetComponent<CameraParameters>(camera);
 
