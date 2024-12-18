@@ -75,6 +75,7 @@ public:
     bool MillingMachineRuns() const
         { return millingMachineSystem->MachineRuns(); }
 
+    [[nodiscard]]
     const auto& GetMillingWarnings() const
         { return millingMachineSystem->GetWarnings(); }
 

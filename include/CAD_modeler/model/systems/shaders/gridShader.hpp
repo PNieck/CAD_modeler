@@ -3,7 +3,7 @@
 #include "shader.hpp"
 
 
-class GridShader: private Shader {
+class GridShader: Shader {
 public:
     GridShader():
         Shader(
@@ -11,19 +11,18 @@ public:
             "../../shaders/gridShader.frag"
         ) {}
 
-    inline void SetFarPlane(float farPlane) const
+    void SetFarPlane(float farPlane) const
         { SetFloat("far", farPlane); }
 
-    inline void SetNearPlane(float nearPlane) const
+    void SetNearPlane(float nearPlane) const
         { SetFloat("near", nearPlane); }
 
-    inline void SetViewMatrix(const alg::Mat4x4& viewMtx) const
+    void SetViewMatrix(const alg::Mat4x4& viewMtx) const
         { SetMatrix4("view", viewMtx); }
 
-    inline void SetProjectionMatrix(const alg::Mat4x4& projMtx) const
-        { SetMatrix4("proj", projMtx); }
+    void SetProjectionMatrix(const alg::Mat4x4& projMtx) const
         { SetMatrix4("projection", projMtx); }
 
-    inline void Use() const
+    void Use() const
         { Shader::Use(); }
 };
