@@ -1,6 +1,7 @@
 #include "CAD_modeler/model/millingMachineSim.hpp"
 
 #include <CAD_modeler/model/systems/millingMachinePathsSystem.hpp>
+#include <CAD_modeler/model/systems/shaders/shaderRepository.hpp>
 
 
 MillingMachineSim::MillingMachineSim(const int viewportWidth, const int viewportHeight):
@@ -12,9 +13,7 @@ MillingMachineSim::MillingMachineSim(const int viewportWidth, const int viewport
     gridSystem = coordinator.GetSystem<GridSystem>();
     millingMachineSystem = coordinator.GetSystem<MillingMachineSystem>();
 
-    ShaderRepository& shadersRepo = ShaderRepository::GetInstance();
-
-    gridSystem->Init(&shadersRepo);
+    gridSystem->Init();
 
     millingMachineSystem->Init(1000, 1000);
 }
@@ -38,6 +37,6 @@ void MillingMachineSim::AddMillingPath(const std::string &filePath) const
 void MillingMachineSim::RenderSystemsObjects(const alg::Mat4x4 &viewMtx, const alg::Mat4x4 &persMtx,
                                              const float nearPlane, const float farPlane) const
 {
-    gridSystem->Render(viewMtx, persMtx, nearPlane, farPlane);
     millingMachineSystem->Render(viewMtx, persMtx, cameraManager.GetCameraPosition().vec);
+    gridSystem->Render(viewMtx, persMtx, nearPlane, farPlane);
 }

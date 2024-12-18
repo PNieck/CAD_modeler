@@ -3,6 +3,7 @@
 #include <ecs/coordinator.hpp>
 
 #include <CAD_modeler/model/components/mesh.hpp>
+#include <CAD_modeler/model/systems/shaders/shaderRepository.hpp>
 
 
 void GridSystem::RegisterSystem(Coordinator & coordinator)
@@ -13,10 +14,8 @@ void GridSystem::RegisterSystem(Coordinator & coordinator)
 }
 
 
-void GridSystem::Init(ShaderRepository * shaders)
+void GridSystem::Init()
 {
-    this->shaderRepo = shaders;
-
     grid = coordinator->CreateEntity();
 
     Mesh mesh;
@@ -44,7 +43,7 @@ void GridSystem::Init(ShaderRepository * shaders)
 void GridSystem::Render(const alg::Mat4x4& viewMtx, const alg::Mat4x4& projMtx, const float nearPlane, const float farPlane) const
 {
     auto const& gridMesh = coordinator->GetComponent<Mesh>(grid);
-    auto const& gridShader = shaderRepo->GetGridShader();
+    auto const& gridShader = ShaderRepository::GetInstance().GetGridShader();
 
     gridShader.Use();
     gridShader.SetFarPlane(farPlane);
@@ -53,9 +52,5 @@ void GridSystem::Render(const alg::Mat4x4& viewMtx, const alg::Mat4x4& projMtx, 
     gridShader.SetProjectionMatrix(projMtx);
     
     gridMesh.Use();
-    glDepthMask(GL_FALSE);
     glDrawElements(GL_TRIANGLES, gridMesh.GetElementsCnt(), GL_UNSIGNED_INT, 0);
-    glBindVertexArray(0);
-
-    glDepthMask(GL_TRUE);
 }
