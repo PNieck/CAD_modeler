@@ -65,7 +65,7 @@ Modeler::Modeler(const int viewportWidth, const int viewportHeight):
     ShaderRepository& shadersRepo = ShaderRepository::GetInstance();
 
     cameraManager.Init(viewportWidth, viewportHeight);
-    gridSystem->Init(&shadersRepo);
+    gridSystem->Init();
     cursorSystem->Init(&shadersRepo);
     selectionSystem->Init(&shadersRepo);
     pointsSystem->Init(&shadersRepo);
