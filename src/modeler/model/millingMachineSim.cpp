@@ -38,6 +38,6 @@ void MillingMachineSim::AddMillingPath(const std::string &filePath) const
 void MillingMachineSim::RenderSystemsObjects(const alg::Mat4x4 &viewMtx, const alg::Mat4x4 &persMtx,
                                              const float nearPlane, const float farPlane) const
 {
-    gridSystem->Render(viewMtx, persMtx, nearPlane, farPlane);
     millingMachineSystem->Render(viewMtx, persMtx, cameraManager.GetCameraPosition().vec);
+    gridSystem->Render(viewMtx, persMtx, nearPlane, farPlane);
 }

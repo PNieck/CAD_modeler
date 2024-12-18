@@ -22,6 +22,7 @@ public:
 
     inline void SetProjectionMatrix(const alg::Mat4x4& projMtx) const
         { SetMatrix4("proj", projMtx); }
+        { SetMatrix4("projection", projMtx); }
 
     inline void Use() const
         { Shader::Use(); }

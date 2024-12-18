@@ -229,7 +229,6 @@ void Modeler::RenderSystemsObjects(const alg::Mat4x4 &viewMtx, const alg::Mat4x4
 {
     alg::Mat4x4 cameraMtx = persMtx * viewMtx;
 
-    gridSystem->Render(viewMtx, persMtx, nearPlane, farPlane);
     toriSystem->Render(cameraMtx);
     cursorSystem->Render(cameraMtx);
     pointsSystem->Render(cameraMtx);
@@ -243,6 +242,7 @@ void Modeler::RenderSystemsObjects(const alg::Mat4x4 &viewMtx, const alg::Mat4x4
     controlNetSystem->Render(cameraMtx);
     gregoryPatchesSystem->Render(cameraMtx);
     vectorSystem->Render(cameraMtx);
+    gridSystem->Render(viewMtx, persMtx, nearPlane, farPlane);
 
     if (selectingEntities)
         selectionSystem->RenderSelectionCircle(
