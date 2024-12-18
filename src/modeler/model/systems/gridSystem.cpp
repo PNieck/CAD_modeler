@@ -41,7 +41,7 @@ void GridSystem::Init(ShaderRepository * shaders)
 }
 
 
-void GridSystem::Render(const alg::Mat4x4& viewMtx, const alg::Mat4x4& projMtx, float nearPlane, float farPlane) const
+void GridSystem::Render(const alg::Mat4x4& viewMtx, const alg::Mat4x4& projMtx, const float nearPlane, const float farPlane) const
 {
     auto const& gridMesh = coordinator->GetComponent<Mesh>(grid);
     auto const& gridShader = shaderRepo->GetGridShader();

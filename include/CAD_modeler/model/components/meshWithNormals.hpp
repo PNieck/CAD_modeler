@@ -5,7 +5,7 @@
 
 class MeshWithNormals: private Mesh {
 public:
-    MeshWithNormals() {}
+    MeshWithNormals() = default;
 
     void Update(const std::vector<float>& vertices, const std::vector<uint32_t>& indices)
     {
