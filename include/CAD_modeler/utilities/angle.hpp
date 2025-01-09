@@ -5,20 +5,22 @@
 
 class Angle {
 public:
-    inline static Angle FromDegrees(float degrees)
+    static Angle FromDegrees(const float degrees)
         { return Angle(degrees); }
 
-    inline static Angle FromRadians(float radians)
+    static Angle FromRadians(const float radians)
         { return Angle(radians*radiansToDegreesConst); }
 
-    inline float ToDegrees() const
+    [[nodiscard]]
+    float ToDegrees() const
         { return degrees; }
 
-    inline float ToRadians() const
+    [[nodiscard]]
+    float ToRadians() const
         { return degrees * degreeToRadiansConst; }
 
 private:
-    Angle(float degrees): degrees(degrees) {}
+    explicit Angle(const float degrees): degrees(degrees) {}
 
     static constexpr float degreeToRadiansConst = std::numbers::pi_v<float> / 180.f;
     static constexpr float radiansToDegreesConst = 1.f / degreeToRadiansConst;
