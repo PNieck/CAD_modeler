@@ -49,6 +49,10 @@ public:
     const MillingShader& GetMillingShader() const
         { return millingShader; }
 
+    ShaderRepository(const ShaderRepository&) = delete;
+    ShaderRepository(ShaderRepository&&) = delete;
+    ShaderRepository& operator=(const ShaderRepository&) = delete;
+
 private:
     StdShader stdShader;
     GridShader gridShader;
@@ -60,7 +64,4 @@ private:
     MillingShader millingShader;
 
     ShaderRepository() = default;
-    ShaderRepository(const ShaderRepository&) = delete;
-    ShaderRepository(ShaderRepository&&) = delete;
-    ShaderRepository& operator=(const ShaderRepository&) = delete;
 };

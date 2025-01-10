@@ -21,7 +21,7 @@ public:
 
     ~Shader();
 
-    inline void Use() const
+    void Use() const
         { glUseProgram(id); }
 
     void SetBool(const std::string &name, bool value) const;
@@ -39,7 +39,8 @@ private:
 };
 
 
-class UniformNotFoundInShader: std::exception {
+class UniformNotFoundInShader final : public std::exception {
 public:
-     const char * what() const noexcept override;
+    [[nodiscard]]
+    const char * what() const noexcept override;
 };
