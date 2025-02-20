@@ -1,4 +1,4 @@
-function(enable_compiler_warings target)
+function(enable_compiler_warnings target)
     target_compile_options(${target} PRIVATE
     $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:
         -Wall>

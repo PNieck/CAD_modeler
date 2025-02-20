@@ -6,7 +6,7 @@ file(GLOB_RECURSE ALGEBRA_LIB_SRCS CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/src/
 
 add_library(algebra ${ALGEBRA_LIB_SRCS} ${ALGEBRA_LIB_HEADERS})
 target_include_directories(algebra PUBLIC ../include)
-enable_compiler_warings(algebra)
+enable_compiler_warnings(algebra)
 
 #
 # ECS library
@@ -16,7 +16,7 @@ file(GLOB_RECURSE ECS_LIB_SRCS CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/src/ecs/
 
 add_library(ecs ${ECS_LIB_SRCS} ${ECS_LIB_HEADERS})
 target_include_directories(ecs PUBLIC ../include)
-enable_compiler_warings(ecs)
+enable_compiler_warnings(ecs)
 
 
 #
@@ -27,7 +27,7 @@ file(GLOB_RECURSE GRAPH_LIB_SRCS CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/src/gr
 
 add_library(graph ${GRAPH_LIB_SRCS} ${GRAPH_LIB_HEADERS})
 target_include_directories(graph PUBLIC ../include)
-enable_compiler_warings(graph)
+enable_compiler_warnings(graph)
 
 
 #
@@ -39,7 +39,7 @@ file(GLOB_RECURSE OPENGL_HELPERS_LIB_SRCS CONFIGURE_DEPENDS "${PROJECT_SOURCE_DI
 add_library(openGlHelpers ${OPENGL_HELPERS_LIB_SRCS} ${OPENGL_HELPERS_LIB_HEADERS})
 target_include_directories(openGlHelpers PUBLIC ../include)
 target_link_libraries(openGlHelpers PUBLIC glad)
-enable_compiler_warings(openGlHelpers)
+enable_compiler_warnings(openGlHelpers)
 
 #
 # Main library
@@ -64,7 +64,7 @@ target_link_libraries(
     imguiLoadingSpinner
     openGlHelpers
 )
-enable_compiler_warings(modeler_lib)
+enable_compiler_warnings(modeler_lib)
 
 # Copy shaders
 add_custom_target(copy_shaders

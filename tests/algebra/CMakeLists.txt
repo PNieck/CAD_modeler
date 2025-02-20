@@ -18,4 +18,4 @@ target_link_libraries(
 )
 
 gtest_discover_tests(algebra_tests)
-enable_compiler_warings(algebra_tests)
+enable_compiler_warnings(algebra_tests)

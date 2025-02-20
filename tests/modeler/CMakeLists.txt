@@ -12,7 +12,7 @@ target_link_libraries(
 )
 
 gtest_discover_tests(plane_tests)
-enable_compiler_warings(plane_tests)
+enable_compiler_warnings(plane_tests)
 
 
 add_executable(
@@ -30,7 +30,7 @@ target_link_libraries(
 )
 
 gtest_discover_tests(camera_system_tests)
-enable_compiler_warings(camera_system_tests)
+enable_compiler_warnings(camera_system_tests)
 
 
 add_executable(
@@ -46,4 +46,4 @@ target_link_libraries(
 )
 
 gtest_discover_tests(angle_tests)
-enable_compiler_warings(angle_tests)
+enable_compiler_warnings(angle_tests)

@@ -21,7 +21,7 @@ target_link_libraries(
 )
 
 gtest_discover_tests(sample_test)
-enable_compiler_warings(sample_test)
+enable_compiler_warnings(sample_test)
 
 
 add_subdirectory(algebra/)
