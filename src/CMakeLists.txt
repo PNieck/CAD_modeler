@@ -31,6 +31,17 @@ enable_compiler_warings(graph)
 
 
 #
+# OpenGl Helpers library
+#
+file(GLOB_RECURSE OPENGL_HELPERS_LIB_HEADERS CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/include/openglHelpers/*.hpp")
+file(GLOB_RECURSE OPENGL_HELPERS_LIB_SRCS CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/src/openglHelpers/*.cpp")
+
+add_library(openGlHelpers ${OPENGL_HELPERS_LIB_SRCS} ${OPENGL_HELPERS_LIB_HEADERS})
+target_include_directories(openGlHelpers PUBLIC ../include)
+target_link_libraries(openGlHelpers PUBLIC glad)
+enable_compiler_warings(openGlHelpers)
+
+#
 # Main library
 #
 file(GLOB_RECURSE HEADER_LIST CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/include/CAD_modeler/*.hpp")
@@ -51,6 +62,7 @@ target_link_libraries(
     nlohmann_json::nlohmann_json
     dlib::dlib
     imguiLoadingSpinner
+    openGlHelpers
 )
 enable_compiler_warings(modeler_lib)
 
@@ -62,7 +74,7 @@ add_dependencies(modeler_lib copy_shaders)
 
 # Copy models
 add_custom_target(copy_models
-        COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/models ${CMAKE_BINARY_DIR}/models
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/models ${CMAKE_BINARY_DIR}/models
 )
 add_dependencies(modeler_lib copy_models)
 
