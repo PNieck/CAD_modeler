@@ -438,11 +438,14 @@ void ModelerMainMenuView::RenderObjectsNames() const
     const auto& entities = model.EntitiesWithNames();
     const auto& points = model.GetAllPoints();
 
+    unsigned int id = 0;
     for (auto entity: entities) {
         if (hidePoints && points.contains(entity))
             continue;
 
         bool selected = model.IsSelected(entity);
+
+        ImGui::PushID(++id);
 
         if (ImGui::Selectable(
             model.GetEntityName(entity).c_str(),
@@ -453,6 +456,8 @@ void ModelerMainMenuView::RenderObjectsNames() const
             else
                 model.Deselect(entity);
         }
+
+        ImGui::PopID();
     } 
 }
 
