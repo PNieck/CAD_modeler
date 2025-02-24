@@ -256,7 +256,7 @@ std::vector<uint32_t> C0CurveSystem::GenerateBezierPolygonIndices(const CurveCon
 
     // Add all full segments
     int firstControlPoint = 0;
-    for (; firstControlPoint < fullSegmentsCnt * CONTROL_POINTS_PER_SEGMENT - 3; firstControlPoint += 3) {
+    for (; firstControlPoint < static_cast<int>(fullSegmentsCnt * CONTROL_POINTS_PER_SEGMENT) - 3; firstControlPoint += 3) {
         result.push_back(firstControlPoint);
         result.push_back(firstControlPoint + 1);
         result.push_back(firstControlPoint + 2);
