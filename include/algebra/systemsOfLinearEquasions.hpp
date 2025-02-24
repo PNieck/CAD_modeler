@@ -34,7 +34,7 @@ namespace alg
 
         result[size - 1] = resultsElems[size - 1] / diagonalElems[size - 1];
 
-        for (size_t i = size - 2; i >= 0; --i) {
+        for (int i = static_cast<int>(size - 2); i >= 0; --i) {
             if (diagonalElems[i] == 0)
                 return std::nullopt;
 
