@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../model/modeler.hpp"
+#include "../../model/modeler.hpp"
 
 // ImGui header must be included before imfilebrowser one
 #include <imgui.h>
@@ -10,9 +10,9 @@
 class ModelerController;
 
 
-class MainMenuBar {
+class ModelerMainMenuBar {
 public:
-    MainMenuBar(ModelerController& controller, Modeler& model);
+    ModelerMainMenuBar(ModelerController& controller, Modeler& model);
 
     void Render();
 

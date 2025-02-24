@@ -1,11 +1,11 @@
-#include <CAD_modeler/views/mainMenuBar.hpp>
+#include <CAD_modeler/views/modeler/modelerMainMenuBar.hpp>
 
 #include <CAD_modeler/controllers/modelerController.hpp>
 
 #include <imgui.h>
 
 
-MainMenuBar::MainMenuBar(ModelerController& controller, Modeler& model):
+ModelerMainMenuBar::ModelerMainMenuBar(ModelerController& controller, Modeler& model):
     controller(controller), model(model), fileDialog(ImGuiFileBrowserFlags_EnterNewFilename | ImGuiFileBrowserFlags_CreateNewDir)
 {
     fileDialog.SetTitle("Choose file to load");
@@ -13,7 +13,7 @@ MainMenuBar::MainMenuBar(ModelerController& controller, Modeler& model):
 }
 
 
-void MainMenuBar::Render()
+void ModelerMainMenuBar::Render()
 {
     static bool savingScene = false;
 

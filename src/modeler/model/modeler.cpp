@@ -108,22 +108,24 @@ void Modeler::MergeControlPoints(Entity e1, Entity e2)
     auto ownersSet = registrySys->GetOwnersOfControlPoints(e2);
 
     for (auto owner: ownersSet) {
-        auto sysId = std::get<SystemId>(owner);
+        // Getting system ID
+        auto sysId = std::get<1>(owner);
+        Entity entity = std::get<0>(owner);
 
         if (sysId == Coordinator::GetSystemID<C0CurveSystem>() ||
             sysId == Coordinator::GetSystemID<C2CurveSystem>() ||
             sysId == Coordinator::GetSystemID<InterpolationCurveSystem>())
-            curveCPSys->MergeControlPoints(std::get<Entity>(owner), e2, e1, sysId);
+            curveCPSys->MergeControlPoints(entity, e2, e1, sysId);
 
         else if (sysId == Coordinator::GetSystemID<C0CylinderSystem>() ||
                  sysId == Coordinator::GetSystemID<C0SurfaceSystem>())
-                 c0PatchesSystem->MergeControlPoints(std::get<Entity>(owner), e2, e1, sysId);
+                 c0PatchesSystem->MergeControlPoints(entity, e2, e1, sysId);
 
         else if (sysId == Coordinator::GetSystemID<C2SurfaceSystem>())
-                 c2SurfaceSystem->MergeControlPoints(std::get<Entity>(owner), e2, e1);
+                 c2SurfaceSystem->MergeControlPoints(entity, e2, e1);
 
         else if (sysId == Coordinator::GetSystemID<C2CylinderSystem>())
-                 c2CylinderSystem->MergeControlPoints(std::get<Entity>(owner), e2, e1);
+                 c2CylinderSystem->MergeControlPoints(entity, e2, e1);
         else
             throw std::runtime_error("Unknown system");
     }
