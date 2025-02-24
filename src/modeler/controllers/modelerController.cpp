@@ -13,7 +13,7 @@ ModelerController::ModelerController(Modeler &modeler):
 void ModelerController::Render()
 {
     modeler.RenderFrame();
-    guiView.RenderGui();
+    guiView.Render();
 }
 
 
