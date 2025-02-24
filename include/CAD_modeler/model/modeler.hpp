@@ -27,6 +27,8 @@
 #include "components/scale.hpp"
 #include "components/rotation.hpp"
 
+#include "utils/nameGenerator.hpp"
+
 #include "../utilities/line.hpp"
 
 
@@ -35,28 +37,21 @@ class Modeler final: public Model
 public:
     Modeler(int viewportWidth, int viewportHeight);
 
-    void AddTorus();
+    Entity AddTorus();
 
-    inline Entity AddC0Curve(const std::vector<Entity>& controlPoints) const
-        { return c0CurveSystem->CreateC0Curve(controlPoints); }
+    Entity AddC0Curve(const std::vector<Entity>& controlPoints);
 
-    inline Entity AddC2Curve(const std::vector<Entity>& controlPoints) const
-        { return c2CurveSystem->CreateC2Curve(controlPoints); }
+    Entity AddC2Curve(const std::vector<Entity>& controlPoints);
 
-    inline Entity AddInterpolationCurve(const std::vector<Entity>& controlPoints) const
-        { return interpolationCurveSystem->CreateCurve(controlPoints); }
+    Entity AddInterpolationCurve(const std::vector<Entity>& controlPoints);
 
-    inline Entity AddC0Surface(const alg::Vec3& direction, float length, float width) const
-        { return c0SurfaceSystem->CreateSurface(cursorSystem->GetPosition(), direction, length, width); }
+    Entity AddC0Surface(const alg::Vec3& direction, float length, float width);
 
-    inline Entity AddC2Surface(const alg::Vec3& direction, float length, float width) const
-        { return c2SurfaceSystem->CreateSurface(cursorSystem->GetPosition(), direction, length, width); }
+    Entity AddC2Surface(const alg::Vec3& direction, float length, float width);
 
-    inline Entity AddC0Cylinder() const
-        { return c0CylinderSystem->CreateCylinder(cursorSystem->GetPosition(), alg::Vec3(0.f, 1.f, 0.f), 1.f); }
+    Entity AddC0Cylinder();
 
-    inline Entity AddC2Cylinder() const
-        { return c2CylinderSystem->CreateCylinder(cursorSystem->GetPosition(), alg::Vec3(0.f, 1.f, 0.f), 1.f); }
+    Entity AddC2Cylinder();
 
     inline void AddControlPointToC0Curve(Entity curve, Entity entity) const
         { c0CurveSystem->AddControlPoint(curve, entity); }
@@ -279,8 +274,7 @@ public:
 
     std::vector<GregoryPatchesSystem::Hole> GetHolesPossibleToFill(const std::unordered_set<Entity>& entities) const;
     
-    inline void FillHole(const GregoryPatchesSystem::Hole& hole)
-        { gregoryPatchesSystem->FillHole(hole); }
+    Entity FillHole(const GregoryPatchesSystem::Hole& hole);
 
     inline void ShowGregoryNet(Entity gregoryPatches)
         { gregoryPatchesSystem->ShowControlNet(gregoryPatches); }
@@ -328,9 +322,12 @@ private:
     std::shared_ptr<IntersectionSystem> intersectionSystem;
 
     SaveManager saveManager;
+    NameGenerator nameGenerator;
 
     alg::Vec3 PointFromViewportCoordinates(float x, float y);
     Line LineFromViewportCoordinates(float x, float y);
+
+    void NamePatchesCPs(const Patches& patches);
 
     void RenderSystemsObjects(const alg::Mat4x4& viewMtx, const alg::Mat4x4& persMtx, float nearPlane, float farPlane) const override;
 };

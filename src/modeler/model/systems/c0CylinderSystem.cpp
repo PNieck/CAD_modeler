@@ -10,7 +10,6 @@
 #include "CAD_modeler/model/components/c0Patches.hpp"
 #include "CAD_modeler/model/components/patchesDensity.hpp"
 #include "CAD_modeler/model/components/mesh.hpp"
-#include "CAD_modeler/model/components/name.hpp"
 #include "CAD_modeler/model/components/rotation.hpp"
 #include "CAD_modeler/model/components/unremovable.hpp"
 #include "CAD_modeler/model/components/IsC0Cylinder.hpp"
@@ -70,7 +69,6 @@ Entity C0CylinderSystem::CreateCylinder(const Position &pos, const alg::Vec3 &di
 
     patches.deletionHandler = coordinator->Subscribe<C0Patches>(surface, deletionHandler);
 
-    coordinator->AddComponent<Name>(surface, nameGenerator.GenerateName("CylinderC0_"));
     coordinator->AddComponent<Mesh>(surface, mesh);
     coordinator->AddComponent<C0Patches>(surface, patches);
     coordinator->AddComponent<PatchesDensity>(surface, density);

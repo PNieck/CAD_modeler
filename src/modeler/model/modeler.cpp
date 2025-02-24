@@ -84,7 +84,7 @@ Modeler::Modeler(const int viewportWidth, const int viewportHeight):
 }
 
 
-void Modeler::AddTorus()
+Entity Modeler::AddTorus()
 {
     Position cursorPos = cursorSystem->GetPosition();
 
@@ -96,7 +96,79 @@ void Modeler::AddTorus()
         .meshDensityMajR = 5,
     };
 
-    toriSystem->AddTorus(cursorPos, params);
+    const Entity entity = toriSystem->AddTorus(cursorPos, params);
+    nameSystem->SetName(entity, nameGenerator.GenerateName("Torus_"));
+
+    return entity;
+}
+
+
+Entity Modeler::AddC0Curve(const std::vector<Entity>& controlPoints)
+{
+    const Entity entity = c0CurveSystem->CreateC0Curve(controlPoints);
+    nameSystem->SetName(entity, nameGenerator.GenerateName("CurveC0_"));
+
+    return entity;
+}
+
+
+Entity Modeler::AddC2Curve(const std::vector<Entity>& controlPoints)
+{
+    const Entity entity = c2CurveSystem->CreateC2Curve(controlPoints);
+    nameSystem->SetName(entity, nameGenerator.GenerateName("CurveC2_"));
+
+    return entity;
+}
+
+
+Entity Modeler::AddInterpolationCurve(const std::vector<Entity>& controlPoints)
+{
+    const Entity entity = interpolationCurveSystem->CreateCurve(controlPoints);
+    nameSystem->SetName(entity, nameGenerator.GenerateName("InterpolationCurve_"));
+
+    return entity;
+}
+
+
+Entity Modeler::AddC0Surface(const alg::Vec3& direction, float length, float width)
+{
+    const Entity entity = c0SurfaceSystem->CreateSurface(cursorSystem->GetPosition(), direction, length, width);
+    nameSystem->SetName(entity, nameGenerator.GenerateName("SurfaceC0_"));
+
+    NamePatchesCPs(coordinator.GetComponent<C0Patches>(entity));
+
+    return entity;
+}
+
+
+Entity Modeler::AddC2Surface(const alg::Vec3& direction, float length, float width)
+{
+    const Entity entity = c2SurfaceSystem->CreateSurface(cursorSystem->GetPosition(), direction, length, width);
+    nameSystem->SetName(entity, nameGenerator.GenerateName("SurfaceC2_"));
+
+    NamePatchesCPs(coordinator.GetComponent<C2Patches>(entity));
+
+    return entity;
+}
+
+
+Entity Modeler::AddC0Cylinder()
+{
+    const Entity entity = c0CylinderSystem->CreateCylinder(cursorSystem->GetPosition(), alg::Vec3(0.f, 1.f, 0.f), 1.f);
+    nameSystem->SetName(entity, nameGenerator.GenerateName("CylinderC0_"));
+
+    NamePatchesCPs(coordinator.GetComponent<C0Patches>(entity));
+
+    return entity;
+}
+
+
+Entity Modeler::AddC2Cylinder()
+{
+    const Entity entity = c2CylinderSystem->CreateCylinder(cursorSystem->GetPosition(), alg::Vec3(0.f, 1.f, 0.f), 1.f);
+    nameSystem->SetName(entity, nameGenerator.GenerateName("CylinderC2_"));
+
+    return entity;
 }
 
 
@@ -142,7 +214,10 @@ void Modeler::MergeControlPoints(Entity e1, Entity e2)
 Entity Modeler::Add3DPointFromViewport(float x, float y)
 {
     Position newPos(PointFromViewportCoordinates(x, y));
-    return pointsSystem->CreatePoint(newPos);
+    Entity result = pointsSystem->CreatePoint(newPos);
+    nameSystem->SetName(result, nameGenerator.GenerateName("Point_"));
+
+    return result;
 }
 
 
@@ -169,6 +244,15 @@ std::vector<GregoryPatchesSystem::Hole> Modeler::GetHolesPossibleToFill(const st
         c0Patches.push_back(coordinator.GetComponent<C0Patches>(entity));
 
     return gregoryPatchesSystem->FindHolesToFill(c0Patches);
+}
+
+
+Entity Modeler::FillHole(const GregoryPatchesSystem::Hole& hole)
+{
+    const Entity entity = gregoryPatchesSystem->FillHole(hole);
+    nameSystem->SetName(entity, nameGenerator.GenerateName("GregoryPatches__"));
+
+    return entity;
 }
 
 
@@ -224,6 +308,17 @@ Line Modeler::LineFromViewportCoordinates(float x, float y)
     );
 
     return Line::FromTwoPoints(near, far);
+}
+
+
+void Modeler::NamePatchesCPs(const Patches &patches)
+{
+    for (int i=0; i < patches.PointsInCol(); ++i) {
+        for (int j=0; j < patches.PointsInRow(); ++j) {
+            Entity cp = patches.GetPoint(i, j);
+            nameSystem->SetName(cp, nameGenerator.GenerateName("Point_"));
+        }
+    }
 }
 
 

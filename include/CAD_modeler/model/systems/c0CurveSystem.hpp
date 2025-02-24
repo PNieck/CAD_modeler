@@ -5,7 +5,6 @@
 #include "shaders/shaderRepository.hpp"
 #include "../components/curveControlPoints.hpp"
 #include "../components/position.hpp"
-#include "utils/nameGenerator.hpp"
 #include "curveControlPointsSystem.hpp"
 
 #include <vector>
@@ -39,7 +38,6 @@ public:
 
 private:
     ShaderRepository* shaderRepo;
-    NameGenerator nameGenerator;
 
     static constexpr int CONTROL_POINTS_PER_SEGMENT = 4;
 

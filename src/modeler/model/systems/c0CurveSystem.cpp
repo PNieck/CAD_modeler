@@ -7,7 +7,6 @@
 #include <CAD_modeler/model/components/position.hpp>
 #include <CAD_modeler/model/components/toUpdate.hpp>
 #include <CAD_modeler/model/components/mesh.hpp>
-#include <CAD_modeler/model/components/name.hpp>
 
 #include <CAD_modeler/model/systems/toUpdateSystem.hpp>
 #include <CAD_modeler/model/systems/selectionSystem.hpp>
@@ -17,9 +16,6 @@
 #include <cmath>
 #include <algorithm>
 #include <cassert>
-
-
-static constexpr int COORD_IN_VERTEX = 3;
 
 
 void C0CurveSystem::RegisterSystem(Coordinator & coordinator)
@@ -48,7 +44,6 @@ Entity C0CurveSystem::CreateC0Curve(const std::vector<Entity>& cps)
 
     coordinator->AddComponent<C0CurveParameters>(curve, params);
     coordinator->AddComponent<Mesh>(curve, mesh);
-    coordinator->AddComponent<Name>(curve, nameGenerator.GenerateName("CurveC0_"));
 
     return curve;
 }
@@ -221,17 +216,15 @@ std::vector<float> C0CurveSystem::GenerateBezierPolygonVertices(const CurveContr
 {
     auto const& controlPoints = params.GetPoints();
 
-    std::vector<float> result(controlPoints.size() * COORD_IN_VERTEX);
+    std::vector<float> result;
+    result.reserve(controlPoints.size() * alg::Vec3::dim);
 
-    int i = 0;
     for (Entity entity: controlPoints) {
         auto const& pos = coordinator->GetComponent<Position>(entity);
 
-        result[i * COORD_IN_VERTEX] = pos.GetX();
-        result[i * COORD_IN_VERTEX + 1] = pos.GetY();
-        result[i * COORD_IN_VERTEX + 2] = pos.GetZ();
-
-        i++;
+        result.push_back(pos.GetX());
+        result.push_back(pos.GetY());
+        result.push_back(pos.GetZ());
     }
 
     return result;

@@ -3,7 +3,6 @@
 #include <CAD_modeler/model/systems/selectionSystem.hpp>
 #include <CAD_modeler/model/systems/toUpdateSystem.hpp>
 
-#include <CAD_modeler/model/components/name.hpp>
 #include <CAD_modeler/model/components/gregoryPatchParameters.hpp>
 #include <CAD_modeler/model/components/gregoryNetMesh.hpp>
 #include <CAD_modeler/model/components/patchesDensity.hpp>
@@ -386,7 +385,7 @@ std::tuple<Position, Position> CalculateInnerPoints(
 }
 
 
-void GregoryPatchesSystem::FillHole(const GregoryPatchesSystem::Hole& hole)
+Entity GregoryPatchesSystem::FillHole(const GregoryPatchesSystem::Hole& hole)
 {
     Entity entity = coordinator->CreateEntity();
     TriangleOfGregoryPatches triangle;
@@ -409,11 +408,12 @@ void GregoryPatchesSystem::FillHole(const GregoryPatchesSystem::Hole& hole)
 
     coordinator->AddComponent<Hole>(entity, hole);
     coordinator->AddComponent<TriangleOfGregoryPatches>(entity, triangle);
-    coordinator->AddComponent<Name>(entity, nameGenerator.GenerateName("GregoryPatch"));
     coordinator->AddComponent<Mesh>(entity, Mesh());
     coordinator->AddComponent<PatchesDensity>(entity, PatchesDensity(5));
 
     coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(entity);
+
+    return entity;
 }
 
 

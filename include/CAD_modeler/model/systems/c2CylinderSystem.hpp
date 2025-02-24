@@ -3,7 +3,6 @@
 #include <ecs/system.hpp>
 #include <ecs/coordinator.hpp>
 
-#include "utils/nameGenerator.hpp"
 #include "../components/position.hpp"
 #include "../components/patchesDensity.hpp"
 #include "../components/c2CylinderPatches.hpp"
@@ -51,7 +50,6 @@ private:
     class DeletionHandler;
 
     std::shared_ptr<DeletionHandler> deletionHandler;
-    NameGenerator nameGenerator;
 
     ShaderRepository* shaderRepo;
 

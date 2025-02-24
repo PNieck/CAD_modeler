@@ -151,11 +151,7 @@ void ModelerMainMenuView::RenderAddingCurveGui(const CurveType curveType)
     ImGui::SeparatorText("Select control points");
 
     for (auto entity: model.GetAllPoints()) {
-        bool oldSelected = false;
-
-        if (controlPoints.contains(entity))
-            oldSelected = true;
-
+        bool oldSelected = controlPoints.contains(entity);
         bool newSelected = oldSelected;
 
         ImGui::Selectable(

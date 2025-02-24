@@ -3,7 +3,6 @@
 #include "../components/c0Patches.hpp"
 #include "../components/gregoryPatchParameters.hpp"
 
-#include "utils/nameGenerator.hpp"
 #include "shaders/shaderRepository.hpp"
 
 #include <ecs/system.hpp>
@@ -39,7 +38,7 @@ public:
 
     std::vector<Hole> FindHolesToFill(const std::vector<C0Patches>& patches) const;
 
-    void FillHole(const Hole& hole);
+    Entity FillHole(const Hole& hole);
 
     void ShowControlNet(Entity gregoryPatches);
     void HideControlNet(Entity gregoryPatches);
@@ -52,7 +51,6 @@ private:
     std::shared_ptr<DeletionHandler> deletionHandler;
 
     ShaderRepository* shaderRepo;
-    NameGenerator nameGenerator;
 
     void UpdateEntities() const;
     void UpdateMesh(Entity entity, const TriangleOfGregoryPatches& triangle) const;

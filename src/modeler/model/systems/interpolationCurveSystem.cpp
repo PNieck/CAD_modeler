@@ -2,8 +2,6 @@
 
 #include <ecs/coordinator.hpp>
 
-#include <CAD_modeler/model/components/name.hpp>
-
 #include <CAD_modeler/model/systems/toUpdateSystem.hpp>
 #include <CAD_modeler/model/systems/selectionSystem.hpp>
 
@@ -27,7 +25,6 @@ Entity InterpolationCurveSystem::CreateCurve(const std::vector<Entity> &controlP
         Coordinator::GetSystemID<InterpolationCurveSystem>()
     );
 
-    coordinator->AddComponent<Name>(curve, nameGenerator.GenerateName("InterpolationCurve"));
     coordinator->AddComponent<Mesh>(curve, Mesh());
 
     UpdateMesh(
@@ -48,7 +45,6 @@ void InterpolationCurveSystem::Render(const alg::Mat4x4& cameraMtx) const
     }
 
     auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
-
     auto const& shader = shaderRepo->GetBezierCurveShader();
 
     UpdateEntities();

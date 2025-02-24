@@ -1,7 +1,6 @@
 #pragma once
 
 #include <ecs/system.hpp>
-#include "utils/nameGenerator.hpp"
 #include "shaders/shaderRepository.hpp"
 #include "../components/position.hpp"
 #include "../components/rotation.hpp"
@@ -64,8 +63,6 @@ public:
     alg::Vec3 NormalVec(Entity e, float alpha, float beta) const;
 
 private:
-    NameGenerator nameGenerator;
-
     ShaderRepository* shadersRepo;
 
     void UpdateMesh(Entity e, const TorusParameters& params) const;

@@ -2,7 +2,6 @@
 
 #include "CAD_modeler/model/components/mesh.hpp"
 #include "CAD_modeler/model/components/unremovable.hpp"
-#include "CAD_modeler/model/components/name.hpp"
 #include "CAD_modeler/model/components/rotation.hpp"
 
 #include "CAD_modeler/model/systems/pointsSystem.hpp"
@@ -65,7 +64,6 @@ Entity C2CylinderSystem::CreateCylinder(const Position &pos, const alg::Vec3 &di
 
     patches.deletionHandler = coordinator->Subscribe<C2CylinderPatches>(surface, deletionHandler);
 
-    coordinator->AddComponent<Name>(surface, nameGenerator.GenerateName("CylinderC2_"));
     coordinator->AddComponent<Mesh>(surface, mesh);
     coordinator->AddComponent<C2CylinderPatches>(surface, patches);
     coordinator->AddComponent<PatchesDensity>(surface, density);
