@@ -3,3 +3,4 @@ FetchContent_Declare(dlib
     GIT_TAG        v19.24
 )
 FetchContent_MakeAvailable(dlib)
+target_compile_definitions(dlib PRIVATE HAVE_BOOLEAN)
