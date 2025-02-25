@@ -2,7 +2,6 @@
 
 #include <ecs/system.hpp>
 
-#include "utils/nameGenerator.hpp"
 #include "../components/position.hpp"
 #include "../components/curveControlPoints.hpp"
 #include "../components/c0Patches.hpp"
@@ -51,7 +50,6 @@ private:
     class DeletionHandler;
 
     std::shared_ptr<DeletionHandler> deletionHandler;
-    NameGenerator nameGenerator;
 
 
     class DeletionHandler: public EventHandler<C0Patches> {

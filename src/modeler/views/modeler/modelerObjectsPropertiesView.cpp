@@ -282,9 +282,9 @@ void ModelerObjectsPropertiesView::DisplayCurveControlPoints(Entity entity, cons
     }
 
     if (ImGui::Button("Add control points"))
-        ImGui::OpenPopup("Add_c0_control_points_popup");
+        ImGui::OpenPopup("Add_control_points_popup");
     
-    if (ImGui::BeginPopup("Add_c0_control_points_popup")) {
+    if (ImGui::BeginPopup("Add_control_points_popup")) {
         auto const& points = model.GetAllPoints();
         auto const& pointsWithNames = model.EntitiesWithNames();
 
@@ -292,17 +292,7 @@ void ModelerObjectsPropertiesView::DisplayCurveControlPoints(Entity entity, cons
             // TODO: rewrite with set intersection
             if (std::ranges::find(params.GetPoints(), point) == params.GetPoints().end()) {
                 if (pointsWithNames.contains(point) && ImGui::Selectable(model.GetEntityName(point).c_str(), false)) {
-                    CurveType curveType;
-                    
-                    if (model.GetAllC0Curves().contains(point))
-                        curveType = CurveType::C0;
-                    else if (model.GetAllC2Curves().contains(point))
-                        curveType = CurveType::C2;
-                    else if (model.GetAllInterpolationCurves().contains(point))
-                        curveType = CurveType::Interpolation;
-                    else
-                        throw std::runtime_error("Unknown curve type");
-
+                    CurveType curveType = GetCurveType(model, entity);
                     AddControlPointToCurve(model, entity, point, curveType);
                 }
             }

@@ -2,7 +2,6 @@
 
 #include "CAD_modeler/model/components/mesh.hpp"
 #include "CAD_modeler/model/components/unremovable.hpp"
-#include "CAD_modeler/model/components/name.hpp"
 #include "CAD_modeler/model/components/rotation.hpp"
 
 #include "CAD_modeler/model/systems/pointsSystem.hpp"
@@ -45,7 +44,7 @@ Entity C2CylinderSystem::CreateCylinder(const Position &pos, const alg::Vec3 &di
     auto handler = std::make_shared<ControlPointMovedHandler>(surface, *coordinator);
 
     for (int row=0; row < patches.PointsInRow(); ++row) {
-        for (int col=0; col < patches.PointsInCol()-doublePointsCnt; ++col) {
+        for (int col=0; col < patches.PointsInCol() - DoublePointsCnt; ++col) {
             Entity cp = pointsSystem->CreatePoint();
             patches.SetPoint(cp, row, col);
 
@@ -65,7 +64,6 @@ Entity C2CylinderSystem::CreateCylinder(const Position &pos, const alg::Vec3 &di
 
     patches.deletionHandler = coordinator->Subscribe<C2CylinderPatches>(surface, deletionHandler);
 
-    coordinator->AddComponent<Name>(surface, nameGenerator.GenerateName("CylinderC2_"));
     coordinator->AddComponent<Mesh>(surface, mesh);
     coordinator->AddComponent<C2CylinderPatches>(surface, patches);
     coordinator->AddComponent<PatchesDensity>(surface, density);
@@ -91,7 +89,7 @@ void C2CylinderSystem::AddRowOfPatches(Entity surface, const Position &pos, cons
             HandlerId firstCpHandler = patches.controlPointsHandlers.at(firstCP);
             auto eventHandler = coordinator->GetEventHandler<Position>(firstCP, firstCpHandler);
 
-            for (int col=0; col < patches.PointsInCol() - doublePointsCnt; col++) {
+            for (int col=0; col < patches.PointsInCol() - DoublePointsCnt; col++) {
                 Entity newEntity = pointSys->CreatePoint();
 
                 patches.SetPoint(newEntity, patches.PointsInRow()-1, col);
@@ -104,9 +102,9 @@ void C2CylinderSystem::AddRowOfPatches(Entity surface, const Position &pos, cons
                 cpRegistrySys->RegisterControlPoint(surface, newEntity, Coordinator::GetSystemID<C2CylinderSystem>());
             }
 
-            for (int col = 0; col < doublePointsCnt; ++col) {
+            for (int col = 0; col < DoublePointsCnt; ++col) {
                 Entity cp = patches.GetPoint(patches.PointsInRow()-1, col);
-                patches.SetPoint(cp, patches.PointsInRow()-1, patches.PointsInCol() - doublePointsCnt + col);
+                patches.SetPoint(cp, patches.PointsInRow()-1, patches.PointsInCol() - DoublePointsCnt + col);
             }
         }
     );
@@ -133,7 +131,7 @@ void C2CylinderSystem::AddColOfPatches(Entity surface, const Position &pos, cons
             for (int row=0; row < patches.PointsInRow(); row++) {
                 Entity newEntity = pointSys->CreatePoint();
 
-                patches.SetPoint(newEntity, row, patches.PointsInCol()-doublePointsCnt-1);
+                patches.SetPoint(newEntity, row, patches.PointsInCol()-DoublePointsCnt-1);
 
                 HandlerId newHandler = coordinator->Subscribe<Position>(newEntity, eventHandler);
                 patches.controlPointsHandlers.insert({ newEntity, newHandler });
@@ -159,7 +157,7 @@ void C2CylinderSystem::DeleteRowOfPatches(Entity surface, const Position &pos, c
         [surface, this](C2CylinderPatches& patches) {
             auto cpRegistrySys = coordinator->GetSystem<ControlPointsRegistrySystem>();
 
-            for (int col=0; col < patches.PointsInCol() - doublePointsCnt; col++) {
+            for (int col=0; col < patches.PointsInCol() - DoublePointsCnt; col++) {
                 Entity point = patches.GetPoint(patches.PointsInRow()-1, col);
                 cpRegistrySys->UnregisterControlPoint(surface, point, Coordinator::GetSystemID<C2CylinderSystem>());
                 coordinator->DestroyEntity(point);
@@ -183,7 +181,7 @@ void C2CylinderSystem::DeleteColOfPatches(Entity surface, const Position &pos, c
             auto cpRegistrySys = coordinator->GetSystem<ControlPointsRegistrySystem>();
 
             for (int row=0; row < patches.PointsInRow(); row++) {
-                Entity point = patches.GetPoint(row, patches.PointsInCol()-doublePointsCnt-1);
+                Entity point = patches.GetPoint(row, patches.PointsInCol() - DoublePointsCnt - 1);
                 cpRegistrySys->UnregisterControlPoint(surface, point, Coordinator::GetSystemID<C2CylinderSystem>());
                 coordinator->DestroyEntity(point);
 
@@ -355,9 +353,9 @@ void C2CylinderSystem::UpdateEntities() const
 void C2CylinderSystem::UpdateDoubleControlPoints(C2CylinderPatches &patches) const
 {
     for (int row=0; row < patches.PointsInRow(); ++row) {
-        for (int col=0; col < doublePointsCnt; ++col) {
+        for (int col=0; col < DoublePointsCnt; ++col) {
             Entity cp = patches.GetPoint(row, col);
-            int column = patches.PointsInCol() - doublePointsCnt + col;
+            int column = patches.PointsInCol() - DoublePointsCnt + col;
             patches.SetPoint(cp, row, column);
         }
     }

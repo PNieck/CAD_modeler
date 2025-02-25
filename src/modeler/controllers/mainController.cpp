@@ -7,7 +7,7 @@ MainController::MainController(GLFWwindow* window, const int windowWidth, const 
     millSimController(millingSim),
     modelerController(modeler),
     guiController(window),
-    actModelType(ModelType::MillerMachineSim),
+    actModelType(ModelType::Modeler),
     modelChooser(*this)
 {
 }

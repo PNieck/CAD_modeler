@@ -4,7 +4,6 @@
 
 #include <algebra/vec4.hpp>
 
-#include "utils/nameGenerator.hpp"
 #include "curveControlPointsSystem.hpp"
 #include "shaders/shaderRepository.hpp"
 
@@ -33,8 +32,8 @@ public:
 
 private:
     ShaderRepository* shaderRepo;
-    NameGenerator nameGenerator;
 
+    
     void UpdateEntities() const;
 
     void UpdateMesh(Entity entity, const CurveControlPoints& cps) const;

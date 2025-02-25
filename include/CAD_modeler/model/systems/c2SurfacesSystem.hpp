@@ -4,7 +4,6 @@
 #include <ecs/coordinator.hpp>
 
 #include "shaders/shaderRepository.hpp"
-#include "utils/nameGenerator.hpp"
 #include "../components/position.hpp"
 #include "../components/c2Patches.hpp"
 #include "../components/patchesDensity.hpp"
@@ -52,7 +51,6 @@ private:
     class DeletionHandler;
 
     std::shared_ptr<DeletionHandler> deletionHandler;
-    NameGenerator nameGenerator;
     ShaderRepository* shaderRepo;
 
     void UpdateEntities() const;

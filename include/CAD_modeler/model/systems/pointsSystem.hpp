@@ -1,7 +1,6 @@
 #pragma once
 
 #include <ecs/system.hpp>
-#include "utils/nameGenerator.hpp"
 #include "../components/position.hpp"
 #include "../components/mesh.hpp"
 #include "shaders/shaderRepository.hpp"
@@ -16,13 +15,11 @@ public:
     inline void Init(ShaderRepository* shaders)
         { this->shaderRepo = shaders; }
 
-    Entity CreatePoint(const Position& pos = Position(), bool createName = true);
+    Entity CreatePoint(const Position& pos = Position());
 
     void Render(const alg::Mat4x4& cameraMtx) const;
 
 private:
     Mesh pointsMesh;
     ShaderRepository* shaderRepo;
-
-    NameGenerator nameGenerator;
 };

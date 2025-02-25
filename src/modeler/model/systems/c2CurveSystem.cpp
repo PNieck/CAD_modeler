@@ -3,7 +3,6 @@
 #include <ecs/coordinator.hpp>
 
 #include <CAD_modeler/model/components/mesh.hpp>
-#include <CAD_modeler/model/components/name.hpp>
 #include <CAD_modeler/model/components/position.hpp>
 #include <CAD_modeler/model/components/curveControlPoints.hpp>
 #include <CAD_modeler/model/components/c2CurveParameters.hpp>
@@ -43,7 +42,6 @@ Entity C2CurveSystem::CreateC2Curve(const std::vector<Entity>& cps)
 
     coordinator->AddComponent<C2CurveParameters>(curve, C2CurveParameters());
     coordinator->AddComponent<Mesh>(curve, mesh);
-    coordinator->AddComponent<Name>(curve, nameGenerator.GenerateName("CurveC2_"));
 
     return curve;
 }
@@ -255,7 +253,7 @@ void C2CurveSystem::UpdateBezierControlPoints(Entity curve) const
                 auto pointsSystem = coordinator->GetSystem<PointsSystem>();
 
                 do {
-                    Entity entity = pointsSystem->CreatePoint(Position(0.f), false);
+                    Entity entity = pointsSystem->CreatePoint(Position(0.f));
                     bezier.AddControlPoint(entity);
                 } while (controlPointsPositions.size() > bezier.Size());
 
@@ -387,7 +385,7 @@ BezierControlPoints C2CurveSystem::CreateBezierControlPoints(const CurveControlP
     const auto pointsPositions = CreateBezierControlPointsPositions(params);
 
     for (auto& vec: pointsPositions) {
-        const Entity point = pointsSystem->CreatePoint(Position(vec), false);
+        const Entity point = pointsSystem->CreatePoint(Position(vec));
         bezierControlPoints.AddControlPoint(point);
         coordinator->AddComponent<Unremovable>(point, Unremovable());
     }

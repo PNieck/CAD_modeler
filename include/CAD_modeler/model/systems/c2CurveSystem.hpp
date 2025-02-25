@@ -8,7 +8,6 @@
 #include "../components/c2CurveParameters.hpp"
 #include "../components/curveControlPoints.hpp"
 #include "../components/bezierControlPoints.hpp"
-#include "utils/nameGenerator.hpp"
 #include "curveControlPointsSystem.hpp"
 
 #include <vector>
@@ -47,7 +46,6 @@ public:
 
 private:
     ShaderRepository* shaderRepo;
-    NameGenerator nameGenerator;
 
     static constexpr int MIN_CTRL_PTS_CNT = 4;
 

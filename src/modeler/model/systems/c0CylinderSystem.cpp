@@ -10,7 +10,6 @@
 #include "CAD_modeler/model/components/c0Patches.hpp"
 #include "CAD_modeler/model/components/patchesDensity.hpp"
 #include "CAD_modeler/model/components/mesh.hpp"
-#include "CAD_modeler/model/components/name.hpp"
 #include "CAD_modeler/model/components/rotation.hpp"
 #include "CAD_modeler/model/components/unremovable.hpp"
 #include "CAD_modeler/model/components/IsC0Cylinder.hpp"
@@ -42,9 +41,9 @@ Entity C0CylinderSystem::CreateCylinder(const Position &pos, const alg::Vec3 &di
     auto const pointsSystem = coordinator->GetSystem<PointsSystem>();
     auto cpRegistry = coordinator->GetSystem<ControlPointsRegistrySystem>();
 
-    Entity surface = coordinator->CreateEntity();
+    Entity cylinder = coordinator->CreateEntity();
 
-    auto handler = std::make_shared<ControlPointMovedHandler>(surface, *coordinator);
+    auto handler = std::make_shared<ControlPointMovedHandler>(cylinder, *coordinator);
 
     for (int row=0; row < patches.PointsInRow(); ++row) {
         for (int col=0; col < patches.PointsInCol(); ++col) {
@@ -56,7 +55,7 @@ Entity C0CylinderSystem::CreateCylinder(const Position &pos, const alg::Vec3 &di
 
             coordinator->AddComponent<Unremovable>(cp, Unremovable());
 
-            cpRegistry->RegisterControlPoint(surface, cp, Coordinator::GetSystemID<C0CylinderSystem>());
+            cpRegistry->RegisterControlPoint(cylinder, cp, Coordinator::GetSystemID<C0CylinderSystem>());
         }
     }
 
@@ -68,26 +67,25 @@ Entity C0CylinderSystem::CreateCylinder(const Position &pos, const alg::Vec3 &di
     Mesh mesh;
     PatchesDensity density(5);
 
-    patches.deletionHandler = coordinator->Subscribe<C0Patches>(surface, deletionHandler);
+    patches.deletionHandler = coordinator->Subscribe<C0Patches>(cylinder, deletionHandler);
 
-    coordinator->AddComponent<Name>(surface, nameGenerator.GenerateName("CylinderC0_"));
-    coordinator->AddComponent<Mesh>(surface, mesh);
-    coordinator->AddComponent<C0Patches>(surface, patches);
-    coordinator->AddComponent<PatchesDensity>(surface, density);
-    coordinator->AddComponent<IsC0Cylinder>(surface, {});
+    coordinator->AddComponent<Mesh>(cylinder, mesh);
+    coordinator->AddComponent<C0Patches>(cylinder, patches);
+    coordinator->AddComponent<PatchesDensity>(cylinder, density);
+    coordinator->AddComponent<IsC0Cylinder>(cylinder, {});
 
-    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
+    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(cylinder);
 
-    Recalculate(surface, pos, direction, radius);
+    Recalculate(cylinder, pos, direction, radius);
 
-    return surface;
+    return cylinder;
 }
 
 
-void C0CylinderSystem::AddRowOfPatches(Entity surface, const Position &pos, const alg::Vec3 &direction, float radius) const
+void C0CylinderSystem::AddRowOfPatches(Entity cylinder, const Position &pos, const alg::Vec3 &direction, float radius) const
 {
-    coordinator->EditComponent<C0Patches>(surface,
-        [surface, this](C0Patches& patches) {
+    coordinator->EditComponent<C0Patches>(cylinder,
+        [cylinder, this](C0Patches& patches) {
             auto pointSys = coordinator->GetSystem<PointsSystem>();
             auto cpRegistrySys = coordinator->GetSystem<ControlPointsRegistrySystem>();
             
@@ -108,7 +106,7 @@ void C0CylinderSystem::AddRowOfPatches(Entity surface, const Position &pos, cons
 
                     coordinator->AddComponent<Unremovable>(newEntity, Unremovable());
 
-                    cpRegistrySys->RegisterControlPoint(surface, newEntity, Coordinator::GetSystemID<C0CylinderSystem>());
+                    cpRegistrySys->RegisterControlPoint(cylinder, newEntity, Coordinator::GetSystemID<C0CylinderSystem>());
                 }
             }
 
@@ -119,16 +117,16 @@ void C0CylinderSystem::AddRowOfPatches(Entity surface, const Position &pos, cons
         }
     );
 
-    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
+    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(cylinder);
 
-    Recalculate(surface, pos, direction, radius);
+    Recalculate(cylinder, pos, direction, radius);
 }
 
 
-void C0CylinderSystem::AddColOfPatches(Entity surface, const Position &pos, const alg::Vec3 &direction, float radius) const
+void C0CylinderSystem::AddColOfPatches(Entity cylinder, const Position &pos, const alg::Vec3 &direction, float radius) const
 {
-    coordinator->EditComponent<C0Patches>(surface,
-        [surface, this](C0Patches& patches) {
+    coordinator->EditComponent<C0Patches>(cylinder,
+        [cylinder, this](C0Patches& patches) {
             auto pointSys = coordinator->GetSystem<PointsSystem>();
             auto cpRegistrySys = coordinator->GetSystem<ControlPointsRegistrySystem>();
             
@@ -154,28 +152,28 @@ void C0CylinderSystem::AddColOfPatches(Entity surface, const Position &pos, cons
 
                     coordinator->AddComponent<Unremovable>(newEntity, Unremovable());
 
-                    cpRegistrySys->RegisterControlPoint(surface, newEntity, Coordinator::GetSystemID<C0CylinderSystem>());
+                    cpRegistrySys->RegisterControlPoint(cylinder, newEntity, Coordinator::GetSystemID<C0CylinderSystem>());
                 }
             }
         }
     );
 
-    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
+    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(cylinder);
 
-    Recalculate(surface, pos, direction, radius);
+    Recalculate(cylinder, pos, direction, radius);
 }
 
 
-void C0CylinderSystem::DeleteRowOfPatches(Entity surface, const Position &pos, const alg::Vec3 &direction, float radius) const
+void C0CylinderSystem::DeleteRowOfPatches(Entity cylinder, const Position &pos, const alg::Vec3 &direction, float radius) const
 {
-    coordinator->EditComponent<C0Patches>(surface,
-        [surface, this](C0Patches& patches) {
+    coordinator->EditComponent<C0Patches>(cylinder,
+        [cylinder, this](C0Patches& patches) {
             auto cpRegistrySys = coordinator->GetSystem<ControlPointsRegistrySystem>();
 
             for (int col=0; col < patches.PointsInCol() - 1; col++) {
                 for (int row=patches.PointsInRow() - 3; row < patches.PointsInRow(); row++) {
                     Entity point = patches.GetPoint(row, col);
-                    cpRegistrySys->UnregisterControlPoint(surface, point, Coordinator::GetSystemID<C0CylinderSystem>());
+                    cpRegistrySys->UnregisterControlPoint(cylinder, point, Coordinator::GetSystemID<C0CylinderSystem>());
                     coordinator->DestroyEntity(point);
 
                     patches.controlPointsHandlers.erase(point);
@@ -186,21 +184,21 @@ void C0CylinderSystem::DeleteRowOfPatches(Entity surface, const Position &pos, c
         }
     );
 
-    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
-    Recalculate(surface, pos, direction, radius);
+    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(cylinder);
+    Recalculate(cylinder, pos, direction, radius);
 }
 
 
-void C0CylinderSystem::DeleteColOfPatches(Entity surface, const Position &pos, const alg::Vec3 &direction, float radius) const
+void C0CylinderSystem::DeleteColOfPatches(Entity cylinder, const Position &pos, const alg::Vec3 &direction, float radius) const
 {
-    coordinator->EditComponent<C0Patches>(surface,
-        [surface, this](C0Patches& patches) {
+    coordinator->EditComponent<C0Patches>(cylinder,
+        [cylinder, this](C0Patches& patches) {
             auto cpRegistrySys = coordinator->GetSystem<ControlPointsRegistrySystem>();
 
             for (int row=0; row < patches.PointsInRow(); row++) {
                 for (int col=patches.PointsInCol() - 4; col < patches.PointsInCol() - 1; col++) {
                     Entity point = patches.GetPoint(row, col);
-                    cpRegistrySys->UnregisterControlPoint(surface, point, Coordinator::GetSystemID<C0CylinderSystem>());
+                    cpRegistrySys->UnregisterControlPoint(cylinder, point, Coordinator::GetSystemID<C0CylinderSystem>());
                     coordinator->DestroyEntity(point);
 
                     patches.controlPointsHandlers.erase(point);
@@ -216,8 +214,8 @@ void C0CylinderSystem::DeleteColOfPatches(Entity surface, const Position &pos, c
         }
     );
 
-    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
-    Recalculate(surface, pos, direction, radius);
+    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(cylinder);
+    Recalculate(cylinder, pos, direction, radius);
 }
 
 

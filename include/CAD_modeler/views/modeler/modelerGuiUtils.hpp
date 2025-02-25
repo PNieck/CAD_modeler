@@ -6,3 +6,6 @@
 
 
 void AddControlPointToCurve(Modeler& model, Entity curve, Entity entity, CurveType curveType);
+
+
+CurveType GetCurveType(Modeler& model, Entity entity);

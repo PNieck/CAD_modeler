@@ -24,6 +24,21 @@ void AddControlPointToCurve(Modeler& model, Entity curve, Entity entity, CurveTy
 }
 
 
+CurveType GetCurveType(Modeler& model, const Entity entity)
+{
+    if (model.GetAllC0Curves().contains(entity))
+        return CurveType::C0;
+    
+    if (model.GetAllC2Curves().contains(entity))
+        return CurveType::C2;
+
+    if (model.GetAllInterpolationCurves().contains(entity))
+        return CurveType::Interpolation;
+    
+    throw std::runtime_error("Unknown curve type");
+}
+
+
 Entity ModelerMainMenuView::AddCurve(const std::vector<Entity>& entities, CurveType curveType) const
 {
     switch (curveType)

@@ -41,7 +41,6 @@ Entity ToriSystem::AddTorus(const Position& pos, const TorusParameters& params)
     coordinator->AddComponent<Rotation>(torus, rot);
 
     coordinator->AddComponent<TorusParameters>(torus, params);
-    coordinator->AddComponent<Name>(torus, nameGenerator.GenerateName("Torus"));
 
     coordinator->AddComponent<Mesh>(torus, Mesh());
     UpdateMesh(torus, params);

@@ -151,11 +151,7 @@ void ModelerMainMenuView::RenderAddingCurveGui(const CurveType curveType)
     ImGui::SeparatorText("Select control points");
 
     for (auto entity: model.GetAllPoints()) {
-        bool oldSelected = false;
-
-        if (controlPoints.contains(entity))
-            oldSelected = true;
-
+        bool oldSelected = controlPoints.contains(entity);
         bool newSelected = oldSelected;
 
         ImGui::Selectable(
@@ -249,6 +245,7 @@ void ModelerMainMenuView::RenderAddingCylinder(const CylinderType cylinderType)
     if (!entity.has_value()) {
         entity = AddCylinder(cylinderType);
         newLen = 1.f;
+        newRadius = 1.0f;
     }
 
     int rows = GetCylinderRowsCnt(entity.value(), cylinderType);
@@ -438,11 +435,14 @@ void ModelerMainMenuView::RenderObjectsNames() const
     const auto& entities = model.EntitiesWithNames();
     const auto& points = model.GetAllPoints();
 
+    unsigned int id = 0;
     for (auto entity: entities) {
         if (hidePoints && points.contains(entity))
             continue;
 
         bool selected = model.IsSelected(entity);
+
+        ImGui::PushID(++id);
 
         if (ImGui::Selectable(
             model.GetEntityName(entity).c_str(),
@@ -453,6 +453,8 @@ void ModelerMainMenuView::RenderObjectsNames() const
             else
                 model.Deselect(entity);
         }
+
+        ImGui::PopID();
     } 
 }
 

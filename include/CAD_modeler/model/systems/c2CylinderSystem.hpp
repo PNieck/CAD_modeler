@@ -3,7 +3,6 @@
 #include <ecs/system.hpp>
 #include <ecs/coordinator.hpp>
 
-#include "utils/nameGenerator.hpp"
 #include "../components/position.hpp"
 #include "../components/patchesDensity.hpp"
 #include "../components/c2CylinderPatches.hpp"
@@ -13,6 +12,8 @@
 
 class C2CylinderSystem: public System {
 public:
+    static constexpr int DoublePointsCnt = 3;
+
     static void RegisterSystem(Coordinator& coordinator);
 
     void Init(ShaderRepository* shadersRepo);
@@ -46,12 +47,9 @@ public:
     void Render(const alg::Mat4x4& cameraMtx) const;
 
 private:
-    static constexpr int doublePointsCnt = 3;
-
     class DeletionHandler;
 
     std::shared_ptr<DeletionHandler> deletionHandler;
-    NameGenerator nameGenerator;
 
     ShaderRepository* shaderRepo;
 

@@ -2,7 +2,6 @@
 
 #include "CAD_modeler/model/components/c2Patches.hpp"
 #include "CAD_modeler/model/components/unremovable.hpp"
-#include "CAD_modeler/model/components/name.hpp"
 
 #include "CAD_modeler/model/systems/selectionSystem.hpp"
 #include "CAD_modeler/model/systems/pointsSystem.hpp"
@@ -60,7 +59,6 @@ Entity C2SurfaceSystem::CreateSurface(const Position &pos, const alg::Vec3 &dire
 
     patches.deletionHandler = coordinator->Subscribe<C2Patches>(surface, deletionHandler);
 
-    coordinator->AddComponent<Name>(surface, nameGenerator.GenerateName("SurfaceC2_"));
     coordinator->AddComponent<Mesh>(surface, mesh);
     coordinator->AddComponent<C2Patches>(surface, patches);
     coordinator->AddComponent<PatchesDensity>(surface, density);
@@ -100,7 +98,6 @@ Entity C2SurfaceSystem::CreateSurface(C2Patches &patches)
 
     patches.deletionHandler = coordinator->Subscribe<C2Patches>(surface, deletionHandler);
 
-    coordinator->AddComponent<Name>(surface, nameGenerator.GenerateName("SurfaceC2_"));
     coordinator->AddComponent<Mesh>(surface, mesh);
     coordinator->AddComponent<C2Patches>(surface, patches);
     coordinator->AddComponent<PatchesDensity>(surface, density);
