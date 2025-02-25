@@ -245,6 +245,7 @@ void ModelerMainMenuView::RenderAddingCylinder(const CylinderType cylinderType)
     if (!entity.has_value()) {
         entity = AddCylinder(cylinderType);
         newLen = 1.f;
+        newRadius = 1.0f;
     }
 
     int rows = GetCylinderRowsCnt(entity.value(), cylinderType);
