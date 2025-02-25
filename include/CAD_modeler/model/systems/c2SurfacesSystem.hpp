@@ -3,7 +3,6 @@
 #include <ecs/system.hpp>
 #include <ecs/coordinator.hpp>
 
-#include "shaders/shaderRepository.hpp"
 #include "../components/position.hpp"
 #include "../components/c2Patches.hpp"
 #include "../components/patchesDensity.hpp"
@@ -14,11 +13,10 @@ class C2SurfaceSystem: public System {
 public:
     static void RegisterSystem(Coordinator& coordinator);
 
-    void Init(ShaderRepository* shadersRepo);
+    void Init();
 
     Entity CreateSurface(const Position& pos, const alg::Vec3& direction, float length, float width);
 
-    // TODO: remove
     Entity CreateSurface(C2Patches& patches);
 
     void AddRowOfPatches(Entity surface, const Position& pos, const alg::Vec3& direction, float length, float width) const;
@@ -51,7 +49,6 @@ private:
     class DeletionHandler;
 
     std::shared_ptr<DeletionHandler> deletionHandler;
-    ShaderRepository* shaderRepo;
 
     void UpdateEntities() const;
     void UpdateMesh(Entity surface, const C2Patches& patches) const;

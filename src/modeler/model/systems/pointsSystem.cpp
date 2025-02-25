@@ -3,6 +3,7 @@
 #include <ecs/coordinator.hpp>
 
 #include <CAD_modeler/model/systems/selectionSystem.hpp>
+#include <CAD_modeler/model/systems/shaders/shaderRepository.hpp>
 
 #include <CAD_modeler/model/components/name.hpp>
 #include <CAD_modeler/model/components/position.hpp>
@@ -44,7 +45,7 @@ void PointsSystem::Render(const alg::Mat4x4& cameraMtx) const
     }
 
     auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
-    auto const& shader = shaderRepo->GetStdShader();
+    auto const& shader = ShaderRepository::GetInstance().GetStdShader();
 
     shader.Use();
     shader.SetColor(alg::Vec4(1.0f));

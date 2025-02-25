@@ -13,6 +13,7 @@
 #include <CAD_modeler/model/systems/toUpdateSystem.hpp>
 #include <CAD_modeler/model/systems/pointsSystem.hpp>
 #include <CAD_modeler/model/systems/curveControlPointsSystem.hpp>
+#include <CAD_modeler/model/systems/shaders/shaderRepository.hpp>
 
 #include <CAD_modeler/utilities/setIntersection.hpp>
 
@@ -143,7 +144,7 @@ void C2CurveSystem::Render(const alg::Mat4x4& cameraMtx) const
 
     auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
 
-    auto const& shader = shaderRepo->GetBezierCurveShader();
+    auto const& shader = ShaderRepository::GetInstance().GetBezierCurveShader();
     std::stack<Entity> bSplinePolygonsToDraw;
     std::stack<Entity> bezierPolygonsToDraw;
 
@@ -322,7 +323,7 @@ void C2CurveSystem::UpdateBezierCtrlPtsHandlers(Entity curve, BezierControlPoint
 void C2CurveSystem::RenderBSplinePolygons(std::stack<Entity>& cps, const alg::Mat4x4& cameraMtx) const
 {
     auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
-    auto const& shader = shaderRepo->GetStdShader();
+    auto const& shader = ShaderRepository::GetInstance().GetStdShader();
 
     shader.Use();
     shader.SetColor(alg::Vec4(1.0f));
@@ -351,7 +352,7 @@ void C2CurveSystem::RenderBSplinePolygons(std::stack<Entity>& cps, const alg::Ma
 void C2CurveSystem::RenderBezierPolygons(std::stack<Entity>& cps, const alg::Mat4x4& cameraMtx) const
 {
     auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
-    auto const& shader = shaderRepo->GetStdShader();
+    auto const& shader = ShaderRepository::GetInstance().GetStdShader();
 
     shader.Use();
     shader.SetColor(alg::Vec4(1.0f));

@@ -8,6 +8,7 @@
 
 #include <CAD_modeler/model/systems/pointsSystem.hpp>
 #include <CAD_modeler/model/systems/toriSystem.hpp>
+#include <CAD_modeler/model/systems/shaders/shaderRepository.hpp>
 
 #include <CAD_modeler/utilities/angle.hpp>
 
@@ -34,10 +35,8 @@ SelectionSystem::SelectionSystem()
 }
 
 
-void SelectionSystem::Init(ShaderRepository* shaderRepo)
+void SelectionSystem::Init()
 {
-    this->shadersRepo = shaderRepo;
-
     middlePoint = coordinator->CreateEntity();
 
     Position pos;
@@ -127,7 +126,7 @@ void SelectionSystem::RenderMiddlePoint(const alg::Mat4x4& cameraMtx)
     if (entities.size() < 2)
         return;
 
-    auto const& shader = shadersRepo->GetStdShader();
+    auto const& shader = ShaderRepository::GetInstance().GetStdShader();
 
     auto const& mesh = coordinator->GetComponent<Mesh>(middlePoint);
     auto const& position = coordinator->GetComponent<Position>(middlePoint);
@@ -255,7 +254,7 @@ void SelectionSystem::RenderSelectionCircle(float x, float y)
         GenerateSelectionCircleIndices()
     );
 
-    auto const& shader = shadersRepo->GetPassThroughShader();
+    auto const& shader = ShaderRepository::GetInstance().GetPassThroughShader();
 
     shader.Use();
     shader.SetColor(alg::Vec4(1.0f));

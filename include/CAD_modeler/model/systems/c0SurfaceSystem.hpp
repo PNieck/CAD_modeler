@@ -18,7 +18,6 @@ public:
 
     Entity CreateSurface(const Position& pos, const alg::Vec3& direction, float length, float width);
 
-    // TODO: remove
     Entity CreateSurface(C0Patches& patches);
 
     void AddRowOfPatches(Entity surface, const Position& pos, const alg::Vec3& direction, float length, float width) const;

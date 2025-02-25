@@ -6,7 +6,6 @@
 #include "../components/position.hpp"
 #include "../components/rotation.hpp"
 #include "../components/scale.hpp"
-#include "shaders/shaderRepository.hpp"
 #include "../../utilities/line.hpp"
 
 #include <vector>
@@ -18,7 +17,7 @@ public:
 
     SelectionSystem();
 
-    void Init(ShaderRepository* shaderRepo);
+    void Init();
 
     inline bool IsSelected(Entity entity) const
         { return entities.contains(entity); }
@@ -50,7 +49,6 @@ public:
 private:
     Mesh pointsMesh;
     Mesh circleMesh;
-    ShaderRepository* shadersRepo;
     Entity middlePoint;
 
     void UpdateMiddlePointPosition();

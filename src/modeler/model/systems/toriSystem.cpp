@@ -6,6 +6,7 @@
 #include <CAD_modeler/model/components/name.hpp>
 
 #include <CAD_modeler/model/systems/selectionSystem.hpp>
+#include <CAD_modeler/model/systems/shaders/shaderRepository.hpp>
 
 #include <numbers>
 
@@ -19,12 +20,6 @@ void ToriSystem::RegisterSystem(Coordinator & coordinator)
     coordinator.RegisterRequiredComponent<ToriSystem, Rotation>();
     coordinator.RegisterRequiredComponent<ToriSystem, Mesh>();
     coordinator.RegisterRequiredComponent<ToriSystem, TorusParameters>();
-}
-
-
-void ToriSystem::Init(ShaderRepository * shaderRepo)
-{
-    this->shadersRepo = shaderRepo;
 }
 
 
@@ -63,7 +58,7 @@ void ToriSystem::Render(const alg::Mat4x4& cameraMtx)
     }
 
     auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
-    auto const& shader = shadersRepo->GetStdShader();
+    auto const& shader = ShaderRepository::GetInstance().GetStdShader();
 
     shader.Use();
     shader.SetColor(alg::Vec4(1.0f));

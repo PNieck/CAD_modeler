@@ -1,7 +1,7 @@
 #pragma once
 
 #include <ecs/system.hpp>
-#include "shaders/shaderRepository.hpp"
+
 #include "../components/position.hpp"
 #include "../components/rotation.hpp"
 #include "../components/scale.hpp"
@@ -13,8 +13,6 @@
 class ToriSystem: public System {
 public:
     static void RegisterSystem(Coordinator& coordinator);
-
-    void Init(ShaderRepository* shaderRepo);
 
     Entity AddTorus(const Position& pos, const TorusParameters& params);
 
@@ -63,8 +61,6 @@ public:
     alg::Vec3 NormalVec(Entity e, float alpha, float beta) const;
 
 private:
-    ShaderRepository* shadersRepo;
-
     void UpdateMesh(Entity e, const TorusParameters& params) const;
 
     static std::vector<float> GenerateMeshVertices(const TorusParameters& params);

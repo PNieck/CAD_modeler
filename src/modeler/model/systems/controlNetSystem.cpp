@@ -3,6 +3,7 @@
 #include <CAD_modeler/model/components/position.hpp>
 
 #include <CAD_modeler/model/systems/selectionSystem.hpp>
+#include <CAD_modeler/model/systems/shaders/shaderRepository.hpp>
 
 
 void ControlNetSystem::RegisterSystem(Coordinator &coordinator)
@@ -28,7 +29,7 @@ void ControlNetSystem::Render(const alg::Mat4x4& cameraMtx) const
         return;
 
     auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
-    auto const& shader = shaderRepo->GetStdShader();
+    auto const& shader = ShaderRepository::GetInstance().GetStdShader();
 
     shader.Use();
     shader.SetColor(alg::Vec4(1.0f));

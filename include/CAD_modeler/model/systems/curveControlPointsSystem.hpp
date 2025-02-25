@@ -11,7 +11,6 @@ class CurveControlPointsSystem: public System {
 public:
     static void RegisterSystem(Coordinator& coordinator);
 
-    // TODO: delete dependency with controlPointsRegistry
     Entity CreateControlPoints(const std::vector<Entity>& entities, SystemId system);
 
     void AddControlPoint(Entity object, Entity controlPoint, SystemId system);

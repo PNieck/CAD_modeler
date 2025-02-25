@@ -6,7 +6,6 @@
 #include "../components/position.hpp"
 #include "../components/patchesDensity.hpp"
 #include "../components/c2CylinderPatches.hpp"
-#include "shaders/shaderRepository.hpp"
 #include "controlNetSystem.hpp"
 
 
@@ -16,7 +15,7 @@ public:
 
     static void RegisterSystem(Coordinator& coordinator);
 
-    void Init(ShaderRepository* shadersRepo);
+    void Init();
 
     Entity CreateCylinder(const Position& pos, const alg::Vec3& direction, float radius);
     
@@ -50,8 +49,6 @@ private:
     class DeletionHandler;
 
     std::shared_ptr<DeletionHandler> deletionHandler;
-
-    ShaderRepository* shaderRepo;
 
     void UpdateEntities() const;
     void UpdateMesh(Entity surface, const C2CylinderPatches& patches) const;

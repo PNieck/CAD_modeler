@@ -9,6 +9,7 @@
 #include "CAD_modeler/model/systems/controlPointsRegistrySystem.hpp"
 #include "CAD_modeler/model/systems/selectionSystem.hpp"
 #include "CAD_modeler/model/systems/controlNetSystem.hpp"
+#include "CAD_modeler/model/systems/shaders/shaderRepository.hpp"
 
 #include <numbers>
 
@@ -25,10 +26,9 @@ void C2CylinderSystem::RegisterSystem(Coordinator &coordinator)
 }
 
 
-void C2CylinderSystem::Init(ShaderRepository* shadersRepo)
+void C2CylinderSystem::Init()
 {
     deletionHandler = std::make_shared<DeletionHandler>(*coordinator);
-    this->shaderRepo = shadersRepo;
 }
 
 
@@ -298,7 +298,7 @@ void C2CylinderSystem::Render(const alg::Mat4x4& cameraMtx) const
     }
 
     auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
-    auto const& shader = shaderRepo->GetBSplineSurfaceShader();
+    auto const& shader = ShaderRepository::GetInstance().GetBSplineSurfaceShader();
 
     UpdateEntities();
 

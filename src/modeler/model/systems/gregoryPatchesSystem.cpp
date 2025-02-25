@@ -2,6 +2,7 @@
 
 #include <CAD_modeler/model/systems/selectionSystem.hpp>
 #include <CAD_modeler/model/systems/toUpdateSystem.hpp>
+#include <CAD_modeler/model/systems/shaders/shaderRepository.hpp>
 
 #include <CAD_modeler/model/components/gregoryPatchParameters.hpp>
 #include <CAD_modeler/model/components/gregoryNetMesh.hpp>
@@ -32,7 +33,6 @@ void GregoryPatchesSystem::RegisterSystem(Coordinator &coordinator)
 {
     coordinator.RegisterSystem<GregoryPatchesSystem>();
 
-    // TODO: move it
     coordinator.RegisterComponent<Hole>();
 
     coordinator.RegisterRequiredComponent<GregoryPatchesSystem, TriangleOfGregoryPatches>();
@@ -42,9 +42,8 @@ void GregoryPatchesSystem::RegisterSystem(Coordinator &coordinator)
 }
 
 
-void GregoryPatchesSystem::Init(ShaderRepository *shadersRepo)
+void GregoryPatchesSystem::Init()
 {
-    this->shaderRepo = shadersRepo;
     deletionHandler = std::make_shared<DeletionHandler>(*coordinator);
 }
 
@@ -457,7 +456,7 @@ void GregoryPatchesSystem::Render(const alg::Mat4x4 &cameraMtx) const
     UpdateEntities();
 
     auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
-    auto const& shader = shaderRepo->GetGregoryPatchShader();
+    auto const& shader = ShaderRepository::GetInstance().GetGregoryPatchShader();
     std::stack<Entity> netsToDraw;
 
     shader.Use();
@@ -761,7 +760,7 @@ void GregoryPatchesSystem::FillPatchesParameters(TriangleOfGregoryPatches& trian
 void GregoryPatchesSystem::RenderNet(std::stack<Entity>& cps, const alg::Mat4x4 &cameraMtx) const
 {
     auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
-    auto const& shader = shaderRepo->GetStdShader();
+    auto const& shader = ShaderRepository::GetInstance().GetStdShader();
 
     shader.Use();
     shader.SetColor(alg::Vec4(1.0f));

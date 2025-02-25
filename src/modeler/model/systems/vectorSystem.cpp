@@ -3,6 +3,7 @@
 #include <CAD_modeler/model/components/vectorMesh.hpp>
 
 #include <CAD_modeler/model/systems/selectionSystem.hpp>
+#include <CAD_modeler/model/systems/shaders/shaderRepository.hpp>
 
 #include <ecs/coordinator.hpp>
 
@@ -55,7 +56,7 @@ void VectorSystem::Render(const alg::Mat4x4 &cameraMtx) const
     }
 
     auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
-    auto const& shader = shaderRepo->GetStdShader();
+    auto const& shader = ShaderRepository::GetInstance().GetStdShader();
 
     shader.Use();
     shader.SetColor(alg::Vec4(1.0f));

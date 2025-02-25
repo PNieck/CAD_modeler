@@ -7,6 +7,7 @@
 #include "CAD_modeler/model/systems/pointsSystem.hpp"
 #include "CAD_modeler/model/systems/toUpdateSystem.hpp"
 #include "CAD_modeler/model/systems/controlPointsRegistrySystem.hpp"
+#include "CAD_modeler/model/systems/shaders/shaderRepository.hpp"
 
 #include <CAD_modeler/utilities/setIntersection.hpp>
 
@@ -21,10 +22,9 @@ void C2SurfaceSystem::RegisterSystem(Coordinator &coordinator)
 }
 
 
-void C2SurfaceSystem::Init(ShaderRepository* shadersRepo)
+void C2SurfaceSystem::Init()
 {
     deletionHandler = std::make_shared<DeletionHandler>(*coordinator);
-    this->shaderRepo = shadersRepo;
 }
 
 
@@ -294,7 +294,7 @@ void C2SurfaceSystem::Render(const alg::Mat4x4& cameraMtx) const
     }
 
     auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
-    auto const& shader = shaderRepo->GetBSplineSurfaceShader();
+    auto const& shader = ShaderRepository::GetInstance().GetBSplineSurfaceShader();
 
     UpdateEntities();
 

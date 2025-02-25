@@ -3,7 +3,6 @@
 #include <ecs/system.hpp>
 #include <ecs/coordinator.hpp>
 
-#include "shaders/shaderRepository.hpp"
 #include "../components/c0Patches.hpp"
 #include "../components/position.hpp"
 #include "controlNetSystem.hpp"
@@ -12,9 +11,6 @@
 class C0PatchesSystem: public System {
 public:
     static void RegisterSystem(Coordinator& coordinator);
-
-    inline void Init(ShaderRepository* shadersRepo)
-        { this->shaderRepo = shadersRepo; }
 
     inline int GetRowsCnt(Entity surface) const
         { return coordinator->GetComponent<C0Patches>(surface).PatchesInRow(); }
@@ -34,8 +30,6 @@ public:
     void Render(const alg::Mat4x4& cameraMtx) const;
 
 private:
-    ShaderRepository* shaderRepo;
-
     void UpdateEntities() const;
     void UpdateMesh(Entity surface, const C0Patches& patches) const;
 

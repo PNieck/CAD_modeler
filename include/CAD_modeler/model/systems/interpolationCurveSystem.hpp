@@ -5,7 +5,6 @@
 #include <algebra/vec4.hpp>
 
 #include "curveControlPointsSystem.hpp"
-#include "shaders/shaderRepository.hpp"
 
 #include <vector>
 
@@ -13,9 +12,6 @@
 class InterpolationCurveSystem: public System {
 public:
     static void RegisterSystem(Coordinator& coordinator);
-
-    inline void Init(ShaderRepository* shadersRepo)
-        { this->shaderRepo = shadersRepo; }
 
     Entity CreateCurve(const std::vector<Entity>& entities);
 
@@ -30,10 +26,7 @@ public:
 
     void Render(const alg::Mat4x4& cameraMtx) const;
 
-private:
-    ShaderRepository* shaderRepo;
-
-    
+private:  
     void UpdateEntities() const;
 
     void UpdateMesh(Entity entity, const CurveControlPoints& cps) const;

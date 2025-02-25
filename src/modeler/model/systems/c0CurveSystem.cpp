@@ -10,6 +10,7 @@
 
 #include <CAD_modeler/model/systems/toUpdateSystem.hpp>
 #include <CAD_modeler/model/systems/selectionSystem.hpp>
+#include <CAD_modeler/model/systems/shaders/shaderRepository.hpp>
 
 #include <CAD_modeler/utilities/setIntersection.hpp>
 
@@ -57,7 +58,7 @@ void C0CurveSystem::Render(const alg::Mat4x4& cameraMtx) const
 
     auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
 
-    auto const& shader = shaderRepo->GetBezierCurveShader();
+    auto const& shader = ShaderRepository::GetInstance().GetBezierCurveShader();
     std::stack<Entity> polygonsToDraw;
 
     UpdateEntities();
@@ -153,7 +154,7 @@ Position C0CurveSystem::CalculatePosition(const std::vector<Entity>& cps, float 
 void C0CurveSystem::RenderCurvesPolygons(std::stack<Entity>& cps, const alg::Mat4x4& cameraMtx) const
 {
     auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
-    auto const& shader = shaderRepo->GetStdShader();
+    auto const& shader = ShaderRepository::GetInstance().GetStdShader();
 
     shader.Use();
     shader.SetColor(alg::Vec4(1.0f));

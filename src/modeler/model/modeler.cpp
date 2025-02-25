@@ -62,25 +62,15 @@ Modeler::Modeler(const int viewportWidth, const int viewportHeight):
     vectorSystem = coordinator.GetSystem<VectorSystem>();
     intersectionSystem = coordinator.GetSystem<IntersectionSystem>();
 
-    ShaderRepository& shadersRepo = ShaderRepository::GetInstance();
-
     cameraManager.Init(viewportWidth, viewportHeight);
     gridSystem->Init();
-    cursorSystem->Init(&shadersRepo);
-    selectionSystem->Init(&shadersRepo);
-    pointsSystem->Init(&shadersRepo);
-    toriSystem->Init(&shadersRepo);
-    c0CurveSystem->Init(&shadersRepo);
-    c2CurveSystem->Init(&shadersRepo);
-    interpolationCurveSystem->Init(&shadersRepo);
-    c0PatchesSystem->Init(&shadersRepo);
+    cursorSystem->Init();
+    selectionSystem->Init();
     c0SurfaceSystem->Init();
     c0CylinderSystem->Init();
-    c2SurfaceSystem->Init(&shadersRepo);
-    c2CylinderSystem->Init(&shadersRepo);
-    controlNetSystem->Init(&shadersRepo);
-    gregoryPatchesSystem->Init(&shadersRepo);
-    vectorSystem->Init(&shadersRepo);
+    c2SurfaceSystem->Init();
+    c2CylinderSystem->Init();
+    gregoryPatchesSystem->Init();
 }
 
 

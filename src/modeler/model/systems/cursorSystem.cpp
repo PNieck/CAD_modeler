@@ -1,13 +1,12 @@
 #include <CAD_modeler/model/systems/cursorSystem.hpp>
 
-#include <ecs/coordinator.hpp>
-
 #include <CAD_modeler/model/components/position.hpp>
 #include <CAD_modeler/model/components/mesh.hpp>
 #include <CAD_modeler/model/components/name.hpp>
 #include <CAD_modeler/model/components/unremovable.hpp>
 
 #include <CAD_modeler/model/systems/selectionSystem.hpp>
+#include <CAD_modeler/model/systems/shaders/shaderRepository.hpp>
 
 
 void CursorSystem::RegisterSystem(Coordinator & coordinator)
@@ -19,10 +18,8 @@ void CursorSystem::RegisterSystem(Coordinator & coordinator)
 }
 
 
-void CursorSystem::Init(ShaderRepository* shadersRepo)
+void CursorSystem::Init()
 {
-    this->shaderRepo = shadersRepo;
-
     cursor = coordinator->CreateEntity();
 
     const Position pos(0.0f);
@@ -46,7 +43,7 @@ void CursorSystem::Render(const alg::Mat4x4& cameraMtx)
 {
 
     auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
-    auto const& shader = shaderRepo->GetStdShader();
+    auto const& shader = ShaderRepository::GetInstance().GetStdShader();
 
     auto const& mesh = coordinator->GetComponent<Mesh>(cursor);
     auto const& position = coordinator->GetComponent<Position>(cursor);
@@ -64,16 +61,4 @@ void CursorSystem::Render(const alg::Mat4x4& cameraMtx)
 
     mesh.Use();
     glDrawElements(GL_POINTS, mesh.GetElementsCnt(), GL_UNSIGNED_INT, 0);
-}
-
-
-void CursorSystem::SetPosition(const alg::Vec3& pos)
-{
-    coordinator->SetComponent<Position>(cursor, Position(pos));
-}
-
-
-Position CursorSystem::GetPosition() const
-{
-    return coordinator->GetComponent<Position>(cursor);
 }

@@ -3,8 +3,6 @@
 #include "../components/c0Patches.hpp"
 #include "../components/gregoryPatchParameters.hpp"
 
-#include "shaders/shaderRepository.hpp"
-
 #include <ecs/system.hpp>
 
 #include <algebra/mat4x4.hpp>
@@ -16,7 +14,7 @@ class GregoryPatchesSystem: public System {
 public:
     static void RegisterSystem(Coordinator& coordinator);
 
-    void Init(ShaderRepository* shadersRepo);
+    void Init();
 
     class Hole {
     public:
@@ -49,8 +47,6 @@ private:
     class DeletionHandler;
 
     std::shared_ptr<DeletionHandler> deletionHandler;
-
-    ShaderRepository* shaderRepo;
 
     void UpdateEntities() const;
     void UpdateMesh(Entity entity, const TriangleOfGregoryPatches& triangle) const;

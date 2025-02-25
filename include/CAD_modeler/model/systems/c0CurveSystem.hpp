@@ -2,7 +2,6 @@
 
 #include <ecs/system.hpp>
 
-#include "shaders/shaderRepository.hpp"
 #include "../components/curveControlPoints.hpp"
 #include "../components/position.hpp"
 #include "curveControlPointsSystem.hpp"
@@ -14,9 +13,6 @@
 class C0CurveSystem: public System {
 public:
     static void RegisterSystem(Coordinator& coordinator);
-
-    inline void Init(ShaderRepository* shadersRepo)
-        { this->shaderRepo = shadersRepo; }
 
     Entity CreateC0Curve(const std::vector<Entity>& entities);
     inline Entity CreateC0Curve(Entity entity)
@@ -37,8 +33,6 @@ public:
     Position CalculatePosition(const std::vector<Entity>& cps, float t) const;
 
 private:
-    ShaderRepository* shaderRepo;
-
     static constexpr int CONTROL_POINTS_PER_SEGMENT = 4;
 
     void RenderCurvesPolygons(std::stack<Entity>& entities, const alg::Mat4x4& cameraMtx) const;

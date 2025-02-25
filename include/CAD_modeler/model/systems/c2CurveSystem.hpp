@@ -4,7 +4,6 @@
 #include <ecs/coordinator.hpp>
 #include <ecs/eventHandler.hpp>
 
-#include "shaders/shaderRepository.hpp"
 #include "../components/c2CurveParameters.hpp"
 #include "../components/curveControlPoints.hpp"
 #include "../components/bezierControlPoints.hpp"
@@ -16,9 +15,6 @@
 class C2CurveSystem: public System {
 public:
     static void RegisterSystem(Coordinator& coordinator);
-
-    inline void Init(ShaderRepository* shadersRepo)
-        { this->shaderRepo = shadersRepo; }
 
     Entity CreateC2Curve(const std::vector<Entity>& controlPoints);
     inline Entity CreateC2Curve(Entity controlPoint)
@@ -45,8 +41,6 @@ public:
     void Render(const alg::Mat4x4& cameraMtx) const;
 
 private:
-    ShaderRepository* shaderRepo;
-
     static constexpr int MIN_CTRL_PTS_CNT = 4;
 
     void UpdateEntities() const;

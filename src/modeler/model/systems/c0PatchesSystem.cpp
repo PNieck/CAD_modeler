@@ -7,6 +7,7 @@
 #include "CAD_modeler/model/systems/selectionSystem.hpp"
 #include "CAD_modeler/model/systems/toUpdateSystem.hpp"
 #include "CAD_modeler/model/systems/controlPointsRegistrySystem.hpp"
+#include "CAD_modeler/model/systems/shaders/shaderRepository.hpp"
 
 #include <CAD_modeler/utilities/setIntersection.hpp>
 
@@ -136,7 +137,7 @@ void C0PatchesSystem::Render(const alg::Mat4x4& cameraMtx) const
     }
 
     auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
-    auto const& shader = shaderRepo->GetBezierSurfaceShader();
+    auto const& shader = ShaderRepository::GetInstance().GetBezierSurfaceShader();
 
     UpdateEntities();
 
