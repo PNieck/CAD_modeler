@@ -4,6 +4,10 @@
 #include <CAD_modeler/views/globalViewParams.hpp>
 #include <CAD_modeler/views/modeler/modelerGuiUtils.hpp>
 
+#include <imgui.h>
+
+#include <sstream>
+
 
 ModelerMainMenuView::ModelerMainMenuView(ModelerController &controller, Modeler &model):
     controller(controller), model(model)

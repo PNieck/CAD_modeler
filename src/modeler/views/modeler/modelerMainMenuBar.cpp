@@ -3,28 +3,29 @@
 #include <CAD_modeler/controllers/modelerController.hpp>
 
 #include <imgui.h>
+#include <ImGuiFileDialog.h>
 
 
 ModelerMainMenuBar::ModelerMainMenuBar(ModelerController& controller, Modeler& model):
-    controller(controller), model(model), fileDialog(ImGuiFileBrowserFlags_EnterNewFilename | ImGuiFileBrowserFlags_CreateNewDir)
+    controller(controller), model(model)
 {
-    fileDialog.SetTitle("Choose file to load");
-    fileDialog.SetTypeFilters({ ".json"});
 }
 
 
 void ModelerMainMenuBar::Render()
 {
-    static bool savingScene = false;
-
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("File")) {
-            if (ImGui::MenuItem("Load"))
-                fileDialog.Open();
+            if (ImGui::MenuItem("Load")) {
+                IGFD::FileDialogConfig config;
+                config.path = ".";
+                ImGuiFileDialog::Instance()->OpenDialog("LoadFileDlgKey", "Choose file to load", ".json", config);
+            }
 
             if (ImGui::MenuItem("Save")) {
-                fileDialog.Open();
-                savingScene = true;
+                IGFD::FileDialogConfig config;
+                config.path = ".";
+                ImGuiFileDialog::Instance()->OpenDialog("SaveFileDlgKey", "Choose or create file to save", ".json", config);
             }
 
             ImGui::EndMenu();
@@ -66,18 +67,19 @@ void ModelerMainMenuBar::Render()
         ImGui::EndMainMenuBar();
     }
 
-    fileDialog.Display();
-
-    if(fileDialog.HasSelected()) {
-        const auto path = fileDialog.GetSelected().string();
-        fileDialog.ClearSelected();
-
-        if (savingScene) {
-            model.SaveScene(path);
-            savingScene = false;
+    if (ImGuiFileDialog::Instance()->Display("LoadFileDlgKey")) {
+        if (ImGuiFileDialog::Instance()->IsOk()) {
+            model.LoadScene(ImGuiFileDialog::Instance()->GetFilePathName());
         }
-        else
-            model.LoadScene(path);
-        fileDialog.Close();
+
+        ImGuiFileDialog::Instance()->Close();
+    }
+
+    if (ImGuiFileDialog::Instance()->Display("SaveFileDlgKey")) {
+        if (ImGuiFileDialog::Instance()->IsOk()) {
+            model.SaveScene(ImGuiFileDialog::Instance()->GetFilePathName());
+        }
+
+        ImGuiFileDialog::Instance()->Close();
     }
 }

@@ -58,7 +58,7 @@ target_link_libraries(
     ecs
     algebra
     graph
-    fileBrowser
+    ImGuiFileDialog
     nlohmann_json::nlohmann_json
     dlib::dlib
     imguiLoadingSpinner

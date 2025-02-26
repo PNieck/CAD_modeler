@@ -2,10 +2,6 @@
 
 #include "../../model/modeler.hpp"
 
-// ImGui header must be included before imfilebrowser one
-#include <imgui.h>
-#include <imfilebrowser.h>
-
 
 class ModelerController;
 
@@ -19,6 +15,4 @@ public:
 private:
     ModelerController& controller;
     Modeler& model;
-
-    ImGui::FileBrowser fileDialog;
 };
