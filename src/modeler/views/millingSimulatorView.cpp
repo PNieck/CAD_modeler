@@ -1,10 +1,12 @@
 #include <CAD_modeler/views/millingSimulatorView.hpp>
 
+#include <imgui.h>
+#include <ImGuiFileDialog.h>
+
 
 MillingSimulatorView::MillingSimulatorView(MillingSimController &controller, MillingMachineSim &model):
     controller(controller), model(model)
 {
-    fileBrowser.SetTitle("Choose GCode file");
 }
 
 
@@ -31,17 +33,19 @@ void MillingSimulatorView::RenderFileSelection()
     else
         ImGui::Text("Selected file: %s", filePath.c_str());
 
-    if (ImGui::Button("Load"))
-        fileBrowser.Open();
+    if (ImGui::Button("Load")) {
+        IGFD::FileDialogConfig config;
+	    config.path = ".";
+        ImGuiFileDialog::Instance()->OpenDialog("ChooseGCodeFileDlgKey", "Choose GCode File", ".k01,.k8,.k16,.f10,.f12", config);
+    }
 
-    fileBrowser.Display();
+    if (ImGuiFileDialog::Instance()->Display("ChooseFileDlgKey")) {
+        if (ImGuiFileDialog::Instance()->IsOk()) {
+            filePath = ImGuiFileDialog::Instance()->GetFilePathName();
+            model.AddMillingPath(filePath);
+        }
 
-    if (fileBrowser.HasSelected()) {
-        filePath = fileBrowser.GetSelected().string();
-        fileBrowser.ClearSelected();
-        fileBrowser.Close();
-
-        model.AddMillingPath(filePath);
+        ImGuiFileDialog::Instance()->Close();
     }
 }
 

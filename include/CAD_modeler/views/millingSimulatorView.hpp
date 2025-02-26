@@ -4,10 +4,6 @@
 
 #include <string>
 
-// ImGui header must be included before imfilebrowser one
-#include <imgui.h>
-#include <imfilebrowser.h>
-
 
 class MillingSimController;
 
@@ -23,8 +19,6 @@ private:
     MillingMachineSim& model;
 
     std::string filePath;
-
-    ImGui::FileBrowser fileBrowser;
 
     void RenderFileSelection();
     void RenderMaterialOptions() const;
