@@ -74,7 +74,7 @@ Entity C0CylinderSystem::CreateCylinder(const Position &pos, const alg::Vec3 &di
     coordinator->AddComponent<PatchesDensity>(cylinder, density);
     coordinator->AddComponent<IsC0Cylinder>(cylinder, {});
 
-    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(cylinder);
+    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate<C0PatchesSystem>(cylinder);
 
     Recalculate(cylinder, pos, direction, radius);
 
@@ -117,7 +117,7 @@ void C0CylinderSystem::AddRowOfPatches(Entity cylinder, const Position &pos, con
         }
     );
 
-    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(cylinder);
+    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate<C0PatchesSystem>(cylinder);
 
     Recalculate(cylinder, pos, direction, radius);
 }
@@ -158,7 +158,7 @@ void C0CylinderSystem::AddColOfPatches(Entity cylinder, const Position &pos, con
         }
     );
 
-    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(cylinder);
+    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate<C0PatchesSystem>(cylinder);
 
     Recalculate(cylinder, pos, direction, radius);
 }
@@ -184,7 +184,7 @@ void C0CylinderSystem::DeleteRowOfPatches(Entity cylinder, const Position &pos, 
         }
     );
 
-    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(cylinder);
+    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate<C0PatchesSystem>(cylinder);
     Recalculate(cylinder, pos, direction, radius);
 }
 
@@ -214,7 +214,7 @@ void C0CylinderSystem::DeleteColOfPatches(Entity cylinder, const Position &pos, 
         }
     );
 
-    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(cylinder);
+    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate<C0PatchesSystem>(cylinder);
     Recalculate(cylinder, pos, direction, radius);
 }
 
@@ -274,5 +274,9 @@ void C0CylinderSystem::DeletionHandler::HandleEvent(Entity entity, const C0Patch
 
 void C0CylinderSystem::ControlPointMovedHandler::HandleEvent(Entity entity, const Position& component, EventType eventType)
 {
-    coordinator.GetSystem<ToUpdateSystem>()->MarkAsToUpdate(targetObject);
+    (void)entity;
+    (void)component;
+    (void)eventType;
+
+    coordinator.GetSystem<ToUpdateSystem>()->MarkAsToUpdate<C0PatchesSystem>(targetObject);
 }

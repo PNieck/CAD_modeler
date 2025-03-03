@@ -40,6 +40,8 @@ public:
 
     void Render(const alg::Mat4x4& cameraMtx) const;
 
+    void Update() const;
+
 private:
     static constexpr int MIN_CTRL_PTS_CNT = 4;
 

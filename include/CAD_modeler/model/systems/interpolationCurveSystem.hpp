@@ -26,9 +26,9 @@ public:
 
     void Render(const alg::Mat4x4& cameraMtx) const;
 
-private:  
-    void UpdateEntities() const;
+    void Update() const;
 
+private:
     void UpdateMesh(Entity entity, const CurveControlPoints& cps) const;
 
     std::vector<float> GenerateMeshVertices(const CurveControlPoints& cps) const;

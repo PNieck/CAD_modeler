@@ -98,8 +98,18 @@ void MainController::Render()
 
 void MainController::Update(double dt)
 {
-    if (actModelType == ModelType::MillerMachineSim)
-        millSimController.Update(dt);
+    switch (actModelType) {
+        case ModelType::Modeler:
+            modelerController.Update();
+            break;
+
+        case ModelType::MillerMachineSim:
+            millSimController.Update(dt);
+            break;
+
+        default:
+            throw std::runtime_error("Unknown model type");
+    }
 }
 
 

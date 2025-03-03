@@ -28,14 +28,15 @@ private:
 
     class ControlPointMovedHandler: public EventHandler<Position> {
     public:
-        ControlPointMovedHandler(Entity targetObject, Coordinator& coordinator):
-            coordinator(coordinator), targetObject(targetObject) {}
+        ControlPointMovedHandler(Entity targetObject, Coordinator& coordinator, SystemId sysId):
+            coordinator(coordinator), targetObject(targetObject), sysId(sysId) {}
 
         void HandleEvent(Entity entity, const Position& component, EventType eventType) override;
 
     private:
         Coordinator& coordinator;
         Entity targetObject;
+        SystemId sysId;
     };
 
 

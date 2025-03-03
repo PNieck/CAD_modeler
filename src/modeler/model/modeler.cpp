@@ -50,7 +50,6 @@ Modeler::Modeler(const int viewportWidth, const int viewportHeight):
     selectionSystem = coordinator.GetSystem<SelectionSystem>();
     c0CurveSystem = coordinator.GetSystem<C0CurveSystem>();
     c2CurveSystem = coordinator.GetSystem<C2CurveSystem>();
-    auto controlPointsSystem = coordinator.GetSystem<CurveControlPointsSystem>();
     interpolationCurveSystem = coordinator.GetSystem<InterpolationCurveSystem>();
     c0SurfaceSystem = coordinator.GetSystem<C0SurfaceSystem>();
     c0CylinderSystem = coordinator.GetSystem<C0CylinderSystem>();
@@ -398,6 +397,18 @@ Entity Modeler::FillHole(const GregoryPatchesSystem::Hole& hole)
     nameSystem->SetName(entity, nameGenerator.GenerateName("GregoryPatches__"));
 
     return entity;
+}
+
+
+void Modeler::Update() const
+{
+    c0CurveSystem->Update();
+    c0PatchesSystem->Update();
+    c2CurveSystem->Update();
+    c2CylinderSystem->Update();
+    c2SurfaceSystem->Update();
+    gregoryPatchesSystem->Update();
+    interpolationCurveSystem->Update();
 }
 
 

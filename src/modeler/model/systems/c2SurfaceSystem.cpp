@@ -9,8 +9,6 @@
 #include "CAD_modeler/model/systems/controlPointsRegistrySystem.hpp"
 #include "CAD_modeler/model/systems/shaders/shaderRepository.hpp"
 
-#include <CAD_modeler/utilities/setIntersection.hpp>
-
 
 void C2SurfaceSystem::RegisterSystem(Coordinator &coordinator)
 {
@@ -63,7 +61,7 @@ Entity C2SurfaceSystem::CreateSurface(const Position &pos, const alg::Vec3 &dire
     coordinator->AddComponent<C2Patches>(surface, patches);
     coordinator->AddComponent<PatchesDensity>(surface, density);
 
-    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
+    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate<C2SurfaceSystem>(surface);
 
     Recalculate(surface, pos, direction, length, width);
 
@@ -102,7 +100,7 @@ Entity C2SurfaceSystem::CreateSurface(C2Patches &patches)
     coordinator->AddComponent<C2Patches>(surface, patches);
     coordinator->AddComponent<PatchesDensity>(surface, density);
 
-    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
+    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate<C2SurfaceSystem>(surface);
 
     return surface;
 }
@@ -136,7 +134,7 @@ void C2SurfaceSystem::AddRowOfPatches(Entity surface, const Position &pos, const
         }
     );
 
-    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
+    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate<C2SurfaceSystem>(surface);
 
     Recalculate(surface, pos, direction, length, width);
 }
@@ -170,7 +168,7 @@ void C2SurfaceSystem::AddColOfPatches(Entity surface, const Position &pos, const
         }
     );
 
-    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
+    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate<C2SurfaceSystem>(surface);
 
     Recalculate(surface, pos, direction, length, width);
 }
@@ -194,7 +192,7 @@ void C2SurfaceSystem::DeleteRowOfPatches(Entity surface, const Position &pos, co
         }
     );
 
-    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
+    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate<C2SurfaceSystem>(surface);
 
     Recalculate(surface, pos, direction, length, width);
 }
@@ -218,7 +216,7 @@ void C2SurfaceSystem::DeleteColOfPatches(Entity surface, const Position &pos, co
         }
     );
 
-    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
+    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate<C2SurfaceSystem>(surface);
 
     Recalculate(surface, pos, direction, length, width);
 }
@@ -248,7 +246,7 @@ void C2SurfaceSystem::MergeControlPoints(Entity surface, Entity oldCP, Entity ne
         }
     );
 
-    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
+    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate<C2SurfaceSystem>(surface);
 
     auto registry = coordinator->GetSystem<ControlPointsRegistrySystem>();
     registry->UnregisterControlPoint(surface, oldCP, Coordinator::GetSystemID<C2SurfaceSystem>());
@@ -296,8 +294,6 @@ void C2SurfaceSystem::Render(const alg::Mat4x4& cameraMtx) const
     auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
     auto const& shader = ShaderRepository::GetInstance().GetBSplineSurfaceShader();
 
-    UpdateEntities();
-
     shader.Use();
     shader.SetColor(alg::Vec4(1.0f));
     shader.SetMVP(cameraMtx);
@@ -326,12 +322,12 @@ void C2SurfaceSystem::Render(const alg::Mat4x4& cameraMtx) const
 }
 
 
-void C2SurfaceSystem::UpdateEntities() const
+void C2SurfaceSystem::Update() const
 {
-    auto const& toUpdateSystem = coordinator->GetSystem<ToUpdateSystem>();
+    auto toUpdateSystem = coordinator->GetSystem<ToUpdateSystem>();
     auto const& netSystem = coordinator->GetSystem<ControlNetSystem>();
 
-    auto toUpdate = intersect(toUpdateSystem->GetEntities(), entities);
+    auto toUpdate = toUpdateSystem->GetEntitiesToUpdate<C2SurfaceSystem>();
 
     for (auto entity: toUpdate) {
         auto const& patches = coordinator->GetComponent<C2Patches>(entity);
@@ -340,9 +336,9 @@ void C2SurfaceSystem::UpdateEntities() const
 
         if (netSystem->HasControlPointsNet(entity))
             netSystem->Update(entity, patches);
-
-        toUpdateSystem->Unmark(entity);
     }
+
+    toUpdateSystem->UnmarkAll<C2SurfaceSystem>();
 }
 
 
@@ -436,5 +432,9 @@ void C2SurfaceSystem::DeletionHandler::HandleEvent(Entity entity, const C2Patche
 
 void C2SurfaceSystem::ControlPointMovedHandler::HandleEvent(Entity entity, const Position& component, EventType eventType)
 {
-    coordinator.GetSystem<ToUpdateSystem>()->MarkAsToUpdate(targetObject);
+    (void)entity;
+    (void)component;
+    (void)eventType;
+
+    coordinator.GetSystem<ToUpdateSystem>()->MarkAsToUpdate<C2SurfaceSystem>(targetObject);
 }

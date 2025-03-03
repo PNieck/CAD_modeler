@@ -292,6 +292,8 @@ public:
     float selectionCircleY = 0.0f;
     float selectionCircleRadius = 0.2f;
 
+    void Update() const;
+
 private:
     std::shared_ptr<ToriSystem> toriSystem;
     std::shared_ptr<GridSystem> gridSystem;

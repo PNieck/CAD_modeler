@@ -16,8 +16,6 @@
 #include "CAD_modeler/model/components/mesh.hpp"
 #include "CAD_modeler/model/components/unremovable.hpp"
 
-#include <CAD_modeler/utilities/setIntersection.hpp>
-
 #include <vector>
 #include <stack>
 
@@ -73,7 +71,7 @@ Entity C0SurfaceSystem::CreateSurface(const Position& pos, const alg::Vec3& dire
     coordinator->AddComponent<C0Patches>(surface, patches);
     coordinator->AddComponent<PatchesDensity>(surface, density);
 
-    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
+    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate<C0PatchesSystem>(surface);
 
     Recalculate(surface, pos, direction, length, width);
 
@@ -112,7 +110,7 @@ Entity C0SurfaceSystem::CreateSurface(C0Patches &patches)
     coordinator->AddComponent<C0Patches>(surface, patches);
     coordinator->AddComponent<PatchesDensity>(surface, density);
 
-    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
+    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate<C0PatchesSystem>(surface);
 
     return surface;
 }
@@ -148,7 +146,7 @@ void C0SurfaceSystem::AddRowOfPatches(Entity surface, const Position& pos, const
         }
     );
 
-    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
+    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate<C0PatchesSystem>(surface);
 
     Recalculate(surface, pos, direction, length, width);
 }
@@ -184,7 +182,7 @@ void C0SurfaceSystem::AddColOfPatches(Entity surface, const Position& pos, const
         }
     );
 
-    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
+    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate<C0PatchesSystem>(surface);
 
     Recalculate(surface, pos, direction, length, width);
 }
@@ -210,7 +208,7 @@ void C0SurfaceSystem::DeleteRowOfPatches(Entity surface, const Position& pos, co
         }
     );
 
-    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
+    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate<C0PatchesSystem>(surface);
 
     Recalculate(surface, pos, direction, length, width);
 }
@@ -236,7 +234,7 @@ void C0SurfaceSystem::DeleteColOfPatches(Entity surface, const Position& pos, co
         }
     );
 
-    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
+    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate<C0PatchesSystem>(surface);
 
     Recalculate(surface, pos, direction, length, width);
 }
@@ -296,5 +294,9 @@ void C0SurfaceSystem::DeletionHandler::HandleEvent(Entity entity, const C0Patche
 
 void C0SurfaceSystem::ControlPointMovedHandler::HandleEvent(Entity entity, const Position& component, EventType eventType)
 {
-    coordinator.GetSystem<ToUpdateSystem>()->MarkAsToUpdate(targetObject);
+    (void)entity;
+    (void)component;
+    (void)eventType;
+
+    coordinator.GetSystem<ToUpdateSystem>()->MarkAsToUpdate<C0PatchesSystem>(targetObject);
 }

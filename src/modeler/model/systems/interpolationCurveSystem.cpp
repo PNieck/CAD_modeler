@@ -6,8 +6,6 @@
 #include <CAD_modeler/model/systems/selectionSystem.hpp>
 #include <CAD_modeler/model/systems/shaders/shaderRepository.hpp>
 
-#include <CAD_modeler/utilities/setIntersection.hpp>
-
 #include <algebra/systemsOfLinearEquasions.hpp>
 #include <algebra/cubicPolynomials.hpp>
 
@@ -48,8 +46,6 @@ void InterpolationCurveSystem::Render(const alg::Mat4x4& cameraMtx) const
     auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
     auto const& shader = ShaderRepository::GetInstance().GetBezierCurveShader();
 
-    UpdateEntities();
-
     shader.Use();
     shader.SetColor(alg::Vec4(1.0f));
     shader.SetMVP(cameraMtx);
@@ -72,23 +68,22 @@ void InterpolationCurveSystem::Render(const alg::Mat4x4& cameraMtx) const
 }
 
 
-void InterpolationCurveSystem::UpdateEntities() const
+void InterpolationCurveSystem::Update() const
 {
     auto const& toUpdateSystem = coordinator->GetSystem<ToUpdateSystem>();
 
-    auto toUpdate = intersect(toUpdateSystem->GetEntities(), entities);
+    auto toUpdate = toUpdateSystem->GetEntitiesToUpdate<InterpolationCurveSystem>();
 
     for (auto entity: toUpdate) {
         auto const cps = coordinator->GetComponent<CurveControlPoints>(entity);
 
-        if (cps.Size() != 0) {
+        if (cps.Size() != 0)
             UpdateMesh(entity, cps);
-            toUpdateSystem->Unmark(entity);
-        }
         else
             coordinator->DestroyEntity(entity);
-        
     }
+
+    toUpdateSystem->UnmarkAll<InterpolationCurveSystem>();
 }
 
 

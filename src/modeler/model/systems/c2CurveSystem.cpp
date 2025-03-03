@@ -15,8 +15,6 @@
 #include <CAD_modeler/model/systems/curveControlPointsSystem.hpp>
 #include <CAD_modeler/model/systems/shaders/shaderRepository.hpp>
 
-#include <CAD_modeler/utilities/setIntersection.hpp>
-
 #include <algorithm>
 
 
@@ -148,8 +146,6 @@ void C2CurveSystem::Render(const alg::Mat4x4& cameraMtx) const
     std::stack<Entity> bSplinePolygonsToDraw;
     std::stack<Entity> bezierPolygonsToDraw;
 
-    UpdateEntities();
-
     shader.Use();
     shader.SetColor(alg::Vec4(1.0f));
     shader.SetMVP(cameraMtx);
@@ -185,11 +181,10 @@ void C2CurveSystem::Render(const alg::Mat4x4& cameraMtx) const
 }
 
 
-void C2CurveSystem::UpdateEntities() const
+void C2CurveSystem::Update() const
 {
-    auto const& toUpdateSystem = coordinator->GetSystem<ToUpdateSystem>();
-
-    const auto toUpdate = intersect(toUpdateSystem->GetEntities(), entities);
+    auto toUpdateSystem = coordinator->GetSystem<ToUpdateSystem>();
+    const auto toUpdate = toUpdateSystem->GetEntitiesToUpdate<C2CurveSystem>();
 
     for (const auto entity: toUpdate) {
         auto const& cps = coordinator->GetComponent<CurveControlPoints>(entity);
@@ -207,9 +202,9 @@ void C2CurveSystem::UpdateEntities() const
 
         if (params.showBezierControlPoints)
             UpdateBezierControlPoints(entity);
-
-        toUpdateSystem->Unmark(entity);
     }
+
+    toUpdateSystem->UnmarkAll<C2CurveSystem>();
 }
 
 
@@ -523,7 +518,7 @@ void C2CurveSystem::BezierCtrlPtMovedHandler::HandleEvent(Entity entity, const P
     (void)eventType;
 
     // FIXME: remove this condition
-    if (coordinator.HasComponent<ToUpdate>(c2Curve))
+    if (coordinator.GetSystem<ToUpdateSystem>()->GetEntitiesToUpdate<C2CurveSystem>().contains(entity))
         return;
 
     auto const& bSplineCPs = coordinator.GetComponent<CurveControlPoints>(c2Curve).GetPoints();
