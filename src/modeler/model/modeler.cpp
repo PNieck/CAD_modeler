@@ -5,6 +5,7 @@
 
 #include <CAD_modeler/model/components/registerComponents.hpp>
 #include <CAD_modeler/model/components/cameraParameters.hpp>
+#include <CAD_modeler/model/components/unremovable.hpp>
 
 #include <CAD_modeler/model/systems/toUpdateSystem.hpp>
 #include <CAD_modeler/model/systems/curveControlPointsSystem.hpp>
@@ -71,6 +72,10 @@ Modeler::Modeler(const int viewportWidth, const int viewportHeight):
     c2SurfaceSystem->Init();
     c2CylinderSystem->Init();
     gregoryPatchesSystem->Init();
+
+    Entity cursor = cursorSystem->GetCursor();
+    nameSystem->SetName(cursor, "Cursor");
+    coordinator.AddComponent<Unremovable>(cursor, Unremovable());
 }
 
 
