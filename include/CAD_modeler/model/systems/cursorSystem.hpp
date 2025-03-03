@@ -22,6 +22,9 @@ public:
     Position GetPosition() const
         { return coordinator->GetComponent<Position>(cursor); }
 
+    Entity GetCursor() const
+        { return cursor; }
+
 private:
     Entity cursor;
 };

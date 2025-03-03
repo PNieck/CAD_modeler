@@ -1,7 +1,5 @@
 #include <CAD_modeler/views/modeler/modelerGuiView.hpp>
 
-#include <CAD_modeler/utilities/angle.hpp>
-#include <CAD_modeler/model/components/unremovable.hpp>
 #include <CAD_modeler/controllers/modelerController.hpp>
 
 #include <imgui.h>

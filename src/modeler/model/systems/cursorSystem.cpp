@@ -2,19 +2,14 @@
 
 #include <CAD_modeler/model/components/position.hpp>
 #include <CAD_modeler/model/components/mesh.hpp>
-#include <CAD_modeler/model/components/name.hpp>
-#include <CAD_modeler/model/components/unremovable.hpp>
 
 #include <CAD_modeler/model/systems/selectionSystem.hpp>
 #include <CAD_modeler/model/systems/shaders/shaderRepository.hpp>
 
 
-void CursorSystem::RegisterSystem(Coordinator & coordinator)
+void CursorSystem::RegisterSystem(Coordinator& coordinator)
 {
     coordinator.RegisterSystem<CursorSystem>();
-
-    glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
-    glPointSize(10.0f);
 }
 
 
@@ -34,8 +29,7 @@ void CursorSystem::Init()
     mesh.Update(vertices, indices);
     
     coordinator->AddComponent<Mesh>(cursor, mesh);
-    coordinator->AddComponent<Name>(cursor, "Cursor");
-    coordinator->AddComponent<Unremovable>(cursor, Unremovable());
+    
 }
 
 
