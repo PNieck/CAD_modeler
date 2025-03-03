@@ -12,6 +12,9 @@ class ModelerController: public SubController {
 public:
     explicit ModelerController(Modeler& modeler);
 
+    void Update() const
+        { modeler.Update(); }
+
     void Render();
 
     inline void WindowSizeChanged(const int width, const int height) const

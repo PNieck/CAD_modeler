@@ -45,12 +45,13 @@ public:
 
     void Render(const alg::Mat4x4& cameraMtx) const;
 
+    void Update() const;
+
 private:
     class DeletionHandler;
 
     std::shared_ptr<DeletionHandler> deletionHandler;
-
-    void UpdateEntities() const;
+    
     void UpdateMesh(Entity surface, const C2Patches& patches) const;
 
     std::vector<float> GenerateVertices(const C2Patches& patches) const;

@@ -13,8 +13,6 @@
 
 #include <numbers>
 
-#include <CAD_modeler/utilities/setIntersection.hpp>
-
 
 void C2CylinderSystem::RegisterSystem(Coordinator &coordinator)
 {
@@ -68,7 +66,7 @@ Entity C2CylinderSystem::CreateCylinder(const Position &pos, const alg::Vec3 &di
     coordinator->AddComponent<C2CylinderPatches>(surface, patches);
     coordinator->AddComponent<PatchesDensity>(surface, density);
 
-    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
+    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate<C2CylinderSystem>(surface);
 
     Recalculate(surface, pos, direction, radius);
 
@@ -109,7 +107,7 @@ void C2CylinderSystem::AddRowOfPatches(Entity surface, const Position &pos, cons
         }
     );
 
-    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
+    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate<C2CylinderSystem>(surface);
 
     Recalculate(surface, pos, direction, radius);
 }
@@ -145,7 +143,7 @@ void C2CylinderSystem::AddColOfPatches(Entity surface, const Position &pos, cons
         }
     );
 
-    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
+    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate<C2CylinderSystem>(surface);
 
     Recalculate(surface, pos, direction, radius);
 }
@@ -169,7 +167,7 @@ void C2CylinderSystem::DeleteRowOfPatches(Entity surface, const Position &pos, c
         }
     );
 
-    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
+    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate<C2CylinderSystem>(surface);
     Recalculate(surface, pos, direction, radius);
 }
 
@@ -193,7 +191,7 @@ void C2CylinderSystem::DeleteColOfPatches(Entity surface, const Position &pos, c
         }
     );
 
-    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
+    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate<C2CylinderSystem>(surface);
     Recalculate(surface, pos, direction, radius);
 }
 
@@ -222,7 +220,7 @@ void C2CylinderSystem::MergeControlPoints(Entity cylinder, Entity oldCP, Entity 
         }
     );
 
-    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(cylinder);
+    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate<C2CylinderSystem>(cylinder);
 
     auto registry = coordinator->GetSystem<ControlPointsRegistrySystem>();
     registry->UnregisterControlPoint(cylinder, oldCP, Coordinator::GetSystemID<C2CylinderSystem>());
@@ -287,7 +285,11 @@ void C2CylinderSystem::DeletionHandler::HandleEvent(Entity entity, const C2Cylin
 
 void C2CylinderSystem::ControlPointMovedHandler::HandleEvent(Entity entity, const Position& component, EventType eventType)
 {
-    coordinator.GetSystem<ToUpdateSystem>()->MarkAsToUpdate(targetObject);
+    (void)entity;
+    (void)component;
+    (void)eventType;
+
+    coordinator.GetSystem<ToUpdateSystem>()->MarkAsToUpdate<C2CylinderSystem>(targetObject);
 }
 
 
@@ -299,8 +301,6 @@ void C2CylinderSystem::Render(const alg::Mat4x4& cameraMtx) const
 
     auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
     auto const& shader = ShaderRepository::GetInstance().GetBSplineSurfaceShader();
-
-    UpdateEntities();
 
     shader.Use();
     shader.SetColor(alg::Vec4(1.0f));
@@ -330,12 +330,12 @@ void C2CylinderSystem::Render(const alg::Mat4x4& cameraMtx) const
 }
 
 
-void C2CylinderSystem::UpdateEntities() const
+void C2CylinderSystem::Update() const
 {
-    auto const& toUpdateSystem = coordinator->GetSystem<ToUpdateSystem>();
+    auto toUpdateSystem = coordinator->GetSystem<ToUpdateSystem>();
     auto const& netSystem = coordinator->GetSystem<ControlNetSystem>();
 
-    auto toUpdate = intersect(toUpdateSystem->GetEntities(), entities);
+    auto toUpdate = toUpdateSystem->GetEntitiesToUpdate<C2CylinderSystem>();
 
     for (auto entity: toUpdate) {
         auto const& patches = coordinator->GetComponent<C2CylinderPatches>(entity);
@@ -344,9 +344,9 @@ void C2CylinderSystem::UpdateEntities() const
 
         if (netSystem->HasControlPointsNet(entity))
             netSystem->Update(entity, patches);
-
-        toUpdateSystem->Unmark(entity);
     }
+
+    toUpdateSystem->UnmarkAll<C2CylinderSystem>();
 }
 
 

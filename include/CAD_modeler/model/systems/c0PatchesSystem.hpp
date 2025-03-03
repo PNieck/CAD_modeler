@@ -29,8 +29,9 @@ public:
 
     void Render(const alg::Mat4x4& cameraMtx) const;
 
+    void Update() const;
+
 private:
-    void UpdateEntities() const;
     void UpdateMesh(Entity surface, const C0Patches& patches) const;
 
     std::vector<float> GenerateVertices(const C0Patches& patches) const;

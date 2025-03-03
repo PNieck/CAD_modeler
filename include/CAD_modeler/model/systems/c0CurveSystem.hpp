@@ -29,6 +29,8 @@ public:
 
     void Render(const alg::Mat4x4& cameraMtx) const;
 
+    void Update() const;
+
     static Position CalculatePosition(const std::vector<Position>& cpPositions, float t);
     Position CalculatePosition(const std::vector<Entity>& cps, float t) const;
 
@@ -36,7 +38,6 @@ private:
     static constexpr int CONTROL_POINTS_PER_SEGMENT = 4;
 
     void RenderCurvesPolygons(std::stack<Entity>& entities, const alg::Mat4x4& cameraMtx) const;
-    void UpdateEntities() const;
     void UpdateMesh(Entity curve, const CurveControlPoints& cps) const;
 
     std::vector<float> GenerateBezierPolygonVertices(const CurveControlPoints& cps) const;

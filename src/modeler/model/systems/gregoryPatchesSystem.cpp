@@ -8,8 +8,6 @@
 #include <CAD_modeler/model/components/gregoryNetMesh.hpp>
 #include <CAD_modeler/model/components/patchesDensity.hpp>
 
-#include <CAD_modeler/utilities/setIntersection.hpp>
-
 #include <ecs/coordinator.hpp>
 
 #include <graph/alg/cycleDetection.hpp>
@@ -410,7 +408,7 @@ Entity GregoryPatchesSystem::FillHole(const GregoryPatchesSystem::Hole& hole)
     coordinator->AddComponent<Mesh>(entity, Mesh());
     coordinator->AddComponent<PatchesDensity>(entity, PatchesDensity(5));
 
-    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(entity);
+    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate<GregoryPatchesSystem>(entity);
 
     return entity;
 }
@@ -453,8 +451,6 @@ void GregoryPatchesSystem::Render(const alg::Mat4x4 &cameraMtx) const
         return;
     }
 
-    UpdateEntities();
-
     auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
     auto const& shader = ShaderRepository::GetInstance().GetGregoryPatchShader();
     std::stack<Entity> netsToDraw;
@@ -494,11 +490,10 @@ void GregoryPatchesSystem::Render(const alg::Mat4x4 &cameraMtx) const
 }
 
 
-void GregoryPatchesSystem::UpdateEntities() const
+void GregoryPatchesSystem::Update() const
 {
-    auto const& toUpdateSystem = coordinator->GetSystem<ToUpdateSystem>();
-
-    auto toUpdate = intersect(toUpdateSystem->GetEntities(), entities);
+    auto toUpdateSystem = coordinator->GetSystem<ToUpdateSystem>();
+    auto toUpdate = toUpdateSystem->GetEntitiesToUpdate<GregoryPatchesSystem>();
 
     for (auto entity: toUpdate) {
         coordinator->EditComponent<TriangleOfGregoryPatches>(entity,
@@ -510,6 +505,8 @@ void GregoryPatchesSystem::UpdateEntities() const
         const auto& triangle = coordinator->GetComponent<TriangleOfGregoryPatches>(entity);
         UpdateMesh(entity, triangle);
     }
+
+    toUpdateSystem->UnmarkAll<GregoryPatchesSystem>();
 }
 
 
@@ -996,5 +993,5 @@ void GregoryPatchesSystem::ControlPointMovedHandler::HandleEvent(Entity entity, 
         return;
     }
 
-    coordinator.GetSystem<ToUpdateSystem>()->MarkAsToUpdate(targetObject);
+    coordinator.GetSystem<ToUpdateSystem>()->MarkAsToUpdate<GregoryPatchesSystem>(targetObject);
 }

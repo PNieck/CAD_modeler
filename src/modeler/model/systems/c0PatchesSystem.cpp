@@ -9,8 +9,6 @@
 #include "CAD_modeler/model/systems/controlPointsRegistrySystem.hpp"
 #include "CAD_modeler/model/systems/shaders/shaderRepository.hpp"
 
-#include <CAD_modeler/utilities/setIntersection.hpp>
-
 
 void C0PatchesSystem::RegisterSystem(Coordinator &coordinator)
 {
@@ -46,7 +44,7 @@ void C0PatchesSystem::MergeControlPoints(Entity surface, Entity oldCP, Entity ne
         }
     );
 
-    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(surface);
+    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate<C0PatchesSystem>(surface);
 
     auto registry = coordinator->GetSystem<ControlPointsRegistrySystem>();
     registry->UnregisterControlPoint(surface, oldCP, system);
@@ -64,7 +62,7 @@ void C0PatchesSystem::ShowBezierNet(Entity surface)
 
 
 alg::Vec4 CubicBernsteinPolynomial(const float t) {
-    const float oneMinusT = 1.0 - t;
+    const float oneMinusT = 1.0f - t;
 
     return {
         oneMinusT * oneMinusT * oneMinusT,
@@ -139,8 +137,6 @@ void C0PatchesSystem::Render(const alg::Mat4x4& cameraMtx) const
     auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
     auto const& shader = ShaderRepository::GetInstance().GetBezierSurfaceShader();
 
-    UpdateEntities();
-
     shader.Use();
     shader.SetColor(alg::Vec4(1.0f));
     shader.SetMVP(cameraMtx);
@@ -169,12 +165,12 @@ void C0PatchesSystem::Render(const alg::Mat4x4& cameraMtx) const
 }
 
 
-void C0PatchesSystem::UpdateEntities() const
+void C0PatchesSystem::Update() const
 {
     auto const& toUpdateSystem = coordinator->GetSystem<ToUpdateSystem>();
     auto const& netSystem = coordinator->GetSystem<ControlNetSystem>();
 
-    auto toUpdate = intersect(toUpdateSystem->GetEntities(), entities);
+    auto toUpdate = toUpdateSystem->GetEntitiesToUpdate<C0PatchesSystem>();
 
     for (auto entity: toUpdate) {
         auto const& patches = coordinator->GetComponent<C0Patches>(entity);
@@ -183,9 +179,9 @@ void C0PatchesSystem::UpdateEntities() const
 
         if (netSystem->HasControlPointsNet(entity))
             netSystem->Update(entity, patches);
-
-        toUpdateSystem->Unmark(entity);
     }
+
+    toUpdateSystem->UnmarkAll<C0PatchesSystem>();
 }
 
 

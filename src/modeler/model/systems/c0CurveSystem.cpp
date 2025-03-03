@@ -5,14 +5,11 @@
 #include <CAD_modeler/model/components/c0CurveParameters.hpp>
 #include <CAD_modeler/model/components/curveControlPoints.hpp>
 #include <CAD_modeler/model/components/position.hpp>
-#include <CAD_modeler/model/components/toUpdate.hpp>
 #include <CAD_modeler/model/components/mesh.hpp>
 
 #include <CAD_modeler/model/systems/toUpdateSystem.hpp>
 #include <CAD_modeler/model/systems/selectionSystem.hpp>
 #include <CAD_modeler/model/systems/shaders/shaderRepository.hpp>
-
-#include <CAD_modeler/utilities/setIntersection.hpp>
 
 #include <cmath>
 #include <algorithm>
@@ -61,8 +58,6 @@ void C0CurveSystem::Render(const alg::Mat4x4& cameraMtx) const
     auto const& shader = ShaderRepository::GetInstance().GetBezierCurveShader();
     std::stack<Entity> polygonsToDraw;
 
-    UpdateEntities();
-
     shader.Use();
     shader.SetColor(alg::Vec4(1.0f));
     shader.SetMVP(cameraMtx);
@@ -90,6 +85,24 @@ void C0CurveSystem::Render(const alg::Mat4x4& cameraMtx) const
 
     if (!polygonsToDraw.empty())
         RenderCurvesPolygons(polygonsToDraw, cameraMtx);
+}
+
+
+void C0CurveSystem::Update() const
+{
+    auto toUpdateSystem = coordinator->GetSystem<ToUpdateSystem>();
+    auto toUpdate = toUpdateSystem->GetEntitiesToUpdate<C0CurveSystem>();
+
+    for (auto entity: toUpdate) {
+        auto const& cps = coordinator->GetComponent<CurveControlPoints>(entity);
+
+        if (cps.Size() != 0)
+            UpdateMesh(entity, cps);
+        else
+            coordinator->DestroyEntity(entity);
+    }
+
+    toUpdateSystem->UnmarkAll<C0CurveSystem>();
 }
 
 
@@ -176,26 +189,6 @@ void C0CurveSystem::RenderCurvesPolygons(std::stack<Entity>& cps, const alg::Mat
 
         if (selection)
             shader.SetColor(alg::Vec4(1.0f));
-    }
-}
-
-
-void C0CurveSystem::UpdateEntities() const
-{
-    auto const& toUpdateSystem = coordinator->GetSystem<ToUpdateSystem>();
-
-    auto toUpdate = intersect(toUpdateSystem->GetEntities(), entities);
-
-    for (auto entity: toUpdate) {
-        auto const& cps = coordinator->GetComponent<CurveControlPoints>(entity);
-
-        if (cps.Size() != 0) {
-            UpdateMesh(entity, cps);
-            toUpdateSystem->Unmark(entity);
-        }
-        else {
-            coordinator->DestroyEntity(entity);
-        }
     }
 }
 

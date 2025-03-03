@@ -16,15 +16,15 @@ void CurveControlPointsSystem::RegisterSystem(Coordinator & coordinator)
 }
 
 
-Entity CurveControlPointsSystem::CreateControlPoints(const std::vector<Entity>& entities, SystemId system)
+Entity CurveControlPointsSystem::CreateControlPoints(const std::vector<Entity>& cps, SystemId system)
 {
     Entity object = coordinator->CreateEntity();
-    CurveControlPoints controlPoints(entities);
+    CurveControlPoints controlPoints(cps);
 
-    auto handler = std::make_shared<ControlPointMovedHandler>(object, *coordinator);
+    auto handler = std::make_shared<ControlPointMovedHandler>(object, *coordinator, system);
     auto registry = coordinator->GetSystem<ControlPointsRegistrySystem>();
 
-    for (Entity entity: entities) {
+    for (Entity entity: cps) {
         auto handlerId = coordinator->Subscribe<Position>(entity, std::static_pointer_cast<EventHandler<Position>>(handler));
         controlPoints.controlPointsHandlers.insert({ entity, handlerId });
         registry->RegisterControlPoint(object, entity, system);
@@ -33,7 +33,7 @@ Entity CurveControlPointsSystem::CreateControlPoints(const std::vector<Entity>& 
     auto deletionHandler = GetDeletionHandler(system);
     controlPoints.deletionHandler = coordinator->Subscribe<CurveControlPoints>(object, std::static_pointer_cast<EventHandler<CurveControlPoints>>(deletionHandler));
 
-     coordinator->AddComponent<CurveControlPoints>(object, controlPoints);
+    coordinator->AddComponent<CurveControlPoints>(object, controlPoints);
 
     return object;
 }
@@ -53,7 +53,7 @@ void CurveControlPointsSystem::AddControlPoint(Entity object, Entity controlPoin
         }
     );
 
-    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(object);
+    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(object, system);
 
     auto registry = coordinator->GetSystem<ControlPointsRegistrySystem>();
     registry->RegisterControlPoint(object, controlPoint, system);
@@ -70,7 +70,7 @@ void CurveControlPointsSystem::DeleteControlPoint(Entity object, Entity controlP
         }
     );
 
-    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(object);
+    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(object, system);
 
     auto registry = coordinator->GetSystem<ControlPointsRegistrySystem>();
     registry->UnregisterControlPoint(object, controlPoint, system);
@@ -96,7 +96,7 @@ void CurveControlPointsSystem::MergeControlPoints(Entity curve, Entity oldCP, En
         }
     );
 
-    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(curve);
+    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate(curve, system);
 
     auto registry = coordinator->GetSystem<ControlPointsRegistrySystem>();
     registry->UnregisterControlPoint(curve, oldCP, system);
@@ -115,6 +115,8 @@ std::shared_ptr<CurveControlPointsSystem::DeletionHandler> CurveControlPointsSys
 
 void CurveControlPointsSystem::ControlPointMovedHandler::HandleEvent(Entity entity, const Position & component, EventType eventType)
 {
+    (void)component;
+
     if (eventType == EventType::ComponentDeleted) {
         coordinator.EditComponent<CurveControlPoints>(targetObject,
             [this, entity](CurveControlPoints& ctrlPts) {
@@ -126,7 +128,7 @@ void CurveControlPointsSystem::ControlPointMovedHandler::HandleEvent(Entity enti
         );
     }
 
-    coordinator.GetSystem<ToUpdateSystem>()->MarkAsToUpdate(targetObject);
+    coordinator.GetSystem<ToUpdateSystem>()->MarkAsToUpdate(targetObject, sysId);
 }
 
 

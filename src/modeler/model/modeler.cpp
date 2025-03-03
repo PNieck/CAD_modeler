@@ -401,6 +401,18 @@ Entity Modeler::FillHole(const GregoryPatchesSystem::Hole& hole)
 }
 
 
+void Modeler::Update() const
+{
+    c0CurveSystem->Update();
+    c0PatchesSystem->Update();
+    c2CurveSystem->Update();
+    c2CylinderSystem->Update();
+    c2SurfaceSystem->Update();
+    gregoryPatchesSystem->Update();
+    interpolationCurveSystem->Update();
+}
+
+
 alg::Vec3 Modeler::PointFromViewportCoordinates(float x, float y)
 {
     auto cameraParams = cameraManager.GetBaseParams();

@@ -43,12 +43,13 @@ public:
 
     void Render(const alg::Mat4x4& cameraMtx) const;
 
+    void Update() const;
+
 private:
     class DeletionHandler;
 
     std::shared_ptr<DeletionHandler> deletionHandler;
 
-    void UpdateEntities() const;
     void UpdateMesh(Entity entity, const TriangleOfGregoryPatches& triangle) const;
     void FillPatchesParameters(TriangleOfGregoryPatches& triangle, Entity entity) const;
 
