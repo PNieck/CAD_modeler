@@ -50,7 +50,6 @@ Modeler::Modeler(const int viewportWidth, const int viewportHeight):
     selectionSystem = coordinator.GetSystem<SelectionSystem>();
     c0CurveSystem = coordinator.GetSystem<C0CurveSystem>();
     c2CurveSystem = coordinator.GetSystem<C2CurveSystem>();
-    auto controlPointsSystem = coordinator.GetSystem<CurveControlPointsSystem>();
     interpolationCurveSystem = coordinator.GetSystem<InterpolationCurveSystem>();
     c0SurfaceSystem = coordinator.GetSystem<C0SurfaceSystem>();
     c0CylinderSystem = coordinator.GetSystem<C0CylinderSystem>();
