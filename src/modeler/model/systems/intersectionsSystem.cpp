@@ -17,13 +17,15 @@
 #include <dlib/optimization.h>
 
 #include <cassert>
-#include <numbers>
 
 // TODO: remove
 #include <iostream>
 
 
 typedef dlib::matrix<double,0,1> columnVector;
+
+
+using namespace interSys;
 
 
 void IntersectionSystem::RegisterSystem(Coordinator &coordinator)
@@ -56,11 +58,13 @@ void IntersectionSystem::FindIntersection(Entity e1, Entity e2, float step)
     assert(CanBeIntersected(e2));
     assert(e1 != e2);
 
-    const auto toriSys = coordinator->GetSystem<ToriSystem>();
     const auto pointSys = coordinator->GetSystem<PointsSystem>();
 
-    const auto initSol = FindFirstApproximation(e1, e2);
-    auto solOpt = FindFirstIntersectionPoint(e1, e2, initSol);
+    auto surface1 = GetSurface(e1);
+    auto surface2 = GetSurface(e2);
+
+    const auto initSol = FindFirstApproximation(*surface1, *surface2);
+    auto solOpt = FindFirstIntersectionPoint(*surface1, *surface2, initSol);
     if (!solOpt.has_value()) {
         std::cout << "WARNING: using dlib to calculate first intersection point" << std::endl;
         solOpt = FindFirstIntersectionPointDLib(e1, e2, initSol);
@@ -73,10 +77,10 @@ void IntersectionSystem::FindIntersection(Entity e1, Entity e2, float step)
 
     auto& sol = solOpt.value();
 
-    const auto firstPoint = toriSys->PointOnTorus(e1, sol.V1(), sol.U1());
-    pointSys->CreatePoint(firstPoint.vec);
+    const auto firstPoint = surface1->PointOnSurface(sol.U1(), sol.V1());
+    pointSys->CreatePoint(firstPoint);
 
-    solOpt = FindNextIntersectionPoint(e1, e2, sol, step);
+    solOpt = FindNextIntersectionPoint(*surface1, *surface2, sol, step);
 
     if (!solOpt.has_value()) {
         std::cout << "Cannot find second point\n";
@@ -84,11 +88,11 @@ void IntersectionSystem::FindIntersection(Entity e1, Entity e2, float step)
     }
 
     sol = solOpt.value();
-    pointSys->CreatePoint(toriSys->PointOnTorus(e1, sol.V1(), sol.U1()));
+    pointSys->CreatePoint(surface1->PointOnSurface(sol.U1(), sol.V1()));
 
     Position newPoint;
     do {
-        solOpt = FindNextIntersectionPoint(e1, e2, sol, step);
+        solOpt = FindNextIntersectionPoint(*surface1, *surface2, sol, step);
 
         if (!solOpt.has_value()) {
             std::cout << "Cannot find next point\n";
@@ -96,11 +100,20 @@ void IntersectionSystem::FindIntersection(Entity e1, Entity e2, float step)
         }
 
         sol = solOpt.value();
-        pointSys->CreatePoint(toriSys->PointOnTorus(e1, sol.V1(), sol.U1()));
+        pointSys->CreatePoint(surface1->PointOnSurface(sol.U1(), sol.V1()));
 
-        newPoint = toriSys->PointOnTorus(e1, sol.V1(), sol.U1());
-    } while (alg::DistanceSquared(firstPoint.vec, newPoint.vec) > step*step);
+        newPoint = surface1->PointOnSurface(sol.U1(), sol.V1());
+    } while (alg::DistanceSquared(firstPoint, newPoint.vec) > step*step);
 
+}
+
+
+std::unique_ptr<Surface> IntersectionSystem::GetSurface(const Entity entity) const
+{
+    if (coordinator->GetSystem<ToriSystem>()->GetEntities().contains(entity))
+        return std::make_unique<TorusSurface>(*coordinator, entity);
+
+    throw std::runtime_error("Entity cannot be used to calculate intersection curve");
 }
 
 
@@ -123,33 +136,39 @@ private:
 };
 
 
-IntersectionSystem::IntersectionPoint IntersectionSystem::FindFirstApproximation(const Entity e1, const Entity e2) const
+IntersectionPoint IntersectionSystem::FindFirstApproximation(interSys::Surface& s1, interSys::Surface& s2) const
 {
-    constexpr float maxVal = 2.f * std::numbers::pi_v<float>;
     constexpr int oneDimSamplesCnt = 15;
-    constexpr float delta = maxVal / static_cast<float>(oneDimSamplesCnt);
 
-    const auto toriSys = coordinator->GetSystem<ToriSystem>();
+    const float maxU1 = s1.MaxU();
+    const float maxV1 = s1.MaxV();
+    const float maxU2 = s2.MaxU();
+    const float maxV2 = s2.MaxV();
+
+    const float deltaU1 = maxU1 / static_cast<float>(oneDimSamplesCnt + 1);
+    const float deltaV1 = maxV1 / static_cast<float>(oneDimSamplesCnt + 1);
+    const float deltaU2 = maxU2 / static_cast<float>(oneDimSamplesCnt + 1);
+    const float deltaV2 = maxV2 / static_cast<float>(oneDimSamplesCnt + 1);
 
     float minDist = std::numeric_limits<float>::infinity();
     IntersectionPoint result;
 
-    for (int i=0; i<oneDimSamplesCnt; ++i) {
-        const float v1 = delta * static_cast<float>(i);
+    for (int i = 1; i <= oneDimSamplesCnt; ++i) {
+        const float u1 = deltaU1 * static_cast<float>(i);
 
-        for (int j=0; j<oneDimSamplesCnt; ++j) {
-            const float u1 = delta * static_cast<float>(j);
+        for (int j = 1; j <= oneDimSamplesCnt; ++j) {
+            const float v1 = deltaV1 * static_cast<float>(j);
 
-            for (int k=0; k<oneDimSamplesCnt; ++k) {
-                const float v2 = delta * static_cast<float>(k);
+            for (int k = 1; k <= oneDimSamplesCnt; ++k) {
+                const float u2 = deltaU2 * static_cast<float>(k);
 
-                for (int l=0; l<oneDimSamplesCnt; ++l) {
-                    const float u2 = delta * static_cast<float>(l);
+                for (int l = 1; l <= oneDimSamplesCnt; ++l) {
+                    const float v2 = deltaV2 * static_cast<float>(l);
 
-                    auto point1 = toriSys->PointOnTorus(e1, v1, u1);
-                    auto point2 = toriSys->PointOnTorus(e2, v2, u2);
+                    auto point1 = s1.PointOnSurface(u1, v1);
+                    auto point2 = s2.PointOnSurface(u2, v2);
 
-                    const float dist = alg::DistanceSquared(point1.vec, point2.vec);
+                    const float dist = alg::DistanceSquared(point1, point2);
                     if (minDist > dist) {
                         minDist = dist;
 
@@ -204,55 +223,55 @@ private:
 
 class DistanceBetweenPoints: public opt::FunctionToOptimize {
 public:
-    explicit DistanceBetweenPoints(const std::shared_ptr<ToriSystem> &toriSys, Entity e1, Entity e2):
-        toriSys(toriSys), e1(e1), e2(e2) {}
+    explicit DistanceBetweenPoints(Surface& s1, Surface& s2):
+        surface1(s1), surface2(s2) {}
 
     float Value(const std::vector<float> &args) override {
-        const auto point1 = toriSys->PointOnTorus(e1, args[0], args[1]);
-        const auto point2 = toriSys->PointOnTorus(e2, args[2], args[3]);
+        const auto point1 = surface1.PointOnSurface(args[0], args[1]);
+        const auto point2 = surface2.PointOnSurface(args[2], args[3]);
 
-        return alg::DistanceSquared(point1.vec, point2.vec);
+        return alg::DistanceSquared(point1, point2);
     }
 
 
     std::vector<float> Gradient(const std::vector<float> &args) override {
-        const auto point1 = toriSys->PointOnTorus(e1, args[0], args[1]);
-        const auto point2 = toriSys->PointOnTorus(e2, args[2], args[3]);
+        const auto point1 = surface1.PointOnSurface(args[0], args[1]);
+        const auto point2 = surface2.PointOnSurface(args[2], args[3]);
 
-        const auto partDivV1 = toriSys->PartialDerivativeWithRespectToAlpha(e1, args[0], args[1]);
-        const auto partDivV2 = toriSys->PartialDerivativeWithRespectToAlpha(e2, args[2], args[3]);
+        const auto partDivU1 = surface1.PartialDerivativeU(args[0], args[1]);
+        const auto partDivU2 = surface2.PartialDerivativeU(args[2], args[3]);
 
-        const auto partDivU1 = toriSys->PartialDerivativeWithRespectToBeta(e1, args[0], args[1]);
-        const auto partDivU2 = toriSys->PartialDerivativeWithRespectToBeta(e2, args[2], args[3]);
+        const auto partDivV1 = surface1.PartialDerivativeV(args[0], args[1]);
+        const auto partDivV2 = surface2.PartialDerivativeV(args[2], args[3]);
 
-        const float xDiv = point1.GetX() - point2.GetX();
-        const float yDiv = point1.GetY() - point2.GetY();
-        const float zDiv = point1.GetZ() - point2.GetZ();
+        const float xDiv = point1.X() - point2.X();
+        const float yDiv = point1.Y() - point2.Y();
+        const float zDiv = point1.Z() - point2.Z();
 
         std::vector<float> result(4);
 
-        result[0] = 2.f * (xDiv*partDivV1.X() + yDiv*partDivV1.Y() + zDiv*partDivV1.Z());   // df/dv1
-        result[1] = 2.f * (xDiv*partDivU1.X() + yDiv*partDivU1.Y() + zDiv*partDivU1.Z());   // df/du1
-        result[2] = -2.f * (xDiv*partDivV2.X() + yDiv*partDivV2.Y() + zDiv*partDivV2.Z());  // df/dv2
-        result[3] = -2.f * (xDiv*partDivU2.X() + yDiv*partDivU2.Y() + zDiv*partDivU2.Z());  // df/du2
+        result[0] = 2.f * (xDiv*partDivU1.X() + yDiv*partDivU1.Y() + zDiv*partDivU1.Z());   // df/du1
+        result[1] = 2.f * (xDiv*partDivV1.X() + yDiv*partDivV1.Y() + zDiv*partDivV1.Z());   // df/dv1
+        result[2] = -2.f * (xDiv*partDivU2.X() + yDiv*partDivU2.Y() + zDiv*partDivU2.Z());  // df/du2
+        result[3] = -2.f * (xDiv*partDivV2.X() + yDiv*partDivV2.Y() + zDiv*partDivV2.Z());  // df/dv2
 
         return result;
     }
 
 private:
-    std::shared_ptr<ToriSystem> toriSys;
-    Entity e1, e2;
+    Surface& surface1;
+    Surface& surface2;
 };
 
 
-std::optional<IntersectionSystem::IntersectionPoint> IntersectionSystem::FindFirstIntersectionPointDLib(Entity e1, Entity e2,
+std::optional<IntersectionPoint> IntersectionSystem::FindFirstIntersectionPointDLib(Entity e1, Entity e2,
     const IntersectionPoint& initSol) const
 {
     columnVector startingPoint = {
-        initSol.V1(),
         initSol.U1(),
-        initSol.V2(),
-        initSol.U2()
+        initSol.V1(),
+        initSol.U2(),
+        initSol.V2()
     };
 
     const auto toriSys = coordinator->GetSystem<ToriSystem>();
@@ -279,20 +298,17 @@ std::optional<IntersectionSystem::IntersectionPoint> IntersectionSystem::FindFir
 }
 
 
-std::optional<IntersectionSystem::IntersectionPoint> IntersectionSystem::FindFirstIntersectionPoint(Entity e1,
-    Entity e2, const IntersectionPoint &initSol) const
+std::optional<IntersectionPoint> IntersectionSystem::FindFirstIntersectionPoint(Surface& s1, Surface& s2, const IntersectionPoint& initSol) const
 {
     const std::vector<float> startingPoint = {
-        initSol.V1(),
         initSol.U1(),
-        initSol.V2(),
-        initSol.U2()
+        initSol.V1(),
+        initSol.U2(),
+        initSol.V2()
     };
 
-    const auto toriSys = coordinator->GetSystem<ToriSystem>();
-
     opt::DichotomyLineSearch lineSearch(0, 1.f, 1e-7f);
-    DistanceBetweenPoints fun(toriSys, e1, e2);
+    DistanceBetweenPoints fun(s1, s2);
 
     const auto sol = opt::ConjugateGradientMethod(fun, lineSearch, startingPoint, 1e-7, 100);
 
@@ -306,7 +322,7 @@ std::optional<IntersectionSystem::IntersectionPoint> IntersectionSystem::FindFir
         sol.value()[3]
     );
 
-    if (ErrorRate(e1, e2, result) > 1e-5)
+    if (ErrorRate(s1, s2, result) > 1e-5)
         return std::nullopt;
 
     return result;
@@ -315,16 +331,16 @@ std::optional<IntersectionSystem::IntersectionPoint> IntersectionSystem::FindFir
 
 class NextPointDistFun final : public root::FunctionToFindRoot {
 public:
-    NextPointDistFun(const std::shared_ptr<ToriSystem> &toriSys, Entity e1, Entity e2, const alg::Vec3& prevPoint,
+    NextPointDistFun(Surface& s1, Surface& s2, const alg::Vec3& prevPoint,
                      const alg::Vec3& tangent, float step):
-        toriSys(toriSys), e1(e1), e2(e2), prevPoint(prevPoint), tangent(tangent), step(step) {}
+        surface1(s1), surface2(s2), prevPoint(prevPoint), tangent(tangent), step(step) {}
 
     alg::Vec4 Value(alg::Vec4 args) override {
-        const auto point1 = toriSys->PointOnTorus(e1, args.X(), args.Y());
-        const auto point2 = toriSys->PointOnTorus(e2, args.Z(), args.W());
+        const auto point1 = surface1.PointOnSurface(args.X(), args.Y());
+        const auto point2 = surface2.PointOnSurface(args.Z(), args.W());
 
-        auto diff = point1.vec - point2.vec;
-        auto v = alg::Dot(point1.vec - prevPoint, tangent) - step;
+        auto diff = point1 - point2;
+        auto v = alg::Dot(point1 - prevPoint, tangent) - step;
 
         return {
             diff.X(),
@@ -335,11 +351,11 @@ public:
     }
 
     alg::Mat4x4 Jacobian(alg::Vec4 args) override {
-        const auto derE1X = toriSys->PartialDerivativeWithRespectToAlpha(e1, args.X(), args.Y());
-        const auto derE1Y = toriSys->PartialDerivativeWithRespectToBeta(e1, args.X(), args.Y());
+        const auto derE1X = surface1.PartialDerivativeU(args.X(), args.Y());
+        const auto derE1Y = surface1.PartialDerivativeV(args.X(), args.Y());
 
-        const auto derE2Z = toriSys->PartialDerivativeWithRespectToAlpha(e2, args.Z(), args.W());
-        const auto derE2W = toriSys->PartialDerivativeWithRespectToBeta(e2, args.Z(), args.W());
+        const auto derE2Z = surface2.PartialDerivativeU(args.Z(), args.W());
+        const auto derE2W = surface2.PartialDerivativeV(args.Z(), args.W());
 
         const float partX = alg::Dot(tangent, derE1X);
         const float partY = alg::Dot(tangent, derE1Y);
@@ -355,33 +371,30 @@ public:
     }
 
 private:
-    std::shared_ptr<ToriSystem> toriSys;
-    Entity e1, e2;
+    Surface& surface1;
+    Surface& surface2;
+
     alg::Vec3 prevPoint;
     alg::Vec3 tangent;
     float step;
 };
 
 
-std::optional<IntersectionSystem::IntersectionPoint> IntersectionSystem::
-FindNextIntersectionPoint(Entity e1, Entity e2, IntersectionPoint &prevSol, float step) const
+std::optional<IntersectionPoint> IntersectionSystem::FindNextIntersectionPoint(interSys::Surface& s1, interSys::Surface& s2, IntersectionPoint &prevSol, float step) const
 {
-    const auto toriSys = coordinator->GetSystem<ToriSystem>();
-
     float remainingDist = step;
     const float minStep = step / 1024.f;
     std::optional<alg::Vec4> nextPoint;
 
     do {
-        alg::Vec3 normal1 = toriSys->NormalVec(e1, prevSol.V1(), prevSol.U1());
-        alg::Vec3 normal2 = toriSys->NormalVec(e2, prevSol.V2(), prevSol.U2());
+        alg::Vec3 normal1 = s1.NormalVector(prevSol.U1(), prevSol.V1());
+        alg::Vec3 normal2 = s2.NormalVector(prevSol.U2(), prevSol.V2());
 
         alg::Vec3 tangent = alg::Cross(normal1, normal2);
-        alg::Vec3 prevPoint = toriSys->PointOnTorus(e1, prevSol.V1(), prevSol.U1()).vec;
+        alg::Vec3 prevPoint = s1.PointOnSurface(prevSol.U1(), prevSol.V1());
 
         NextPointDistFun fun(
-            toriSys,
-            e1, e2,
+            s1, s2,
             prevPoint,
             tangent,
             step
@@ -422,6 +435,15 @@ bool IntersectionSystem::CheckIfSolutionIsInDomain(IntersectionPoint &sol) const
         return true;
 
     return false;
+}
+
+
+float IntersectionSystem::ErrorRate(Surface& s1, Surface& s2, const IntersectionPoint &intPt) const
+{
+    const auto point1 = s1.PointOnSurface(intPt.U1(), intPt.V1());
+    const auto point2 = s2.PointOnSurface(intPt.U2(), intPt.V2());
+
+    return alg::DistanceSquared(point1, point2);
 }
 
 

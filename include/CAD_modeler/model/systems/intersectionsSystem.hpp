@@ -4,7 +4,10 @@
 
 #include <optional>
 
-#include "algebra/vec4.hpp"
+#include <algebra/vec4.hpp>
+
+#include "intersectionSystem/intersectionPoint.hpp"
+#include "intersectionSystem/surfaces.hpp"
 
 
 class IntersectionSystem: public System {
@@ -16,59 +19,21 @@ public:
     void FindIntersection(Entity e1, Entity e2, float step);
 
 private:
-    class IntersectionPoint {
-    public:
-        IntersectionPoint(float v1, float u1, float v2, float u2):
-            vec(v1, u1, v2, u2) {}
-
-        explicit IntersectionPoint(alg::Vec4&& vec):
-            vec(vec) {}
-
-        IntersectionPoint():
-            IntersectionPoint(0.f, 0.f, 0.f, 0.f) {}
-
-        inline float& V1()
-            { return vec.X(); }
-
-        inline float& U1()
-            { return vec.Y(); }
-
-        inline float& V2()
-            { return vec.Z(); }
-
-        inline float& U2()
-            { return vec.W(); }
-
-        inline float V1() const
-            { return vec.X(); }
-
-        inline float U1() const
-            { return vec.Y(); }
-
-        inline float V2() const
-            { return vec.Z(); }
-
-        inline float U2() const
-            { return vec.W(); }
-
-        inline alg::Vec4& AsVector()
-            { return vec; }
-
-    private:
-        alg::Vec4 vec;
-    };
+    [[nodiscard]]
+    std::unique_ptr<interSys::Surface> GetSurface(Entity entity) const;
 
     [[nodiscard]]
-    IntersectionPoint FindFirstApproximation(Entity e1, Entity e2) const;
+    interSys::IntersectionPoint FindFirstApproximation(interSys::Surface& s1, interSys::Surface& s2) const;
 
     [[nodiscard]]
-    std::optional<IntersectionPoint> FindFirstIntersectionPointDLib(Entity e1, Entity e2, const IntersectionPoint& initSol) const;
+    std::optional<interSys::IntersectionPoint> FindFirstIntersectionPointDLib(Entity e1, Entity e2, const interSys::IntersectionPoint& initSol) const;
 
     [[nodiscard]]
-    std::optional<IntersectionPoint> FindFirstIntersectionPoint(Entity e1, Entity e2, const IntersectionPoint& initSol) const;
+    std::optional<interSys::IntersectionPoint> FindFirstIntersectionPoint(interSys::Surface& s1, interSys::Surface& s2, const interSys::IntersectionPoint& initSol) const;
 
-    std::optional<IntersectionPoint> FindNextIntersectionPoint(Entity e1, Entity e2, IntersectionPoint &prevSol, float step) const;
+    std::optional<interSys::IntersectionPoint> FindNextIntersectionPoint(interSys::Surface& s1, interSys::Surface& s2, interSys::IntersectionPoint &prevSol, float step) const;
 
-    bool CheckIfSolutionIsInDomain(IntersectionPoint &sol) const;
-    float ErrorRate(Entity e1, Entity e2, const IntersectionPoint &intPt) const;
+    bool CheckIfSolutionIsInDomain(interSys::IntersectionPoint &sol) const;
+    float ErrorRate(interSys::Surface& s1, interSys::Surface& s2, const interSys::IntersectionPoint &intPt) const;
+    float ErrorRate(Entity e1, Entity e2, const interSys::IntersectionPoint &intPt) const;
 };
