@@ -1,10 +1,9 @@
-#include <algebra/newtonMethod.hpp>
+#include <rootFinding/newtonMethod.hpp>
 
-// TODO: remove
 #include <iostream>
 
 
-std::optional<alg::Vec4> alg::NewtonMethod(FunctionToFindRoot &fun, const Vec4 &initSol, float eps, int maxIter) {
+std::optional<alg::Vec4> root::NewtonMethod(FunctionToFindRoot &fun, const alg::Vec4 &initSol, float eps, int maxIter) {
     alg::Vec4 newSol = initSol;
     int i = 0;
 

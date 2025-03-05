@@ -9,8 +9,10 @@
 
 #include <ecs/coordinator.hpp>
 
-#include <algebra/conjugateGradientMethod.hpp>
-#include <algebra/newtonMethod.hpp>
+#include <optimization/conjugateGradientMethod.hpp>
+#include <optimization/lineSearchMethods/dichotomyLineSearch.hpp>
+
+#include <rootFinding/newtonMethod.hpp>
 
 #include <dlib/optimization.h>
 
@@ -200,7 +202,7 @@ private:
 };
 
 
-class DistanceBetweenPoints: public alg::FunctionToOptimize {
+class DistanceBetweenPoints: public opt::FunctionToOptimize {
 public:
     explicit DistanceBetweenPoints(const std::shared_ptr<ToriSystem> &toriSys, Entity e1, Entity e2):
         toriSys(toriSys), e1(e1), e2(e2) {}
@@ -289,10 +291,10 @@ std::optional<IntersectionSystem::IntersectionPoint> IntersectionSystem::FindFir
 
     const auto toriSys = coordinator->GetSystem<ToriSystem>();
 
+    opt::DichotomyLineSearch lineSearch(0, 1.f, 1e-7f);
     DistanceBetweenPoints fun(toriSys, e1, e2);
-    const auto sol = alg::ConjugationGradientMethod(fun,
-                                                    startingPoint,
-                                                    0.01f, 1e-5);
+
+    const auto sol = opt::ConjugateGradientMethod(fun, lineSearch, startingPoint, 1e-7, 100);
 
     if (!sol.has_value())
         return std::nullopt;
@@ -311,7 +313,7 @@ std::optional<IntersectionSystem::IntersectionPoint> IntersectionSystem::FindFir
 }
 
 
-class NextPointDistFun final : public alg::FunctionToFindRoot {
+class NextPointDistFun final : public root::FunctionToFindRoot {
 public:
     NextPointDistFun(const std::shared_ptr<ToriSystem> &toriSys, Entity e1, Entity e2, const alg::Vec3& prevPoint,
                      const alg::Vec3& tangent, float step):
@@ -339,8 +341,8 @@ public:
         const auto derE2Z = toriSys->PartialDerivativeWithRespectToAlpha(e2, args.Z(), args.W());
         const auto derE2W = toriSys->PartialDerivativeWithRespectToBeta(e2, args.Z(), args.W());
 
-        const float partX = tangent.X()*derE1X.X() + tangent.Y()*derE1X.Y() + tangent.Z()*derE1X.Z();
-        const float partY = tangent.X()*derE1Y.X() + tangent.Y()*derE1Y.Y() + tangent.Z()*derE1Y.Z();
+        const float partX = alg::Dot(tangent, derE1X);
+        const float partY = alg::Dot(tangent, derE1Y);
 
         auto mtx = alg::Mat4x4(
             derE1X.X(), derE1Y.X(), -derE2Z.X(), -derE2W.X(),
@@ -348,8 +350,6 @@ public:
             derE1X.Z(), derE1Y.Z(), -derE2Z.Z(), -derE2W.Z(),
                  partX,      partY,         0.f,         0.f
         );
-
-        //mtx.TransposeSelf();
 
         return mtx;
     }
@@ -387,7 +387,7 @@ FindNextIntersectionPoint(Entity e1, Entity e2, IntersectionPoint &prevSol, floa
             step
         );
 
-        nextPoint = alg::NewtonMethod(fun, prevSol.AsVector(), 1e-5);
+        nextPoint = root::NewtonMethod(fun, prevSol.AsVector(), 1e-5);
         if (!nextPoint.has_value()) {
             step /= 2.f;
             if (step < minStep)

@@ -41,6 +41,30 @@ target_include_directories(openGlHelpers PUBLIC ../include)
 target_link_libraries(openGlHelpers PUBLIC glad)
 enable_compiler_warnings(openGlHelpers)
 
+
+#
+# Optimization library
+#
+file(GLOB_RECURSE OPTIMIZATION_LIB_HEADERS CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/include/optimization/*.hpp")
+file(GLOB_RECURSE OPTIMIZATION_LIB_SRCS CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/src/optimization/*.cpp")
+
+add_library(optimization ${OPTIMIZATION_LIB_SRCS} ${OPTIMIZATION_LIB_HEADERS})
+target_include_directories(optimization PUBLIC ../include)
+enable_compiler_warnings(optimization)
+
+
+#
+# Optimization library
+#
+file(GLOB_RECURSE ROOT_FINDING_LIB_HEADERS CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/include/rootFinding/*.hpp")
+file(GLOB_RECURSE ROOT_FINDING_LIB_SRCS CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/src/rootFinding/*.cpp")
+
+add_library(rootFinding ${ROOT_FINDING_LIB_SRCS} ${ROOT_FINDING_LIB_HEADERS})
+target_include_directories(rootFinding PUBLIC ../include)
+target_link_libraries(rootFinding PUBLIC algebra)
+enable_compiler_warnings(rootFinding)
+
+
 #
 # Main library
 #
@@ -63,6 +87,8 @@ target_link_libraries(
     dlib::dlib
     imguiLoadingSpinner
     openGlHelpers
+    optimization
+    rootFinding
 )
 enable_compiler_warnings(modeler_lib)
 
