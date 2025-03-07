@@ -7,6 +7,8 @@
 #include <CAD_modeler/model/systems/pointsSystem.hpp>
 #include <CAD_modeler/model/systems/vectorSystem.hpp>
 
+#include <CAD_modeler/model/systems/intersectionSystem/torusSurface.hpp>
+
 #include <ecs/coordinator.hpp>
 
 #include <optimization/conjugateGradientMethod.hpp>
