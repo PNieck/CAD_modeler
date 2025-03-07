@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.27)
 
-project(CAD_modeler VERSION 0.1
-                    DESCRIPTION "Simple CAD modeling software"
-                    LANGUAGES CXX)
+project(
+    CAD_modeler VERSION 0.1
+                DESCRIPTION "Simple CAD modeling software")
 
 set(CMAKE_CXX_STANDARD 20)
 

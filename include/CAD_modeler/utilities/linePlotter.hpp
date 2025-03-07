@@ -3,6 +3,7 @@
 #include <algebra/vec2.hpp>
 
 #include <deque>
+#include <tuple>
 
 class LinePlotter {
 public:

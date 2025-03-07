@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdlib>
+
 namespace stdh {
-    size_t hashCombine( size_t lhs, size_t rhs );
+    std::size_t hashCombine( size_t lhs, size_t rhs );
 }

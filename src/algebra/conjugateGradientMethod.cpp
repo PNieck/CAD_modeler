@@ -78,7 +78,7 @@ std::vector<float> FindMinimumInOneDirection(
     float dot = DotProduct(function.Gradient(initSol), dir);
 
     for (int i=0; ; i++) {
-        float coef = std::powf(beta, i) * initStep;
+        float coef = std::pow(beta, i) * initStep;
 
         for (int j=0; j<initSol.size(); j++) {
             solution[j] = initSol[j] + coef * dir[j];
