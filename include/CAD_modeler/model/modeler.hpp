@@ -194,11 +194,8 @@ public:
         { return coordinator.GetComponent<Comp>(entity); }
 
     template <typename Comp>
-    inline void SetComponent(Entity entity, const Comp& comp)
+    void SetComponent(const Entity entity, const Comp& comp)
         { coordinator.SetComponent<Comp>(entity, comp); }
-
-    inline void SetComponent(Entity entity, const TorusParameters& params)
-        { toriSystem->SetParameters(entity, params); }
 
     inline void DeleteEntity(Entity entity)
         { coordinator.DestroyEntity(entity); }
@@ -322,3 +319,8 @@ private:
 
     void RenderSystemsObjects(const alg::Mat4x4& viewMtx, const alg::Mat4x4& persMtx, float nearPlane, float farPlane) const override;
 };
+
+
+template <>
+inline void Modeler::SetComponent<TorusParameters>(const Entity entity, const TorusParameters& params)
+    { toriSystem->SetParameters(entity, params); }
