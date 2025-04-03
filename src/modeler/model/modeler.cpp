@@ -10,8 +10,6 @@
 #include <CAD_modeler/model/systems/toUpdateSystem.hpp>
 #include <CAD_modeler/model/systems/curveControlPointsSystem.hpp>
 
-#include <CAD_modeler/model/systems/shaders/shaderRepository.hpp>
-
 #include <stdexcept>
 
 
@@ -124,7 +122,7 @@ Entity Modeler::AddInterpolationCurve(const std::vector<Entity>& controlPoints)
 }
 
 
-Entity Modeler::AddC0Surface(const alg::Vec3& direction, float length, float width)
+Entity Modeler::AddC0Surface(const alg::Vec3& direction, const float length, const float width)
 {
     const Entity entity = c0SurfaceSystem->CreateSurface(cursorSystem->GetPosition(), direction, length, width);
     nameSystem->SetName(entity, nameGenerator.GenerateName("SurfaceC0_"));
@@ -133,7 +131,7 @@ Entity Modeler::AddC0Surface(const alg::Vec3& direction, float length, float wid
 
     for (int row=0; row < patches.PointsInRow(); ++row) {
         for (int col=0; col < patches.PointsInCol(); ++col) {
-            Entity cp = patches.GetPoint(row, col);
+            const Entity cp = patches.GetPoint(row, col);
             nameSystem->SetName(cp, nameGenerator.GenerateName("Point_"));
         }
     }
@@ -142,7 +140,7 @@ Entity Modeler::AddC0Surface(const alg::Vec3& direction, float length, float wid
 }
 
 
-Entity Modeler::AddC2Surface(const alg::Vec3& direction, float length, float width)
+Entity Modeler::AddC2Surface(const alg::Vec3& direction, const float length, const float width)
 {
     const Entity entity = c2SurfaceSystem->CreateSurface(cursorSystem->GetPosition(), direction, length, width);
     nameSystem->SetName(entity, nameGenerator.GenerateName("SurfaceC2_"));
@@ -151,7 +149,7 @@ Entity Modeler::AddC2Surface(const alg::Vec3& direction, float length, float wid
 
     for (int row=0; row < patches.PointsInRow(); ++row) {
         for (int col=0; col < patches.PointsInCol(); ++col) {
-            Entity cp = patches.GetPoint(row, col);
+            const Entity cp = patches.GetPoint(row, col);
             nameSystem->SetName(cp, nameGenerator.GenerateName("Point_"));
         }
     }

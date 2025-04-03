@@ -12,17 +12,17 @@ class C0PatchesSystem: public System {
 public:
     static void RegisterSystem(Coordinator& coordinator);
 
-    inline int GetRowsCnt(Entity surface) const
+    int GetRowsCnt(const Entity surface) const
         { return coordinator->GetComponent<C0Patches>(surface).PatchesInRow(); }
 
-    inline int GetColsCnt(Entity surface) const
+    int GetColsCnt(const Entity surface) const
         { return coordinator->GetComponent<C0Patches>(surface).PatchesInCol(); }
 
     void MergeControlPoints(Entity patches, Entity oldCP, Entity newCP, SystemId system);
 
     void ShowBezierNet(Entity surface);
 
-    inline void HideBezierNet(Entity surface)
+    void HideBezierNet(const Entity surface) const
         { coordinator->GetSystem<ControlNetSystem>()->DeleteControlPointsNet(surface); }
 
     Position PointOnPatches(Entity entity, float u, float v) const;

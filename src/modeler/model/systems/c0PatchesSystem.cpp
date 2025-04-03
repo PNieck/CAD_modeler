@@ -20,7 +20,7 @@ void C0PatchesSystem::RegisterSystem(Coordinator &coordinator)
 }
 
 
-void C0PatchesSystem::MergeControlPoints(Entity surface, Entity oldCP, Entity newCP, SystemId system)
+void C0PatchesSystem::MergeControlPoints(const Entity surface, const Entity oldCP, Entity newCP, const SystemId system)
 {
     coordinator->EditComponent<C0Patches>(surface,
         [oldCP, newCP, this] (C0Patches& patches) {
@@ -31,10 +31,10 @@ void C0PatchesSystem::MergeControlPoints(Entity surface, Entity oldCP, Entity ne
                 }
             }
 
-            HandlerId handlerId = patches.controlPointsHandlers.at(oldCP);
+            const HandlerId handlerId = patches.controlPointsHandlers.at(oldCP);
 
             if (!patches.controlPointsHandlers.contains(newCP)) {
-                auto eventHandler = coordinator->GetEventHandler<Position>(oldCP, handlerId);
+                const auto eventHandler = coordinator->GetEventHandler<Position>(oldCP, handlerId);
                 auto newEventHandlerId = coordinator->Subscribe<Position>(newCP, eventHandler);
                 patches.controlPointsHandlers.insert({newCP, newEventHandlerId});
             }
@@ -46,13 +46,13 @@ void C0PatchesSystem::MergeControlPoints(Entity surface, Entity oldCP, Entity ne
 
     coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate<C0PatchesSystem>(surface);
 
-    auto registry = coordinator->GetSystem<ControlPointsRegistrySystem>();
+    const auto registry = coordinator->GetSystem<ControlPointsRegistrySystem>();
     registry->UnregisterControlPoint(surface, oldCP, system);
     registry->RegisterControlPoint(surface, newCP, system);
 }
 
 
-void C0PatchesSystem::ShowBezierNet(Entity surface)
+void C0PatchesSystem::ShowBezierNet(const Entity surface)
 {
     auto const& patches = coordinator->GetComponent<C0Patches>(surface);
     auto const& netSystem = coordinator->GetSystem<ControlNetSystem>();
@@ -144,7 +144,7 @@ void C0PatchesSystem::Render(const alg::Mat4x4& cameraMtx) const
     glPatchParameteri(GL_PATCH_VERTICES, 16);
 
     for (auto const entity: entities) {
-        bool selection = selectionSystem->IsSelected(entity);
+        const bool selection = selectionSystem->IsSelected(entity);
 
         if (selection)
             shader.SetColor(alg::Vec4(1.0f, 0.5f, 0.0f, 1.0f));
@@ -157,7 +157,7 @@ void C0PatchesSystem::Render(const alg::Mat4x4& cameraMtx) const
         v[0] = static_cast<float>(density.GetDensity());
         glPatchParameterfv(GL_PATCH_DEFAULT_OUTER_LEVEL, v);
 
-	    glDrawElements(GL_PATCHES, mesh.GetElementsCnt(), GL_UNSIGNED_INT, 0);
+	    glDrawElements(GL_PATCHES, mesh.GetElementsCnt(), GL_UNSIGNED_INT, nullptr);
 
         if (selection)
             shader.SetColor(alg::Vec4(1.0f));
@@ -172,7 +172,7 @@ void C0PatchesSystem::Update() const
 
     auto toUpdate = toUpdateSystem->GetEntitiesToUpdate<C0PatchesSystem>();
 
-    for (auto entity: toUpdate) {
+    for (const auto entity: toUpdate) {
         auto const& patches = coordinator->GetComponent<C0Patches>(entity);
 
         UpdateMesh(entity, patches);
@@ -185,10 +185,10 @@ void C0PatchesSystem::Update() const
 }
 
 
-void C0PatchesSystem::UpdateMesh(Entity surface, const C0Patches& patches) const
+void C0PatchesSystem::UpdateMesh(const Entity surface, const C0Patches& patches) const
 {
     coordinator->EditComponent<Mesh>(surface,
-        [surface, &patches, this](Mesh& mesh) {
+        [&patches, this](Mesh& mesh) {
             mesh.Update(
                 GenerateVertices(patches),
                 GenerateIndices(patches)
@@ -205,7 +205,7 @@ std::vector<float> C0PatchesSystem::GenerateVertices(const C0Patches& patches) c
 
     for (int col=0; col < patches.PointsInCol(); col++) {
         for (int row=0; row < patches.PointsInRow(); row++) {
-            Entity point = patches.GetPoint(row, col);
+            const Entity point = patches.GetPoint(row, col);
 
             auto const& pos = coordinator->GetComponent<Position>(point);
 
@@ -229,8 +229,8 @@ std::vector<uint32_t> C0PatchesSystem::GenerateIndices(const C0Patches& patches)
             for (int rowInPatch=0; rowInPatch < C0Patches::RowsInPatch; rowInPatch++) {
                 for (int colInPatch=0; colInPatch < C0Patches::ColsInPatch; colInPatch++) {
 
-                    int globCol = patchCol * (C0Patches::ColsInPatch - 1) + colInPatch;
-                    int globRow = patchRow * (C0Patches::RowsInPatch - 1) + rowInPatch;
+                    const int globCol = patchCol * (C0Patches::ColsInPatch - 1) + colInPatch;
+                    const int globRow = patchRow * (C0Patches::RowsInPatch - 1) + rowInPatch;
 
                     result.push_back(globCol * patches.PointsInRow() + globRow);
                 }
@@ -239,8 +239,8 @@ std::vector<uint32_t> C0PatchesSystem::GenerateIndices(const C0Patches& patches)
             for (int colInPatch=0; colInPatch < C0Patches::ColsInPatch; colInPatch++) {
                 for (int rowInPatch=0; rowInPatch < C0Patches::RowsInPatch; rowInPatch++) {
 
-                    int globCol = patchCol * (C0Patches::ColsInPatch - 1) + colInPatch;
-                    int globRow = patchRow * (C0Patches::RowsInPatch - 1) + rowInPatch;
+                    const int globCol = patchCol * (C0Patches::ColsInPatch - 1) + colInPatch;
+                    const int globRow = patchRow * (C0Patches::RowsInPatch - 1) + rowInPatch;
 
                     result.push_back(globCol * patches.PointsInRow() + globRow);
                 }

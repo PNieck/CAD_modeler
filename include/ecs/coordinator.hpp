@@ -30,7 +30,7 @@ public:
 
 
     template <SystemConcept Sys, typename Comp>
-    inline void RegisterRequiredComponent() {
+    void RegisterRequiredComponent() {
         systemsMgr.RegisterRequiredComponent<Sys, Comp>();
     }
 
@@ -82,25 +82,25 @@ public:
 
 
     template <typename Comp>
-    inline const Comp& GetComponent(Entity entity) const {
+    const Comp& GetComponent(Entity entity) const {
         return componentMgr.GetComponent<Comp>(entity);
     }
 
     template <typename Comp>
-    void SetComponent(Entity entity, const Comp& component) {
+    void SetComponent(const Entity entity, const Comp& component) {
         componentMgr.GetComponent<Comp>(entity) = component;
         eventMgr.ComponentChanged<Comp>(entity, component);
     }
 
     template <typename Comp>
-    void EditComponent(Entity entity, std::function<void(Comp& component)> func) {
+    void EditComponent(const Entity entity, std::function<void(Comp& component)> func) {
         Comp& component = componentMgr.GetComponent<Comp>(entity);
         func(component);
         eventMgr.ComponentChanged<Comp>(entity, component);
     }
 
     template <typename Comp>
-    inline HandlerId Subscribe(Entity entity, std::shared_ptr<EventHandler<Comp>> function)
+    HandlerId Subscribe(const Entity entity, std::shared_ptr<EventHandler<Comp>> function)
         { return eventMgr.Subscribe<Comp>(entity, function); }
 
     template <typename Comp>

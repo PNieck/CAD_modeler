@@ -26,10 +26,10 @@ public:
     void DeleteRowOfPatches(Entity surface, const Position& pos, const alg::Vec3& direction, float length, float width) const;
     void DeleteColOfPatches(Entity surface, const Position& pos, const alg::Vec3& direction, float length, float width) const;
 
-    inline void MergeControlPoints(Entity cylinder, Entity oldCP, Entity newCP)
+    void MergeControlPoints(const Entity cylinder, const Entity oldCP, const Entity newCP) const
         { coordinator->GetSystem<C0PatchesSystem>()->MergeControlPoints(cylinder, oldCP, newCP, Coordinator::GetSystemID<C0SurfaceSystem>()); }
 
-    inline void SetDensity(Entity entity, PatchesDensity density) const
+    void SetDensity(const Entity entity, const PatchesDensity density) const
         { coordinator->SetComponent<PatchesDensity>(entity, density); }
 
     void ShowBezierNet(Entity cylinder) const;

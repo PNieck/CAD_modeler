@@ -374,7 +374,7 @@ void ModelerObjectsPropertiesView::DisplaySurfaceDensityParameter(Entity entity,
 }
 
 
-void ModelerObjectsPropertiesView::DisplaySurfacePatches(Entity entity, const Patches &patches) const
+void ModelerObjectsPropertiesView::DisplaySurfacePatches(const Entity entity, const Patches &patches) const
 {
     ImGui::SeparatorText("Control Points");
 

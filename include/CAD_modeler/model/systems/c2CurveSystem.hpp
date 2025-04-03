@@ -17,10 +17,10 @@ public:
     static void RegisterSystem(Coordinator& coordinator);
 
     Entity CreateC2Curve(const std::vector<Entity>& controlPoints);
-    inline Entity CreateC2Curve(Entity controlPoint)
-        { CreateC2Curve({controlPoint}); }
+    Entity CreateC2Curve(const Entity controlPoint)
+        { return CreateC2Curve(std::vector{controlPoint}); }
 
-    inline void AddControlPoint(Entity bezierCurve, Entity entity)
+    inline void AddControlPoint(const Entity bezierCurve, const Entity entity)
         { coordinator->GetSystem<CurveControlPointsSystem>()->AddControlPoint(bezierCurve, entity, Coordinator::GetSystemID<C2CurveSystem>()); }
 
     inline void DeleteControlPoint(Entity bezierCurve, Entity entity)
@@ -45,7 +45,6 @@ public:
 private:
     static constexpr int MIN_CTRL_PTS_CNT = 4;
 
-    void UpdateEntities() const;
     void UpdateCurveMesh(Entity curve, const CurveControlPoints& cps) const;
     void UpdateBSplinePolygon(Entity curve) const;
     void UpdateBezierControlPoints(Entity curve) const;

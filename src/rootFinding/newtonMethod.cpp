@@ -3,7 +3,9 @@
 #include <iostream>
 
 
-std::optional<alg::Vec4> root::NewtonMethod(FunctionToFindRoot &fun, const alg::Vec4 &initSol, float eps, int maxIter) {
+std::optional<alg::Vec4> root::NewtonMethod(
+    FunctionToFindRoot &fun, const alg::Vec4 &initSol, const  float eps, const int maxIter
+) {
     alg::Vec4 newSol = initSol;
     int i = 0;
 

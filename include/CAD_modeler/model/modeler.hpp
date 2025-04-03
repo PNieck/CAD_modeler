@@ -170,14 +170,14 @@ public:
     inline bool IsSelected(Entity entity) const
         { return selectionSystem->IsSelected(entity); }
 
-    inline void Select(Entity entity)
+    void Select(const Entity entity)
         { return selectionSystem->Select(entity); }
 
     void TryToSelectFromViewport(float x, float y);
 
     void SelectMultipleFromViewport(float x, float y, float dist);
 
-    inline void Deselect(Entity entity)
+    void Deselect(const Entity entity)
         { return selectionSystem->Deselect(entity); }
 
     inline void DeselectAllEntities() const
@@ -280,7 +280,7 @@ public:
     inline void SaveScene(const std::string& path)
         { saveManager.SaveScene(path, coordinator); }
 
-    inline void FindIntersection(Entity e1, Entity e2, float step)
+    inline void FindIntersection(const Entity e1, const Entity e2, const float step)
         { intersectionSystem->FindIntersection(e1, e2, step); }
 
     bool selectingEntities = false;

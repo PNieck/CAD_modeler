@@ -9,7 +9,7 @@
 
 namespace interSys
 {
-    class TorusSurface: public Surface {
+    class TorusSurface final : public Surface {
     public:
         TorusSurface(const Coordinator& coord, const Entity entity):
             params(coord.GetComponent<TorusParameters>(entity)),
@@ -17,14 +17,16 @@ namespace interSys
             rot(coord.GetComponent<Rotation>(entity)),
             scale(coord.GetComponent<Scale>(entity))
             {}
+
+        ~TorusSurface() override = default;
     
-        alg::Vec3 PointOnSurface(float u, float v) override
+        alg::Vec3 PointOnSurface(const float u, const float v) override
             { return ToriSystem::PointOnTorus(params, pos, rot, scale, u, v).vec; }
     
-        alg::Vec3 PartialDerivativeU(float u, float v) override
+        alg::Vec3 PartialDerivativeU(const float u, const float v) override
             { return ToriSystem::PartialDerivativeWithRespectToAlpha(params, rot, scale, u, v); }
 
-        alg::Vec3 PartialDerivativeV(float u, float v) override
+        alg::Vec3 PartialDerivativeV(const float u, const float v) override
             { return ToriSystem::PartialDerivativeWithRespectToBeta(params, rot, scale, u, v); }
 
         float MaxU() override
