@@ -7,6 +7,7 @@
 #include "CAD_modeler/model/systems/selectionSystem.hpp"
 #include "CAD_modeler/model/systems/toUpdateSystem.hpp"
 #include "CAD_modeler/model/systems/controlPointsRegistrySystem.hpp"
+#include "CAD_modeler/model/systems/c0PatchesSystem/singleC0Patch.hpp"
 #include "CAD_modeler/model/systems/shaders/shaderRepository.hpp"
 
 
@@ -72,78 +73,23 @@ alg::Vec4 CubicBernsteinPolynomial(const float t) {
     };
 }
 
-// TODO: delete
-#include <iostream>
-
 Position C0PatchesSystem::PointOnPatches(const C0Patches &patches, const float u, const float v) const
 {
-    std::cout << u << " " << v << std::endl;
+    CheckUVDomain(patches, u, v);
 
-    if (!(v >= 0.f && v <= MaxV(patches)) || !(u >= 0.f && u <= MaxU(patches)))
-        throw std::runtime_error("Arguments outside the domain");
+    const SingleC0Patch p(*coordinator, patches, u, v);
 
-    const float vFloor = std::floor(v);
-    const float uFloor = std::floor(u);
-
-    int firstRow = static_cast<int>(vFloor) * 3;
-    if (v == static_cast<float>(patches.PatchesInRow()))
-        --firstRow;
-
-    int firstCol = static_cast<int>(uFloor) * 3;
-    if (u == static_cast<float>(patches.PatchesInCol()))
-        --firstCol;
-
-    const float vNormalized = v - vFloor;
-    const float uNormalized = u - uFloor;
+    const float vNormalized = v - std::floor(v);
+    const float uNormalized = u - std::floor(u);
 
     const auto bu = CubicBernsteinPolynomial(uNormalized);
     const auto bv = CubicBernsteinPolynomial(vNormalized);
 
-    // const auto& p00 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow, firstCol));
-    // const auto& p01 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow, firstCol + 1));
-    // const auto& p02 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow, firstCol + 2));
-    // const auto& p03 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow, firstCol + 3));
-    //
-    // const auto& p10 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 1, firstCol));
-    // const auto& p11 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 1, firstCol + 1));
-    // const auto& p12 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 1, firstCol + 2));
-    // const auto& p13 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 1, firstCol + 3));
-    //
-    // const auto& p20 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 2, firstCol));
-    // const auto& p21 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 2, firstCol + 1));
-    // const auto& p22 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 2, firstCol + 2));
-    // const auto& p23 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 2, firstCol + 3));
-    //
-    // const auto& p30 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 3, firstCol));
-    // const auto& p31 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 3, firstCol + 1));
-    // const auto& p32 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 3, firstCol + 2));
-    // const auto& p33 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 3, firstCol + 3));
-
-    const auto& p00 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow, firstCol));
-    const auto& p01 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 1, firstCol));
-    const auto& p02 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 2, firstCol));
-    const auto& p03 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 3, firstCol));
-
-    const auto& p10 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 0, firstCol + 1));
-    const auto& p11 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 1, firstCol + 1));
-    const auto& p12 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 2, firstCol + 1));
-    const auto& p13 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 3, firstCol + 1));
-
-    const auto& p20 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 0, firstCol + 2));
-    const auto& p21 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 1, firstCol + 2));
-    const auto& p22 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 2, firstCol + 2));
-    const auto& p23 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 3, firstCol + 2));
-
-    const auto& p30 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 0, firstCol + 3));
-    const auto& p31 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 1, firstCol + 3));
-    const auto& p32 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 2, firstCol + 3));
-    const auto& p33 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 3, firstCol + 3));
-
     // Result of bu*p
-    const auto a0 = bu.X()*p00.vec + bu.Y()*p10.vec + bu.Z()*p20.vec + bu.W()*p30.vec;
-    const auto a1 = bu.X()*p01.vec + bu.Y()*p11.vec + bu.Z()*p21.vec + bu.W()*p31.vec;
-    const auto a2 = bu.X()*p02.vec + bu.Y()*p12.vec + bu.Z()*p22.vec + bu.W()*p32.vec;
-    const auto a3 = bu.X()*p03.vec + bu.Y()*p13.vec + bu.Z()*p23.vec + bu.W()*p33.vec;
+    const auto a0 = bu.X()*p.Point(0,0) + bu.Y()*p.Point(0, 1) + bu.Z()*p.Point(0, 2) + bu.W()*p.Point(0, 3);
+    const auto a1 = bu.X()*p.Point(1, 0) + bu.Y()*p.Point(1, 2) + bu.Z()*p.Point(1, 2) + bu.W()*p.Point(1, 3);
+    const auto a2 = bu.X()*p.Point(2, 0) + bu.Y()*p.Point(2, 2) + bu.Z()*p.Point(2, 2) + bu.W()*p.Point(2, 3);
+    const auto a3 = bu.X()*p.Point(3, 0) + bu.Y()*p.Point(3, 2) + bu.Z()*p.Point(3, 2) + bu.W()*p.Point(3, 3);
 
     // pos = bu * p * bv^T
     return a0*bv.X() + a1*bv.Y() + a2*bv.Z() + a3*bv.W();
@@ -162,70 +108,20 @@ alg::Vec3 Derivative(const float t, const alg::Vec3& a0, const alg::Vec3& a1, co
 
 alg::Vec3 C0PatchesSystem::PartialDerivativeU(const C0Patches &patches, const float u, const float v) const
 {
-    assert(v >= 0.f && v <= MaxV(patches));
-    assert(u >= 0.f && u <= MaxU(patches));
+    CheckUVDomain(patches, u, v);
 
-    const float vFloor = std::floor(v);
-    const float uFloor = std::floor(u);
+    const SingleC0Patch p(*coordinator, patches, u, v);
 
-    int firstRow = static_cast<int>(vFloor) * 3;
-    if (v == static_cast<float>(patches.PatchesInRow()))
-        --firstRow;
-
-    int firstCol = static_cast<int>(uFloor) * 3;
-    if (u == static_cast<float>(patches.PatchesInCol()))
-        --firstCol;
-
-    const float vNormalized = v - vFloor;
-    const float uNormalized = u - uFloor;
+    const float vNormalized = v - std::floor(v);
+    const float uNormalized = u - std::floor(u);
 
     const auto bv = CubicBernsteinPolynomial(vNormalized);
 
-    // const auto& p00 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow, firstCol));
-    // const auto& p01 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow, firstCol + 1));
-    // const auto& p02 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow, firstCol + 2));
-    // const auto& p03 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow, firstCol + 3));
-    //
-    // const auto& p10 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 1, firstCol));
-    // const auto& p11 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 1, firstCol + 1));
-    // const auto& p12 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 1, firstCol + 2));
-    // const auto& p13 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 1, firstCol + 3));
-    //
-    // const auto& p20 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 2, firstCol));
-    // const auto& p21 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 2, firstCol + 1));
-    // const auto& p22 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 2, firstCol + 2));
-    // const auto& p23 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 2, firstCol + 3));
-    //
-    // const auto& p30 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 3, firstCol));
-    // const auto& p31 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 3, firstCol + 1));
-    // const auto& p32 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 3, firstCol + 2));
-    // const auto& p33 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 3, firstCol + 3));
-
-    const auto& p00 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow, firstCol));
-    const auto& p01 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 1, firstCol));
-    const auto& p02 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 2, firstCol));
-    const auto& p03 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 3, firstCol));
-
-    const auto& p10 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 0, firstCol + 1));
-    const auto& p11 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 1, firstCol + 1));
-    const auto& p12 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 2, firstCol + 1));
-    const auto& p13 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 3, firstCol + 1));
-
-    const auto& p20 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 0, firstCol + 2));
-    const auto& p21 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 1, firstCol + 2));
-    const auto& p22 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 2, firstCol + 2));
-    const auto& p23 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 3, firstCol + 2));
-
-    const auto& p30 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 0, firstCol + 3));
-    const auto& p31 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 1, firstCol + 3));
-    const auto& p32 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 2, firstCol + 3));
-    const auto& p33 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 3, firstCol + 3));
-
     // Result of bu*p
-    const auto a0 = bv.X()*p00.vec + bv.Y()*p01.vec + bv.Z()*p02.vec + bv.W()*p03.vec;
-    const auto a1 = bv.X()*p10.vec + bv.Y()*p11.vec + bv.Z()*p12.vec + bv.W()*p13.vec;
-    const auto a2 = bv.X()*p20.vec + bv.Y()*p21.vec + bv.Z()*p22.vec + bv.W()*p23.vec;
-    const auto a3 = bv.X()*p30.vec + bv.Y()*p31.vec + bv.Z()*p32.vec + bv.W()*p33.vec;
+    const auto a0 = bv.X()*p.Point(0, 0) + bv.Y()*p.Point(1, 0) + bv.Z()*p.Point(2, 0) + bv.W()*p.Point(3, 0);
+    const auto a1 = bv.X()*p.Point(0, 1) + bv.Y()*p.Point(1, 1) + bv.Z()*p.Point(2, 1) + bv.W()*p.Point(3, 1);
+    const auto a2 = bv.X()*p.Point(0, 2) + bv.Y()*p.Point(1, 2) + bv.Z()*p.Point(2, 2) + bv.W()*p.Point(3, 2);
+    const auto a3 = bv.X()*p.Point(0, 3) + bv.Y()*p.Point(1, 3) + bv.Z()*p.Point(2, 3) + bv.W()*p.Point(3, 3);
 
     return Derivative(uNormalized, a0, a1, a2, a3);
 }
@@ -233,70 +129,20 @@ alg::Vec3 C0PatchesSystem::PartialDerivativeU(const C0Patches &patches, const fl
 
 alg::Vec3 C0PatchesSystem::PartialDerivativeV(const C0Patches &patches, float u, float v) const
 {
-    assert(v >= 0.f && v <= MaxV(patches));
-    assert(u >= 0.f && u <= MaxU(patches));
+    CheckUVDomain(patches, u, v);
 
-    const float vFloor = std::floor(v);
-    const float uFloor = std::floor(u);
+    const SingleC0Patch p(*coordinator, patches, u, v);
 
-    int firstRow = static_cast<int>(vFloor) * 3;
-    if (v == static_cast<float>(patches.PatchesInRow()))
-        --firstRow;
-
-    int firstCol = static_cast<int>(uFloor) * 3;
-    if (u == static_cast<float>(patches.PatchesInCol()))
-        --firstCol;
-
-    const float vNormalized = v - vFloor;
-    const float uNormalized = u - uFloor;
+    const float vNormalized = v - std::floor(v);
+    const float uNormalized = u - std::floor(u);
 
     const auto bu = CubicBernsteinPolynomial(uNormalized);
 
-    // const auto& p00 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow, firstCol));
-    // const auto& p01 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow, firstCol + 1));
-    // const auto& p02 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow, firstCol + 2));
-    // const auto& p03 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow, firstCol + 3));
-    //
-    // const auto& p10 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 1, firstCol));
-    // const auto& p11 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 1, firstCol + 1));
-    // const auto& p12 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 1, firstCol + 2));
-    // const auto& p13 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 1, firstCol + 3));
-    //
-    // const auto& p20 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 2, firstCol));
-    // const auto& p21 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 2, firstCol + 1));
-    // const auto& p22 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 2, firstCol + 2));
-    // const auto& p23 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 2, firstCol + 3));
-    //
-    // const auto& p30 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 3, firstCol));
-    // const auto& p31 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 3, firstCol + 1));
-    // const auto& p32 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 3, firstCol + 2));
-    // const auto& p33 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 3, firstCol + 3));
-
-    const auto& p00 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow, firstCol));
-    const auto& p01 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 1, firstCol));
-    const auto& p02 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 2, firstCol));
-    const auto& p03 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 3, firstCol));
-
-    const auto& p10 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 0, firstCol + 1));
-    const auto& p11 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 1, firstCol + 1));
-    const auto& p12 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 2, firstCol + 1));
-    const auto& p13 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 3, firstCol + 1));
-
-    const auto& p20 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 0, firstCol + 2));
-    const auto& p21 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 1, firstCol + 2));
-    const auto& p22 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 2, firstCol + 2));
-    const auto& p23 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 3, firstCol + 2));
-
-    const auto& p30 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 0, firstCol + 3));
-    const auto& p31 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 1, firstCol + 3));
-    const auto& p32 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 2, firstCol + 3));
-    const auto& p33 = coordinator->GetComponent<Position>(patches.GetPoint(firstRow + 3, firstCol + 3));
-
     // Result of bu*p
-    const auto a0 = bu.X()*p00.vec + bu.Y()*p10.vec + bu.Z()*p20.vec + bu.W()*p30.vec;
-    const auto a1 = bu.X()*p01.vec + bu.Y()*p11.vec + bu.Z()*p21.vec + bu.W()*p31.vec;
-    const auto a2 = bu.X()*p02.vec + bu.Y()*p12.vec + bu.Z()*p22.vec + bu.W()*p32.vec;
-    const auto a3 = bu.X()*p03.vec + bu.Y()*p13.vec + bu.Z()*p23.vec + bu.W()*p33.vec;
+    const auto a0 = bu.X()*p.Point(0, 1) + bu.Y()*p.Point(0, 1) + bu.Z()*p.Point(0, 2) + bu.W()*p.Point(0, 3);
+    const auto a1 = bu.X()*p.Point(1, 1) + bu.Y()*p.Point(1, 1) + bu.Z()*p.Point(1, 2) + bu.W()*p.Point(1, 3);
+    const auto a2 = bu.X()*p.Point(2, 1) + bu.Y()*p.Point(2, 1) + bu.Z()*p.Point(2, 2) + bu.W()*p.Point(2, 3);
+    const auto a3 = bu.X()*p.Point(3, 1) + bu.Y()*p.Point(3, 1) + bu.Z()*p.Point(3, 2) + bu.W()*p.Point(3, 3);
 
     return Derivative(vNormalized, a0, a1, a2, a3);
 }
@@ -369,6 +215,12 @@ void C0PatchesSystem::UpdateMesh(const Entity surface, const C0Patches& patches)
             );
         }
     );
+}
+
+void C0PatchesSystem::CheckUVDomain(const C0Patches &patches, const float u, const float v)
+{
+    if (!(v >= 0.f && v <= MaxV(patches)) || !(u >= 0.f && u <= MaxU(patches)))
+        throw std::runtime_error("Arguments outside the domain");
 }
 
 

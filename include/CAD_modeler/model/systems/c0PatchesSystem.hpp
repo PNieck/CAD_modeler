@@ -56,6 +56,8 @@ public:
 private:
     void UpdateMesh(Entity surface, const C0Patches& patches) const;
 
+    static void CheckUVDomain(const C0Patches& patches, float u, float v);
+
     std::vector<float> GenerateVertices(const C0Patches& patches) const;
     std::vector<uint32_t> GenerateIndices(const C0Patches& patches) const;
 };

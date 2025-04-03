@@ -372,8 +372,6 @@ void ModelerMainMenuView::RenderAddingGregoryPatches()
     
 }
 
-// TODO: remove
-#include <iostream>
 
 void ModelerMainMenuView::RenderAddingIntersectionCurve()
 {

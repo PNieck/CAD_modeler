@@ -445,7 +445,7 @@ void Modeler::ShowDerivativesV(Entity e)
 void Modeler::ShowNormals(const Entity e)
 {
     constexpr int cntRows = 10;
-    constexpr int cntCols = 1;
+    constexpr int cntCols = 10;
 
     const auto& patches = coordinator.GetComponent<C0Patches>(e);
     const float maxU = C0PatchesSystem::MaxU(patches);
