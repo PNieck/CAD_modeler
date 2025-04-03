@@ -3,7 +3,6 @@
 #include <ecs/system.hpp>
 
 #include "../components/position.hpp"
-#include "../components/curveControlPoints.hpp"
 #include "../components/c0Patches.hpp"
 #include "../components/patchesDensity.hpp"
 #include "c0PatchesSystem.hpp"

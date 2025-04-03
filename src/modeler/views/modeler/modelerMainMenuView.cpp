@@ -372,6 +372,8 @@ void ModelerMainMenuView::RenderAddingGregoryPatches()
     
 }
 
+// TODO: remove
+#include <iostream>
 
 void ModelerMainMenuView::RenderAddingIntersectionCurve()
 {
@@ -414,7 +416,14 @@ void ModelerMainMenuView::RenderAddingIntersectionCurve()
         else {
             const Entity e1 = *entities.begin();
             const Entity e2 = *(++entities.begin());
-            model.FindIntersection(e1, e2, step);
+
+            try {
+                model.FindIntersection(e1, e2, step);
+            }
+            catch (...) {
+                ImGui::OpenPopup("Cannot find intersection curve");
+            }
+
         }
     }
 
@@ -424,6 +433,11 @@ void ModelerMainMenuView::RenderAddingIntersectionCurve()
         ImGui::EndPopup();
     }
 
+    if (ImGui::BeginPopupModal("Cannot find intersection curve", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+        ImGui::Text("Cannot find intersection curve. Try to use 3d cursor");
+        if (ImGui::Button("OK")) { ImGui::CloseCurrentPopup(); }
+        ImGui::EndPopup();
+    }
 
     if (ImGui::Button("Cancel"))
         controller.SetModelerState(ModelerState::Default);

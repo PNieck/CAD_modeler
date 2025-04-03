@@ -406,6 +406,21 @@ void ModelerObjectsPropertiesView::DisplaySurfacePatches(const Entity entity, co
             ImGui::Text(model.GetEntityName(cp).c_str());
         }
     }
+
+    // TODO: delete
+    if (model.GetAllC0Surfaces().contains(entity)) {
+        if (ImGui::Button("Show derivatives U")) {
+            model.ShowDerivativesU(entity);
+        }
+
+        if (ImGui::Button("Show derivatives V")) {
+            model.ShowDerivativesV(entity);
+        }
+
+        if (ImGui::Button("Show normals")) {
+            model.ShowNormals(entity);
+        }
+    }
 }
 
 

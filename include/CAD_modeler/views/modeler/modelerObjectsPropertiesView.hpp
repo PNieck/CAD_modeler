@@ -1,6 +1,8 @@
 #pragma once
 
 #include "../../model/modeler.hpp"
+#include "../../model/components/c0CurveParameters.hpp"
+#include "../../model/components/c2CurveParameters.hpp"
 
 
 class ModelerController;

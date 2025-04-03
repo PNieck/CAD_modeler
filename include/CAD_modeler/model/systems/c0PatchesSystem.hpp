@@ -25,7 +25,29 @@ public:
     void HideBezierNet(const Entity surface) const
         { coordinator->GetSystem<ControlNetSystem>()->DeleteControlPointsNet(surface); }
 
-    Position PointOnPatches(Entity entity, float u, float v) const;
+    Position PointOnPatches(const C0Patches& patches, float u, float v) const;
+    Position PointOnPatches(const Entity entity, const float u, const float v) const
+        { return PointOnPatches(coordinator->GetComponent<C0Patches>(entity), u, v); }
+
+    alg::Vec3 PartialDerivativeU(const C0Patches& patches, float u, float v) const;
+    alg::Vec3 PartialDerivativeU(const Entity entity, const float u, const float v) const
+        { return PartialDerivativeU(coordinator->GetComponent<C0Patches>(entity), u, v); }
+
+    alg::Vec3 PartialDerivativeV(const C0Patches& patches, float u, float v) const;
+    alg::Vec3 PartialDerivativeV(const Entity entity, const float u, const float v) const
+        { return PartialDerivativeV(coordinator->GetComponent<C0Patches>(entity), u, v); }
+
+    static float MaxU(const C0Patches& patches)
+        { return static_cast<float>(patches.PatchesInRow()); }
+
+    float MaxU(const Entity entity) const
+        { return MaxU(coordinator->GetComponent<C0Patches>(entity)); }
+
+    static float MaxV(const C0Patches& patches)
+        { return static_cast<float>(patches.PatchesInCol()); }
+
+    float MaxV(const Entity entity) const
+        { return MaxV(coordinator->GetComponent<C0Patches>(entity)); }
 
     void Render(const alg::Mat4x4& cameraMtx) const;
 

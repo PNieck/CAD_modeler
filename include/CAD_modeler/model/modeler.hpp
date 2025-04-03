@@ -283,6 +283,11 @@ public:
     inline void FindIntersection(const Entity e1, const Entity e2, const float step)
         { intersectionSystem->FindIntersection(e1, e2, step); }
 
+    // TODO: delet
+    void ShowDerivativesU(Entity e);
+    void ShowDerivativesV(Entity e);
+    void ShowNormals(Entity e);
+
     bool selectingEntities = false;
     float selectionCircleX = 0.0f;
     float selectionCircleY = 0.0f;

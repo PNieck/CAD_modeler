@@ -398,6 +398,75 @@ Entity Modeler::FillHole(const GregoryPatchesSystem::Hole& hole)
 }
 
 
+void Modeler::ShowDerivativesU(Entity e)
+{
+    constexpr int cnt = 100;
+
+    const auto& patches = coordinator.GetComponent<C0Patches>(e);
+    const float maxU = C0PatchesSystem::MaxU(patches);
+    const float maxV = C0PatchesSystem::MaxV(patches);
+
+    for (int row = 0; row < cnt; row++) {
+        for (int col = 0; col < cnt; col++) {
+            const float u = static_cast<float>(row) * maxU / static_cast<float>(cnt);
+            const float v = static_cast<float>(col) * maxV / static_cast<float>(cnt);
+
+            auto point = c0PatchesSystem->PointOnPatches(patches, u, v);
+            auto partialU = c0PatchesSystem->PartialDerivativeU(patches, u, v);
+
+            vectorSystem->AddVector(partialU, point);
+        }
+    }
+}
+
+
+void Modeler::ShowDerivativesV(Entity e)
+{
+    constexpr int cnt = 100;
+
+    const auto& patches = coordinator.GetComponent<C0Patches>(e);
+    const float maxU = C0PatchesSystem::MaxU(patches);
+    const float maxV = C0PatchesSystem::MaxV(patches);
+
+    for (int row = 0; row < cnt; row++) {
+        for (int col = 0; col < cnt; col++) {
+            const float u = static_cast<float>(row) * maxU / static_cast<float>(cnt);
+            const float v = static_cast<float>(col) * maxV / static_cast<float>(cnt);
+
+            auto point = c0PatchesSystem->PointOnPatches(patches, u, v);
+            auto partialV = c0PatchesSystem->PartialDerivativeV(patches, u, v);
+
+            vectorSystem->AddVector(partialV, point);
+        }
+    }
+}
+
+
+void Modeler::ShowNormals(const Entity e)
+{
+    constexpr int cntRows = 10;
+    constexpr int cntCols = 1;
+
+    const auto& patches = coordinator.GetComponent<C0Patches>(e);
+    const float maxU = C0PatchesSystem::MaxU(patches);
+    const float maxV = C0PatchesSystem::MaxV(patches);
+
+    for (int row = 0; row < cntRows; row++) {
+        for (int col = 0; col < cntCols; col++) {
+            const float u = static_cast<float>(row) * maxU / static_cast<float>(cntRows);
+            const float v = static_cast<float>(col) * maxV / static_cast<float>(cntCols);
+
+            auto point = c0PatchesSystem->PointOnPatches(patches, u, v);
+            auto partialV = c0PatchesSystem->PartialDerivativeV(patches, u, v);
+            auto partialU = c0PatchesSystem->PartialDerivativeU(patches, u, v);
+
+            auto normal = alg::Cross(partialV, partialU).Normalize();
+
+            vectorSystem->AddVector(normal, point);
+        }
+    }
+}
+
 void Modeler::Update() const
 {
     c0CurveSystem->Update();

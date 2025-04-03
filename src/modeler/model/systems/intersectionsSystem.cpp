@@ -8,6 +8,7 @@
 #include <CAD_modeler/model/systems/vectorSystem.hpp>
 
 #include <CAD_modeler/model/systems/intersectionSystem/torusSurface.hpp>
+#include <CAD_modeler/model/systems/intersectionSystem/c0Surface.hpp>
 
 #include <ecs/coordinator.hpp>
 
@@ -36,11 +37,11 @@ void IntersectionSystem::RegisterSystem(Coordinator &coordinator)
 }
 
 
-bool IntersectionSystem::CanBeIntersected(Entity entity) const
+bool IntersectionSystem::CanBeIntersected(const Entity entity) const
 {
-    // if (coordinator->GetSystem<C0PatchesSystem>()->GetEntities().contains(entity))
-    //     return true;
-    //
+    if (coordinator->GetSystem<C0PatchesSystem>()->GetEntities().contains(entity))
+        return true;
+
     // if (coordinator->GetSystem<C2SurfaceSystem>()->GetEntities().contains(entity))
     //     return true;
     //
@@ -54,7 +55,7 @@ bool IntersectionSystem::CanBeIntersected(Entity entity) const
 }
 
 
-void IntersectionSystem::FindIntersection(Entity e1, Entity e2, float step)
+void IntersectionSystem::FindIntersection(const Entity e1, const Entity e2, const float step)
 {
     assert(CanBeIntersected(e1));
     assert(CanBeIntersected(e2));
@@ -62,8 +63,8 @@ void IntersectionSystem::FindIntersection(Entity e1, Entity e2, float step)
 
     const auto pointSys = coordinator->GetSystem<PointsSystem>();
 
-    auto surface1 = GetSurface(e1);
-    auto surface2 = GetSurface(e2);
+    const auto surface1 = GetSurface(e1);
+    const auto surface2 = GetSurface(e2);
 
     const auto initSol = FindFirstApproximation(*surface1, *surface2);
     auto solOpt = FindFirstIntersectionPoint(*surface1, *surface2, initSol);
@@ -114,6 +115,9 @@ std::unique_ptr<Surface> IntersectionSystem::GetSurface(const Entity entity) con
 {
     if (coordinator->GetSystem<ToriSystem>()->GetEntities().contains(entity))
         return std::make_unique<TorusSurface>(*coordinator, entity);
+
+    if (coordinator->GetSystem<C0PatchesSystem>()->GetEntities().contains(entity))
+        return std::make_unique<C0Surface>(*coordinator, entity);
 
     throw std::runtime_error("Entity cannot be used to calculate intersection curve");
 }
@@ -266,7 +270,7 @@ private:
 };
 
 
-std::optional<IntersectionPoint> IntersectionSystem::FindFirstIntersectionPointDLib(Entity e1, Entity e2,
+std::optional<IntersectionPoint> IntersectionSystem::FindFirstIntersectionPointDLib(const Entity e1, const Entity e2,
     const IntersectionPoint& initSol) const
 {
     columnVector startingPoint = {
@@ -302,7 +306,7 @@ std::optional<IntersectionPoint> IntersectionSystem::FindFirstIntersectionPointD
 
 std::optional<IntersectionPoint> IntersectionSystem::FindFirstIntersectionPoint(Surface& s1, Surface& s2, const IntersectionPoint& initSol) const
 {
-    const std::vector<float> startingPoint = {
+    const std::vector startingPoint = {
         initSol.U1(),
         initSol.V1(),
         initSol.U2(),
@@ -334,7 +338,7 @@ std::optional<IntersectionPoint> IntersectionSystem::FindFirstIntersectionPoint(
 class NextPointDistFun final : public root::FunctionToFindRoot {
 public:
     NextPointDistFun(Surface& s1, Surface& s2, const alg::Vec3& prevPoint,
-                     const alg::Vec3& tangent, float step):
+                     const alg::Vec3& tangent, const float step):
         surface1(s1), surface2(s2), prevPoint(prevPoint), tangent(tangent), step(step) {}
 
     alg::Vec4 Value(alg::Vec4 args) override {
@@ -362,14 +366,12 @@ public:
         const float partX = alg::Dot(tangent, derE1X);
         const float partY = alg::Dot(tangent, derE1Y);
 
-        auto mtx = alg::Mat4x4(
+        return {
             derE1X.X(), derE1Y.X(), -derE2Z.X(), -derE2W.X(),
             derE1X.Y(), derE1Y.Y(), -derE2Z.Y(), -derE2W.Y(),
             derE1X.Z(), derE1Y.Z(), -derE2Z.Z(), -derE2W.Z(),
                  partX,      partY,         0.f,         0.f
-        );
-
-        return mtx;
+        };
     }
 
 private:
@@ -382,11 +384,13 @@ private:
 };
 
 
-std::optional<IntersectionPoint> IntersectionSystem::FindNextIntersectionPoint(interSys::Surface& s1, interSys::Surface& s2, IntersectionPoint &prevSol, float step) const
+std::optional<IntersectionPoint> IntersectionSystem::FindNextIntersectionPoint(Surface& s1, Surface& s2, IntersectionPoint &prevSol, float step) const
 {
     float remainingDist = step;
     const float minStep = step / 1024.f;
     std::optional<alg::Vec4> nextPoint;
+
+    const auto vectorSys = coordinator->GetSystem<VectorSystem>();
 
     do {
         alg::Vec3 normal1 = s1.NormalVector(prevSol.U1(), prevSol.V1());
@@ -394,6 +398,8 @@ std::optional<IntersectionPoint> IntersectionSystem::FindNextIntersectionPoint(i
 
         alg::Vec3 tangent = alg::Cross(normal1, normal2);
         alg::Vec3 prevPoint = s1.PointOnSurface(prevSol.U1(), prevSol.V1());
+
+        vectorSys->AddVector(tangent, prevPoint);
 
         NextPointDistFun fun(
             s1, s2,

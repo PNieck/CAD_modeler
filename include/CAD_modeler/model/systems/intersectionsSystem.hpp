@@ -3,8 +3,7 @@
 #include <ecs/system.hpp>
 
 #include <optional>
-
-#include <algebra/vec4.hpp>
+#include <memory>
 
 #include "intersectionSystem/intersectionPoint.hpp"
 #include "intersectionSystem/surfaces.hpp"

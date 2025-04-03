@@ -4,7 +4,6 @@
 #include <ecs/coordinator.hpp>
 #include <ecs/eventHandler.hpp>
 
-#include "../components/c2CurveParameters.hpp"
 #include "../components/curveControlPoints.hpp"
 #include "../components/bezierControlPoints.hpp"
 #include "curveControlPointsSystem.hpp"
