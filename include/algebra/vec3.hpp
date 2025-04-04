@@ -20,22 +20,22 @@ namespace alg
             data[2] = v3;
         }
 
-        inline DataType& X()
+        DataType& X()
             { return data[0]; }
 
-        inline DataType X() const
+        DataType X() const
             { return data[0]; }
 
-        inline DataType& Y()
+        DataType& Y()
             { return data[1]; }
 
-        inline DataType Y() const
+        DataType Y() const
             { return data[1]; }
 
-        inline DataType& Z()
+        DataType& Z()
             { return data[2]; }
 
-        inline DataType Z() const
+        DataType Z() const
             { return data[2]; }
 
         Vector3 Normalize() const {
@@ -48,27 +48,31 @@ namespace alg
             );
         }
 
-        inline float LengthSquared() const
+        [[nodiscard]]
+        float LengthSquared() const
             { return data[0]*data[0] + data[1]*data[1] + data[2]*data[2]; }
         
-        inline float Length() const
+        [[nodiscard]]
+        float Length() const
             { return std::sqrt(LengthSquared()); }
 
-        inline DataType* Data()
+        DataType* Data()
             { return data.data(); }
 
-        inline const DataType* Data() const
+        const DataType* Data() const
             { return data.data(); }
 
         Vector3<DataType> operator+(const Vector3<DataType>& v) const {
             return Vector3<DataType>(
+        Vector3 operator+(const Vector3& v) const {
+            return Vector3(
                 data[0] + v.data[0],
                 data[1] + v.data[1],
                 data[2] + v.data[2]
             );
         }
 
-        Vector3<DataType>& operator+=(const Vector3<DataType>& v) {
+        Vector3& operator+=(const Vector3& v) {
             data[0] += v.data[0];
             data[1] += v.data[1];
             data[2] += v.data[2];
@@ -76,7 +80,7 @@ namespace alg
             return *this;
         }
 
-        Vector3<DataType>& operator-=(const Vector3<DataType>& v) {
+        Vector3& operator-=(const Vector3& v) {
             data[0] -= v.data[0];
             data[1] -= v.data[1];
             data[2] -= v.data[2];
@@ -84,7 +88,7 @@ namespace alg
             return *this;
         }
 
-        Vector3<DataType>& operator*=(DataType scalar) {
+        Vector3& operator*=(DataType scalar) {
             data[0] *= scalar;
             data[1] *= scalar;
             data[2] *= scalar;
@@ -92,8 +96,8 @@ namespace alg
             return *this;
         }
 
-        Vector3<DataType> operator-(const Vector3<DataType>& v) const {
-            return Vector3<DataType>(
+        Vector3 operator-(const Vector3& v) const {
+            return Vector3(
                 data[0] - v.data[0],
                 data[1] - v.data[1],
                 data[2] - v.data[2]
@@ -101,8 +105,8 @@ namespace alg
         }
 
 
-        Vector3<DataType> operator-() const {
-            return Vector3<DataType>(
+        Vector3 operator-() const {
+            return Vector3(
                 -data[0],
                 -data[1],
                 -data[2]
@@ -110,7 +114,7 @@ namespace alg
         }
 
 
-        Vector3<DataType>& operator/=(DataType scalar) {
+        Vector3& operator/=(DataType scalar) {
             data[0] /= scalar;
             data[1] /= scalar;
             data[2] /= scalar;
@@ -119,10 +123,12 @@ namespace alg
         }
 
 
-        void operator=(const Vector3<DataType>& v) {
+        Vector3& operator=(const Vector3& v) {
             data[0] = v.data[0];
             data[1] = v.data[1];
             data[2] = v.data[2];
+
+            return *this;
         }
 
     protected:
@@ -150,13 +156,13 @@ namespace alg
 
 
     template <typename DataType>
-    inline DataType Distance(const Vector3<DataType>& v1, const Vector3<DataType>& v2) {
+    DataType Distance(const Vector3<DataType>& v1, const Vector3<DataType>& v2) {
         return (v1 - v2).Length();
     }
 
 
     template <typename DataType>
-    inline DataType DistanceSquared(const Vector3<DataType>& v1, const Vector3<DataType>& v2) {
+    DataType DistanceSquared(const Vector3<DataType>& v1, const Vector3<DataType>& v2) {
         return (v1 - v2).LengthSquared();
     }
 
@@ -172,12 +178,12 @@ namespace alg
 
 
     template <typename DataType>
-    inline Vector3<DataType> operator*(const Vector3<DataType>& v, DataType scalar)
+    Vector3<DataType> operator*(const Vector3<DataType>& v, DataType scalar)
         { return scalar * v; }
 
 
     template <typename DataType>
-    inline Vector3<DataType> operator/(const Vector3<DataType>& v, DataType scalar)
+    Vector3<DataType> operator/(const Vector3<DataType>& v, DataType scalar)
         { return v * (1.f / scalar); }
 
 
@@ -190,7 +196,7 @@ namespace alg
 
 
     template <typename DataType>
-    inline bool operator!=(const Vector3<DataType>& v1, const Vector3<DataType>& v2) {
+    bool operator!=(const Vector3<DataType>& v1, const Vector3<DataType>& v2) {
         return !(v1 == v2);
     }
 
@@ -212,4 +218,4 @@ namespace alg
         return stream;
     }
 
-};
+}

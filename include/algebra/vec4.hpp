@@ -28,28 +28,28 @@ namespace alg
         Vector4(Vector3<DataType> v, DataType w):
             Vector4(v.X(), v.Y(), v.Z(), w) {}
 
-        inline DataType& X()
+        DataType& X()
             { return data[0]; }
 
-        inline DataType X() const
+        DataType X() const
             { return data[0]; }
 
-        inline DataType& Y()
+        DataType& Y()
             { return data[1]; }
 
-        inline DataType Y() const
+        DataType Y() const
             { return data[1]; }
 
-        inline DataType& Z()
+        DataType& Z()
             { return data[2]; }
 
-        inline DataType Z() const
+        DataType Z() const
             { return data[2]; }
 
-        inline DataType& W()
+        DataType& W()
             { return data[3]; }
 
-        inline DataType W() const
+        DataType W() const
             { return data[3]; }
 
         Vector4 Normalize() const {
@@ -63,21 +63,25 @@ namespace alg
             );
         }
 
-        inline float LengthSquared() const
+        [[nodiscard]]
+        float LengthSquared() const
             { return data[0]*data[0] + data[1]*data[1] + data[2]*data[2] + data[3]*data[3]; }
         
-        inline float Length() const
+        [[nodiscard]]
+        float Length() const
             { return std::sqrt(LengthSquared()); }
         
 
-        inline DataType* Data()
+        DataType* Data()
             { return data.data(); }
 
-        inline const DataType* Data() const
+        const DataType* Data() const
             { return data.data(); }
 
         Vector4<DataType> operator+(const Vector4<DataType>& v) const {
             return Vector4<DataType>(
+        Vector4 operator+(const Vector4& v) const {
+            return Vector4(
                 data[0] + v.data[0],
                 data[1] + v.data[1],
                 data[2] + v.data[2],
@@ -85,8 +89,8 @@ namespace alg
             );
         }
 
-        Vector4<DataType> operator-(const Vector4<DataType>& v) const {
-            return Vector4<DataType>(
+        Vector4 operator-(const Vector4& v) const {
+            return Vector4(
                 data[0] - v.data[0],
                 data[1] - v.data[1],
                 data[2] - v.data[2],
@@ -94,8 +98,8 @@ namespace alg
             );
         }
 
-        Vector4<DataType> operator-() const {
-            return Vector4<DataType>(
+        Vector4 operator-() const {
+            return Vector4(
                 -data[0],
                 -data[1],
                 -data[2],
@@ -132,7 +136,7 @@ namespace alg
 
 
     template <typename DataType>
-    inline DataType DistanceSquared(const Vector4<DataType>& v1, const Vector4<DataType>& v2) {
+    DataType DistanceSquared(const Vector4<DataType>& v1, const Vector4<DataType>& v2) {
         return (v1 - v2).LengthSquared();
     }
 
@@ -143,4 +147,4 @@ namespace alg
 
         return stream;
     }
-};
+}
