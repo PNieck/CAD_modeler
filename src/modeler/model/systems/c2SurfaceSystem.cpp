@@ -198,11 +198,12 @@ void C2SurfaceSystem::DeleteRowOfPatches(Entity surface, const Position &pos, co
 }
 
 
-void C2SurfaceSystem::DeleteColOfPatches(Entity surface, const Position &pos, const alg::Vec3 &direction, float length, float width) const
+void C2SurfaceSystem::DeleteColOfPatches(
+    Entity surface, const Position &pos, const alg::Vec3 &direction, const float length, const float width) const
 {
     coordinator->EditComponent<C2Patches>(surface,
         [surface, this](C2Patches& patches) {
-            auto cpRegistrySys = coordinator->GetSystem<ControlPointsRegistrySystem>();
+            const auto cpRegistrySys = coordinator->GetSystem<ControlPointsRegistrySystem>();
 
             for (int row=0; row < patches.PointsInRow(); row++) {
                 Entity point = patches.GetPoint(row, patches.PointsInCol() - 1);
@@ -248,13 +249,13 @@ void C2SurfaceSystem::MergeControlPoints(Entity surface, Entity oldCP, Entity ne
 
     coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate<C2SurfaceSystem>(surface);
 
-    auto registry = coordinator->GetSystem<ControlPointsRegistrySystem>();
+    const auto registry = coordinator->GetSystem<ControlPointsRegistrySystem>();
     registry->UnregisterControlPoint(surface, oldCP, Coordinator::GetSystemID<C2SurfaceSystem>());
     registry->RegisterControlPoint(surface, newCP, Coordinator::GetSystemID<C2SurfaceSystem>());
 }
 
 
-void C2SurfaceSystem::ShowDeBoorNet(Entity surface)
+void C2SurfaceSystem::ShowDeBoorNet(const Entity surface)
 {
     auto const& patches = coordinator->GetComponent<C2Patches>(surface);
     auto const& netSystem = coordinator->GetSystem<ControlNetSystem>();
@@ -263,21 +264,22 @@ void C2SurfaceSystem::ShowDeBoorNet(Entity surface)
 }
 
 
-void C2SurfaceSystem::Recalculate(Entity surface, const Position &pos, const alg::Vec3 &direction, float length, float width) const
+void C2SurfaceSystem::Recalculate(
+    const Entity surface, const Position &pos, const alg::Vec3 &direction, const float length, const float width) const
 {
     auto const& patches = coordinator->GetComponent<C2Patches>(surface);
 
-    alg::Vec3 perpendicular1 = alg::GetPerpendicularVec(direction);
-    alg::Vec3 perpendicular2 = alg::Cross(perpendicular1, direction);
+    alg::Vec3 perpendicular1 = GetPerpendicularVec(direction);
+    alg::Vec3 perpendicular2 = Cross(perpendicular1, direction);
 
-    perpendicular1 *= length / float(patches.PointsInRow() - 1);
-    perpendicular2 *= width / float(patches.PointsInCol() - 1);
+    perpendicular1 *= length / static_cast<float>(patches.PointsInRow() - 1);
+    perpendicular2 *= width / static_cast<float>(patches.PointsInCol() - 1);
 
     for (int i=0; i < patches.PointsInRow(); ++i) {
         for (int j=0; j < patches.PointsInCol(); ++j) {
-            Entity cp = patches.GetPoint(i, j);
+            const Entity cp = patches.GetPoint(i, j);
 
-            alg::Vec3 newPos = pos.vec + perpendicular1 * float(i) + perpendicular2 * float(j);
+            alg::Vec3 newPos = pos.vec + perpendicular1 * static_cast<float>(i) + perpendicular2 * static_cast<float>(j);
 
             coordinator->SetComponent(cp, Position(newPos));
         }
@@ -301,7 +303,7 @@ void C2SurfaceSystem::Render(const alg::Mat4x4& cameraMtx) const
     glPatchParameteri(GL_PATCH_VERTICES, 16);
 
     for (auto const entity: entities) {
-        bool selection = selectionSystem->IsSelected(entity);
+        const bool selection = selectionSystem->IsSelected(entity);
 
         if (selection)
             shader.SetColor(alg::Vec4(1.0f, 0.5f, 0.0f, 1.0f));
@@ -324,12 +326,10 @@ void C2SurfaceSystem::Render(const alg::Mat4x4& cameraMtx) const
 
 void C2SurfaceSystem::Update() const
 {
-    auto toUpdateSystem = coordinator->GetSystem<ToUpdateSystem>();
+    auto const toUpdateSystem = coordinator->GetSystem<ToUpdateSystem>();
     auto const& netSystem = coordinator->GetSystem<ControlNetSystem>();
 
-    auto toUpdate = toUpdateSystem->GetEntitiesToUpdate<C2SurfaceSystem>();
-
-    for (auto entity: toUpdate) {
+    for (const auto entity: toUpdateSystem->GetEntitiesToUpdate<C2SurfaceSystem>()) {
         auto const& patches = coordinator->GetComponent<C2Patches>(entity);
 
         UpdateMesh(entity, patches);
@@ -362,7 +362,7 @@ std::vector<float> C2SurfaceSystem::GenerateVertices(const C2Patches &patches) c
 
     for (int col=0; col < patches.PointsInCol(); col++) {
         for (int row=0; row < patches.PointsInRow(); row++) {
-            Entity point = patches.GetPoint(row, col);
+            const Entity point = patches.GetPoint(row, col);
 
             auto const& pos = coordinator->GetComponent<Position>(point);
 
@@ -386,8 +386,8 @@ std::vector<uint32_t> C2SurfaceSystem::GenerateIndices(const C2Patches &patches)
             for (int rowInPatch=0; rowInPatch < C2Patches::RowsInPatch; rowInPatch++) {
                 for (int colInPatch=0; colInPatch < C2Patches::ColsInPatch; colInPatch++) {
 
-                    int globCol = patchCol + colInPatch;
-                    int globRow = patchRow + rowInPatch;
+                    const int globCol = patchCol + colInPatch;
+                    const int globRow = patchRow + rowInPatch;
 
                     result.push_back(globCol * patches.PointsInRow() + globRow);
                 }
@@ -396,8 +396,8 @@ std::vector<uint32_t> C2SurfaceSystem::GenerateIndices(const C2Patches &patches)
             for (int colInPatch=0; colInPatch < C2Patches::ColsInPatch; colInPatch++) {
                 for (int rowInPatch=0; rowInPatch < C2Patches::RowsInPatch; rowInPatch++) {
 
-                    int globCol = patchCol + colInPatch;
-                    int globRow = patchRow + rowInPatch;
+                    const int globCol = patchCol + colInPatch;
+                    const int globRow = patchRow + rowInPatch;
 
                     result.push_back(globCol * patches.PointsInRow() + globRow);
                 }

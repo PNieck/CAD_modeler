@@ -309,7 +309,7 @@ void C2CylinderSystem::Render(const alg::Mat4x4& cameraMtx) const
     glPatchParameteri(GL_PATCH_VERTICES, 16);
 
     for (auto const entity: entities) {
-        bool selection = selectionSystem->IsSelected(entity);
+        const bool selection = selectionSystem->IsSelected(entity);
 
         if (selection)
             shader.SetColor(alg::Vec4(1.0f, 0.5f, 0.0f, 1.0f));
@@ -332,12 +332,10 @@ void C2CylinderSystem::Render(const alg::Mat4x4& cameraMtx) const
 
 void C2CylinderSystem::Update() const
 {
-    auto toUpdateSystem = coordinator->GetSystem<ToUpdateSystem>();
+    auto const toUpdateSystem = coordinator->GetSystem<ToUpdateSystem>();
     auto const& netSystem = coordinator->GetSystem<ControlNetSystem>();
 
-    auto toUpdate = toUpdateSystem->GetEntitiesToUpdate<C2CylinderSystem>();
-
-    for (auto entity: toUpdate) {
+    for (const auto entity: toUpdateSystem->GetEntitiesToUpdate<C2CylinderSystem>()) {
         auto const& patches = coordinator->GetComponent<C2CylinderPatches>(entity);
 
         UpdateMesh(entity, patches);
@@ -382,7 +380,7 @@ std::vector<float> C2CylinderSystem::GenerateVertices(const C2Patches &patches) 
 
     for (int col=0; col < patches.PointsInCol(); col++) {
         for (int row=0; row < patches.PointsInRow(); row++) {
-            Entity point = patches.GetPoint(row, col);
+            const Entity point = patches.GetPoint(row, col);
 
             auto const& pos = coordinator->GetComponent<Position>(point);
 
@@ -406,8 +404,8 @@ std::vector<uint32_t> C2CylinderSystem::GenerateIndices(const C2Patches &patches
             for (int rowInPatch=0; rowInPatch < C2Patches::RowsInPatch; rowInPatch++) {
                 for (int colInPatch=0; colInPatch < C2Patches::ColsInPatch; colInPatch++) {
 
-                    int globCol = patchCol + colInPatch;
-                    int globRow = patchRow + rowInPatch;
+                    const int globCol = patchCol + colInPatch;
+                    const int globRow = patchRow + rowInPatch;
 
                     result.push_back(globCol * patches.PointsInRow() + globRow);
                 }
@@ -416,8 +414,8 @@ std::vector<uint32_t> C2CylinderSystem::GenerateIndices(const C2Patches &patches
             for (int colInPatch=0; colInPatch < C2Patches::ColsInPatch; colInPatch++) {
                 for (int rowInPatch=0; rowInPatch < C2Patches::RowsInPatch; rowInPatch++) {
 
-                    int globCol = patchCol + colInPatch;
-                    int globRow = patchRow + rowInPatch;
+                    const int globCol = patchCol + colInPatch;
+                    const int globRow = patchRow + rowInPatch;
 
                     result.push_back(globCol * patches.PointsInRow() + globRow);
                 }

@@ -27,18 +27,18 @@ public:
 
     void MergeControlPoints(Entity cylinder, Entity oldCP, Entity newCP);
 
-    inline void SetDensity(Entity entity, PatchesDensity density) const
+    void SetDensity(const Entity entity, const PatchesDensity density) const
         { coordinator->SetComponent<PatchesDensity>(entity, density); }
 
-    inline int GetRowsCnt(Entity surface) const
+    int GetRowsCnt(const Entity surface) const
         { return coordinator->GetComponent<C2Patches>(surface).PatchesInRow(); }
 
-    inline int GetColsCnt(Entity surface) const
+    int GetColsCnt(const Entity surface) const
         { return coordinator->GetComponent<C2Patches>(surface).PatchesInCol(); }
 
     void ShowDeBoorNet(Entity surface);
 
-    inline void HideDeBoorNet(Entity surface)
+    void HideDeBoorNet(const Entity surface) const
         { coordinator->GetSystem<ControlNetSystem>()->DeleteControlPointsNet(surface); }
 
     void Recalculate(Entity surface, const Position& pos, const alg::Vec3& direction, float length, float width) const;
@@ -58,9 +58,9 @@ private:
     std::vector<uint32_t> GenerateIndices(const C2Patches& patches) const;
 
 
-    class DeletionHandler: public EventHandler<C2Patches> {
+    class DeletionHandler final : public EventHandler<C2Patches> {
     public:
-        DeletionHandler(Coordinator& coordinator):
+        explicit DeletionHandler(Coordinator& coordinator):
             coordinator(coordinator) {}
 
         void HandleEvent(Entity entity, const C2Patches& component, EventType eventType) override;
@@ -69,9 +69,9 @@ private:
         Coordinator& coordinator;
     };
 
-    class ControlPointMovedHandler: public EventHandler<Position> {
+    class ControlPointMovedHandler final : public EventHandler<Position> {
     public:
-        ControlPointMovedHandler(Entity targetObject, Coordinator& coordinator):
+        ControlPointMovedHandler(const Entity targetObject, Coordinator& coordinator):
             coordinator(coordinator), targetObject(targetObject) {}
 
         void HandleEvent(Entity entity, const Position& component, EventType eventType) override;
