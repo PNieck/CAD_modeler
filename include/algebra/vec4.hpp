@@ -78,8 +78,12 @@ namespace alg
         const DataType* Data() const
             { return data.data(); }
 
-        Vector4<DataType> operator+(const Vector4<DataType>& v) const {
-            return Vector4<DataType>(
+        DataType& operator[](const size_t pos)
+            { return data[pos]; }
+
+        const DataType& operator[](const size_t pos) const
+            { return data[pos]; }
+
         Vector4 operator+(const Vector4& v) const {
             return Vector4(
                 data[0] + v.data[0],
