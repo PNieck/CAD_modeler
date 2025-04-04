@@ -8,6 +8,7 @@
 #include "CAD_modeler/model/systems/toUpdateSystem.hpp"
 #include "CAD_modeler/model/systems/controlPointsRegistrySystem.hpp"
 #include "CAD_modeler/model/systems/shaders/shaderRepository.hpp"
+#include "CAD_modeler/model/systems/c2SurfacesSystem/singleC2Patch.hpp"
 
 
 void C2SurfaceSystem::RegisterSystem(Coordinator &coordinator)
@@ -178,7 +179,7 @@ void C2SurfaceSystem::DeleteRowOfPatches(Entity surface, const Position &pos, co
 {
     coordinator->EditComponent<C2Patches>(surface,
         [surface, this](C2Patches& patches) {
-            auto cpRegistrySys = coordinator->GetSystem<ControlPointsRegistrySystem>();
+            const auto cpRegistrySys = coordinator->GetSystem<ControlPointsRegistrySystem>();
 
             for (int col=0; col < patches.PointsInCol(); col++) {
                 Entity point = patches.GetPoint(patches.PointsInRow() - 1, col);
@@ -284,6 +285,109 @@ void C2SurfaceSystem::Recalculate(
             coordinator->SetComponent(cp, Position(newPos));
         }
     }
+}
+
+
+// CubicBSplinesBaseFunctions helper function
+float a(const int n, const int j, const float t) {
+    return (static_cast<float>(j + n - 1) - t)/static_cast<float>(n);
+}
+
+
+// CubicBSplinesBaseFunctions helper function
+float b(const int n, const int j, const float t) {
+    return (t - static_cast<float>(j - 1))/static_cast<float>(n);
+}
+
+
+alg::Vec3 QuadraticBSplinesBaseFunctions(float t)
+{
+    // Normalize t
+    t -= std::floor(t);
+
+    alg::Vec3 result;
+    result.X() = 1;
+
+    result.Y() = b(1, 1, t) * result.X();
+    result.X() = a(1, 1, t) * result.X();
+
+    result.Z() = b(2, 1, t) * result.Y();
+    result.Y() = b(2, 0, t) * result.X() + a(2, 1, t) * result.Y();
+    result.X() = a(2, 0, t) * result.X();
+
+    return result;
+}
+
+
+alg::Vec4 CubicBSplinesBaseFunctions(float t) {
+    alg::Vec3 quadratic = QuadraticBSplinesBaseFunctions(t);
+
+    // Normalize t
+    t -= std::floor(t);
+
+    return {
+        b(3, 1, t) * quadratic.Z(),
+        b(3, 0, t) * quadratic.Y() + a(3, 1, t) * quadratic.Z(),
+        b(3, -1, t) * quadratic.X() + a(3, 0, t) * quadratic.Y(),
+        a(3, -1, t) * quadratic.X()
+    };
+}
+
+
+Position C2SurfaceSystem::PointOnPatches(const C2Patches &patches, const float u, const float v) const
+{
+    const SingleC2Patch p(*coordinator, patches, u, v);
+
+    alg::Vec4 Nu = CubicBSplinesBaseFunctions(u);
+    alg::Vec4 Nv = CubicBSplinesBaseFunctions(v);
+
+    Position result(0.f);
+
+    for (int i=0; i <= 3; i++) {
+        for (int j=0; j <= 3; j++) {
+            result.vec += p.Point(3 - i, 3 - j) * Nu[i] * Nv[j];
+        }
+    }
+
+    return result;
+}
+
+
+alg::Vec3 C2SurfaceSystem::PartialDerivativeU(const C2Patches &patches, const float u, const float v) const
+{
+    const SingleC2Patch p(*coordinator, patches, u, v);
+
+    alg::Vec3 Nu = QuadraticBSplinesBaseFunctions(u);
+    alg::Vec4 Nv = CubicBSplinesBaseFunctions(v);
+
+    alg::Vec3 result(0.f);
+
+    for (int i=0; i <= 2; i++) {
+        for (int j=0; j <= 3; j++) {
+            result += (p.Point(i+1, 3-j) - p.Point(i, 3-j)) * Nu[i] * Nv[j];
+        }
+    }
+
+    return result;
+}
+
+
+alg::Vec3 C2SurfaceSystem::PartialDerivativeV(const C2Patches &patches, const float u, const float v) const
+{
+    const SingleC2Patch p(*coordinator, patches, u, v);
+
+    alg::Vec4 Nu = CubicBSplinesBaseFunctions(u);
+    alg::Vec3 Nv = QuadraticBSplinesBaseFunctions(v);
+
+    alg::Vec3 result(0.f);
+
+    for (int i=0; i <= 3; i++) {
+        for (int j=0; j <= 2; j++) {
+            result += (p.Point(3-i, j+1) - p.Point(3-i, j)) * Nu[i] * Nv[j];
+        }
+    }
+
+    return result;
 }
 
 
