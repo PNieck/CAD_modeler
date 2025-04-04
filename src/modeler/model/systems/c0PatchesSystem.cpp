@@ -62,7 +62,10 @@ void C0PatchesSystem::ShowBezierNet(const Entity surface)
 }
 
 
-alg::Vec4 CubicBernsteinPolynomial(const float t) {
+alg::Vec4 CubicBernsteinPolynomial(float t) {
+    // t normalization
+    t -= std::floor(t);
+
     const float oneMinusT = 1.0f - t;
 
     return {
@@ -79,11 +82,8 @@ Position C0PatchesSystem::PointOnPatches(const C0Patches &patches, const float u
 
     const SingleC0Patch p(*coordinator, patches, u, v);
 
-    const float vNormalized = v - std::floor(v);
-    const float uNormalized = u - std::floor(u);
-
-    const auto bu = CubicBernsteinPolynomial(uNormalized);
-    const auto bv = CubicBernsteinPolynomial(vNormalized);
+    const auto bu = CubicBernsteinPolynomial(u);
+    const auto bv = CubicBernsteinPolynomial(v);
 
     // Result of bu*p
     const auto a0 = bu.X()*p.Point(0,0) + bu.Y()*p.Point(0, 1) + bu.Z()*p.Point(0, 2) + bu.W()*p.Point(0, 3);
@@ -96,7 +96,10 @@ Position C0PatchesSystem::PointOnPatches(const C0Patches &patches, const float u
 }
 
 
-alg::Vec3 Derivative(const float t, const alg::Vec3& a0, const alg::Vec3& a1, const alg::Vec3& a2, const alg::Vec3& a3) {
+alg::Vec3 Derivative(float t, const alg::Vec3& a0, const alg::Vec3& a1, const alg::Vec3& a2, const alg::Vec3& a3) {
+    // t normalization
+    t -= std::floor(t);
+
     const float oneMinusT = 1.f - t;
 
     return -3.f * oneMinusT * oneMinusT * a0 +
@@ -112,10 +115,7 @@ alg::Vec3 C0PatchesSystem::PartialDerivativeU(const C0Patches &patches, const fl
 
     const SingleC0Patch p(*coordinator, patches, u, v);
 
-    const float vNormalized = v - std::floor(v);
-    const float uNormalized = u - std::floor(u);
-
-    const auto bv = CubicBernsteinPolynomial(vNormalized);
+    const auto bv = CubicBernsteinPolynomial(v);
 
     // Result of bu*p
     const auto a0 = bv.X()*p.Point(0, 0) + bv.Y()*p.Point(1, 0) + bv.Z()*p.Point(2, 0) + bv.W()*p.Point(3, 0);
@@ -123,7 +123,7 @@ alg::Vec3 C0PatchesSystem::PartialDerivativeU(const C0Patches &patches, const fl
     const auto a2 = bv.X()*p.Point(0, 2) + bv.Y()*p.Point(1, 2) + bv.Z()*p.Point(2, 2) + bv.W()*p.Point(3, 2);
     const auto a3 = bv.X()*p.Point(0, 3) + bv.Y()*p.Point(1, 3) + bv.Z()*p.Point(2, 3) + bv.W()*p.Point(3, 3);
 
-    return Derivative(uNormalized, a0, a1, a2, a3);
+    return Derivative(u, a0, a1, a2, a3);
 }
 
 
@@ -133,10 +133,7 @@ alg::Vec3 C0PatchesSystem::PartialDerivativeV(const C0Patches &patches, float u,
 
     const SingleC0Patch p(*coordinator, patches, u, v);
 
-    const float vNormalized = v - std::floor(v);
-    const float uNormalized = u - std::floor(u);
-
-    const auto bu = CubicBernsteinPolynomial(uNormalized);
+    const auto bu = CubicBernsteinPolynomial(u);
 
     // Result of bu*p
     const auto a0 = bu.X()*p.Point(0, 1) + bu.Y()*p.Point(0, 1) + bu.Z()*p.Point(0, 2) + bu.W()*p.Point(0, 3);
@@ -144,7 +141,7 @@ alg::Vec3 C0PatchesSystem::PartialDerivativeV(const C0Patches &patches, float u,
     const auto a2 = bu.X()*p.Point(2, 1) + bu.Y()*p.Point(2, 1) + bu.Z()*p.Point(2, 2) + bu.W()*p.Point(2, 3);
     const auto a3 = bu.X()*p.Point(3, 1) + bu.Y()*p.Point(3, 1) + bu.Z()*p.Point(3, 2) + bu.W()*p.Point(3, 3);
 
-    return Derivative(vNormalized, a0, a1, a2, a3);
+    return Derivative(v, a0, a1, a2, a3);
 }
 
 
