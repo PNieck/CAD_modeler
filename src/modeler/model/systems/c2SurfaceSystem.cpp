@@ -205,7 +205,7 @@ void C2SurfaceSystem::DeleteColOfPatches(Entity surface, const Position &pos, co
             auto cpRegistrySys = coordinator->GetSystem<ControlPointsRegistrySystem>();
 
             for (int row=0; row < patches.PointsInRow(); row++) {
-                Entity point = patches.GetPoint(row, patches.PointsInCol());
+                Entity point = patches.GetPoint(row, patches.PointsInCol() - 1);
                 cpRegistrySys->UnregisterControlPoint(surface, point, Coordinator::GetSystemID<C2SurfaceSystem>());
                 coordinator->DestroyEntity(point);
 
