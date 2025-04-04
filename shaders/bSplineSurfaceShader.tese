@@ -47,7 +47,7 @@ void main()
 
     v *= float(gl_TessLevelOuter[0]) / float(gl_TessLevelOuter[0] - 1);
 
-    // Bernstein polynomials
+    // BSpline polynomials
     vec4 Nu = CubicBSplinesBaseFunctions(u);
     vec4 Nv = CubicBSplinesBaseFunctions(v);
 
