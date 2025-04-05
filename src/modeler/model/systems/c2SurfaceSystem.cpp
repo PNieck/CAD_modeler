@@ -83,6 +83,9 @@ Entity C2SurfaceSystem::CreateSurface(C2Patches &patches)
             // Creating control points with temporary location
             Entity cp = patches.GetPoint(row, col);
 
+            if (patches.controlPointsHandlers.contains(cp))
+                continue;
+
             HandlerId cpHandler = coordinator->Subscribe(cp, std::static_pointer_cast<EventHandler<Position>>(handler));
             patches.controlPointsHandlers.insert({cp, cpHandler});
 
