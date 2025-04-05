@@ -287,6 +287,7 @@ public:
     void ShowDerivativesU(Entity e);
     void ShowDerivativesV(Entity e);
     void ShowNormals(Entity e);
+    void ShowNormals(Entity e, float u, float v);
 
     bool selectingEntities = false;
     float selectionCircleX = 0.0f;

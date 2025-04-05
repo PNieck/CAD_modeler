@@ -408,7 +408,7 @@ void ModelerObjectsPropertiesView::DisplaySurfacePatches(const Entity entity, co
     }
 
     // TODO: delete
-    if (model.GetAllC0Surfaces().contains(entity)) {
+    if (model.GetAllC2Surfaces().contains(entity)) {
         if (ImGui::Button("Show derivatives U")) {
             model.ShowDerivativesU(entity);
         }
@@ -419,6 +419,21 @@ void ModelerObjectsPropertiesView::DisplaySurfacePatches(const Entity entity, co
 
         if (ImGui::Button("Show normals")) {
             model.ShowNormals(entity);
+        }
+
+        static float u = 0.f, v = 0.f;
+
+        ImGui::DragFloat("U", &u);
+        ImGui::DragFloat("V", &v);
+
+        float maxU = static_cast<float>(patches.PatchesInRow());
+        float maxV = static_cast<float>(patches.PatchesInCol());
+
+        ImGui::Text("Max U: %f", maxU);
+        ImGui::Text("Max V: %f", maxV);
+
+        if (ImGui::Button("Add normal")) {
+            model.ShowNormals(entity, u, v);
         }
     }
 }

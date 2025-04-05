@@ -400,21 +400,21 @@ Entity Modeler::FillHole(const GregoryPatchesSystem::Hole& hole)
 
 void Modeler::ShowDerivativesU(Entity e)
 {
-    constexpr int cnt = 100;
+    constexpr int cnt = 10;
 
-    const auto& patches = coordinator.GetComponent<C0Patches>(e);
-    const float maxU = C0PatchesSystem::MaxU(patches);
-    const float maxV = C0PatchesSystem::MaxV(patches);
+    const auto& patches = coordinator.GetComponent<C2Patches>(e);
+    const float maxU = C2SurfaceSystem::MaxU(patches);
+    const float maxV = C2SurfaceSystem::MaxV(patches);
 
     for (int row = 0; row < cnt; row++) {
         for (int col = 0; col < cnt; col++) {
             const float u = static_cast<float>(row) * maxU / static_cast<float>(cnt);
             const float v = static_cast<float>(col) * maxV / static_cast<float>(cnt);
 
-            auto point = c0PatchesSystem->PointOnPatches(patches, u, v);
-            auto partialU = c0PatchesSystem->PartialDerivativeU(patches, u, v);
+            auto point = c2SurfaceSystem->PointOnPatches(patches, u, v);
+            auto partialU = c2SurfaceSystem->PartialDerivativeU(patches, u, v);
 
-            vectorSystem->AddVector(partialU, point);
+            vectorSystem->AddVector(partialU.Normalize(), point);
         }
     }
 }
@@ -422,21 +422,21 @@ void Modeler::ShowDerivativesU(Entity e)
 
 void Modeler::ShowDerivativesV(Entity e)
 {
-    constexpr int cnt = 100;
+    constexpr int cnt = 10;
 
-    const auto& patches = coordinator.GetComponent<C0Patches>(e);
-    const float maxU = C0PatchesSystem::MaxU(patches);
-    const float maxV = C0PatchesSystem::MaxV(patches);
+    const auto& patches = coordinator.GetComponent<C2Patches>(e);
+    const float maxU = C2SurfaceSystem::MaxU(patches);
+    const float maxV = C2SurfaceSystem::MaxV(patches);
 
     for (int row = 0; row < cnt; row++) {
         for (int col = 0; col < cnt; col++) {
             const float u = static_cast<float>(row) * maxU / static_cast<float>(cnt);
             const float v = static_cast<float>(col) * maxV / static_cast<float>(cnt);
 
-            auto point = c0PatchesSystem->PointOnPatches(patches, u, v);
-            auto partialV = c0PatchesSystem->PartialDerivativeV(patches, u, v);
+            auto point = c2SurfaceSystem->PointOnPatches(patches, u, v);
+            auto partialU = c2SurfaceSystem->PartialDerivativeV(patches, u, v);
 
-            vectorSystem->AddVector(partialV, point);
+            vectorSystem->AddVector(partialU.Normalize(), point);
         }
     }
 }
@@ -447,24 +447,35 @@ void Modeler::ShowNormals(const Entity e)
     constexpr int cntRows = 10;
     constexpr int cntCols = 10;
 
-    const auto& patches = coordinator.GetComponent<C0Patches>(e);
-    const float maxU = C0PatchesSystem::MaxU(patches);
-    const float maxV = C0PatchesSystem::MaxV(patches);
+    const auto& patches = coordinator.GetComponent<C2Patches>(e);
+    const float maxU = C2SurfaceSystem::MaxU(patches);
+    const float maxV = C2SurfaceSystem::MaxV(patches);
 
     for (int row = 0; row < cntRows; row++) {
         for (int col = 0; col < cntCols; col++) {
             const float u = static_cast<float>(row) * maxU / static_cast<float>(cntRows);
             const float v = static_cast<float>(col) * maxV / static_cast<float>(cntCols);
 
-            auto point = c0PatchesSystem->PointOnPatches(patches, u, v);
-            auto partialV = c0PatchesSystem->PartialDerivativeV(patches, u, v);
-            auto partialU = c0PatchesSystem->PartialDerivativeU(patches, u, v);
+            auto point = c2SurfaceSystem->PointOnPatches(patches, u, v);
+            auto partialV = c2SurfaceSystem->PartialDerivativeV(patches, u, v);
+            auto partialU = c2SurfaceSystem->PartialDerivativeU(patches, u, v);
 
             auto normal = alg::Cross(partialV, partialU).Normalize();
 
             vectorSystem->AddVector(normal, point);
         }
     }
+}
+
+void Modeler::ShowNormals(Entity e, float u, float v)
+{
+    auto point = c2SurfaceSystem->PointOnPatches(e, u, v);
+    auto partialV = c2SurfaceSystem->PartialDerivativeV(e, u, v);
+    auto partialU = c2SurfaceSystem->PartialDerivativeU(e, u, v);
+
+    auto normal = alg::Cross(partialV, partialU).Normalize();
+
+    vectorSystem->AddVector(normal, point);
 }
 
 void Modeler::Update() const
