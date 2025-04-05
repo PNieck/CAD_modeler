@@ -398,6 +398,38 @@ Entity Modeler::FillHole(const GregoryPatchesSystem::Hole& hole)
 }
 
 
+void Modeler::ClearScene()
+{
+    const std::vector<std::shared_ptr<System>> systemsToClear {
+        intersectionSystem,
+        vectorSystem,
+        gregoryPatchesSystem,
+        c2CylinderSystem,
+        c2SurfaceSystem,
+        c0CylinderSystem,
+        c0SurfaceSystem,
+        interpolationCurveSystem,
+        c2CurveSystem,
+        c0CurveSystem,
+        pointsSystem,
+        toriSystem
+    };
+
+    std::stack<Entity> toDelete;
+
+    for (const auto& system: systemsToClear) {
+        for (auto entity: system->GetEntities()) {
+            toDelete.push(entity);
+        }
+
+        while (!toDelete.empty()) {
+            coordinator.DestroyEntity(toDelete.top());
+            toDelete.pop();
+        }
+    }
+}
+
+
 void Modeler::ShowDerivativesU(Entity e)
 {
     constexpr int cnt = 10;

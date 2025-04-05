@@ -49,6 +49,14 @@ void ModelerMenuBar::Render() const
             ImGui::EndMenu();
         }
 
+        if (ImGui::BeginMenu("Scene")) {
+            if (ImGui::MenuItem("Clear")) {
+                model.ClearScene();
+            }
+
+            ImGui::EndMenu();
+        }
+
 #       ifndef NDEBUG // is true only during debug compilation
 
             static bool renderImGuiDemo = false;
