@@ -1,4 +1,4 @@
-#include <CAD_modeler/views/modeler/modelerMainMenuBar.hpp>
+#include <CAD_modeler/views/modeler/modelerMenuBar.hpp>
 
 #include <CAD_modeler/controllers/modelerController.hpp>
 
@@ -6,13 +6,13 @@
 #include <ImGuiFileDialog.h>
 
 
-ModelerMainMenuBar::ModelerMainMenuBar(ModelerController& controller, Modeler& model):
+ModelerMenuBar::ModelerMenuBar(ModelerController& controller, Modeler& model):
     controller(controller), model(model)
 {
 }
 
 
-void ModelerMainMenuBar::Render()
+void ModelerMenuBar::Render()
 {
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("File")) {

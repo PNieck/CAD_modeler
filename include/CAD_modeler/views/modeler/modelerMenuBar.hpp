@@ -6,9 +6,9 @@
 class ModelerController;
 
 
-class ModelerMainMenuBar {
+class ModelerMenuBar {
 public:
-    ModelerMainMenuBar(ModelerController& controller, Modeler& model);
+    ModelerMenuBar(ModelerController& controller, Modeler& model);
 
     void Render();
 
