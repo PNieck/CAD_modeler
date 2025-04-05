@@ -92,6 +92,9 @@ Entity C0SurfaceSystem::CreateSurface(C0Patches &patches)
             // Creating control points with temporary location
             Entity cp = patches.GetPoint(j, i);
 
+            if (patches.controlPointsHandlers.contains(cp))
+                continue;
+
             HandlerId cpHandler = coordinator->Subscribe(cp, std::static_pointer_cast<EventHandler<Position>>(handler));
             patches.controlPointsHandlers.insert({cp, cpHandler});
 
