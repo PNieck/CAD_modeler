@@ -96,6 +96,8 @@ void ModelerObjectsPropertiesView::RenderSingleObjectProperties(Entity entity) c
 
     if (!components.contains(Modeler::GetComponentId<Unremovable>()))
         DisplayEntityDeletionOption(entity);
+
+    ImGui::Text("Object ID: %d", entity);
 }
 
 
