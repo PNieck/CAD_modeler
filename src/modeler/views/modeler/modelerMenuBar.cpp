@@ -12,7 +12,7 @@ ModelerMenuBar::ModelerMenuBar(ModelerController& controller, Modeler& model):
 }
 
 
-void ModelerMenuBar::Render()
+void ModelerMenuBar::Render() const
 {
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("File")) {

@@ -8,8 +8,8 @@ public:
         Flat
     };
 
-    MillingCutter(const float radius, const Type type, float height = 1.f):
-        radius(radius), type(type), height(height) {}
+    MillingCutter(const float radius, const Type type, const float height = 1.f):
+        radius(radius), height(height), type(type) {}
 
     float radius;
     float height;

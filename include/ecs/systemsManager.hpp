@@ -38,8 +38,8 @@ public:
 
     template<SystemConcept Sys, typename Comp>
     void RegisterRequiredComponent() {
-        ComponentId compId = ComponentsManager::GetComponentId<Comp>();
-        SystemId sysId = GetSystemID<Sys>();
+        const ComponentId compId = ComponentsManager::GetComponentId<Comp>();
+        const SystemId sysId = GetSystemID<Sys>();
 
         componentsToSystemsMap[compId].insert(sysId);
 
@@ -48,18 +48,11 @@ public:
 
 
     template<typename Comp>
-    void EntityGainedComponent(Entity entity, const std::set<ComponentId>& components) {
-        ComponentId compId = ComponentsManager::GetComponentId<Comp>();
+    void EntityGainedComponent(const Entity entity, const std::set<ComponentId>& components) {
+        const ComponentId compId = ComponentsManager::GetComponentId<Comp>();
 
-        auto const& systemsIds = componentsToSystemsMap[compId];
-
-        for (const auto systemId : systemsIds) {
-            const auto& requirements = requiredComponents[systemId];
-
-            if (std::includes(
-                components.cbegin(), components.cend(),
-                requirements.cbegin(), requirements.cend()
-            )) {
+        for (const auto systemId : componentsToSystemsMap[compId]) {
+            if (std::ranges::includes(components, requiredComponents[systemId])) {
                 systems[systemId]->AddEntity(entity);
             }
         }
@@ -67,20 +60,18 @@ public:
 
 
     template<typename Comp>
-    void EntityLostComponent(Entity entity) {
-        ComponentId compId = ComponentsManager::GetComponentId<Comp>();
+    void EntityLostComponent(const Entity entity) {
+        const ComponentId compId = ComponentsManager::GetComponentId<Comp>();
 
-        auto const& systemsIds = componentsToSystemsMap[compId];
-
-        for (const auto systemId : systemsIds) {
+        for (const auto systemId : componentsToSystemsMap[compId]) {
             systems[systemId]->RemoveEntity(entity);
         }
     }
 
 
-    void EntityDeleted(Entity entity) {
-        for (auto const& pair : systems) {
-            pair.second->RemoveEntity(entity);
+    void EntityDeleted(const Entity entity) {
+        for (const auto &val: systems | std::views::values) {
+            val->RemoveEntity(entity);
         }
     }
 

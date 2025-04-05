@@ -187,9 +187,7 @@ void C0PatchesSystem::Update() const
     auto const& toUpdateSystem = coordinator->GetSystem<ToUpdateSystem>();
     auto const& netSystem = coordinator->GetSystem<ControlNetSystem>();
 
-    auto toUpdate = toUpdateSystem->GetEntitiesToUpdate<C0PatchesSystem>();
-
-    for (const auto entity: toUpdate) {
+    for (const auto entity: toUpdateSystem->GetEntitiesToUpdate<C0PatchesSystem>()) {
         auto const& patches = coordinator->GetComponent<C0Patches>(entity);
 
         UpdateMesh(entity, patches);

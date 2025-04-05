@@ -348,7 +348,7 @@ std::vector<float> InterpolationCurveSystem::SuperdiagonalElems(const std::vecto
 {
     std::vector<float> result(chordLengths.size() - 2);
 
-    for (int i=0; i < result.size(); ++i) {
+    for (size_t i=0; i < result.size(); ++i) {
         result[i] = chordLengths[i+1] / (chordLengths[i] + chordLengths[i+1]);
     }
 

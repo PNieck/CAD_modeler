@@ -10,21 +10,22 @@ class Coordinator;
 
 class System {
 public:
+    System() = default;
 
-    inline void RemoveEntity(Entity entity) {
+    void RemoveEntity(const Entity entity) {
         entities.erase(entity);
     }
 
-    inline void AddEntity(Entity entity) {
+    void AddEntity(const Entity entity) {
         entities.insert(entity);
     }
 
     // TODO: remove
-    inline void SetCoordinator(Coordinator* coord) {
+    void SetCoordinator(Coordinator* coord) {
         this->coordinator = coord;
     }
 
-    inline const std::unordered_set<Entity>& GetEntities() const {
+    const std::unordered_set<Entity>& GetEntities() const {
         return entities;
     }
 

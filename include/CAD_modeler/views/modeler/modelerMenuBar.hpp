@@ -10,7 +10,7 @@ class ModelerMenuBar {
 public:
     ModelerMenuBar(ModelerController& controller, Modeler& model);
 
-    void Render();
+    void Render() const;
 
 private:
     ModelerController& controller;

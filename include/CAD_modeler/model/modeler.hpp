@@ -161,23 +161,23 @@ public:
 
     Entity Add3DPointFromViewport(float x, float y);
 
-    inline const std::unordered_set<Entity> EntitiesWithNames() const
+    const std::unordered_set<Entity>& EntitiesWithNames() const
         { return nameSystem->EntitiesWithNames(); }
 
-    inline const Name& GetEntityName(Entity entity) const
+    const Name& GetEntityName(const Entity entity) const
         { return nameSystem->GetName(entity); }
 
-    inline bool IsSelected(Entity entity) const
+    bool IsSelected(const Entity entity) const
         { return selectionSystem->IsSelected(entity); }
 
-    void Select(const Entity entity)
+    void Select(const Entity entity) const
         { return selectionSystem->Select(entity); }
 
     void TryToSelectFromViewport(float x, float y);
 
     void SelectMultipleFromViewport(float x, float y, float dist);
 
-    void Deselect(const Entity entity)
+    void Deselect(const Entity entity) const
         { return selectionSystem->Deselect(entity); }
 
     inline void DeselectAllEntities() const
@@ -233,31 +233,31 @@ public:
     inline void ShowC2BSplinePolygon(Entity entity) const
         { return c2CurveSystem->ShowBSplinePolygon(entity); }
 
-    inline void HideC2BSplinePolygon(Entity entity) const
+    void HideC2BSplinePolygon(const Entity entity) const
         { return c2CurveSystem->HideBSplinePolygon(entity); }
 
-    inline const void ShowC2BezierPolygon(Entity entity) const
+    void ShowC2BezierPolygon(const Entity entity) const
         { return c2CurveSystem->ShowBezierPolygon(entity); }
 
-    inline const void HideC2BezierPolygon(Entity entity) const
+    void HideC2BezierPolygon(const Entity entity) const
         { return c2CurveSystem->HideBezierPolygon(entity); }
 
-    inline const void ShowC2BezierControlPoints(Entity entity) const
+    void ShowC2BezierControlPoints(const Entity entity) const
         { return c2CurveSystem->ShowBezierControlPoints(entity); }
 
-    inline const void HideC2BezierControlPoints(Entity entity) const
+    void HideC2BezierControlPoints(const Entity entity) const
         { return c2CurveSystem->HideBezierControlPoints(entity); }
 
-    inline const void SetSurfaceDensity(Entity entity, PatchesDensity density) const
+    void SetSurfaceDensity(const Entity entity, const PatchesDensity density) const
         { c0SurfaceSystem->SetDensity(entity, density); }
 
-    inline const void ShowPatchesPolygon(Entity entity, const Patches& patches) const
+    void ShowPatchesPolygon(const Entity entity, const Patches& patches) const
         { controlNetSystem->AddControlPointsNet(entity, patches); }
 
-    inline const void HidePatchesPolygon(Entity entity) const
+    void HidePatchesPolygon(const Entity entity) const
         { controlNetSystem->DeleteControlPointsNet(entity); }
 
-    inline bool HasPatchesPolygon(Entity entity) const
+    bool HasPatchesPolygon(const Entity entity) const
         { return controlNetSystem->HasControlPointsNet(entity); }
 
     std::vector<GregoryPatchesSystem::Hole> GetHolesPossibleToFill(const std::unordered_set<Entity>& entities) const;
@@ -271,7 +271,7 @@ public:
         { gregoryPatchesSystem->HideControlNet(gregoryPatches); }
 
     template <typename Comp>
-    static inline constexpr ComponentId GetComponentId()
+    static constexpr ComponentId GetComponentId()
         { return ComponentsManager::GetComponentId<Comp>(); }
 
     inline void LoadScene(const std::string& path)

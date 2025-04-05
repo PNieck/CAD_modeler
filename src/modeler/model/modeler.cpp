@@ -355,24 +355,24 @@ void Modeler::AddColOfC2CylinderPatches(Entity surface, float radius, const alg:
 
 Entity Modeler::Add3DPointFromViewport(float x, float y)
 {
-    Position newPos(PointFromViewportCoordinates(x, y));
-    Entity result = pointsSystem->CreatePoint(newPos);
+    const Position newPos(PointFromViewportCoordinates(x, y));
+    const Entity result = pointsSystem->CreatePoint(newPos);
     nameSystem->SetName(result, nameGenerator.GenerateName("Point_"));
 
     return result;
 }
 
 
-void Modeler::TryToSelectFromViewport(float x, float y)
+void Modeler::TryToSelectFromViewport(const float x, const float y)
 {
-    Line line(LineFromViewportCoordinates(x, y));
+    const Line line(LineFromViewportCoordinates(x, y));
     selectionSystem->SelectFromLine(line);
 }
 
 
-void Modeler::SelectMultipleFromViewport(float x, float y, float dist)
+void Modeler::SelectMultipleFromViewport(const float x, const float y, const float dist)
 {
-    Line line(LineFromViewportCoordinates(x, y));
+    const Line line(LineFromViewportCoordinates(x, y));
     selectionSystem->SelectAllFromLine(line, dist);
 }
 

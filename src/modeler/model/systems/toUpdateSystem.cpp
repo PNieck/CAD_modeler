@@ -9,9 +9,9 @@ void ToUpdateSystem::RegisterSystem(Coordinator& coordinator)
 }
 
 
-void ToUpdateSystem::Unmark(Entity entity, SystemId systemId)
+void ToUpdateSystem::Unmark(const Entity entity, const SystemId systemId)
 {
-    auto it = entitiesToUpdate.find(systemId);
+    const auto it = entitiesToUpdate.find(systemId);
     if (it == entitiesToUpdate.end())
         return;
 

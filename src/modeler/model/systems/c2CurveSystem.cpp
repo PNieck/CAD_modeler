@@ -504,8 +504,8 @@ std::vector<uint32_t> C2CurveSystem::GenerateBSplinePolygonIndices(const CurveCo
 
     std::vector<uint32_t> result(controlPoints.size());
 
-    for (int i = 0; i < result.size(); ++i) {
-        result[i] = i;
+    for (size_t i = 0; i < result.size(); ++i) {
+        result[i] = static_cast<uint32_t>(i);
     }
 
     return result;

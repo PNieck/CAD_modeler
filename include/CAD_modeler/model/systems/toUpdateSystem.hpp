@@ -4,7 +4,6 @@
 #include <ecs/coordinator.hpp>
 
 #include <set>
-#include <optional>
 
 
 class ToUpdateSystem: public System {
@@ -12,11 +11,11 @@ public:
     static void RegisterSystem(Coordinator& coordinator);
 
     template <typename Sys>
-    inline void MarkAsToUpdate(Entity entity) {
+    void MarkAsToUpdate(const Entity entity) {
         MarkAsToUpdate(entity, Coordinator::GetSystemID<Sys>());
     }
 
-    void MarkAsToUpdate(Entity entity, SystemId systemId)
+    void MarkAsToUpdate(const Entity entity, const SystemId systemId)
         { entitiesToUpdate[systemId].insert(entity); }
 
     template <typename Sys>
@@ -29,7 +28,7 @@ public:
     void UnmarkAll()
         { UnmarkAll(Coordinator::GetSystemID<Sys>()); }
 
-    void UnmarkAll(SystemId system)
+    void UnmarkAll(const SystemId system)
         { entitiesToUpdate.erase(system); }
 
     template <typename Sys>
