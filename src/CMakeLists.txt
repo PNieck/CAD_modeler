@@ -84,7 +84,6 @@ target_link_libraries(
     graph
     ImGuiFileDialog
     nlohmann_json::nlohmann_json
-    dlib::dlib
     imguiLoadingSpinner
     openGlHelpers
     optimization

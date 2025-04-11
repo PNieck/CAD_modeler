@@ -25,9 +25,6 @@ private:
     interSys::IntersectionPoint FindFirstApproximation(interSys::Surface& s1, interSys::Surface& s2) const;
 
     [[nodiscard]]
-    std::optional<interSys::IntersectionPoint> FindFirstIntersectionPointDLib(Entity e1, Entity e2, const interSys::IntersectionPoint& initSol) const;
-
-    [[nodiscard]]
     std::optional<interSys::IntersectionPoint> FindFirstIntersectionPoint(interSys::Surface& s1, interSys::Surface& s2, const interSys::IntersectionPoint& initSol) const;
 
     std::optional<interSys::IntersectionPoint> FindNextIntersectionPoint(interSys::Surface& s1, interSys::Surface& s2, interSys::IntersectionPoint &prevSol, float step) const;
