@@ -146,8 +146,8 @@ std::vector<uint32_t> InterpolationCurveSystem::GenerateMeshIndices(const CurveC
 {
     std::vector<uint32_t> result((cps.Size() - 1) * 4);
 
-    for (int i=0; i < result.size(); ++i) {
-        result[i] = i;
+    for (size_t i=0; i < result.size(); ++i) {
+        result[i] = static_cast<uint32_t>(i);
     }
 
     return result;
@@ -156,18 +156,18 @@ std::vector<uint32_t> InterpolationCurveSystem::GenerateMeshIndices(const CurveC
 
 std::vector<alg::Vector4<alg::Vec3>> InterpolationCurveSystem::FindInterpolationsPolynomialsInPowerBasis(const CurveControlPoints& cps) const
 {
-    auto ctrlPts = PreprocessControlPoints(cps);
+    const auto ctrlPts = PreprocessControlPoints(cps);
 
-    auto chordLengths = ChordLengthsBetweenControlPoints(ctrlPts);
+    const auto chordLengths = ChordLengthsBetweenControlPoints(ctrlPts);
 
-    auto squareCoeff = SquareCoeffInPowerBasis(ctrlPts, chordLengths);
-    auto cubicCoeff = CubicCoeffInPowerBasis(squareCoeff, chordLengths);
-    auto linearCoeff = LinearCoeffInPowerBasis(squareCoeff, cubicCoeff, chordLengths, ctrlPts);
-    auto constCoeff = ConstantCoeffInPowerBasis(linearCoeff, squareCoeff, cubicCoeff, chordLengths, ctrlPts);
+    const auto squareCoeff = SquareCoeffInPowerBasis(ctrlPts, chordLengths);
+    const auto cubicCoeff = CubicCoeffInPowerBasis(squareCoeff, chordLengths);
+    const auto linearCoeff = LinearCoeffInPowerBasis(squareCoeff, cubicCoeff, chordLengths, ctrlPts);
+    const auto constCoeff = ConstantCoeffInPowerBasis(linearCoeff, squareCoeff, cubicCoeff, chordLengths, ctrlPts);
 
     std::vector<alg::Vector4<alg::Vec3>> result(constCoeff.size());
 
-    for (int i=0; i < constCoeff.size(); ++i) {
+    for (size_t i=0; i < constCoeff.size(); ++i) {
         result[i] = alg::Vector4(
             constCoeff[i],
             linearCoeff[i],
@@ -176,7 +176,7 @@ std::vector<alg::Vector4<alg::Vec3>> InterpolationCurveSystem::FindInterpolation
         );
     }
 
-    for (int i=0; i < result.size(); ++i) {
+    for (size_t i=0; i < result.size(); ++i) {
         ChangePolynomialInPowerBaseDomainFrom0To1(result[i], chordLengths[i]);
     }
 
@@ -240,7 +240,7 @@ std::vector<alg::Vec3> InterpolationCurveSystem::SquareCoeffInPowerBasis(const s
 
     result[0] = alg::Vec3(0);
 
-    for (int i=1; i <= result.size() - 2; ++i) {
+    for (size_t i=1; i <= result.size() - 2; ++i) {
         result[i] = coeff.value()[i-1];
     }
 
@@ -254,7 +254,7 @@ std::vector<alg::Vec3> InterpolationCurveSystem::CubicCoeffInPowerBasis(const st
 {
     std::vector<alg::Vec3> result(squarePowerCoeff.size() - 1);
 
-    for (int i=0; i < result.size(); ++i) {
+    for (size_t i=0; i < result.size(); ++i) {
         result[i] = (squarePowerCoeff[i+1] - squarePowerCoeff[i]) / (3.f * chordsLen[i]);
     }
 
@@ -277,7 +277,7 @@ std::vector<alg::Vec3> InterpolationCurveSystem::LinearCoeffInPowerBasis(
 
     result[0] = (cpPos1.vec - cpPos0.vec - cubicPowerCoeff[0] * t*t*t) / t;
 
-    for (int i=1; i < result.size(); ++i) {
+    for (size_t i=1; i < result.size(); ++i) {
         t = chordsLen[i-1];
         result[i] = result[i-1] + 2.f*squarePowerCoeff[i-1]*t + 3.f*cubicPowerCoeff[i-1]*t*t;
     }
@@ -297,8 +297,8 @@ std::vector<alg::Vec3> InterpolationCurveSystem::ConstantCoeffInPowerBasis(
 
     result[0] = coordinator->GetComponent<Position>(ctrlPts[0]).vec;
 
-    for (int i=1; i < result.size(); ++i) {
-        float t = chordsLen[i-1];
+    for (size_t i=1; i < result.size(); ++i) {
+        const float t = chordsLen[i-1];
         result[i] = result[i-1] + linearPowerCoeff[i-1]*t + squarePowerCoeff[i-1]*t*t + cubicPowerCoeff[i-1]*t*t*t;
     }
 
@@ -315,7 +315,7 @@ std::vector<float> InterpolationCurveSystem::ChordLengthsBetweenControlPoints(co
 
     result.reserve(ctrlPts.size() - 1);
 
-    for (int i=1; i < ctrlPts.size(); ++i) {
+    for (size_t i=1; i < ctrlPts.size(); ++i) {
         auto const& p0 = coordinator->GetComponent<Position>(ctrlPts[i-1]);
         auto const& p1 = coordinator->GetComponent<Position>(ctrlPts[i]);
 
@@ -330,7 +330,7 @@ std::vector<float> InterpolationCurveSystem::SubdiagonalElems(const std::vector<
 {
     std::vector<float> result(chordLengths.size() - 2);
 
-    for (int i=0; i < result.size(); ++i) {
+    for (size_t i=0; i < result.size(); ++i) {
         result[i] = chordLengths[i+1] / (chordLengths[i+1] + chordLengths[i+2]);
     }
 
@@ -360,7 +360,7 @@ std::vector<alg::Vec3> InterpolationCurveSystem::EquationResultsElems(const std:
 {
     std::vector<alg::Vec3> result(chordLengths.size() - 1);
 
-    for (int i=0; i < result.size(); ++i) {
+    for (size_t i=0; i < result.size(); ++i) {
         auto const& posI = coordinator->GetComponent<Position>(ctrlPts[i]);
         auto const& posIPlus1 = coordinator->GetComponent<Position>(ctrlPts[i+1]);
         auto const& posIPlus2 = coordinator->GetComponent<Position>(ctrlPts[i+2]);

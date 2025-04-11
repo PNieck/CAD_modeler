@@ -405,7 +405,7 @@ void ModelerObjectsPropertiesView::DisplaySurfacePatches(const Entity entity, co
     for (int row=0; row < patches.PointsInRow(); row++) {
         for (int col=0; col < patches.PointsInCol(); col++) {
             const Entity cp = patches.GetPoint(row, col);
-            ImGui::Text(model.GetEntityName(cp).c_str());
+            ImGui::Text("%s", model.GetEntityName(cp).c_str());
         }
     }
 
