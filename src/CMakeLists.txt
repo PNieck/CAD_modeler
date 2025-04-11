@@ -54,7 +54,7 @@ enable_compiler_warnings(optimization)
 
 
 #
-# Optimization library
+# Root finding library
 #
 file(GLOB_RECURSE ROOT_FINDING_LIB_HEADERS CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/include/rootFinding/*.hpp")
 file(GLOB_RECURSE ROOT_FINDING_LIB_SRCS CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/src/rootFinding/*.cpp")
