@@ -46,7 +46,7 @@ Entity C0CylinderSystem::CreateCylinder(const Position &pos, const alg::Vec3 &di
     auto handler = std::make_shared<ControlPointMovedHandler>(cylinder, *coordinator);
 
     for (int row=0; row < patches.PointsInRow(); ++row) {
-        for (int col=0; col < patches.PointsInCol(); ++col) {
+        for (int col=0; col < patches.PointsInCol() - 1; ++col) {
             Entity cp = pointsSystem->CreatePoint();
             patches.SetPoint(cp, row, col);
 
@@ -61,7 +61,7 @@ Entity C0CylinderSystem::CreateCylinder(const Position &pos, const alg::Vec3 &di
 
     for (int row=0; row < patches.PointsInRow(); ++row) {
         Entity cp = patches.GetPoint(row, 0);
-        patches.SetPoint(cp, row, patches.PointsInRow() - 1);
+        patches.SetPoint(cp, row, patches.PointsInCol() - 1);
     }
 
     Mesh mesh;
