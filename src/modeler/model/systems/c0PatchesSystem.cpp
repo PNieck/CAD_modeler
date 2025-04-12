@@ -62,10 +62,7 @@ void C0PatchesSystem::ShowBezierNet(const Entity surface)
 }
 
 
-alg::Vec4 CubicBernsteinPolynomial(float t) {
-    // t normalization
-    t -= std::floor(t);
-
+alg::Vec4 CubicBernsteinPolynomial(const float t) {
     const float oneMinusT = 1.0f - t;
 
     return {
@@ -76,11 +73,13 @@ alg::Vec4 CubicBernsteinPolynomial(float t) {
     };
 }
 
-Position C0PatchesSystem::PointOnPatches(const C0Patches &patches, const float u, const float v) const
+Position C0PatchesSystem::PointOnPatches(const C0Patches &patches, float u, float v) const
 {
     CheckUVDomain(patches, u, v);
 
     const SingleC0Patch p(*coordinator, patches, u, v);
+
+    NormalizeUV(patches, u, v);
 
     const auto bu = CubicBernsteinPolynomial(u);
     const auto bv = CubicBernsteinPolynomial(v);
@@ -96,10 +95,7 @@ Position C0PatchesSystem::PointOnPatches(const C0Patches &patches, const float u
 }
 
 
-alg::Vec3 Derivative(float t, const alg::Vec3& a0, const alg::Vec3& a1, const alg::Vec3& a2, const alg::Vec3& a3) {
-    // t normalization
-    t -= std::floor(t);
-
+alg::Vec3 Derivative(const float t, const alg::Vec3& a0, const alg::Vec3& a1, const alg::Vec3& a2, const alg::Vec3& a3) {
     const float oneMinusT = 1.f - t;
 
     return -3.f * oneMinusT * oneMinusT * a0 +
@@ -109,11 +105,13 @@ alg::Vec3 Derivative(float t, const alg::Vec3& a0, const alg::Vec3& a1, const al
 }
 
 
-alg::Vec3 C0PatchesSystem::PartialDerivativeU(const C0Patches &patches, const float u, const float v) const
+alg::Vec3 C0PatchesSystem::PartialDerivativeU(const C0Patches &patches, float u, float v) const
 {
     CheckUVDomain(patches, u, v);
 
     const SingleC0Patch p(*coordinator, patches, u, v);
+
+    NormalizeUV(patches, u, v);
 
     const auto bv = CubicBernsteinPolynomial(v);
 
@@ -132,6 +130,8 @@ alg::Vec3 C0PatchesSystem::PartialDerivativeV(const C0Patches &patches, float u,
     CheckUVDomain(patches, u, v);
 
     const SingleC0Patch p(*coordinator, patches, u, v);
+
+    NormalizeUV(patches, u, v);
 
     const auto bu = CubicBernsteinPolynomial(u);
 
@@ -216,6 +216,21 @@ void C0PatchesSystem::CheckUVDomain(const C0Patches &patches, const float u, con
 {
     if (!(v >= 0.f && v <= MaxV(patches)) || !(u >= 0.f && u <= MaxU(patches)))
         throw std::runtime_error("Arguments outside the domain");
+}
+
+
+// TODO: merge with c2 surface function
+void C0PatchesSystem::NormalizeUV(const C0Patches &patches, float& u, float& v)
+{
+    if (u == MaxU(patches))
+        u = 1.f;
+    else
+        u -= std::floor(u);
+
+    if (v == MaxV(patches))
+        v = 1.f;
+    else
+        v -= std::floor(v);
 }
 
 
