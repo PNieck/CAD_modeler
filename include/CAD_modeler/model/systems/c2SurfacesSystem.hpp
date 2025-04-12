@@ -81,6 +81,7 @@ private:
     std::vector<float> GenerateVertices(const C2Patches& patches) const;
     std::vector<uint32_t> GenerateIndices(const C2Patches& patches) const;
 
+    static void NormalizeUV(const C2Patches& patches, float& u, float& v);
 
     class DeletionHandler final : public EventHandler<C2Patches> {
     public:

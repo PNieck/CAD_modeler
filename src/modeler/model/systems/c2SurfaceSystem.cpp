@@ -303,11 +303,8 @@ float b(const int n, const int j, const float t) {
 }
 
 
-alg::Vec3 QuadraticBSplinesBaseFunctions(float t)
+alg::Vec3 QuadraticBSplinesBaseFunctions(const float t)
 {
-    // Normalize t
-    t -= std::floor(t);
-
     alg::Vec3 result;
     result.X() = 1;
 
@@ -322,11 +319,8 @@ alg::Vec3 QuadraticBSplinesBaseFunctions(float t)
 }
 
 
-alg::Vec4 CubicBSplinesBaseFunctions(float t) {
+alg::Vec4 CubicBSplinesBaseFunctions(const float t) {
     alg::Vec3 quadratic = QuadraticBSplinesBaseFunctions(t);
-
-    // Normalize t
-    t -= std::floor(t);
 
     return {
         b(3, 1, t) * quadratic.Z(),
@@ -337,9 +331,11 @@ alg::Vec4 CubicBSplinesBaseFunctions(float t) {
 }
 
 
-Position C2SurfaceSystem::PointOnPatches(const C2Patches &patches, const float u, const float v) const
+Position C2SurfaceSystem::PointOnPatches(const C2Patches &patches, float u, float v) const
 {
     const SingleC2Patch p(*coordinator, patches, u, v);
+
+    NormalizeUV(patches, u, v);
 
     alg::Vec4 Nu = CubicBSplinesBaseFunctions(u);
     alg::Vec4 Nv = CubicBSplinesBaseFunctions(v);
@@ -356,9 +352,11 @@ Position C2SurfaceSystem::PointOnPatches(const C2Patches &patches, const float u
 }
 
 
-alg::Vec3 C2SurfaceSystem::PartialDerivativeU(const C2Patches &patches, const float u, const float v) const
+alg::Vec3 C2SurfaceSystem::PartialDerivativeU(const C2Patches &patches, float u, float v) const
 {
     const SingleC2Patch p(*coordinator, patches, u, v);
+
+    NormalizeUV(patches, u, v);
 
     alg::Vec3 Nu = QuadraticBSplinesBaseFunctions(u);
     alg::Vec4 Nv = CubicBSplinesBaseFunctions(v);
@@ -375,9 +373,11 @@ alg::Vec3 C2SurfaceSystem::PartialDerivativeU(const C2Patches &patches, const fl
 }
 
 
-alg::Vec3 C2SurfaceSystem::PartialDerivativeV(const C2Patches &patches, const float u, const float v) const
+alg::Vec3 C2SurfaceSystem::PartialDerivativeV(const C2Patches &patches, float u, float v) const
 {
     const SingleC2Patch p(*coordinator, patches, u, v);
+
+    NormalizeUV(patches, u, v);
 
     alg::Vec4 Nu = CubicBSplinesBaseFunctions(u);
     alg::Vec3 Nv = QuadraticBSplinesBaseFunctions(v);
@@ -513,6 +513,20 @@ std::vector<uint32_t> C2SurfaceSystem::GenerateIndices(const C2Patches &patches)
     }
 
     return result;
+}
+
+
+void C2SurfaceSystem::NormalizeUV(const C2Patches& patches, float& u, float& v)
+{
+    if (u == MaxU(patches))
+        u = 1.f;
+    else
+        u -= std::floor(u);
+
+    if (v == MaxV(patches))
+        v = 1.f;
+    else
+        v -= std::floor(v);
 }
 
 
