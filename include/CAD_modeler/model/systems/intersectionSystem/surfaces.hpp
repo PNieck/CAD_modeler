@@ -19,10 +19,27 @@ namespace interSys
             const alg::Vec3 tangent1 = PartialDerivativeU(u, v);
             const alg::Vec3 tangent2 = PartialDerivativeV(u, v);
 
-            return alg::Cross(tangent1, tangent2).Normalize();
+            return Cross(tangent1, tangent2).Normalize();
         }
 
+        virtual void Normalize(float& u, float& v) {}
+
+        virtual float MinUInitSampleVal()
+            { return 0.f; }
+
+        virtual float MaxUInitSampleVal()
+            { return 1.0f; }
+
+        virtual float MinVInitSampleVal()
+            { return 0.f; }
+
+        virtual float MaxVInitSampleVal()
+            { return 1.0f; }
+
         virtual float MaxU() = 0;
+        virtual float MinU() = 0;
+
         virtual float MaxV() = 0;
+        virtual float MinV() = 0;
     };
 }

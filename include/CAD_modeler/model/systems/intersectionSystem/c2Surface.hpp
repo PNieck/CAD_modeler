@@ -32,6 +32,13 @@ namespace interSys
         float MaxV() override
             { return  C2SurfaceSystem::MaxV(patches); }
 
+        // FIXME
+        float MinU() override
+            { return 0; }
+
+        // FIXME
+        float MinV() override
+            { return 0; }
 
     private:
         std::shared_ptr<C2SurfaceSystem> surfaceSys;

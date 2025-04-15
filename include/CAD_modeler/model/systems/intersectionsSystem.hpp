@@ -29,7 +29,7 @@ private:
 
     std::optional<interSys::IntersectionPoint> FindNextIntersectionPoint(interSys::Surface& s1, interSys::Surface& s2, interSys::IntersectionPoint &prevSol, float step) const;
 
-    bool CheckIfSolutionIsInDomain(interSys::IntersectionPoint &sol) const;
+    bool CheckIfSolutionIsInDomain(interSys::IntersectionPoint &sol, interSys::Surface& s1, interSys::Surface& s2) const;
     float ErrorRate(interSys::Surface& s1, interSys::Surface& s2, const interSys::IntersectionPoint &intPt) const;
     float ErrorRate(Entity e1, Entity e2, const interSys::IntersectionPoint &intPt) const;
 };

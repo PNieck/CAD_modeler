@@ -29,11 +29,23 @@ namespace interSys
         alg::Vec3 PartialDerivativeV(const float u, const float v) override
             { return ToriSystem::PartialDerivativeWithRespectToBeta(params, rot, scale, u, v); }
 
-        float MaxU() override
+        float MaxUInitSampleVal() override
             { return 2.f * std::numbers::pi_v<float>; }
 
-        float MaxV() override
+        float MaxVInitSampleVal() override
             { return 2.f * std::numbers::pi_v<float>; }
+
+        float MaxU() override
+            { return std::numeric_limits<float>::infinity(); }
+
+        float MinU() override
+            { return -std::numeric_limits<float>::infinity(); }
+
+        float MaxV() override
+            { return std::numeric_limits<float>::infinity(); }
+
+        float MinV() override
+            { return -std::numeric_limits<float>::infinity(); }
 
     private:   
         const TorusParameters& params;

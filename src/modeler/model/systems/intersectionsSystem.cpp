@@ -118,34 +118,41 @@ std::unique_ptr<Surface> IntersectionSystem::GetSurface(const Entity entity) con
 }
 
 
-IntersectionPoint IntersectionSystem::FindFirstApproximation(interSys::Surface& s1, interSys::Surface& s2) const
+IntersectionPoint IntersectionSystem::FindFirstApproximation(Surface& s1, Surface& s2) const
 {
     constexpr int oneDimSamplesCnt = 15;
 
-    const float maxU1 = s1.MaxU();
-    const float maxV1 = s1.MaxV();
-    const float maxU2 = s2.MaxU();
-    const float maxV2 = s2.MaxV();
+    const float maxU1 = s1.MaxUInitSampleVal();
+    const float minU1 = s1.MinUInitSampleVal();
 
-    const float deltaU1 = maxU1 / static_cast<float>(oneDimSamplesCnt + 1);
-    const float deltaV1 = maxV1 / static_cast<float>(oneDimSamplesCnt + 1);
-    const float deltaU2 = maxU2 / static_cast<float>(oneDimSamplesCnt + 1);
-    const float deltaV2 = maxV2 / static_cast<float>(oneDimSamplesCnt + 1);
+    const float maxV1 = s1.MaxVInitSampleVal();
+    const float minV1 = s1.MinVInitSampleVal();
+
+    const float maxU2 = s2.MaxUInitSampleVal();
+    const float minU2 = s2.MinUInitSampleVal();
+
+    const float maxV2 = s2.MaxVInitSampleVal();
+    const float minV2 = s2.MinVInitSampleVal();
+
+    const float deltaU1 = (maxU1 - minU1) / static_cast<float>(oneDimSamplesCnt + 1);
+    const float deltaV1 = (maxV1 - minV1) / static_cast<float>(oneDimSamplesCnt + 1);
+    const float deltaU2 = (maxU2 - minU2) / static_cast<float>(oneDimSamplesCnt + 1);
+    const float deltaV2 = (maxV2 - minV2) / static_cast<float>(oneDimSamplesCnt + 1);
 
     float minDist = std::numeric_limits<float>::infinity();
     IntersectionPoint result;
 
     for (int i = 1; i <= oneDimSamplesCnt; ++i) {
-        const float u1 = deltaU1 * static_cast<float>(i);
+        const float u1 = deltaU1 * static_cast<float>(i) + minU1;
 
         for (int j = 1; j <= oneDimSamplesCnt; ++j) {
-            const float v1 = deltaV1 * static_cast<float>(j);
+            const float v1 = deltaV1 * static_cast<float>(j) + minV1;
 
             for (int k = 1; k <= oneDimSamplesCnt; ++k) {
-                const float u2 = deltaU2 * static_cast<float>(k);
+                const float u2 = deltaU2 * static_cast<float>(k) + minU2;
 
                 for (int l = 1; l <= oneDimSamplesCnt; ++l) {
-                    const float v2 = deltaV2 * static_cast<float>(l);
+                    const float v2 = deltaV2 * static_cast<float>(l) + minV2;
 
                     auto point1 = s1.PointOnSurface(u1, v1);
                     auto point2 = s2.PointOnSurface(u2, v2);
@@ -234,6 +241,9 @@ std::optional<IntersectionPoint> IntersectionSystem::FindFirstIntersectionPoint(
         sol.value()[2],
         sol.value()[3]
     );
+
+    if (!CheckIfSolutionIsInDomain(result, s1, s2))
+        return std::nullopt;
 
     if (ErrorRate(s1, s2, result) > 1e-5)
         return std::nullopt;
@@ -338,18 +348,20 @@ std::optional<IntersectionPoint> IntersectionSystem::FindNextIntersectionPoint(S
     );
 }
 
+bool IntersectionSystem::CheckIfSolutionIsInDomain(
+    IntersectionPoint &sol, Surface &s1, Surface &s2
+) const {
+    return s1.MinU() <= sol.U1() &&
+           s1.MaxU() >= sol.U1() &&
 
-bool IntersectionSystem::CheckIfSolutionIsInDomain(IntersectionPoint &sol) const
-{
-    constexpr float maxVal = 2.0f * std::numbers::pi_v<float>;
+           s2.MinU() <= sol.U2() &&
+           s2.MaxU() >= sol.U2() &&
 
-    if (sol.V1() >= 0.f && sol.V1() <= maxVal &&
-        sol.U1() >= 0.f && sol.U1() <= maxVal &&
-        sol.V2() >= 0.f && sol.V2() <= maxVal &&
-        sol.U2() >= 0.f && sol.U2() <= maxVal)
-        return true;
+           s1.MinV() <= sol.V1() &&
+           s1.MaxV() >= sol.V1() &&
 
-    return false;
+           s2.MinV() <= sol.V2() &&
+           s2.MaxV() >= sol.V2();
 }
 
 
