@@ -86,10 +86,10 @@ Position C0PatchesSystem::PointOnPatches(const C0Patches &patches, float u, floa
     const auto bv = CubicBernsteinPolynomial(v);
 
     // Result of bu*p
-    const auto a0 = bu.X()*p.Point(0,0) + bu.Y()*p.Point(0, 1) + bu.Z()*p.Point(0, 2) + bu.W()*p.Point(0, 3);
-    const auto a1 = bu.X()*p.Point(1, 0) + bu.Y()*p.Point(1, 2) + bu.Z()*p.Point(1, 2) + bu.W()*p.Point(1, 3);
-    const auto a2 = bu.X()*p.Point(2, 0) + bu.Y()*p.Point(2, 2) + bu.Z()*p.Point(2, 2) + bu.W()*p.Point(2, 3);
-    const auto a3 = bu.X()*p.Point(3, 0) + bu.Y()*p.Point(3, 2) + bu.Z()*p.Point(3, 2) + bu.W()*p.Point(3, 3);
+    const auto a0 = bu.X()*p.Point(0, 0) + bu.Y()*p.Point(1, 0) + bu.Z()*p.Point(2, 0) + bu.W()*p.Point(3, 0);
+    const auto a1 = bu.X()*p.Point(0, 1) + bu.Y()*p.Point(1, 1) + bu.Z()*p.Point(2, 1) + bu.W()*p.Point(3, 1);
+    const auto a2 = bu.X()*p.Point(0, 2) + bu.Y()*p.Point(1, 2) + bu.Z()*p.Point(2, 2) + bu.W()*p.Point(3, 2);
+    const auto a3 = bu.X()*p.Point(0, 3) + bu.Y()*p.Point(1, 3) + bu.Z()*p.Point(2, 3) + bu.W()*p.Point(3, 3);
 
     // pos = bu * p * bv^T
     return a0*bv.X() + a1*bv.Y() + a2*bv.Z() + a3*bv.W();
@@ -117,10 +117,10 @@ alg::Vec3 C0PatchesSystem::PartialDerivativeU(const C0Patches &patches, float u,
     const auto bv = CubicBernsteinPolynomial(v);
 
     // Result of bu*p
-    const auto a0 = bv.X()*p.Point(0, 0) + bv.Y()*p.Point(1, 0) + bv.Z()*p.Point(2, 0) + bv.W()*p.Point(3, 0);
-    const auto a1 = bv.X()*p.Point(0, 1) + bv.Y()*p.Point(1, 1) + bv.Z()*p.Point(2, 1) + bv.W()*p.Point(3, 1);
-    const auto a2 = bv.X()*p.Point(0, 2) + bv.Y()*p.Point(1, 2) + bv.Z()*p.Point(2, 2) + bv.W()*p.Point(3, 2);
-    const auto a3 = bv.X()*p.Point(0, 3) + bv.Y()*p.Point(1, 3) + bv.Z()*p.Point(2, 3) + bv.W()*p.Point(3, 3);
+    const auto a0 = bv.X()*p.Point(0, 0) + bv.Y()*p.Point(0, 1) + bv.Z()*p.Point(0, 2) + bv.W()*p.Point(0, 3);
+    const auto a1 = bv.X()*p.Point(1, 0) + bv.Y()*p.Point(1, 1) + bv.Z()*p.Point(1, 2) + bv.W()*p.Point(1, 3);
+    const auto a2 = bv.X()*p.Point(2, 0) + bv.Y()*p.Point(2, 1) + bv.Z()*p.Point(2, 2) + bv.W()*p.Point(2, 3);
+    const auto a3 = bv.X()*p.Point(3, 0) + bv.Y()*p.Point(3, 1) + bv.Z()*p.Point(3, 2) + bv.W()*p.Point(3, 3);
 
     return Derivative(u, a0, a1, a2, a3);
 }
@@ -137,10 +137,10 @@ alg::Vec3 C0PatchesSystem::PartialDerivativeV(const C0Patches &patches, float u,
     const auto bu = CubicBernsteinPolynomial(u);
 
     // Result of bu*p
-    const auto a0 = bu.X()*p.Point(0, 1) + bu.Y()*p.Point(0, 1) + bu.Z()*p.Point(0, 2) + bu.W()*p.Point(0, 3);
-    const auto a1 = bu.X()*p.Point(1, 1) + bu.Y()*p.Point(1, 1) + bu.Z()*p.Point(1, 2) + bu.W()*p.Point(1, 3);
-    const auto a2 = bu.X()*p.Point(2, 1) + bu.Y()*p.Point(2, 1) + bu.Z()*p.Point(2, 2) + bu.W()*p.Point(2, 3);
-    const auto a3 = bu.X()*p.Point(3, 1) + bu.Y()*p.Point(3, 1) + bu.Z()*p.Point(3, 2) + bu.W()*p.Point(3, 3);
+    const auto a0 = bu.X()*p.Point(0, 0) + bu.Y()*p.Point(1, 0) + bu.Z()*p.Point(2, 0) + bu.W()*p.Point(3, 0);
+    const auto a1 = bu.X()*p.Point(0, 1) + bu.Y()*p.Point(1, 1) + bu.Z()*p.Point(2, 1) + bu.W()*p.Point(3, 1);
+    const auto a2 = bu.X()*p.Point(0, 2) + bu.Y()*p.Point(1, 2) + bu.Z()*p.Point(2, 2) + bu.W()*p.Point(3, 2);
+    const auto a3 = bu.X()*p.Point(0, 3) + bu.Y()*p.Point(1, 3) + bu.Z()*p.Point(2, 3) + bu.W()*p.Point(3, 3);
 
     return Derivative(v, a0, a1, a2, a3);
 }
