@@ -39,11 +39,11 @@ Entity C0CylinderSystem::CreateCylinder(const Position &pos, const alg::Vec3 &di
     C0Patches patches(1, 1);
 
     auto const pointsSystem = coordinator->GetSystem<PointsSystem>();
-    auto cpRegistry = coordinator->GetSystem<ControlPointsRegistrySystem>();
+    const auto cpRegistry = coordinator->GetSystem<ControlPointsRegistrySystem>();
 
     Entity cylinder = coordinator->CreateEntity();
 
-    auto handler = std::make_shared<ControlPointMovedHandler>(cylinder, *coordinator);
+    const auto handler = std::make_shared<ControlPointMovedHandler>(cylinder, *coordinator);
 
     for (int row=0; row < patches.PointsInRow(); ++row) {
         for (int col=0; col < patches.PointsInCol() - 1; ++col) {
@@ -60,12 +60,12 @@ Entity C0CylinderSystem::CreateCylinder(const Position &pos, const alg::Vec3 &di
     }
 
     for (int row=0; row < patches.PointsInRow(); ++row) {
-        Entity cp = patches.GetPoint(row, 0);
+        const Entity cp = patches.GetPoint(row, 0);
         patches.SetPoint(cp, row, patches.PointsInCol() - 1);
     }
 
-    Mesh mesh;
-    PatchesDensity density(5);
+    const Mesh mesh;
+    const PatchesDensity density(5);
 
     patches.deletionHandler = coordinator->Subscribe<C0Patches>(cylinder, deletionHandler);
 

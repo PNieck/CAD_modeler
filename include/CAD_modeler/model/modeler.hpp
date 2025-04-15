@@ -264,23 +264,23 @@ public:
     
     Entity FillHole(const GregoryPatchesSystem::Hole& hole);
 
-    inline void ShowGregoryNet(Entity gregoryPatches)
+    void ShowGregoryNet(const Entity gregoryPatches)
         { gregoryPatchesSystem->ShowControlNet(gregoryPatches); }
 
-    inline void HideGregoryNet(Entity gregoryPatches)
+    void HideGregoryNet(const Entity gregoryPatches)
         { gregoryPatchesSystem->HideControlNet(gregoryPatches); }
 
     template <typename Comp>
     static constexpr ComponentId GetComponentId()
         { return ComponentsManager::GetComponentId<Comp>(); }
 
-    inline void LoadScene(const std::string& path)
+    void LoadScene(const std::string& path)
         { saveManager.LoadScene(path, coordinator); }
 
-    inline void SaveScene(const std::string& path)
+    void SaveScene(const std::string& path)
         { saveManager.SaveScene(path, coordinator); }
 
-    inline void FindIntersection(const Entity e1, const Entity e2, const float step)
+    void FindIntersection(const Entity e1, const Entity e2, const float step)
         { intersectionSystem->FindIntersection(e1, e2, step); }
 
     void ClearScene();

@@ -15,14 +15,15 @@ float LengthSquared(const std::vector<float>& vec)
 }
 
 
-std::optional<std::vector<float>> opt::ConjugateGradientMethod(FunctionToOptimize& fun, LineSearchMethod& lineSearch, const std::vector<float> &initSol, float eps, unsigned int maxIt)
+std::optional<std::vector<float>> opt::ConjugateGradientMethod(
+    FunctionToOptimize& fun, LineSearchMethod& lineSearch, const std::vector<float> &initSol, const float eps, const unsigned int maxIt)
 {
     std::vector<float> solution(initSol);
 
     // At first search direction is equal to gradient with minus sign
     std::vector<float> searchDir = fun.Gradient(solution);
-    for (int i=0; i < searchDir.size(); i++)
-        searchDir[i] = -searchDir[i];
+    for (float & i : searchDir)
+        i = -i;
 
     for (unsigned int it = 0; it < maxIt; it++) {
         std::cout << "It " << it << " conjugate\n";
@@ -30,7 +31,7 @@ std::optional<std::vector<float>> opt::ConjugateGradientMethod(FunctionToOptimiz
         if (fun.Value(solution) < eps)
             return solution;
 
-        float step = lineSearch.Search(fun, solution, searchDir);
+        const float step = lineSearch.Search(fun, solution, searchDir);
 
         std::vector<float> oldSolution = solution;
 
@@ -43,7 +44,7 @@ std::optional<std::vector<float>> opt::ConjugateGradientMethod(FunctionToOptimiz
         std::vector<float> oldGradient = fun.Gradient(oldSolution);
         std::vector<float> newGradient = fun.Gradient(solution);
 
-        float beta = LengthSquared(newGradient) / LengthSquared(oldGradient);
+        const float beta = LengthSquared(newGradient) / LengthSquared(oldGradient);
 
         for (int i=0; i < searchDir.size(); i++)
             searchDir[i] = -newGradient[i] + beta * searchDir[i];

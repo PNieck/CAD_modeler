@@ -74,7 +74,7 @@ public:
 
 
     template <typename Comp>
-    void DeleteComponent(Entity entity) {
+    void DeleteComponent(const Entity entity) {
         eventMgr.ComponentDeleted<Comp>(entity);
         componentMgr.DeleteComponent<Comp>(entity);
         systemsMgr.EntityLostComponent<Comp>(entity);
@@ -82,7 +82,7 @@ public:
 
 
     template <typename Comp>
-    const Comp& GetComponent(Entity entity) const {
+    const Comp& GetComponent(const Entity entity) const {
         return componentMgr.GetComponent<Comp>(entity);
     }
 
@@ -104,22 +104,22 @@ public:
         { return eventMgr.Subscribe<Comp>(entity, function); }
 
     template <typename Comp>
-    inline void Unsubscribe(Entity entity, HandlerId handlerId)
+    void Unsubscribe(const Entity entity, const HandlerId handlerId)
         { eventMgr.Unsubscribe<Comp>(entity, handlerId); }
 
     template <typename Comp>
-    inline std::shared_ptr<EventHandler<Comp>> GetEventHandler(Entity entity, HandlerId handlerId)
+    std::shared_ptr<EventHandler<Comp>> GetEventHandler(const Entity entity, const HandlerId handlerId)
         { return eventMgr.GetHandler<Comp>(entity, handlerId); }
 
-    inline const std::set<ComponentId>& GetEntityComponents(Entity entity) const
+    const std::set<ComponentId>& GetEntityComponents(const Entity entity) const
         { return componentMgr.GetEntityComponents(entity); }
 
     template <typename Comp>
-    inline bool HasComponent(Entity entity) const
+    bool HasComponent(const Entity entity) const
         { return componentMgr.GetEntityComponents(entity).contains(ComponentsManager::GetComponentId<Comp>()); }
 
     template <SystemConcept Sys>
-    inline std::shared_ptr<Sys> GetSystem() const {
+    std::shared_ptr<Sys> GetSystem() const {
         return systemsMgr.GetSystem<Sys>();
     }
 

@@ -73,6 +73,7 @@ alg::Vec4 CubicBernsteinPolynomial(const float t) {
     };
 }
 
+
 Position C0PatchesSystem::PointOnPatches(const C0Patches &patches, float u, float v) const
 {
     CheckUVDomain(patches, u, v);
@@ -219,7 +220,6 @@ void C0PatchesSystem::CheckUVDomain(const C0Patches &patches, const float u, con
 }
 
 
-// TODO: merge with c2 surface function
 void C0PatchesSystem::NormalizeUV(const C0Patches &patches, float& u, float& v)
 {
     if (u == MaxU(patches))

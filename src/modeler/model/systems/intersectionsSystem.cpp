@@ -168,7 +168,7 @@ IntersectionPoint IntersectionSystem::FindFirstApproximation(interSys::Surface& 
 }
 
 
-class DistanceBetweenPoints: public opt::FunctionToOptimize {
+class DistanceBetweenPoints final : public opt::FunctionToOptimize {
 public:
     explicit DistanceBetweenPoints(Surface& s1, Surface& s2):
         surface1(s1), surface2(s2) {}
@@ -177,7 +177,7 @@ public:
         const auto point1 = surface1.PointOnSurface(args[0], args[1]);
         const auto point2 = surface2.PointOnSurface(args[2], args[3]);
 
-        return alg::DistanceSquared(point1, point2);
+        return DistanceSquared(point1, point2);
     }
 
 
@@ -223,7 +223,7 @@ std::optional<IntersectionPoint> IntersectionSystem::FindFirstIntersectionPoint(
     opt::DichotomyLineSearch lineSearch(0, 1.f, 1e-7f);
     DistanceBetweenPoints fun(s1, s2);
 
-    const auto sol = opt::ConjugateGradientMethod(fun, lineSearch, startingPoint, 1e-7, 100);
+    const auto sol = ConjugateGradientMethod(fun, lineSearch, startingPoint, 1e-7, 100);
 
     if (!sol.has_value())
         return std::nullopt;
@@ -303,7 +303,7 @@ std::optional<IntersectionPoint> IntersectionSystem::FindNextIntersectionPoint(S
         alg::Vec3 normal1 = s1.NormalVector(prevSol.U1(), prevSol.V1());
         alg::Vec3 normal2 = s2.NormalVector(prevSol.U2(), prevSol.V2());
 
-        alg::Vec3 tangent = alg::Cross(normal1, normal2);
+        alg::Vec3 tangent = Cross(normal1, normal2);
         alg::Vec3 prevPoint = s1.PointOnSurface(prevSol.U1(), prevSol.V1());
 
         vectorSys->AddVector(tangent, prevPoint);
@@ -315,7 +315,7 @@ std::optional<IntersectionPoint> IntersectionSystem::FindNextIntersectionPoint(S
             step
         );
 
-        nextPoint = root::NewtonMethod(fun, prevSol.AsVector(), 1e-5);
+        nextPoint = NewtonMethod(fun, prevSol.AsVector(), 1e-5);
         if (!nextPoint.has_value()) {
             step /= 2.f;
             if (step < minStep)
@@ -358,16 +358,16 @@ float IntersectionSystem::ErrorRate(Surface& s1, Surface& s2, const Intersection
     const auto point1 = s1.PointOnSurface(intPt.U1(), intPt.V1());
     const auto point2 = s2.PointOnSurface(intPt.U2(), intPt.V2());
 
-    return alg::DistanceSquared(point1, point2);
+    return DistanceSquared(point1, point2);
 }
 
 
-float IntersectionSystem::ErrorRate(Entity e1, Entity e2, const IntersectionPoint &intPt) const
+float IntersectionSystem::ErrorRate(const Entity e1, const Entity e2, const IntersectionPoint &intPt) const
 {
     const auto toriSys = coordinator->GetSystem<ToriSystem>();
 
     const auto point1 = toriSys->PointOnTorus(e1, intPt.V1(), intPt.U1());
     const auto point2 = toriSys->PointOnTorus(e2, intPt.V2(), intPt.U2());
 
-    return alg::DistanceSquared(point1.vec, point2.vec);
+    return DistanceSquared(point1.vec, point2.vec);
 }
