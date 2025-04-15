@@ -9,9 +9,9 @@ SingleC2Patch::SingleC2Patch(Coordinator &coord, const C2Patches &patches, const
     firstRow(static_cast<int>(std::floor(u))),
     firstCol(static_cast<int>(std::floor(v)))
 {
-    if (v == C2SurfaceSystem::MaxV(patches))
+    if (u == C2SurfaceSystem::MaxU(patches))
         --firstRow;
 
-    if (u == C2SurfaceSystem::MaxU(patches))
+    if (v == C2SurfaceSystem::MaxV(patches))
         --firstCol;
 }
