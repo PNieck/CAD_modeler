@@ -41,8 +41,8 @@ bool IntersectionSystem::CanBeIntersected(const Entity entity) const
     if (coordinator->GetSystem<C2SurfaceSystem>()->GetEntities().contains(entity))
         return true;
 
-    // if (coordinator->GetSystem<C2CylinderSystem>()->GetEntities().contains(entity))
-    //     return true;
+    if (coordinator->GetSystem<C2CylinderSystem>()->GetEntities().contains(entity))
+        return true;
 
     if (coordinator->GetSystem<ToriSystem>()->GetEntities().contains(entity))
         return true;
@@ -112,7 +112,10 @@ std::unique_ptr<Surface> IntersectionSystem::GetSurface(const Entity entity) con
         return std::make_unique<C0Surface>(*coordinator, entity);
 
     if (coordinator->GetSystem<C2SurfaceSystem>()->GetEntities().contains(entity))
-        return std::make_unique<C2Surface>(*coordinator, entity);
+        return std::make_unique<C2Surface>(*coordinator, coordinator->GetComponent<C2Patches>(entity));
+
+    if (coordinator->GetSystem<C2CylinderSystem>()->GetEntities().contains(entity))
+        return std::make_unique<C2Surface>(*coordinator, coordinator->GetComponent<C2CylinderPatches>(entity));
 
     throw std::runtime_error("Entity cannot be used to calculate intersection curve");
 }
