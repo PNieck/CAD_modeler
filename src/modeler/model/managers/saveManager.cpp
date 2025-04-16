@@ -446,8 +446,8 @@ void SaveManager::SaveScene(const std::string &path, Coordinator &coordinator)
         cylinderC2Json["name"] = nameSys->GetName(cylinderC2);
 
         const auto& patches = coordinator.GetComponent<C2CylinderPatches>(cylinderC2);
-        cylinderC2Json["size"]["x"] = patches.PatchesInRow();
-        cylinderC2Json["size"]["y"] = patches.PatchesInCol()+2;
+        cylinderC2Json["size"]["y"] = patches.PatchesInRow();
+        cylinderC2Json["size"]["x"] = patches.PatchesInCol()+2;
 
         const auto& density = coordinator.GetComponent<PatchesDensity>(cylinderC2);
 
