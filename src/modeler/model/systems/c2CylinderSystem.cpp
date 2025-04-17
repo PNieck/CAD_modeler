@@ -30,16 +30,16 @@ void C2CylinderSystem::Init()
 }
 
 
-Entity C2CylinderSystem::CreateCylinder(const Position &pos, const alg::Vec3 &direction, float radius)
+Entity C2CylinderSystem::CreateCylinder(const Position &pos, const alg::Vec3 &direction, const float radius)
 {
     C2CylinderPatches patches(1, 1);
 
     auto const pointsSystem = coordinator->GetSystem<PointsSystem>();
-    auto cpRegistrySys = coordinator->GetSystem<ControlPointsRegistrySystem>();
+    const auto cpRegistrySys = coordinator->GetSystem<ControlPointsRegistrySystem>();
 
     Entity surface = coordinator->CreateEntity();
 
-    auto handler = std::make_shared<ControlPointMovedHandler>(surface, *coordinator);
+    const auto handler = std::make_shared<ControlPointMovedHandler>(surface, *coordinator);
 
     for (int row=0; row < patches.PointsInRow(); ++row) {
         for (int col=0; col < patches.PointsInCol() - DoublePointsCnt; ++col) {

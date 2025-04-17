@@ -10,14 +10,18 @@ std::optional<alg::Vec4> root::NewtonMethod(
     int i = 0;
 
     do {
-        if (++i > maxIter)
+        if (++i > maxIter) {
+            std::cout << "Max iter excited" << std::endl;
             return std::nullopt;
+        }
 
         alg::Vec4 oldSol = newSol;
 
         auto jacInv = fun.Jacobian(oldSol).Inverse();
-        if (!jacInv.has_value())
+        if (!jacInv.has_value()) {
+            std::cout << "No jacobian inverse" << std::endl;
             return std::nullopt;
+        }
 
         newSol = oldSol - fun.Value(oldSol) * jacInv.value();
 

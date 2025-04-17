@@ -35,23 +35,23 @@ Position ParsePosition(const auto& json)
 
 Rotation ParseRotation(const auto& json)
 {
-    float x = json["rotation"]["x"];
-    float y = json["rotation"]["y"];
-    float z = json["rotation"]["z"];
+    const float x = json["rotation"]["x"];
+    const float y = json["rotation"]["y"];
+    const float z = json["rotation"]["z"];
 
-    return Rotation(x, y, z);
+    return {x, y, z};
 }
 
 
 Scale ParseScale(const auto& json)
 {
-    float x = json["scale"]["x"];
-    float y = json["scale"]["y"];
-    float z = json["scale"]["z"];
+    const float x = json["scale"]["x"];
+    const float y = json["scale"]["y"];
+    const float z = json["scale"]["z"];
 
-    return Scale(
+    return {
         x, y, z
-    );
+    };
 }
 
 
@@ -338,7 +338,6 @@ void SaveManager::SaveScene(const std::string &path, Coordinator &coordinator)
 
     for (Entity surfaceC0: c0SurfaceSys->GetEntities()) {
         json surfaceC0Json;
-        
 
         surfaceC0Json["objectType"] = "bezierSurfaceC0";
         surfaceC0Json["id"] = surfaceC0;

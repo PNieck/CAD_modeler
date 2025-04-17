@@ -23,6 +23,8 @@
 // TODO: remove
 #include <iostream>
 
+#include "CAD_modeler/model/systems/nameSystem.hpp"
+
 
 using namespace interSys;
 
@@ -85,6 +87,8 @@ void IntersectionSystem::FindIntersection(const Entity e1, const Entity e2, cons
     sol = solOpt.value();
     pointSys->CreatePoint(surface1->PointOnSurface(sol.U1(), sol.V1()));
 
+    int it = 0;
+
     Position newPoint;
     do {
         solOpt = FindNextIntersectionPoint(*surface1, *surface2, sol, step);
@@ -98,7 +102,9 @@ void IntersectionSystem::FindIntersection(const Entity e1, const Entity e2, cons
         pointSys->CreatePoint(surface1->PointOnSurface(sol.U1(), sol.V1()));
 
         newPoint = surface1->PointOnSurface(sol.U1(), sol.V1());
-    } while (alg::DistanceSquared(firstPoint, newPoint.vec) > step*step);
+
+        std::cout << it << std::endl;
+    } while (DistanceSquared(firstPoint, newPoint.vec) > step*step && it++ < 18);
 
 }
 
@@ -230,7 +236,7 @@ std::optional<IntersectionPoint> IntersectionSystem::FindFirstIntersectionPoint(
         initSol.V2()
     };
 
-    opt::DichotomyLineSearch lineSearch(0, 1.f, 1e-7f);
+    opt::DichotomyLineSearch lineSearch(0, 0.1f, 1e-7f);
     DistanceBetweenPoints fun(s1, s2);
 
     const auto sol = ConjugateGradientMethod(fun, lineSearch, startingPoint, 1e-7, 100);
@@ -316,10 +322,12 @@ std::optional<IntersectionPoint> IntersectionSystem::FindNextIntersectionPoint(S
         alg::Vec3 normal1 = s1.NormalVector(prevSol.U1(), prevSol.V1());
         alg::Vec3 normal2 = s2.NormalVector(prevSol.U2(), prevSol.V2());
 
-        alg::Vec3 tangent = Cross(normal1, normal2);
+        alg::Vec3 tangent = Cross(normal1, normal2).Normalize();
         alg::Vec3 prevPoint = s1.PointOnSurface(prevSol.U1(), prevSol.V1());
 
         vectorSys->AddVector(tangent, prevPoint);
+        vectorSys->AddVector(normal1, prevPoint);
+        vectorSys->AddVector(normal2, prevPoint);
 
         NextPointDistFun fun(
             s1, s2,

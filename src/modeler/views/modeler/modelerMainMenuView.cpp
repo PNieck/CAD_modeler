@@ -415,12 +415,12 @@ void ModelerMainMenuView::RenderAddingIntersectionCurve()
             const Entity e1 = *entities.begin();
             const Entity e2 = *(++entities.begin());
 
-            try {
+            //try {
                 model.FindIntersection(e1, e2, step);
-            }
-            catch (...) {
-                ImGui::OpenPopup("Cannot find intersection curve");
-            }
+            // }
+            // catch (...) {
+            //     ImGui::OpenPopup("Cannot find intersection curve");
+            // }
 
         }
     }

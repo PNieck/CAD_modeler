@@ -27,18 +27,18 @@ public:
 
     void MergeControlPoints(Entity cylinder, Entity oldCP, Entity newCP);
 
-    inline void SetDensity(Entity entity, PatchesDensity density) const
+    void SetDensity(const Entity entity, const PatchesDensity density) const
         { coordinator->SetComponent<PatchesDensity>(entity, density); }
 
-    inline int GetRowsCnt(Entity cylinder) const
+    int GetRowsCnt(const Entity cylinder) const
         { return coordinator->GetComponent<C2CylinderPatches>(cylinder).PatchesInRow(); }
 
-    inline int GetColsCnt(Entity cylinder) const
+    int GetColsCnt(const Entity cylinder) const
         { return coordinator->GetComponent<C2CylinderPatches>(cylinder).PatchesInCol(); }
 
     void ShowDeBoorNet(Entity cylinder);
 
-    inline void HideDeBoorNet(Entity cylinder)
+    void HideDeBoorNet(const Entity cylinder)
         { coordinator->GetSystem<ControlNetSystem>()->DeleteControlPointsNet(cylinder); }
 
     void Recalculate(Entity cylinder, const Position& pos, const alg::Vec3& direction, float radius) const;

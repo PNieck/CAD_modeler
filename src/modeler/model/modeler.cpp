@@ -70,7 +70,7 @@ Modeler::Modeler(const int viewportWidth, const int viewportHeight):
     c2CylinderSystem->Init();
     gregoryPatchesSystem->Init();
 
-    Entity cursor = cursorSystem->GetCursor();
+    const Entity cursor = cursorSystem->GetCursor();
     nameSystem->SetName(cursor, "Cursor");
     coordinator.AddComponent<Unremovable>(cursor, Unremovable());
 }
@@ -78,10 +78,10 @@ Modeler::Modeler(const int viewportWidth, const int viewportHeight):
 
 Entity Modeler::AddTorus()
 {
-    Position cursorPos = cursorSystem->GetPosition();
+    const Position cursorPos = cursorSystem->GetPosition();
 
     // Default torus parameters
-    TorusParameters params {
+    constexpr TorusParameters params {
         .majorRadius = 1.0f,
         .minorRadius = 0.2f,
         .meshDensityMinR = 6,
@@ -474,7 +474,7 @@ void Modeler::ShowDerivativesV(Entity e)
 }
 
 
-void Modeler::ShowNormals(const Entity e)
+void Modeler::ShowC2Normals(const Entity e)
 {
     constexpr int cntRows = 10;
     constexpr int cntCols = 10;
@@ -483,8 +483,8 @@ void Modeler::ShowNormals(const Entity e)
     const float maxU = C2SurfaceSystem::MaxU(patches);
     const float maxV = C2SurfaceSystem::MaxV(patches);
 
-    for (int row = 0; row < cntRows; row++) {
-        for (int col = 0; col < cntCols; col++) {
+    for (int row = 0; row <= cntRows; row++) {
+        for (int col = 0; col <= cntCols; col++) {
             const float u = static_cast<float>(row) * maxU / static_cast<float>(cntRows);
             const float v = static_cast<float>(col) * maxV / static_cast<float>(cntCols);
 
@@ -499,7 +499,7 @@ void Modeler::ShowNormals(const Entity e)
     }
 }
 
-void Modeler::ShowNormals(Entity e, float u, float v)
+void Modeler::ShowC2Normals(Entity e, float u, float v)
 {
     auto point = c2SurfaceSystem->PointOnPatches(e, u, v);
     auto partialV = c2SurfaceSystem->PartialDerivativeV(e, u, v);
@@ -509,6 +509,45 @@ void Modeler::ShowNormals(Entity e, float u, float v)
 
     vectorSystem->AddVector(normal, point);
 }
+
+
+void Modeler::ShowC0Normals(Entity e)
+{
+    constexpr int cntRows = 0;
+    constexpr int cntCols = 30;
+
+    const auto& patches = coordinator.GetComponent<C0Patches>(e);
+    const float maxU = C0PatchesSystem::MaxU(patches);
+    const float maxV = C0PatchesSystem::MaxV(patches);
+
+    for (int row = 0; row <= cntRows; row++) {
+        for (int col = 0; col <= cntCols; col++) {
+            const float u = 0; //static_cast<float>(row) * maxU / static_cast<float>(cntRows);
+            const float v = static_cast<float>(col) * maxV / static_cast<float>(cntCols);
+
+            auto point = c0PatchesSystem->PointOnPatches(patches, u, v);
+            auto partialV = c0PatchesSystem->PartialDerivativeV(patches, u, v);
+            auto partialU = c0PatchesSystem->PartialDerivativeU(patches, u, v);
+
+            auto normal = alg::Cross(partialU, partialV).Normalize();
+
+            vectorSystem->AddVector(normal, point);
+        }
+    }
+}
+
+
+void Modeler::ShowC0Normals(Entity e, float u, float v)
+{
+    auto point = c0PatchesSystem->PointOnPatches(e, u, v);
+    auto partialV = c0PatchesSystem->PartialDerivativeV(e, u, v);
+    auto partialU = c0PatchesSystem->PartialDerivativeU(e, u, v);
+
+    auto normal = alg::Cross(partialU, partialV).Normalize();
+
+    vectorSystem->AddVector(normal, point);
+}
+
 
 void Modeler::Update() const
 {

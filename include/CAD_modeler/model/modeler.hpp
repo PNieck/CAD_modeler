@@ -288,8 +288,10 @@ public:
     // TODO: delet
     void ShowDerivativesU(Entity e);
     void ShowDerivativesV(Entity e);
-    void ShowNormals(Entity e);
-    void ShowNormals(Entity e, float u, float v);
+    void ShowC2Normals(Entity e);
+    void ShowC2Normals(Entity e, float u, float v);
+    void ShowC0Normals(Entity e);
+    void ShowC0Normals(Entity e, float u, float v);
 
     bool selectingEntities = false;
     float selectionCircleX = 0.0f;
