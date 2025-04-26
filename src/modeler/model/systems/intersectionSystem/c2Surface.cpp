@@ -93,7 +93,7 @@ namespace interSys {
 
     float C2Surface::MaxV()
     {
-        if (wrapU)
+        if (wrapV)
             return std::numeric_limits<float>::infinity();
 
         return C2SurfaceSystem::MaxV(patches);
@@ -101,7 +101,12 @@ namespace interSys {
 
 
     float C2Surface::MinV()
-        { return MinU(); }
+    {
+        if (wrapV)
+            return -std::numeric_limits<float>::infinity();
+
+        return 0.f;
+    }
 }
 
 

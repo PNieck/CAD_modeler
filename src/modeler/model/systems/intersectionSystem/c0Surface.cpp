@@ -89,7 +89,7 @@ float interSys::C0Surface::MinU()
 
 float interSys::C0Surface::MaxV()
 {
-    if (wrapU)
+    if (wrapV)
         return std::numeric_limits<float>::infinity();
 
     return C0PatchesSystem::MaxV(patches);
@@ -97,4 +97,9 @@ float interSys::C0Surface::MaxV()
 
 
 float interSys::C0Surface::MinV()
-    { return MinU(); }
+{
+    if (wrapV)
+        return -std::numeric_limits<float>::infinity();
+
+    return 0.f;
+}
