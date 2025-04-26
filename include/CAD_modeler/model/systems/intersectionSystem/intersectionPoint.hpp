@@ -7,41 +7,45 @@ namespace interSys
 {
     class IntersectionPoint {
     public:
-        IntersectionPoint(float u1, float v1, float u2, float v2):
+        IntersectionPoint(const float u1, const float v1, const float u2, const float v2):
             vec(u1, v1, u2, v2) {}
 
-        explicit IntersectionPoint(alg::Vec4&& vec):
+        explicit IntersectionPoint(const alg::Vec4& vec):
             vec(vec) {}
 
         IntersectionPoint():
             IntersectionPoint(0.f, 0.f, 0.f, 0.f) {}
 
-        inline float& U1()
+        float& U1()
             { return vec.X(); }
 
-        inline float& V1()
+        float& V1()
             { return vec.Y(); }
 
-        inline float& U2()
+        float& U2()
             { return vec.Z(); }
 
-        inline float& V2()
+        float& V2()
             { return vec.W(); }
 
-        inline float U1() const
+        [[nodiscard]]
+        float U1() const
             { return vec.X(); }
 
-        inline float V1() const
+        [[nodiscard]]
+        float V1() const
             { return vec.Y(); }
 
-        inline float U2() const
+        [[nodiscard]]
+        float U2() const
             { return vec.Z(); }
 
-        inline float V2() const
+        [[nodiscard]]
+        float V2() const
             { return vec.W(); }
 
 
-        inline alg::Vec4& AsVector()
+        alg::Vec4& AsVector()
             { return vec; }
 
     private:
