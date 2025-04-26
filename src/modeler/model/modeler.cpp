@@ -194,17 +194,15 @@ Entity Modeler::AddC2Cylinder()
 }
 
 
-void Modeler::MergeControlPoints(Entity e1, Entity e2)
+void Modeler::MergeControlPoints(const Entity e1, const Entity e2)
 {
-    auto registrySys = coordinator.GetSystem<ControlPointsRegistrySystem>();
-    auto curveCPSys = coordinator.GetSystem<CurveControlPointsSystem>();
+    const auto registrySys = coordinator.GetSystem<ControlPointsRegistrySystem>();
+    const auto curveCPSys = coordinator.GetSystem<CurveControlPointsSystem>();
 
-    auto ownersSet = registrySys->GetOwnersOfControlPoints(e2);
-
-    for (auto owner: ownersSet) {
+    for (auto owner: registrySys->GetOwnersOfControlPoints(e2)) {
         // Getting system ID
-        auto sysId = std::get<1>(owner);
-        Entity entity = std::get<0>(owner);
+        const auto sysId = std::get<1>(owner);
+        const Entity entity = std::get<0>(owner);
 
         if (sysId == Coordinator::GetSystemID<C0CurveSystem>() ||
             sysId == Coordinator::GetSystemID<C2CurveSystem>() ||
@@ -226,7 +224,7 @@ void Modeler::MergeControlPoints(Entity e1, Entity e2)
 
     auto const& pos1 = coordinator.GetComponent<Position>(e1);
     auto const& pos2 = coordinator.GetComponent<Position>(e2);
-    Position newPos((pos1.vec + pos2.vec) * 0.5f);
+    const Position newPos((pos1.vec + pos2.vec) * 0.5f);
 
     coordinator.SetComponent<Position>(e1, newPos);
     coordinator.DestroyEntity(e2);
