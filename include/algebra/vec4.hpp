@@ -151,4 +151,10 @@ namespace alg
 
         return stream;
     }
+
+
+    template <typename DataType>
+    bool IsAnyNaN(const Vector4<DataType>& vec) {
+        return std::isnan(vec.X()) || std::isnan(vec.Y()) || std::isnan(vec.Z()) || std::isnan(vec.W());
+    }
 }
