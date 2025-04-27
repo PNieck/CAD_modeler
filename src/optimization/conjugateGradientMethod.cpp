@@ -1,24 +1,18 @@
 #include <optimization/conjugateGradientMethod.hpp>
 
+#include <optimization/utils.hpp>
+
 #include <iostream>
 
 
-float LengthSquared(const std::vector<float>& vec)
-{
-    float result = 0.f;
-
-    for (const float value: vec) {
-        result += value * value;
-    }
-
-    return result;
-}
-
-
 std::optional<std::vector<float>> opt::ConjugateGradientMethod(
-    FunctionToOptimize& fun, LineSearchMethod& lineSearch, const std::vector<float> &initSol, const float eps, const unsigned int maxIt)
-{
-    std::vector<float> solution(initSol);
+    FunctionToOptimize& fun,
+    LineSearchMethod& lineSearch,
+    const std::vector<float> &initSol,
+    const unsigned int maxIt,
+    StopCondition& stopCondition
+) {
+    std::vector solution(initSol);
 
     // At first search direction is equal to gradient with minus sign
     std::vector<float> searchDir = fun.Gradient(solution);
@@ -28,7 +22,7 @@ std::optional<std::vector<float>> opt::ConjugateGradientMethod(
     for (unsigned int it = 0; it < maxIt; it++) {
         std::cout << "It " << it << " conjugate\n";
 
-        if (fun.Value(solution) < eps)
+        if (stopCondition.ShouldStop(fun, solution))
             return solution;
 
         const float step = lineSearch.Search(fun, solution, searchDir);

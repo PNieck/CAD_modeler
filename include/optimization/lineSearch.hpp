@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../functionToOptimize.hpp"
+#include "functionToOptimize.hpp"
 
 
 namespace opt

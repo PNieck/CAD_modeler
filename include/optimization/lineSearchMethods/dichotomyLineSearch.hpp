@@ -1,6 +1,6 @@
 #pragma once
 
-#include "lineSearch.hpp"
+#include "../lineSearch.hpp"
 
 
 namespace opt
