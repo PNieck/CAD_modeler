@@ -202,19 +202,14 @@ public:
         const auto partDivV1 = surface1.PartialDerivativeV(args[0], args[1]);
         const auto partDivV2 = surface2.PartialDerivativeV(args[2], args[3]);
 
-        // TODO: optimize
-        const float xDiv = point1.X() - point2.X();
-        const float yDiv = point1.Y() - point2.Y();
-        const float zDiv = point1.Z() - point2.Z();
+        const auto diff = point1 - point2;
 
-        std::vector<float> result(4);
-
-        result[0] = 2.f * (xDiv*partDivU1.X() + yDiv*partDivU1.Y() + zDiv*partDivU1.Z());   // df/du1
-        result[1] = 2.f * (xDiv*partDivV1.X() + yDiv*partDivV1.Y() + zDiv*partDivV1.Z());   // df/dv1
-        result[2] = -2.f * (xDiv*partDivU2.X() + yDiv*partDivU2.Y() + zDiv*partDivU2.Z());  // df/du2
-        result[3] = -2.f * (xDiv*partDivV2.X() + yDiv*partDivV2.Y() + zDiv*partDivV2.Z());  // df/dv2
-
-        return result;
+        return {
+            2.f * Dot(diff, partDivU1),     // df/du1
+            2.f * Dot(diff, partDivV1),     // df/dv1
+            -2.f * Dot(diff, partDivU2),    // df/du2
+            -2.f * Dot(diff, partDivV2)     // df/dv2
+        };
     }
 
 private:
