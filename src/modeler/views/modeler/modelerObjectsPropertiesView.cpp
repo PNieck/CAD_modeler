@@ -172,7 +172,7 @@ void ModelerObjectsPropertiesView::RenderMergingControlPointsOptionButton(Entity
 }
 
 
-void ModelerObjectsPropertiesView::DisplayPositionProperty(Entity entity, const Position &pos) const
+void ModelerObjectsPropertiesView::DisplayPositionProperty(const Entity entity, const Position &pos) const
 {
     float x = pos.GetX();
     float y = pos.GetY();

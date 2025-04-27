@@ -48,6 +48,10 @@ namespace interSys
         alg::Vec4& AsVector()
             { return vec; }
 
+        [[nodiscard]]
+        const alg::Vec4& AsVector() const
+            { return vec; }
+
     private:
         alg::Vec4 vec;
     };

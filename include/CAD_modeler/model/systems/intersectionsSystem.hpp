@@ -6,6 +6,7 @@
 #include <memory>
 #include <tuple>
 
+#include "CAD_modeler/model/components/position.hpp"
 #include "intersectionSystem/intersectionPoint.hpp"
 #include "intersectionSystem/surfaces.hpp"
 
@@ -18,6 +19,8 @@ public:
 
     void FindIntersection(Entity e1, Entity e2, float step);
 
+    void FindIntersection(Entity e1, Entity e2, float step, const Position& guidance);
+
 private:
     [[nodiscard]]
     std::unique_ptr<interSys::Surface> GetSurface(Entity entity) const;
@@ -28,7 +31,14 @@ private:
     [[nodiscard]]
     std::optional<interSys::IntersectionPoint> FindFirstIntersectionPoint(interSys::Surface& s1, interSys::Surface& s2, const interSys::IntersectionPoint& initSol) const;
 
-    std::tuple<std::optional<interSys::IntersectionPoint>, bool> FindNextIntersectionPoint(interSys::Surface& s1, interSys::Surface& s2, interSys::IntersectionPoint &prevSol, float step) const;
+    [[nodiscard]]
+    std::tuple<std::optional<interSys::IntersectionPoint>, bool> FindNextIntersectionPoint(interSys::Surface& s1, interSys::Surface& s2, const interSys::IntersectionPoint &prevSol, float step) const;
+
+    std::optional<std::tuple<float, float>> NearestPoint(interSys::Surface& s, const Position& guidance) const;
+    std::tuple<float, float> NearestPointApproximation(interSys::Surface& s, const Position& guidance) const;
+
+
+    void FindIntersection(interSys::Surface& s1, interSys::Surface& s2, const interSys::IntersectionPoint& initPoint, float step);
 
     void FindOpenIntersection(const interSys::IntersectionPoint& firstPoint, interSys::Surface& s1, interSys::Surface& s2, float step) const;
 
@@ -36,7 +46,6 @@ private:
     static bool SolutionInDomain(interSys::Surface& s, float u, float v);
 
     float ErrorRate(interSys::Surface& s1, interSys::Surface& s2, const interSys::IntersectionPoint &intPt) const;
-    float ErrorRate(Entity e1, Entity e2, const interSys::IntersectionPoint &intPt) const;
 
     friend class NextPointDistFun;
 };

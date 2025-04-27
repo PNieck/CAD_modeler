@@ -155,6 +155,9 @@ public:
     inline void SetCursorPosition(float x, float y, float z) const
         { cursorSystem->SetPosition(alg::Vec3(x, y, z)); }
 
+    Position GetCursorPosition() const
+        { return cursorSystem->GetPosition(); }
+
     // TODO; Change to normal coordinates
     inline void SetCursorPositionFromViewport(float x, float y)
         { cursorSystem->SetPosition(PointFromViewportCoordinates(x, y)); }
@@ -280,8 +283,11 @@ public:
     void SaveScene(const std::string& path)
         { saveManager.SaveScene(path, coordinator); }
 
-    void FindIntersection(const Entity e1, const Entity e2, const float step)
+    void FindIntersection(const Entity e1, const Entity e2, const float step) const
         { intersectionSystem->FindIntersection(e1, e2, step); }
+
+    void FindIntersection(const Entity e1, const Entity e2, const float step, const Position& guidance) const
+        { intersectionSystem->FindIntersection(e1, e2, step, guidance); }
 
     void ClearScene();
 

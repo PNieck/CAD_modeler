@@ -15,6 +15,7 @@
 
 #include <optimization/conjugateGradientMethod.hpp>
 #include <optimization/lineSearchMethods/dichotomyLineSearch.hpp>
+#include <optimization/stopConditions/smallGradient.hpp>
 
 #include <rootFinding/newtonMethod.hpp>
 
@@ -57,59 +58,49 @@ void IntersectionSystem::FindIntersection(const Entity e1, const Entity e2, cons
     assert(CanBeIntersected(e2));
     assert(e1 != e2);
 
-    const auto pointSys = coordinator->GetSystem<PointsSystem>();
-
     const auto surface1 = GetSurface(e1);
     const auto surface2 = GetSurface(e2);
 
     const auto initSol = FindFirstApproximation(*surface1, *surface2);
-    auto firstSolOpt = FindFirstIntersectionPoint(*surface1, *surface2, initSol);
+    auto firstPointOpt = FindFirstIntersectionPoint(*surface1, *surface2, initSol);
 
-    if (!firstSolOpt.has_value()) {
+    if (!firstPointOpt.has_value()) {
         std::cout << "Cannot find first point\n";
         return;
     }
 
-    auto& firstSol = firstSolOpt.value();
+    FindIntersection(*surface1, *surface2, firstPointOpt.value(), step);
+}
 
-    const auto firstPoint = surface1->PointOnSurface(firstSol.U1(), firstSol.V1());
-    pointSys->CreatePoint(firstPoint);
 
-    auto [solOpt, lastPt] = FindNextIntersectionPoint(*surface1, *surface2, firstSol, step);
+void IntersectionSystem::FindIntersection(const Entity e1, const Entity e2, const float step, const Position &guidance)
+{
+    assert(CanBeIntersected(e1));
+    assert(CanBeIntersected(e2));
+    assert(e1 != e2);
 
-    if (!solOpt.has_value()) {
-        std::cout << "Cannot find second point\n";
+    const auto surface1 = GetSurface(e1);
+    const auto surface2 = GetSurface(e2);
+
+    const auto nearestPoint1 = NearestPoint(*surface1, guidance);
+    const auto nearestPoint2 = NearestPoint(*surface2, guidance);
+    if (!nearestPoint1.has_value() || !nearestPoint2.has_value()) {
+        std::cout << "Cannot find nearest point\n";
         return;
     }
 
-    auto& sol = solOpt.value();
-    pointSys->CreatePoint(surface1->PointOnSurface(sol.U1(), sol.V1()));
+    auto [u1, v1] = nearestPoint1.value();
+    auto [u2, v2] = nearestPoint2.value();
 
-    if (lastPt) {
-        FindOpenIntersection(firstSol, *surface1, *surface2, step);
+    const IntersectionPoint startingApprox(u1, v1, u2, v2);
+
+    const auto firstPointOpt = FindFirstIntersectionPoint(*surface1, *surface2, startingApprox);
+    if (!firstPointOpt.has_value()) {
+        std::cout << "Cannot find first point\n";
         return;
     }
 
-    Position newPoint;
-    do {
-        std::tie(solOpt, lastPt) = FindNextIntersectionPoint(*surface1, *surface2, sol, step);
-
-        if (!solOpt.has_value()) {
-            std::cout << "Cannot find next point\n";
-            return;
-        }
-
-        sol = solOpt.value();
-        pointSys->CreatePoint(surface1->PointOnSurface(sol.U1(), sol.V1()));
-
-        newPoint = surface1->PointOnSurface(sol.U1(), sol.V1());
-
-        if (lastPt) {
-            FindOpenIntersection(firstSol, *surface1, *surface2, step);
-            return;
-        }
-    } while (DistanceSquared(firstPoint, newPoint.vec) > step*step);
-
+    FindIntersection(*surface1, *surface2, firstPointOpt.value(), step);
 }
 
 
@@ -133,7 +124,7 @@ std::unique_ptr<Surface> IntersectionSystem::GetSurface(const Entity entity) con
 
 IntersectionPoint IntersectionSystem::FindFirstApproximation(Surface& s1, Surface& s2) const
 {
-    constexpr int oneDimSamplesCnt = 15;
+    constexpr int sampleCntInOneDim = 15;
 
     const float maxU1 = s1.MaxUInitSampleVal();
     const float minU1 = s1.MinUInitSampleVal();
@@ -147,24 +138,24 @@ IntersectionPoint IntersectionSystem::FindFirstApproximation(Surface& s1, Surfac
     const float maxV2 = s2.MaxVInitSampleVal();
     const float minV2 = s2.MinVInitSampleVal();
 
-    const float deltaU1 = (maxU1 - minU1) / static_cast<float>(oneDimSamplesCnt + 1);
-    const float deltaV1 = (maxV1 - minV1) / static_cast<float>(oneDimSamplesCnt + 1);
-    const float deltaU2 = (maxU2 - minU2) / static_cast<float>(oneDimSamplesCnt + 1);
-    const float deltaV2 = (maxV2 - minV2) / static_cast<float>(oneDimSamplesCnt + 1);
+    const float deltaU1 = (maxU1 - minU1) / static_cast<float>(sampleCntInOneDim + 1);
+    const float deltaV1 = (maxV1 - minV1) / static_cast<float>(sampleCntInOneDim + 1);
+    const float deltaU2 = (maxU2 - minU2) / static_cast<float>(sampleCntInOneDim + 1);
+    const float deltaV2 = (maxV2 - minV2) / static_cast<float>(sampleCntInOneDim + 1);
 
     float minDist = std::numeric_limits<float>::infinity();
     IntersectionPoint result;
 
-    for (int i = 1; i <= oneDimSamplesCnt; ++i) {
+    for (int i = 1; i <= sampleCntInOneDim; ++i) {
         const float u1 = deltaU1 * static_cast<float>(i) + minU1;
 
-        for (int j = 1; j <= oneDimSamplesCnt; ++j) {
+        for (int j = 1; j <= sampleCntInOneDim; ++j) {
             const float v1 = deltaV1 * static_cast<float>(j) + minV1;
 
-            for (int k = 1; k <= oneDimSamplesCnt; ++k) {
+            for (int k = 1; k <= sampleCntInOneDim; ++k) {
                 const float u2 = deltaU2 * static_cast<float>(k) + minU2;
 
-                for (int l = 1; l <= oneDimSamplesCnt; ++l) {
+                for (int l = 1; l <= sampleCntInOneDim; ++l) {
                     const float v2 = deltaV2 * static_cast<float>(l) + minV2;
 
                     auto point1 = s1.PointOnSurface(u1, v1);
@@ -211,6 +202,7 @@ public:
         const auto partDivV1 = surface1.PartialDerivativeV(args[0], args[1]);
         const auto partDivV2 = surface2.PartialDerivativeV(args[2], args[3]);
 
+        // TODO: optimize
         const float xDiv = point1.X() - point2.X();
         const float yDiv = point1.Y() - point2.Y();
         const float zDiv = point1.Z() - point2.Z();
@@ -231,6 +223,19 @@ private:
 };
 
 
+class NearZeroCondition final : public opt::StopCondition {
+public:
+    explicit NearZeroCondition(const float eps=1e-7): eps(eps) {}
+
+    bool ShouldStop(opt::FunctionToOptimize &fun, const std::vector<float> &args) override {
+        return fun.Value(args) <= eps;
+    }
+
+private:
+    float eps;
+};
+
+
 std::optional<IntersectionPoint> IntersectionSystem::FindFirstIntersectionPoint(Surface& s1, Surface& s2, const IntersectionPoint& initSol) const
 {
     const std::vector startingPoint = {
@@ -241,9 +246,10 @@ std::optional<IntersectionPoint> IntersectionSystem::FindFirstIntersectionPoint(
     };
 
     opt::DichotomyLineSearch lineSearch(0, 0.1f, 1e-7f);
+    NearZeroCondition stopCond;
     DistanceBetweenPoints fun(s1, s2);
 
-    const auto sol = ConjugateGradientMethod(fun, lineSearch, startingPoint, 1e-7, 100);
+    const auto sol = ConjugateGradientMethod(fun, lineSearch, startingPoint, 100, stopCond);
 
     if (!sol.has_value())
         return std::nullopt;
@@ -325,7 +331,7 @@ private:
 };
 
 
-std::tuple<std::optional<IntersectionPoint>, bool> IntersectionSystem::FindNextIntersectionPoint(Surface& s1, Surface& s2, IntersectionPoint &prevSol, float step) const
+std::tuple<std::optional<IntersectionPoint>, bool> IntersectionSystem::FindNextIntersectionPoint(Surface& s1, Surface& s2, const IntersectionPoint &prevSol, float step) const
 {
     float remainingDist = step;
     const float minStep = step / 1024.f;
@@ -374,6 +380,142 @@ std::tuple<std::optional<IntersectionPoint>, bool> IntersectionSystem::FindNextI
 }
 
 
+class NearestPointFun final : public opt::FunctionToOptimize {
+public:
+    explicit NearestPointFun(Surface& s, const Position& guidance):
+        surface(s), guidance(guidance) {}
+
+    float Value(const std::vector<float> &args) override {
+        const auto point = surface.PointOnSurface(args.at(0), args.at(1));
+
+        return DistanceSquared(point, guidance.vec);
+    }
+
+
+    std::vector<float> Gradient(const std::vector<float> &args) override {
+        const auto point = surface.PointOnSurface(args.at(0), args.at(1));
+
+        const auto partDivU = surface.PartialDerivativeU(args.at(0), args.at(1));
+        const auto partDivV = surface.PartialDerivativeV(args.at(0), args.at(1));
+
+        const auto diff = point - guidance.vec;
+
+        return {
+            2.f * Dot(diff, partDivU),
+            2.f * Dot(diff, partDivV)
+        };
+    }
+
+private:
+    Surface& surface;
+    Position guidance;
+};
+
+
+std::optional<std::tuple<float, float>> IntersectionSystem::NearestPoint(Surface &s, const Position &guidance) const
+{
+    auto [uApprox, vApprox] = NearestPointApproximation(s, guidance);
+
+    const std::vector startingPoint {
+        uApprox, vApprox
+    };
+
+    opt::DichotomyLineSearch lineSearch(0, 0.1f, 1e-7f);
+    opt::SmallGradient stopCond;
+    NearestPointFun fun(s, guidance);
+
+    const auto solOpt = ConjugateGradientMethod(fun, lineSearch, startingPoint, 100, stopCond);
+    if (!solOpt.has_value())
+        return std::nullopt;
+
+    const auto& sol = solOpt.value();
+
+    if (!SolutionInDomain(s, sol.at(0), sol.at(1)))
+        return std::nullopt;
+
+    return std::make_tuple(sol.at(0), sol.at(1));
+}
+
+
+std::tuple<float, float> IntersectionSystem::NearestPointApproximation(Surface &s, const Position &guidance) const
+{
+    constexpr int sampleCntInOneDim = 30;
+
+    const float maxU = s.MaxUInitSampleVal();
+    const float minU = s.MinUInitSampleVal();
+
+    const float maxV = s.MaxVInitSampleVal();
+    const float minV = s.MinVInitSampleVal();
+
+    const float deltaU = (maxU - minU) / static_cast<float>(sampleCntInOneDim + 1);
+    const float deltaV = (maxV - minV) / static_cast<float>(sampleCntInOneDim + 1);
+
+    float minDist = std::numeric_limits<float>::infinity();
+    float resultU, resultV;
+
+    for (int i = 1; i <= sampleCntInOneDim; ++i) {
+        const float u = deltaU * static_cast<float>(i) + minU;
+
+        for (int j = 1; j <= sampleCntInOneDim; ++j) {
+            const float v = deltaV * static_cast<float>(j) + minV;
+
+            auto point = s.PointOnSurface(u, v);
+
+            const float dist = DistanceSquared(point, guidance.vec);
+            if (minDist > dist) {
+                minDist = dist;
+
+                resultU = u;
+                resultV = v;
+            }
+        }
+    }
+
+    return {resultU, resultV};
+}
+
+
+void IntersectionSystem::FindIntersection(Surface &s1, Surface &s2, const IntersectionPoint &initPoint, const float step)
+{
+    const auto pointSys = coordinator->GetSystem<PointsSystem>();
+
+    const auto firstPoint = s1.PointOnSurface(initPoint.U1(), initPoint.V1());
+    pointSys->CreatePoint(firstPoint);
+
+    auto [solOpt, lastPt] = FindNextIntersectionPoint(s1, s2, initPoint, step);
+    if (!solOpt.has_value()) {
+        std::cout << "Cannot find second point\n";
+        return;
+    }
+
+    auto& sol = solOpt.value();
+    pointSys->CreatePoint(s1.PointOnSurface(sol.U1(), sol.V1()));
+    if (lastPt) {
+        FindOpenIntersection(initPoint, s1, s2, step);
+        return;
+    }
+
+    Position newPoint;
+    do {
+        std::tie(solOpt, lastPt) = FindNextIntersectionPoint(s1, s2, sol, step);
+        if (!solOpt.has_value()) {
+            std::cout << "Cannot find next point\n";
+            return;
+        }
+
+        sol = solOpt.value();
+        pointSys->CreatePoint(s1.PointOnSurface(sol.U1(), sol.V1()));
+
+        newPoint = s1.PointOnSurface(sol.U1(), sol.V1());
+
+        if (lastPt) {
+            FindOpenIntersection(initPoint, s1, s2, step);
+            return;
+        }
+    } while (DistanceSquared(firstPoint, newPoint.vec) > step*step);
+}
+
+
 void IntersectionSystem::FindOpenIntersection(const IntersectionPoint& firstPoint, Surface& s1, Surface& s2, const float step) const
 {
     const auto pointSys = coordinator->GetSystem<PointsSystem>();
@@ -417,15 +559,4 @@ float IntersectionSystem::ErrorRate(Surface& s1, Surface& s2, const Intersection
     const auto point2 = s2.PointOnSurface(intPt.U2(), intPt.V2());
 
     return DistanceSquared(point1, point2);
-}
-
-
-float IntersectionSystem::ErrorRate(const Entity e1, const Entity e2, const IntersectionPoint &intPt) const
-{
-    const auto toriSys = coordinator->GetSystem<ToriSystem>();
-
-    const auto point1 = toriSys->PointOnTorus(e1, intPt.V1(), intPt.U1());
-    const auto point2 = toriSys->PointOnTorus(e2, intPt.V2(), intPt.U2());
-
-    return DistanceSquared(point1.vec, point2.vec);
 }

@@ -403,8 +403,28 @@ void ModelerMainMenuView::RenderAddingIntersectionCurve()
     }
 
     static float step = 0.1f;
+    static bool useGuidance = false;
 
     ImGui::DragFloat("Step", &step, 0.001f, 1e-5f);
+
+    ImGui::Checkbox("Use 3D cursor as guidance", &useGuidance);
+    if (useGuidance) {
+        const auto& cursorPos = model.GetCursorPosition();
+
+        float x = cursorPos.GetX();
+        float y = cursorPos.GetY();
+        float z = cursorPos.GetZ();
+        bool valueChanged = false;
+
+        ImGui::Text("%s", "Cursor position");
+
+        valueChanged |= ImGui::DragFloat("X##CursorPos", &x, DRAG_FLOAT_SPEED);
+        valueChanged |= ImGui::DragFloat("Y##CursorPos", &y, DRAG_FLOAT_SPEED);
+        valueChanged |= ImGui::DragFloat("Z##CursorPos", &z, DRAG_FLOAT_SPEED);
+
+        if (valueChanged)
+            model.SetCursorPosition(x, y, z);
+    }
 
     if (ImGui::Button("Accept")) {
         auto const& entities = model.GetAllSelectedEntities();
@@ -415,8 +435,13 @@ void ModelerMainMenuView::RenderAddingIntersectionCurve()
             const Entity e1 = *entities.begin();
             const Entity e2 = *(++entities.begin());
 
-            //try {
+            if (useGuidance)
+                model.FindIntersection(e1, e2, step, model.GetCursorPosition());
+            else
                 model.FindIntersection(e1, e2, step);
+
+            //try {
+
             // }
             // catch (...) {
             //     ImGui::OpenPopup("Cannot find intersection curve");
