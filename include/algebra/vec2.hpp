@@ -17,34 +17,34 @@ namespace alg
             { data[0] = v1; data[1] = v2; }
 
 
-        inline DataType& X()
+        DataType& X()
             { return data[0]; }
 
-        inline DataType X() const
+        DataType X() const
             { return data[0]; }
 
-        inline DataType& Y()
+        DataType& Y()
             { return data[1]; }
 
-        inline DataType Y() const
+        DataType Y() const
             { return data[1]; }
         
 
-        inline DataType* Data()
+        DataType* Data()
             { return data.data(); }
 
-        inline const DataType* Data() const
+        const DataType* Data() const
             { return data.data(); }
 
-        Vector2<DataType> operator+(const Vector2<DataType>& v) const {
-            return Vector2<DataType>(
+        Vector2 operator+(const Vector2& v) const {
+            return Vector2(
                 data[0] + v.data[0],
                 data[1] + v.data[1]
             );
         }
 
-        Vector2<DataType> operator-(const Vector2<DataType>& v) const {
-            return Vector2<DataType>(
+        Vector2 operator-(const Vector2& v) const {
+            return Vector2(
                 data[0] - v.data[0],
                 data[1] - v.data[1]
             );
