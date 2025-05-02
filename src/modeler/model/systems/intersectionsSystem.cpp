@@ -19,6 +19,8 @@
 
 #include <rootFinding/newtonMethod.hpp>
 
+#include <algebra/vec2.hpp>
+
 #include <cassert>
 
 // TODO: remove
@@ -61,8 +63,8 @@ void IntersectionSystem::FindIntersection(const Entity e1, const Entity e2, cons
     const auto surface1 = GetSurface(e1);
     const auto surface2 = GetSurface(e2);
 
-    const auto initSol = FindFirstApproximation(*surface1, *surface2);
-    auto firstPointOpt = FindFirstIntersectionPoint(*surface1, *surface2, initSol);
+    const auto firstApprox = FindFirstApproximation(*surface1, *surface2);
+    auto firstPointOpt = FindFirstIntersectionPoint(*surface1, *surface2, firstApprox);
 
     if (!firstPointOpt.has_value()) {
         std::cout << "Cannot find first point\n";
@@ -101,6 +103,31 @@ void IntersectionSystem::FindIntersection(const Entity e1, const Entity e2, cons
     }
 
     FindIntersection(*surface1, *surface2, firstPointOpt.value(), step);
+}
+
+
+bool CheckInitialPointSelfIntersection(const IntersectionPoint& p) {
+    constexpr float minDist = 0.05f;
+
+    return DistanceSquared(alg::Vec2(p.U1(), p.V1()), alg::Vec2(p.U2(), p.V2())) > minDist*minDist;
+}
+
+
+void IntersectionSystem::FindSelfIntersection(const Entity e, const float step)
+{
+    assert(CanBeIntersected(e));
+
+    const auto surface = GetSurface(e);
+
+    const auto firstApprox = FindFirstApproximationForSelfIntersection(*surface);
+    const auto firstPointOpt = FindFirstIntersectionPoint(*surface, *surface, firstApprox);
+
+    if (!firstPointOpt.has_value() || !CheckInitialPointSelfIntersection(firstPointOpt.value())) {
+        std::cout << "Cannot find first point\n";
+        return;
+    }
+
+    FindIntersection(*surface, *surface, firstPointOpt.value(), step);
 }
 
 
@@ -179,6 +206,59 @@ IntersectionPoint IntersectionSystem::FindFirstApproximation(Surface& s1, Surfac
 }
 
 
+IntersectionPoint IntersectionSystem::FindFirstApproximationForSelfIntersection(Surface &s) const
+{
+    constexpr int sampleCntInOneDim = 40;
+    constexpr float penaltyCoef = 0.5f;
+
+    const float maxU = s.MaxUInitSampleVal();
+    const float minU = s.MinUInitSampleVal();
+
+    const float maxV = s.MaxVInitSampleVal();
+    const float minV = s.MinVInitSampleVal();
+
+    const float deltaU = (maxU - minU) / static_cast<float>(sampleCntInOneDim + 1);
+    const float deltaV = (maxV - minV) / static_cast<float>(sampleCntInOneDim + 1);
+
+    float minDist = std::numeric_limits<float>::infinity();
+    IntersectionPoint result;
+
+    for (int i = 1; i <= sampleCntInOneDim; ++i) {
+        const float u1 = deltaU * static_cast<float>(i) + minU;
+
+        for (int j = 1; j <= sampleCntInOneDim; ++j) {
+            const float v1 = deltaV * static_cast<float>(j) + minV;
+
+            for (int k = 1; k <= sampleCntInOneDim; ++k) {
+                const float u2 = deltaU * static_cast<float>(k) + minU;
+
+                for (int l = 1; l <= sampleCntInOneDim; ++l) {
+                    const float v2 = deltaV * static_cast<float>(l) + minV;
+
+                    auto point1 = s.PointOnSurface(u1, v1);
+                    auto point2 = s.PointOnSurface(u2, v2);
+
+                    float dist = Distance(point1, point2);
+                    const float penalty = -penaltyCoef * Distance(alg::Vec2(u1, v1), alg::Vec2(u2, v2));
+                    dist += penalty;
+
+                    if (minDist > dist) {
+                        minDist = dist;
+
+                        result.V1() = v1;
+                        result.U1() = u1;
+                        result.V2() = v2;
+                        result.U2() = u2;
+                    }
+                }
+            }
+        }
+    }
+
+    return result;
+}
+
+
 class DistanceBetweenPoints final : public opt::FunctionToOptimize {
 public:
     explicit DistanceBetweenPoints(Surface& s1, Surface& s2):
@@ -240,11 +320,11 @@ std::optional<IntersectionPoint> IntersectionSystem::FindFirstIntersectionPoint(
         initSol.V2()
     };
 
-    opt::DichotomyLineSearch lineSearch(0, 0.1f, 1e-7f);
+    opt::DichotomyLineSearch lineSearch(0, 0.01f, 1e-7f);
     NearZeroCondition stopCond;
     DistanceBetweenPoints fun(s1, s2);
 
-    const auto sol = ConjugateGradientMethod(fun, lineSearch, startingPoint, 100, stopCond);
+    const auto sol = ConjugateGradientMethod(fun, lineSearch, startingPoint, 200, stopCond);
 
     if (!sol.has_value())
         return std::nullopt;

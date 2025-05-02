@@ -429,9 +429,9 @@ void ModelerMainMenuView::RenderAddingIntersectionCurve()
     if (ImGui::Button("Accept")) {
         auto const& entities = model.GetAllSelectedEntities();
 
-        if (entities.size() != 2)
-            ImGui::OpenPopup("Wrong number of elements to intersect");
-        else {
+        if (entities.size() == 1)
+            model.FindSelfIntersection(*entities.begin(), step);
+        else if (entities.size() == 2) {
             const Entity e1 = *entities.begin();
             const Entity e2 = *(++entities.begin());
 
@@ -448,10 +448,13 @@ void ModelerMainMenuView::RenderAddingIntersectionCurve()
             // }
 
         }
+        else {
+            ImGui::OpenPopup("Wrong number of elements to intersect");
+        }
     }
 
     if (ImGui::BeginPopupModal("Wrong number of elements to intersect", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
-        ImGui::Text("Wrong number of selected entities to intersect. Two objects must be selected");
+        ImGui::Text("Wrong number of selected entities to intersect. One or two objects must be selected");
         if (ImGui::Button("OK")) { ImGui::CloseCurrentPopup(); }
         ImGui::EndPopup();
     }

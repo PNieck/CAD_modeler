@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <cmath>
 #include <cstddef>
 
 
@@ -50,10 +51,30 @@ namespace alg
             );
         }
 
+        [[nodiscard]]
+        float LengthSquared() const
+            { return data[0]*data[0] + data[1]*data[1]; }
+
+        [[nodiscard]]
+        float Length() const
+            { return std::sqrt(LengthSquared()); }
+
     protected:
         std::array<DataType, 2> data;
     };
 
 
     using IVec2 = Vector2<int>;
+    using Vec2 = Vector2<float>;
+
+
+    template <typename DataType>
+    DataType Distance(const Vector2<DataType>& v1, const Vector2<DataType>& v2) {
+        return (v1 - v2).Length();
+    }
+
+    template <typename DataType>
+    DataType DistanceSquared(const Vector2<DataType>& v1, const Vector2<DataType>& v2) {
+        return (v1 - v2).LengthSquared();
+    }
 }

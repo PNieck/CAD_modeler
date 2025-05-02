@@ -21,12 +21,16 @@ public:
 
     void FindIntersection(Entity e1, Entity e2, float step, const Position& guidance);
 
+    void FindSelfIntersection(Entity e, float step);
+
 private:
     [[nodiscard]]
     std::unique_ptr<interSys::Surface> GetSurface(Entity entity) const;
 
     [[nodiscard]]
     interSys::IntersectionPoint FindFirstApproximation(interSys::Surface& s1, interSys::Surface& s2) const;
+
+    interSys::IntersectionPoint FindFirstApproximationForSelfIntersection(interSys::Surface& s) const;
 
     [[nodiscard]]
     std::optional<interSys::IntersectionPoint> FindFirstIntersectionPoint(interSys::Surface& s1, interSys::Surface& s2, const interSys::IntersectionPoint& initSol) const;
