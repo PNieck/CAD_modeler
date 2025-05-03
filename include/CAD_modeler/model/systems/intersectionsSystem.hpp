@@ -23,6 +23,8 @@ public:
 
     void FindSelfIntersection(Entity e, float step);
 
+    void FindSelfIntersection(Entity e, float step, const Position& guidance);
+
 private:
     [[nodiscard]]
     std::unique_ptr<interSys::Surface> GetSurface(Entity entity) const;
@@ -38,9 +40,10 @@ private:
     [[nodiscard]]
     std::tuple<std::optional<interSys::IntersectionPoint>, bool> FindNextIntersectionPoint(interSys::Surface& s1, interSys::Surface& s2, const interSys::IntersectionPoint &prevSol, float step) const;
 
-    std::optional<std::tuple<float, float>> NearestPoint(interSys::Surface& s, const Position& guidance) const;
+    std::optional<std::tuple<float, float>> NearestPoint(interSys::Surface& s, const Position& guidance, float initU, float initV) const;
     std::tuple<float, float> NearestPointApproximation(interSys::Surface& s, const Position& guidance) const;
 
+    std::tuple<float, float> SecondNearestPointApproximation(interSys::Surface& s, const Position& guidance, float u, float v) const;
 
     void FindIntersection(interSys::Surface& s1, interSys::Surface& s2, const interSys::IntersectionPoint& initPoint, float step);
 

@@ -429,8 +429,12 @@ void ModelerMainMenuView::RenderAddingIntersectionCurve()
     if (ImGui::Button("Accept")) {
         auto const& entities = model.GetAllSelectedEntities();
 
-        if (entities.size() == 1)
-            model.FindSelfIntersection(*entities.begin(), step);
+        if (entities.size() == 1) {
+            if (useGuidance)
+                model.FindSelfIntersection(*entities.begin(), step, model.GetCursorPosition());
+            else
+                model.FindSelfIntersection(*entities.begin(), step);
+        }
         else if (entities.size() == 2) {
             const Entity e1 = *entities.begin();
             const Entity e2 = *(++entities.begin());

@@ -292,6 +292,9 @@ public:
     void FindSelfIntersection(const Entity e, const float step) const
         { intersectionSystem->FindSelfIntersection(e, step); }
 
+    void FindSelfIntersection(const Entity e, const float step, const Position& guidance)
+        { intersectionSystem->FindSelfIntersection(e, step, guidance); }
+
     void ClearScene();
 
     // TODO: delet

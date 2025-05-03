@@ -58,13 +58,15 @@ void IntersectionSystem::FindIntersection(const Entity e1, const Entity e2, cons
 {
     assert(CanBeIntersected(e1));
     assert(CanBeIntersected(e2));
-    assert(e1 != e2);
+
+    if (e1 == e2)
+        return FindSelfIntersection(e1, step);
 
     const auto surface1 = GetSurface(e1);
     const auto surface2 = GetSurface(e2);
 
     const auto firstApprox = FindFirstApproximation(*surface1, *surface2);
-    auto firstPointOpt = FindFirstIntersectionPoint(*surface1, *surface2, firstApprox);
+    const auto firstPointOpt = FindFirstIntersectionPoint(*surface1, *surface2, firstApprox);
 
     if (!firstPointOpt.has_value()) {
         std::cout << "Cannot find first point\n";
@@ -84,8 +86,11 @@ void IntersectionSystem::FindIntersection(const Entity e1, const Entity e2, cons
     const auto surface1 = GetSurface(e1);
     const auto surface2 = GetSurface(e2);
 
-    const auto nearestPoint1 = NearestPoint(*surface1, guidance);
-    const auto nearestPoint2 = NearestPoint(*surface2, guidance);
+    auto [initU, initV] = NearestPointApproximation(*surface1, guidance);
+    const auto nearestPoint1 = NearestPoint(*surface1, guidance, initU, initV);
+
+    std::tie(initU, initV) = NearestPointApproximation(*surface2, guidance);
+    const auto nearestPoint2 = NearestPoint(*surface2, guidance, initU, initV);
     if (!nearestPoint1.has_value() || !nearestPoint2.has_value()) {
         std::cout << "Cannot find nearest point\n";
         return;
@@ -128,6 +133,46 @@ void IntersectionSystem::FindSelfIntersection(const Entity e, const float step)
     }
 
     FindIntersection(*surface, *surface, firstPointOpt.value(), step);
+}
+
+
+void IntersectionSystem::FindSelfIntersection(const Entity e, float step, const Position &guidance)
+{
+    assert(CanBeIntersected(e));
+
+    const auto surface = GetSurface(e);
+
+    auto [initU, initV] = NearestPointApproximation(*surface, guidance);
+    auto nearestPoint1 = NearestPoint(*surface, guidance, initU, initV);
+    if (!nearestPoint1.has_value()) {
+        std::cout << "Cannot find nearest point 1\n";
+        return;
+    }
+
+    std::tie(initU, initV) = SecondNearestPointApproximation(
+        *surface, guidance, std::get<0>(nearestPoint1.value()), std::get<1>(nearestPoint1.value())
+    );
+    auto nearestPoint2 = NearestPoint(*surface, guidance, initU, initV);
+    if (!nearestPoint1.has_value()) {
+        std::cout << "Cannot find nearest point 2\n";
+        return;
+    }
+
+    const IntersectionPoint initInterPoint(
+        std::get<0>(nearestPoint1.value()),
+        std::get<1>(nearestPoint1.value()),
+        std::get<0>(nearestPoint2.value()),
+        std::get<1>(nearestPoint2.value())
+    );
+
+    auto firstInterPoint = FindFirstIntersectionPoint(*surface, *surface, initInterPoint);
+
+    if (!firstInterPoint.has_value() || !CheckInitialPointSelfIntersection(firstInterPoint.value())) {
+        std::cout << "Cannot find nearest point\n";
+        return;
+    }
+
+    FindIntersection(*surface, *surface, firstInterPoint.value(), step);
 }
 
 
@@ -487,19 +532,18 @@ private:
 };
 
 
-std::optional<std::tuple<float, float>> IntersectionSystem::NearestPoint(Surface &s, const Position &guidance) const
+std::optional<std::tuple<float, float>> IntersectionSystem::NearestPoint(
+    Surface &s, const Position &guidance, const float initU, const float initV) const
 {
-    auto [uApprox, vApprox] = NearestPointApproximation(s, guidance);
-
     const std::vector startingPoint {
-        uApprox, vApprox
+        initU, initV
     };
 
-    opt::DichotomyLineSearch lineSearch(0, 0.1f, 1e-7f);
+    opt::DichotomyLineSearch lineSearch(0, 0.01f, 1e-7f);
     opt::SmallGradient stopCond;
     NearestPointFun fun(s, guidance);
 
-    const auto solOpt = ConjugateGradientMethod(fun, lineSearch, startingPoint, 100, stopCond);
+    const auto solOpt = ConjugateGradientMethod(fun, lineSearch, startingPoint, 200, stopCond);
     if (!solOpt.has_value())
         return std::nullopt;
 
@@ -537,6 +581,49 @@ std::tuple<float, float> IntersectionSystem::NearestPointApproximation(Surface &
             auto point = s.PointOnSurface(u, v);
 
             const float dist = DistanceSquared(point, guidance.vec);
+            if (minDist > dist) {
+                minDist = dist;
+
+                resultU = u;
+                resultV = v;
+            }
+        }
+    }
+
+    return {resultU, resultV};
+}
+
+
+std::tuple<float, float> IntersectionSystem::SecondNearestPointApproximation(
+    Surface &s, const Position &guidance, const float firstU, const float firstV) const
+{
+    constexpr int sampleCntInOneDim = 30;
+    constexpr float penaltyCoef = 0.5f;
+
+    const float maxU = s.MaxUInitSampleVal();
+    const float minU = s.MinUInitSampleVal();
+
+    const float maxV = s.MaxVInitSampleVal();
+    const float minV = s.MinVInitSampleVal();
+
+    const float deltaU = (maxU - minU) / static_cast<float>(sampleCntInOneDim + 1);
+    const float deltaV = (maxV - minV) / static_cast<float>(sampleCntInOneDim + 1);
+
+    float minDist = std::numeric_limits<float>::infinity();
+    float resultU, resultV;
+
+    for (int i = 1; i <= sampleCntInOneDim; ++i) {
+        const float u = deltaU * static_cast<float>(i) + minU;
+
+        for (int j = 1; j <= sampleCntInOneDim; ++j) {
+            const float v = deltaV * static_cast<float>(j) + minV;
+
+            auto point = s.PointOnSurface(u, v);
+
+            float dist = DistanceSquared(point, guidance.vec);
+            const float penalty = -penaltyCoef * Distance(alg::Vec2(u, v), alg::Vec2(firstU, firstV));
+            dist += penalty;
+
             if (minDist > dist) {
                 minDist = dist;
 
