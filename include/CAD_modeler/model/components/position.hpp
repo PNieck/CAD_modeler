@@ -1,6 +1,5 @@
 #pragma once
 
-#include <algebra/pos.hpp>
 #include <algebra/mat4x4.hpp>
 
 
