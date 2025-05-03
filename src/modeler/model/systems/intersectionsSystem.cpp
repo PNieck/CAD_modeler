@@ -356,6 +356,89 @@ private:
 };
 
 
+class DomainDichotomyLineSearch4D final : public opt::DichotomyLineSearch {
+public:
+    DomainDichotomyLineSearch4D(Surface& s1, Surface& s2, const float eps):
+        DichotomyLineSearch(0.f, 1.f, eps), surface1(s1), surface2(s2) {}
+
+    float Search(opt::FunctionToOptimize &fun, const std::vector<float> &start, const std::vector<float> &direction) override {
+        float len = 0.f;
+
+        for (const auto dir: direction) {
+            len += dir*dir;
+        }
+
+        len = std::sqrt(len);
+
+        const float d1 = std::min(start[0] - surface1.MinU(), surface1.MaxU() - start[0]);
+        const float d2 = std::min(start[1] - surface1.MinV(), surface1.MaxV() - start[1]);
+        const float d3 = std::min(start[2] - surface2.MinU(), surface2.MaxU() - start[2]);
+        const float d4 = std::min(start[3] - surface2.MinV(), surface2.MaxV() - start[3]);
+
+        float minDist = std::min(std::min(d1, d2), std::min(d3, d4));
+
+        if (minDist < len) {
+            // Scale direction
+            float coef = minDist / len;
+
+            std::vector newDir {
+                direction[0] * coef,
+                direction[1] * coef,
+                direction[2] * coef,
+                direction[3] * coef
+            };
+
+            return coef * DichotomyLineSearch::Search(fun, start, newDir);
+        }
+
+        return DichotomyLineSearch::Search(fun, start, direction);
+    }
+
+private:
+    Surface& surface1;
+    Surface& surface2;
+};
+
+
+class DomainDichotomyLineSearch2D final : public opt::DichotomyLineSearch {
+public:
+    DomainDichotomyLineSearch2D(Surface& s1, const float eps):
+        DichotomyLineSearch(0.f, 1.f, eps), surface1(s1) {}
+
+    float Search(opt::FunctionToOptimize &fun, const std::vector<float> &start, const std::vector<float> &direction) override {
+        float len = 0.f;
+
+        for (const auto dir: direction) {
+            len += dir*dir;
+        }
+
+        len = std::sqrt(len);
+
+        const float d1 = std::min(start[0] - surface1.MinU(), surface1.MaxU() - start[0]);
+        const float d2 = std::min(start[1] - surface1.MinV(), surface1.MaxV() - start[1]);
+
+        float minDist = std::min(d1, d2);
+
+        if (minDist < len) {
+            // Scale direction
+            float coef = minDist / len;
+
+            std::vector newDir {
+                direction[0] * coef,
+                direction[1] * coef,
+            };
+
+            return coef * DichotomyLineSearch::Search(fun, start, newDir);
+        }
+
+        return DichotomyLineSearch::Search(fun, start, direction);
+    }
+
+private:
+    Surface& surface1;
+};
+
+
 std::optional<IntersectionPoint> IntersectionSystem::FindFirstIntersectionPoint(Surface& s1, Surface& s2, const IntersectionPoint& initSol) const
 {
     const std::vector startingPoint = {
@@ -365,7 +448,8 @@ std::optional<IntersectionPoint> IntersectionSystem::FindFirstIntersectionPoint(
         initSol.V2()
     };
 
-    opt::DichotomyLineSearch lineSearch(0, 0.01f, 1e-7f);
+    DomainDichotomyLineSearch4D lineSearch(s1, s2, 1e-7f);
+    //opt::DichotomyLineSearch lineSearch(0, 0.01f, 1e-7f);
     NearZeroCondition stopCond;
     DistanceBetweenPoints fun(s1, s2);
 
@@ -539,7 +623,7 @@ std::optional<std::tuple<float, float>> IntersectionSystem::NearestPoint(
         initU, initV
     };
 
-    opt::DichotomyLineSearch lineSearch(0, 0.01f, 1e-7f);
+    DomainDichotomyLineSearch2D lineSearch(s, 1e-7f);
     opt::SmallGradient stopCond;
     NearestPointFun fun(s, guidance);
 
