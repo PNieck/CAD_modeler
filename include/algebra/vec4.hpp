@@ -53,22 +53,15 @@ namespace alg
             { return data[3]; }
 
         Vector4 Normalize() const {
-            float len = Length();
-
-            return Vector4(
-                data[0] / len,
-                data[1] / len,
-                data[2] / len,
-                data[3] / len
-            );
+            return *this / Length();
         }
 
         [[nodiscard]]
-        float LengthSquared() const
+        DataType LengthSquared() const
             { return data[0]*data[0] + data[1]*data[1] + data[2]*data[2] + data[3]*data[3]; }
         
         [[nodiscard]]
-        float Length() const
+        DataType Length() const
             { return std::sqrt(LengthSquared()); }
         
 
@@ -135,6 +128,17 @@ namespace alg
             v.Y() * scalar,
             v.Z() * scalar,
             v.W() * scalar
+        );
+    }
+
+
+    template <typename DataType>
+    Vector4<DataType> operator/(const Vector4<DataType>& v, DataType scalar) {
+        return Vector4<DataType>(
+            v.X() / scalar,
+            v.Y() / scalar,
+            v.Z() / scalar,
+            v.W() / scalar
         );
     }
 
