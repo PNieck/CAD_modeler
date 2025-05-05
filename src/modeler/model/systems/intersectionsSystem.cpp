@@ -4,13 +4,13 @@
 #include <CAD_modeler/model/systems/c2SurfacesSystem.hpp>
 #include <CAD_modeler/model/systems/c2CylinderSystem.hpp>
 #include <CAD_modeler/model/systems/toriSystem.hpp>
-#include <CAD_modeler/model/systems/pointsSystem.hpp>
-#include <CAD_modeler/model/systems/vectorSystem.hpp>
+#include <CAD_modeler/model/systems/interpolationCurvesRenderingSystem.hpp>
 
 #include <CAD_modeler/model/systems/intersectionSystem/torusSurface.hpp>
 #include <CAD_modeler/model/systems/intersectionSystem/c0Surface.hpp>
 #include <CAD_modeler/model/systems/intersectionSystem/c2Surface.hpp>
 #include <CAD_modeler/model/systems/intersectionSystem/nextPointFinder.hpp>
+#include <CAD_modeler/model/systems/intersectionSystem/domainChecks.hpp>
 
 #include <ecs/coordinator.hpp>
 
@@ -32,6 +32,8 @@ using namespace interSys;
 void IntersectionSystem::RegisterSystem(Coordinator &coordinator)
 {
     coordinator.RegisterSystem<IntersectionSystem>();
+
+    coordinator.RegisterComponent<IntersectionCurve>();
 }
 
 
@@ -53,7 +55,7 @@ bool IntersectionSystem::CanBeIntersected(const Entity entity) const
 }
 
 
-void IntersectionSystem::FindIntersection(const Entity e1, const Entity e2, const float step)
+std::optional<Entity> IntersectionSystem::FindIntersection(const Entity e1, const Entity e2, const float step)
 {
     assert(CanBeIntersected(e1));
     assert(CanBeIntersected(e2));
@@ -69,14 +71,14 @@ void IntersectionSystem::FindIntersection(const Entity e1, const Entity e2, cons
 
     if (!firstPointOpt.has_value()) {
         std::cout << "Cannot find first point\n";
-        return;
+        return std::nullopt;
     }
 
-    FindIntersection(*surface1, *surface2, firstPointOpt.value(), step);
+    return FindIntersection(*surface1, *surface2, firstPointOpt.value(), step);
 }
 
 
-void IntersectionSystem::FindIntersection(const Entity e1, const Entity e2, const float step, const Position &guidance)
+std::optional<Entity> IntersectionSystem::FindIntersection(const Entity e1, const Entity e2, const float step, const Position &guidance)
 {
     assert(CanBeIntersected(e1));
     assert(CanBeIntersected(e2));
@@ -94,7 +96,7 @@ void IntersectionSystem::FindIntersection(const Entity e1, const Entity e2, cons
     const auto nearestPoint2 = NearestPoint(*surface2, guidance, initU, initV);
     if (!nearestPoint1.has_value() || !nearestPoint2.has_value()) {
         std::cout << "Cannot find nearest point\n";
-        return;
+        return std::nullopt;
     }
 
     auto [u1, v1] = nearestPoint1.value();
@@ -105,10 +107,10 @@ void IntersectionSystem::FindIntersection(const Entity e1, const Entity e2, cons
     const auto firstPointOpt = FindFirstIntersectionPoint(*surface1, *surface2, startingApprox);
     if (!firstPointOpt.has_value()) {
         std::cout << "Cannot find first point\n";
-        return;
+        return std::nullopt;
     }
 
-    FindIntersection(*surface1, *surface2, firstPointOpt.value(), step);
+    return FindIntersection(*surface1, *surface2, firstPointOpt.value(), step);
 }
 
 
@@ -119,7 +121,7 @@ bool CheckInitialPointSelfIntersection(const IntersectionPoint& p) {
 }
 
 
-void IntersectionSystem::FindSelfIntersection(const Entity e, const float step)
+std::optional<Entity> IntersectionSystem::FindSelfIntersection(const Entity e, const float step)
 {
     assert(CanBeIntersected(e));
 
@@ -130,33 +132,33 @@ void IntersectionSystem::FindSelfIntersection(const Entity e, const float step)
 
     if (!firstPointOpt.has_value() || !CheckInitialPointSelfIntersection(firstPointOpt.value())) {
         std::cout << "Cannot find first point\n";
-        return;
+        return std::nullopt;
     }
 
-    FindIntersection(*surface, *surface, firstPointOpt.value(), step);
+    return FindIntersection(*surface, *surface, firstPointOpt.value(), step);
 }
 
 
-void IntersectionSystem::FindSelfIntersection(const Entity e, float step, const Position &guidance)
+std::optional<Entity> IntersectionSystem::FindSelfIntersection(const Entity e, const float step, const Position &guidance)
 {
     assert(CanBeIntersected(e));
 
     const auto surface = GetSurface(e);
 
     auto [initU, initV] = NearestPointApproximation(*surface, guidance);
-    auto nearestPoint1 = NearestPoint(*surface, guidance, initU, initV);
+    const auto nearestPoint1 = NearestPoint(*surface, guidance, initU, initV);
     if (!nearestPoint1.has_value()) {
         std::cout << "Cannot find nearest point 1\n";
-        return;
+        return std::nullopt;
     }
 
     std::tie(initU, initV) = SecondNearestPointApproximation(
         *surface, guidance, std::get<0>(nearestPoint1.value()), std::get<1>(nearestPoint1.value())
     );
-    auto nearestPoint2 = NearestPoint(*surface, guidance, initU, initV);
+    const auto nearestPoint2 = NearestPoint(*surface, guidance, initU, initV);
     if (!nearestPoint1.has_value()) {
         std::cout << "Cannot find nearest point 2\n";
-        return;
+        return std::nullopt;
     }
 
     const IntersectionPoint initInterPoint(
@@ -166,14 +168,14 @@ void IntersectionSystem::FindSelfIntersection(const Entity e, float step, const 
         std::get<1>(nearestPoint2.value())
     );
 
-    auto firstInterPoint = FindFirstIntersectionPoint(*surface, *surface, initInterPoint);
+    const auto firstInterPoint = FindFirstIntersectionPoint(*surface, *surface, initInterPoint);
 
     if (!firstInterPoint.has_value() || !CheckInitialPointSelfIntersection(firstInterPoint.value())) {
         std::cout << "Cannot find nearest point\n";
-        return;
+        return std::nullopt;
     }
 
-    FindIntersection(*surface, *surface, firstInterPoint.value(), step);
+    return FindIntersection(*surface, *surface, firstInterPoint.value(), step);
 }
 
 
@@ -612,51 +614,54 @@ std::tuple<float, float> IntersectionSystem::SecondNearestPointApproximation(
 }
 
 
-void IntersectionSystem::FindIntersection(Surface &s1, Surface &s2, const IntersectionPoint &initPoint, const float step)
+std::optional<Entity> IntersectionSystem::FindIntersection(Surface &s1, Surface &s2, const IntersectionPoint &initPoint, const float step)
 {
-    const auto pointSys = coordinator->GetSystem<PointsSystem>();
+    std::deque<IntersectionPoint> intersections;
 
+    intersections.emplace_back(initPoint);
     const auto firstPoint = s1.PointOnSurface(initPoint.U1(), initPoint.V1());
-    pointSys->CreatePoint(firstPoint);
 
     NextPointFinder nextPointFinder(s1, s2, initPoint, step);
 
     if (!nextPointFinder.FindNext()) {
         std::cout << "Cannot find second point\n";
-        return;
+        return std::nullopt;
     }
 
-    const auto& firstInterPoint = nextPointFinder.ActualPoint();
-    pointSys->CreatePoint(s1.PointOnSurface(firstInterPoint.U1(), firstInterPoint.V1()));
-    if (nextPointFinder.WasLastPoint()) {
-        FindOpenIntersection(initPoint, s1, s2, step);
-        return;
-    }
+    const auto& secondInterPoint = nextPointFinder.ActualPoint();
+    intersections.emplace_back(secondInterPoint);
+
+    if (nextPointFinder.WasLastPoint())
+        return FindOpenIntersection(initPoint, s1, s2, step, intersections);
 
     Position newPoint;
     do {
         if (!nextPointFinder.FindNext()) {
             std::cout << "Cannot find next point\n";
-            return;
+            return std::nullopt;
         }
 
         const auto& nextInterPoint = nextPointFinder.ActualPoint();
-        pointSys->CreatePoint(s1.PointOnSurface(nextInterPoint.U1(), nextInterPoint.V1()));
+        intersections.emplace_back(nextInterPoint);
 
         newPoint = s1.PointOnSurface(nextInterPoint.U1(), nextInterPoint.V1());
 
-        if (nextPointFinder.WasLastPoint()) {
-            FindOpenIntersection(initPoint, s1, s2, step);
-            return;
-        }
+        if (nextPointFinder.WasLastPoint())
+            return FindOpenIntersection(initPoint, s1, s2, step, intersections);
+
     } while (DistanceSquared(firstPoint, newPoint.vec) > step*step);
+
+    return CreateCurve(s1, s2, intersections, false);
 }
 
 
-void IntersectionSystem::FindOpenIntersection(const IntersectionPoint& firstPoint, Surface& s1, Surface& s2, const float step) const
-{
-    const auto pointSys = coordinator->GetSystem<PointsSystem>();
-
+std::optional<Entity> IntersectionSystem::FindOpenIntersection(
+    const IntersectionPoint& firstPoint,
+    Surface& s1,
+    Surface& s2,
+    const float step,
+    std::deque<IntersectionPoint>& points
+) const {
     const IntersectionPoint prevSol(firstPoint.U2(), firstPoint.V2(), firstPoint.U1(), firstPoint.V1());
 
     // Passing solutions in reversed order to traverse intersection in other direction
@@ -665,14 +670,15 @@ void IntersectionSystem::FindOpenIntersection(const IntersectionPoint& firstPoin
     do {
         if (!nextPointFinder.FindNext()) {
             std::cout << "Cannot find first point\n";
-            return;
+            return std::nullopt;
         }
 
         const auto& sol = nextPointFinder.ActualPoint();
+        points.emplace_front(sol.U2(), sol.V2(), sol.U1(), sol.V1());
 
-        const auto point = s1.PointOnSurface(sol.U2(), sol.V2());
-        pointSys->CreatePoint(point);
     } while (!nextPointFinder.WasLastPoint());
+
+    return CreateCurve(s1, s2, points, true);
 }
 
 
@@ -682,4 +688,36 @@ float IntersectionSystem::ErrorRate(Surface& s1, Surface& s2, const Intersection
     const auto point2 = s2.PointOnSurface(intPt.U2(), intPt.V2());
 
     return DistanceSquared(point1, point2);
+}
+
+
+Entity IntersectionSystem::CreateCurve(Surface& s1, Surface& s2, const std::deque<IntersectionPoint> &interPoints, const bool isOpen) const
+{
+    IntersectionCurve interCurve(interPoints, isOpen);
+    for (auto& point : interCurve.intersectionPoints) {
+        s1.Normalize(point.U1(), point.V1());
+        s2.Normalize(point.U2(), point.V2());
+    }
+
+    std::vector<Entity> controlPoints;
+    controlPoints.reserve(interPoints.size());
+
+    for (auto point: interPoints) {
+        const Entity cp = coordinator->CreateEntity();
+
+        coordinator->AddComponent<Position>(cp, s1.PointOnSurface(point.U1(), point.V1()));
+
+        controlPoints.push_back(cp);
+    }
+
+    if (!isOpen) {
+        controlPoints.push_back(*controlPoints.begin());
+    }
+
+    const auto sys = coordinator->GetSystem<InterpolationCurvesRenderingSystem>();
+    const Entity curve = sys->AddCurve(controlPoints);
+
+    coordinator->AddComponent(curve, interCurve);
+
+    return curve;
 }

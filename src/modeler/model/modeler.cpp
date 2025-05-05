@@ -28,6 +28,7 @@ Modeler::Modeler(const int viewportWidth, const int viewportHeight):
     C0CurveSystem::RegisterSystem(coordinator);
     C2CurveSystem::RegisterSystem(coordinator);
     ToUpdateSystem::RegisterSystem(coordinator);
+    InterpolationCurvesRenderingSystem::RegisterSystem(coordinator);
     InterpolationCurveSystem::RegisterSystem(coordinator);
     C0SurfaceSystem::RegisterSystem(coordinator);
     C0CylinderSystem::RegisterSystem(coordinator);
@@ -48,7 +49,7 @@ Modeler::Modeler(const int viewportWidth, const int viewportHeight):
     selectionSystem = coordinator.GetSystem<SelectionSystem>();
     c0CurveSystem = coordinator.GetSystem<C0CurveSystem>();
     c2CurveSystem = coordinator.GetSystem<C2CurveSystem>();
-    interpolationCurveSystem = coordinator.GetSystem<InterpolationCurveSystem>();
+    interpolationRenderingSystem = coordinator.GetSystem<InterpolationCurvesRenderingSystem>();
     c0SurfaceSystem = coordinator.GetSystem<C0SurfaceSystem>();
     c0CylinderSystem = coordinator.GetSystem<C0CylinderSystem>();
     c0PatchesSystem = coordinator.GetSystem<C0PatchesSystem>();
@@ -115,7 +116,8 @@ Entity Modeler::AddC2Curve(const std::vector<Entity>& controlPoints)
 
 Entity Modeler::AddInterpolationCurve(const std::vector<Entity>& controlPoints)
 {
-    const Entity entity = interpolationCurveSystem->CreateCurve(controlPoints);
+    const auto interpolationSys = coordinator.GetSystem<InterpolationCurveSystem>();
+    const Entity entity = interpolationSys->CreateCurve(controlPoints);
     nameSystem->SetName(entity, nameGenerator.GenerateName("InterpolationCurve_"));
 
     return entity;
@@ -406,7 +408,7 @@ void Modeler::ClearScene()
         c2SurfaceSystem,
         c0CylinderSystem,
         c0SurfaceSystem,
-        interpolationCurveSystem,
+        coordinator.GetSystem<InterpolationCurveSystem>(),
         c2CurveSystem,
         c0CurveSystem,
         pointsSystem,
@@ -555,7 +557,7 @@ void Modeler::Update() const
     c2CylinderSystem->Update();
     c2SurfaceSystem->Update();
     gregoryPatchesSystem->Update();
-    interpolationCurveSystem->Update();
+    interpolationRenderingSystem->Update();
 }
 
 
@@ -616,7 +618,7 @@ Line Modeler::LineFromViewportCoordinates(float x, float y)
 
 void Modeler::RenderSystemsObjects(const alg::Mat4x4 &viewMtx, const alg::Mat4x4 &persMtx, float nearPlane, float farPlane) const
 {
-    alg::Mat4x4 cameraMtx = persMtx * viewMtx;
+    const alg::Mat4x4 cameraMtx = persMtx * viewMtx;
 
     toriSystem->Render(cameraMtx);
     cursorSystem->Render(cameraMtx);
@@ -624,7 +626,7 @@ void Modeler::RenderSystemsObjects(const alg::Mat4x4 &viewMtx, const alg::Mat4x4
     selectionSystem->RenderMiddlePoint(cameraMtx);
     c0CurveSystem->Render(cameraMtx);
     c2CurveSystem->Render(cameraMtx);
-    interpolationCurveSystem->Render(cameraMtx);
+    interpolationRenderingSystem->Render(cameraMtx);
     c0PatchesSystem->Render(cameraMtx);
     c2SurfaceSystem->Render(cameraMtx);
     c2CylinderSystem->Render(cameraMtx);

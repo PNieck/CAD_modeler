@@ -1,9 +1,7 @@
 #pragma once
 
 #include "surfaces.hpp"
-#include "intersectionPoint.hpp"
-
-#include <optional>
+#include "../../components/intersectionCurve.hpp"
 
 
 namespace interSys {

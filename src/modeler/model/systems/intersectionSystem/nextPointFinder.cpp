@@ -3,6 +3,7 @@
 #include <rootFinding/newtonMethod.hpp>
 
 #include "CAD_modeler/model/systems/intersectionsSystem.hpp"
+#include "CAD_modeler/model/systems/intersectionSystem/domainChecks.hpp"
 
 #include "CAD_modeler/utilities/angle.hpp"
 

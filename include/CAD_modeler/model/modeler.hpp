@@ -12,6 +12,7 @@
 #include "systems/selectionSystem.hpp"
 #include "systems/c0CurveSystem.hpp"
 #include "systems/c2CurveSystem.hpp"
+#include "systems/interpolationCurvesRenderingSystem.hpp"
 #include "systems/interpolationCurveSystem.hpp"
 #include "systems/c0SurfaceSystem.hpp"
 #include "systems/c0CylinderSystem.hpp"
@@ -61,11 +62,11 @@ public:
 
     void MergeControlPoints(Entity e1, Entity e2);
 
-    inline bool IsAControlPoint(Entity entity) const
+    bool IsAControlPoint(const Entity entity) const
         { return controlPointsRegistrySys->IsAControlPoint(entity); }
 
-    inline void AddControlPointToInterpolationCurve(Entity curve, Entity entity) const
-        { interpolationCurveSystem->AddControlPoint(curve, entity); }
+    void AddControlPointToInterpolationCurve(const Entity curve, const Entity entity) const
+        { coordinator.GetSystem<InterpolationCurveSystem>()->AddControlPoint(curve, entity); }
 
     void AddRowOfC0SurfacePatches(Entity surface, const alg::Vec3& direction, float length, float width);
 
@@ -230,8 +231,8 @@ public:
     inline const std::unordered_set<Entity>& GetAllC2Curves() const
         { return c2CurveSystem->GetEntities(); }
 
-    inline const std::unordered_set<Entity>& GetAllInterpolationCurves() const
-        { return interpolationCurveSystem->GetEntities(); }
+    const std::unordered_set<Entity>& GetAllInterpolationCurves() const
+        { return coordinator.GetSystem<InterpolationCurveSystem>()->GetEntities(); }
 
     inline void ShowC2BSplinePolygon(Entity entity) const
         { return c2CurveSystem->ShowBSplinePolygon(entity); }
@@ -321,7 +322,7 @@ private:
     std::shared_ptr<SelectionSystem> selectionSystem;
     std::shared_ptr<C0CurveSystem> c0CurveSystem;
     std::shared_ptr<C2CurveSystem> c2CurveSystem;
-    std::shared_ptr<InterpolationCurveSystem> interpolationCurveSystem;
+    std::shared_ptr<InterpolationCurvesRenderingSystem> interpolationRenderingSystem;
     std::shared_ptr<C0SurfaceSystem> c0SurfaceSystem;
     std::shared_ptr<C0CylinderSystem> c0CylinderSystem;
     std::shared_ptr<C0PatchesSystem> c0PatchesSystem;

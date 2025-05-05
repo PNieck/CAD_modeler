@@ -364,7 +364,7 @@ void ModelerObjectsPropertiesView::DisplayEntityDeletionOption(Entity entity) co
 }
 
 
-void ModelerObjectsPropertiesView::DisplaySurfaceDensityParameter(Entity entity, const PatchesDensity &density) const
+void ModelerObjectsPropertiesView::DisplaySurfaceDensityParameter(const Entity entity, const PatchesDensity &density) const
 {
     int d = density.GetDensity();
 

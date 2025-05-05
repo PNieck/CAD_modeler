@@ -5,9 +5,10 @@
 #include <optional>
 #include <memory>
 #include <tuple>
+#include <deque>
 
 #include "CAD_modeler/model/components/position.hpp"
-#include "intersectionSystem/intersectionPoint.hpp"
+#include "CAD_modeler/model/components/intersectionCurve.hpp"
 #include "intersectionSystem/surfaces.hpp"
 
 
@@ -17,34 +18,36 @@ public:
 
     bool CanBeIntersected(Entity entity) const;
 
-    void FindIntersection(Entity e1, Entity e2, float step);
+    std::optional<Entity> FindIntersection(Entity e1, Entity e2, float step);
 
-    void FindIntersection(Entity e1, Entity e2, float step, const Position& guidance);
+    std::optional<Entity> FindIntersection(Entity e1, Entity e2, float step, const Position& guidance);
 
-    void FindSelfIntersection(Entity e, float step);
+    std::optional<Entity> FindSelfIntersection(Entity e, float step);
 
-    void FindSelfIntersection(Entity e, float step, const Position& guidance);
+    std::optional<Entity> FindSelfIntersection(Entity e, float step, const Position& guidance);
 
 private:
     [[nodiscard]]
     std::unique_ptr<interSys::Surface> GetSurface(Entity entity) const;
 
     [[nodiscard]]
-    interSys::IntersectionPoint FindFirstApproximation(interSys::Surface& s1, interSys::Surface& s2) const;
+    IntersectionPoint FindFirstApproximation(interSys::Surface& s1, interSys::Surface& s2) const;
 
-    interSys::IntersectionPoint FindFirstApproximationForSelfIntersection(interSys::Surface& s) const;
+    IntersectionPoint FindFirstApproximationForSelfIntersection(interSys::Surface& s) const;
 
     [[nodiscard]]
-    std::optional<interSys::IntersectionPoint> FindFirstIntersectionPoint(interSys::Surface& s1, interSys::Surface& s2, const interSys::IntersectionPoint& initSol) const;
+    std::optional<IntersectionPoint> FindFirstIntersectionPoint(interSys::Surface& s1, interSys::Surface& s2, const IntersectionPoint& initSol) const;
 
     std::optional<std::tuple<float, float>> NearestPoint(interSys::Surface& s, const Position& guidance, float initU, float initV) const;
     std::tuple<float, float> NearestPointApproximation(interSys::Surface& s, const Position& guidance) const;
 
     std::tuple<float, float> SecondNearestPointApproximation(interSys::Surface& s, const Position& guidance, float u, float v) const;
 
-    void FindIntersection(interSys::Surface& s1, interSys::Surface& s2, const interSys::IntersectionPoint& initPoint, float step);
+    std::optional<Entity> FindIntersection(interSys::Surface& s1, interSys::Surface& s2, const IntersectionPoint& initPoint, float step);
 
-    void FindOpenIntersection(const interSys::IntersectionPoint& firstPoint, interSys::Surface& s1, interSys::Surface& s2, float step) const;
+    std::optional<Entity> FindOpenIntersection(const IntersectionPoint& firstPoint, interSys::Surface& s1, interSys::Surface& s2, float step, std::deque<IntersectionPoint>& points) const;
 
-    float ErrorRate(interSys::Surface& s1, interSys::Surface& s2, const interSys::IntersectionPoint &intPt) const;
+    float ErrorRate(interSys::Surface& s1, interSys::Surface& s2, const IntersectionPoint &intPt) const;
+
+    Entity CreateCurve(interSys::Surface& s1, interSys::Surface& s2, const std::deque<IntersectionPoint>& interPoints, bool isOpen) const;
 };
