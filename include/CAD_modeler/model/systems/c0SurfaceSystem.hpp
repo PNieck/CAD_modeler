@@ -33,13 +33,13 @@ public:
 
     void ShowBezierNet(Entity cylinder) const;
 
-    inline void HideBezierNet(Entity surface) const
+    void HideBezierNet(const Entity surface) const
         { coordinator->GetSystem<ControlNetSystem>()->DeleteControlPointsNet(surface); }
 
-    inline int GetRowsCnt(Entity surface) const
+    int GetRowsCnt(const Entity surface) const
         { return coordinator->GetSystem<C0PatchesSystem>()->GetRowsCnt(surface); }
 
-    inline int GetColsCnt(Entity surface) const
+    int GetColsCnt(const Entity surface) const
         { return coordinator->GetSystem<C0PatchesSystem>()->GetColsCnt(surface); }
 
     void Recalculate(Entity surface, const Position& pos, const alg::Vec3& direction, float length, float width) const;

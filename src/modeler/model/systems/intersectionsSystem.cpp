@@ -657,7 +657,7 @@ void IntersectionSystem::FindOpenIntersection(const IntersectionPoint& firstPoin
 {
     const auto pointSys = coordinator->GetSystem<PointsSystem>();
 
-    IntersectionPoint prevSol(firstPoint.U2(), firstPoint.V2(), firstPoint.U1(), firstPoint.V1());
+    const IntersectionPoint prevSol(firstPoint.U2(), firstPoint.V2(), firstPoint.U1(), firstPoint.V1());
 
     // Passing solutions in reversed order to traverse intersection in other direction
     NextPointFinder nextPointFinder(s2, s1, prevSol, step);
@@ -674,16 +674,6 @@ void IntersectionSystem::FindOpenIntersection(const IntersectionPoint& firstPoin
         pointSys->CreatePoint(point);
     } while (!nextPointFinder.WasLastPoint());
 }
-
-
-// bool IntersectionSystem::SolutionInDomains(const IntersectionPoint &sol, Surface &s1, Surface &s2) {
-//     return SolutionInDomain(s1, sol.U1(), sol.V1()) && SolutionInDomain(s2, sol.U2(), sol.V2());
-// }
-//
-//
-// bool IntersectionSystem::SolutionInDomain(Surface &s, const float u, const float v) {
-//     return s.MinU() <= u && s.MaxU() >= u && s.MinV() <= v && s.MaxV() >= v;
-// }
 
 
 float IntersectionSystem::ErrorRate(Surface& s1, Surface& s2, const IntersectionPoint &intPt) const

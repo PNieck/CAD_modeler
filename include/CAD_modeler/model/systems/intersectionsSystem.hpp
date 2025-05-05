@@ -46,10 +46,5 @@ private:
 
     void FindOpenIntersection(const interSys::IntersectionPoint& firstPoint, interSys::Surface& s1, interSys::Surface& s2, float step) const;
 
-    // static bool SolutionInDomains(const interSys::IntersectionPoint &sol, interSys::Surface& s1, interSys::Surface& s2);
-    // static bool SolutionInDomain(interSys::Surface& s, float u, float v);
-
     float ErrorRate(interSys::Surface& s1, interSys::Surface& s2, const interSys::IntersectionPoint &intPt) const;
-
-    //friend class NextPointDistFun;
 };

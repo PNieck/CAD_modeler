@@ -14,9 +14,9 @@ class C0CurveSystem: public System {
 public:
     static void RegisterSystem(Coordinator& coordinator);
 
-    Entity CreateC0Curve(const std::vector<Entity>& entities);
-    Entity CreateC0Curve(const Entity entity)
-        { return CreateC0Curve(std::vector{entity}); }
+    Entity CreateC0Curve(const std::vector<Entity>& cps);
+    Entity CreateC0Curve(const Entity cps)
+        { return CreateC0Curve(std::vector{cps}); }
 
     void AddControlPoint(const Entity bezierCurve, const Entity entity) const
         { coordinator->GetSystem<CurveControlPointsSystem>()->AddControlPoint(bezierCurve, entity, Coordinator::GetSystemID<C0CurveSystem>()); }

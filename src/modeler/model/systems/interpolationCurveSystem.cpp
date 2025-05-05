@@ -51,7 +51,7 @@ void InterpolationCurveSystem::Render(const alg::Mat4x4& cameraMtx) const
     shader.SetMVP(cameraMtx);
 
     for (auto const entity: entities) {
-        bool selection = selectionSystem->IsSelected(entity);
+        const bool selection = selectionSystem->IsSelected(entity);
 
         if (selection)
             shader.SetColor(alg::Vec4(1.0f, 0.5f, 0.0f, 1.0f));
@@ -60,7 +60,7 @@ void InterpolationCurveSystem::Render(const alg::Mat4x4& cameraMtx) const
         mesh.Use();
 
         glPatchParameteri(GL_PATCH_VERTICES, 4);
-	    glDrawElements(GL_PATCHES, mesh.GetElementsCnt(), GL_UNSIGNED_INT, 0);
+	    glDrawElements(GL_PATCHES, mesh.GetElementsCnt(), GL_UNSIGNED_INT, nullptr);
 
         if (selection)
             shader.SetColor(alg::Vec4(1.0f));
@@ -160,10 +160,10 @@ std::vector<alg::Vector4<alg::Vec3>> InterpolationCurveSystem::FindInterpolation
 
     const auto chordLengths = ChordLengthsBetweenControlPoints(ctrlPts);
 
-    const auto squareCoeff = SquareCoeffInPowerBasis(ctrlPts, chordLengths);
-    const auto cubicCoeff = CubicCoeffInPowerBasis(squareCoeff, chordLengths);
-    const auto linearCoeff = LinearCoeffInPowerBasis(squareCoeff, cubicCoeff, chordLengths, ctrlPts);
-    const auto constCoeff = ConstantCoeffInPowerBasis(linearCoeff, squareCoeff, cubicCoeff, chordLengths, ctrlPts);
+    const auto squareCoeff = SquareCoefInPowerBasis(ctrlPts, chordLengths);
+    const auto cubicCoeff = CubicCoefInPowerBasis(squareCoeff, chordLengths);
+    const auto linearCoeff = LinearCoefInPowerBasis(squareCoeff, cubicCoeff, chordLengths, ctrlPts);
+    const auto constCoeff = ConstantCoefInPowerBasis(linearCoeff, squareCoeff, cubicCoeff, chordLengths, ctrlPts);
 
     std::vector<alg::Vector4<alg::Vec3>> result(constCoeff.size());
 
@@ -216,7 +216,7 @@ std::vector<Entity> InterpolationCurveSystem::PreprocessControlPoints(const Curv
 }
 
 
-std::vector<alg::Vec3> InterpolationCurveSystem::SquareCoeffInPowerBasis(const std::vector<Entity>& ctrlPts, const std::vector<float>& chordsLen) const
+std::vector<alg::Vec3> InterpolationCurveSystem::SquareCoefInPowerBasis(const std::vector<Entity>& ctrlPts, const std::vector<float>& chordsLen) const
 {
     if (ctrlPts.size() == 2) {
         return { alg::Vec3(0), alg::Vec3(0) };
@@ -250,56 +250,56 @@ std::vector<alg::Vec3> InterpolationCurveSystem::SquareCoeffInPowerBasis(const s
 }
 
 
-std::vector<alg::Vec3> InterpolationCurveSystem::CubicCoeffInPowerBasis(const std::vector<alg::Vec3>& squarePowerCoeff, const std::vector<float>& chordsLen) const
+std::vector<alg::Vec3> InterpolationCurveSystem::CubicCoefInPowerBasis(const std::vector<alg::Vec3>& squarePowerCoef, const std::vector<float>& chordsLen) const
 {
-    std::vector<alg::Vec3> result(squarePowerCoeff.size() - 1);
+    std::vector<alg::Vec3> result(squarePowerCoef.size() - 1);
 
     for (size_t i=0; i < result.size(); ++i) {
-        result[i] = (squarePowerCoeff[i+1] - squarePowerCoeff[i]) / (3.f * chordsLen[i]);
+        result[i] = (squarePowerCoef[i+1] - squarePowerCoef[i]) / (3.f * chordsLen[i]);
     }
 
     return result;
 }
 
 
-std::vector<alg::Vec3> InterpolationCurveSystem::LinearCoeffInPowerBasis(
-    const std::vector<alg::Vec3>& squarePowerCoeff,
-    const std::vector<alg::Vec3>& cubicPowerCoeff,
+std::vector<alg::Vec3> InterpolationCurveSystem::LinearCoefInPowerBasis(
+    const std::vector<alg::Vec3>& squarePowerCoef,
+    const std::vector<alg::Vec3>& cubicPowerCoef,
     const std::vector<float>& chordsLen,
     const std::vector<Entity>& ctrlPts) const
 {
-    std::vector<alg::Vec3> result(squarePowerCoeff.size() - 1);
+    std::vector<alg::Vec3> result(squarePowerCoef.size() - 1);
 
     float t = chordsLen[0];
 
     auto const& cpPos0 = coordinator->GetComponent<Position>(ctrlPts[0]);
     auto const& cpPos1 = coordinator->GetComponent<Position>(ctrlPts[1]);
 
-    result[0] = (cpPos1.vec - cpPos0.vec - cubicPowerCoeff[0] * t*t*t) / t;
+    result[0] = (cpPos1.vec - cpPos0.vec - cubicPowerCoef[0] * t*t*t) / t;
 
     for (size_t i=1; i < result.size(); ++i) {
         t = chordsLen[i-1];
-        result[i] = result[i-1] + 2.f*squarePowerCoeff[i-1]*t + 3.f*cubicPowerCoeff[i-1]*t*t;
+        result[i] = result[i-1] + 2.f*squarePowerCoef[i-1]*t + 3.f*cubicPowerCoef[i-1]*t*t;
     }
 
     return result;
 }
 
 
-std::vector<alg::Vec3> InterpolationCurveSystem::ConstantCoeffInPowerBasis(
-    const std::vector<alg::Vec3>& linearPowerCoeff,
-    const std::vector<alg::Vec3>& squarePowerCoeff,
-    const std::vector<alg::Vec3>& cubicPowerCoeff,
+std::vector<alg::Vec3> InterpolationCurveSystem::ConstantCoefInPowerBasis(
+    const std::vector<alg::Vec3>& linearPowerCoef,
+    const std::vector<alg::Vec3>& squarePowerCoef,
+    const std::vector<alg::Vec3>& cubicPowerCoef,
     const std::vector<float>& chordsLen,
     const std::vector<Entity>& ctrlPts) const
 {
-    std::vector<alg::Vec3> result(squarePowerCoeff.size() - 1);
+    std::vector<alg::Vec3> result(squarePowerCoef.size() - 1);
 
     result[0] = coordinator->GetComponent<Position>(ctrlPts[0]).vec;
 
     for (size_t i=1; i < result.size(); ++i) {
         const float t = chordsLen[i-1];
-        result[i] = result[i-1] + linearPowerCoeff[i-1]*t + squarePowerCoeff[i-1]*t*t + cubicPowerCoeff[i-1]*t*t*t;
+        result[i] = result[i-1] + linearPowerCoef[i-1]*t + squarePowerCoef[i-1]*t*t + cubicPowerCoef[i-1]*t*t*t;
     }
 
     return result;

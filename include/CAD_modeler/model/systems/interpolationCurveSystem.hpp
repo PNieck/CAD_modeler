@@ -15,14 +15,17 @@ public:
 
     Entity CreateCurve(const std::vector<Entity>& entities);
 
-    inline void AddControlPoint(Entity bezierCurve, Entity entity)
-        { coordinator->GetSystem<CurveControlPointsSystem>()->AddControlPoint(bezierCurve, entity, Coordinator::GetSystemID<InterpolationCurveSystem>()); }
+    void AddControlPoint(const Entity bezierCurve, const Entity entity) const {
+        coordinator->GetSystem<CurveControlPointsSystem>()->AddControlPoint(bezierCurve, entity, Coordinator::GetSystemID<InterpolationCurveSystem>());
+    }
 
-    inline void DeleteControlPoint(Entity bezierCurve, Entity entity)
-        { coordinator->GetSystem<CurveControlPointsSystem>()->DeleteControlPoint(bezierCurve, entity, Coordinator::GetSystemID<InterpolationCurveSystem>()); }
+    void DeleteControlPoint(const Entity bezierCurve, const Entity entity) const {
+        coordinator->GetSystem<CurveControlPointsSystem>()->DeleteControlPoint(bezierCurve, entity, Coordinator::GetSystemID<InterpolationCurveSystem>());
+    }
 
-    inline void MergeControlPoints(Entity curve, Entity oldCP, Entity newCP)
-        { coordinator->GetSystem<CurveControlPointsSystem>()->MergeControlPoints(curve, oldCP, newCP, Coordinator::GetSystemID<InterpolationCurveSystem>()); }
+    void MergeControlPoints(const Entity curve, const Entity oldCP, const Entity newCP) const {
+        coordinator->GetSystem<CurveControlPointsSystem>()->MergeControlPoints(curve, oldCP, newCP, Coordinator::GetSystemID<InterpolationCurveSystem>());
+    }
 
     void Render(const alg::Mat4x4& cameraMtx) const;
 
@@ -43,18 +46,15 @@ private:
     /// @brief Function removes neighboring control points with the same positions
     std::vector<Entity> PreprocessControlPoints(const CurveControlPoints& cps) const;
 
-    std::vector<alg::Vec3> ConstantCoeffInPowerBasis(const std::vector<alg::Vec3>& linearPowerCoeff, const std::vector<alg::Vec3>& squarePowerCoeff, const std::vector<alg::Vec3>& cubicPowerCoeff, const std::vector<float>& chordsLen, const std::vector<Entity>& ctrlPts) const;
-    std::vector<alg::Vec3> LinearCoeffInPowerBasis(const std::vector<alg::Vec3>& squarePowerCoeff, const std::vector<alg::Vec3>& cubicPowerCoeff, const std::vector<float>& chordsLen, const std::vector<Entity>& ctrlPts) const;
-    std::vector<alg::Vec3> SquareCoeffInPowerBasis(const std::vector<Entity>& ctrlPts, const std::vector<float>& chordsLen) const;
-    std::vector<alg::Vec3> CubicCoeffInPowerBasis(const std::vector<alg::Vec3>& squarePowerCoeff, const std::vector<float>& chordsLen) const;
+    std::vector<alg::Vec3> ConstantCoefInPowerBasis(const std::vector<alg::Vec3>& linearPowerCoef, const std::vector<alg::Vec3>& squarePowerCoef, const std::vector<alg::Vec3>& cubicPowerCoef, const std::vector<float>& chordsLen, const std::vector<Entity>& ctrlPts) const;
+    std::vector<alg::Vec3> LinearCoefInPowerBasis(const std::vector<alg::Vec3>& squarePowerCoef, const std::vector<alg::Vec3>& cubicPowerCoef, const std::vector<float>& chordsLen, const std::vector<Entity>& ctrlPts) const;
+    std::vector<alg::Vec3> SquareCoefInPowerBasis(const std::vector<Entity>& ctrlPts, const std::vector<float>& chordsLen) const;
+    std::vector<alg::Vec3> CubicCoefInPowerBasis(const std::vector<alg::Vec3>& squarePowerCoef, const std::vector<float>& chordsLen) const;
 
     std::vector<float> ChordLengthsBetweenControlPoints(const std::vector<Entity>& cps) const;
     std::vector<float> SubdiagonalElems(const std::vector<float>& chordLengths) const;
     std::vector<float> DiagonalElems(const std::vector<float>& chordLengths) const;
     std::vector<float> SuperdiagonalElems(const std::vector<float>& chordLengths) const;
     std::vector<alg::Vec3> EquationResultsElems(const std::vector<float>& chordLengths, const std::vector<Entity>& ctrlPts) const;
-
-    
-
 };
  

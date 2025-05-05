@@ -18,13 +18,13 @@ public:
 
     class Hole {
     public:
-        static const int innerCpNb = 9;
-        static const int outerCpNb = 12;
+        static constexpr int innerCpNb = 9;
+        static constexpr int outerCpNb = 12;
 
-        inline Entity GetInnerControlPoint(int index) const
+        Entity GetInnerControlPoint(const int index) const
             { return innerCp[index]; }
 
-        inline Entity GetOuterControlPoint(int index) const
+        Entity GetOuterControlPoint(const int index) const
             { return outerCp[index]; }
 
     private:

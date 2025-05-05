@@ -2,8 +2,6 @@
 
 #include "surfaces.hpp"
 
-#include <ecs/coordinator.hpp>
-
 #include "../c0PatchesSystem.hpp"
 
 

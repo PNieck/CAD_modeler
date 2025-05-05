@@ -15,10 +15,10 @@ public:
 
     void AddControlPointsNet(Entity entity, const Patches& patches);
 
-    inline bool HasControlPointsNet(Entity entity) const
+    bool HasControlPointsNet(const Entity entity) const
         { return entities.contains(entity); }
 
-    inline void DeleteControlPointsNet(Entity entity)
+    void DeleteControlPointsNet(const Entity entity) const
         { coordinator->DeleteComponent<ControlNetMesh>(entity); }
 
     void Render(const alg::Mat4x4& cameraMtx) const;
