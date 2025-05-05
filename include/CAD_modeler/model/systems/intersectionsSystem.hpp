@@ -37,9 +37,6 @@ private:
     [[nodiscard]]
     std::optional<interSys::IntersectionPoint> FindFirstIntersectionPoint(interSys::Surface& s1, interSys::Surface& s2, const interSys::IntersectionPoint& initSol) const;
 
-    [[nodiscard]]
-    std::tuple<std::optional<interSys::IntersectionPoint>, bool> FindNextIntersectionPoint(interSys::Surface& s1, interSys::Surface& s2, const interSys::IntersectionPoint &prevSol, float step) const;
-
     std::optional<std::tuple<float, float>> NearestPoint(interSys::Surface& s, const Position& guidance, float initU, float initV) const;
     std::tuple<float, float> NearestPointApproximation(interSys::Surface& s, const Position& guidance) const;
 
@@ -49,10 +46,10 @@ private:
 
     void FindOpenIntersection(const interSys::IntersectionPoint& firstPoint, interSys::Surface& s1, interSys::Surface& s2, float step) const;
 
-    static bool SolutionInDomains(const interSys::IntersectionPoint &sol, interSys::Surface& s1, interSys::Surface& s2);
-    static bool SolutionInDomain(interSys::Surface& s, float u, float v);
+    // static bool SolutionInDomains(const interSys::IntersectionPoint &sol, interSys::Surface& s1, interSys::Surface& s2);
+    // static bool SolutionInDomain(interSys::Surface& s, float u, float v);
 
     float ErrorRate(interSys::Surface& s1, interSys::Surface& s2, const interSys::IntersectionPoint &intPt) const;
 
-    friend class NextPointDistFun;
+    //friend class NextPointDistFun;
 };

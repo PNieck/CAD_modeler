@@ -10,14 +10,13 @@
 #include <CAD_modeler/model/systems/intersectionSystem/torusSurface.hpp>
 #include <CAD_modeler/model/systems/intersectionSystem/c0Surface.hpp>
 #include <CAD_modeler/model/systems/intersectionSystem/c2Surface.hpp>
+#include <CAD_modeler/model/systems/intersectionSystem/nextPointFinder.hpp>
 
 #include <ecs/coordinator.hpp>
 
 #include <optimization/conjugateGradientMethod.hpp>
 #include <optimization/lineSearchMethods/dichotomyLineSearch.hpp>
 #include <optimization/stopConditions/smallGradient.hpp>
-
-#include <rootFinding/newtonMethod.hpp>
 
 #include <algebra/vec2.hpp>
 
@@ -81,7 +80,9 @@ void IntersectionSystem::FindIntersection(const Entity e1, const Entity e2, cons
 {
     assert(CanBeIntersected(e1));
     assert(CanBeIntersected(e2));
-    assert(e1 != e2);
+
+    if (e1 == e2)
+        return FindSelfIntersection(e1, step, guidance);
 
     const auto surface1 = GetSurface(e1);
     const auto surface2 = GetSurface(e2);
@@ -375,13 +376,13 @@ public:
         const float d3 = std::min(start[2] - surface2.MinU(), surface2.MaxU() - start[2]);
         const float d4 = std::min(start[3] - surface2.MinV(), surface2.MaxV() - start[3]);
 
-        float minDist = std::min(std::min(d1, d2), std::min(d3, d4));
+        const float minDist = std::min(std::min(d1, d2), std::min(d3, d4));
 
         if (minDist < len) {
             // Scale direction
-            float coef = minDist / len;
+            const float coef = minDist / len;
 
-            std::vector newDir {
+            const std::vector newDir {
                 direction[0] * coef,
                 direction[1] * coef,
                 direction[2] * coef,
@@ -417,13 +418,13 @@ public:
         const float d1 = std::min(start[0] - surface1.MinU(), surface1.MaxU() - start[0]);
         const float d2 = std::min(start[1] - surface1.MinV(), surface1.MaxV() - start[1]);
 
-        float minDist = std::min(d1, d2);
+        const float minDist = std::min(d1, d2);
 
         if (minDist < len) {
             // Scale direction
-            float coef = minDist / len;
+            const float coef = minDist / len;
 
-            std::vector newDir {
+            const std::vector newDir {
                 direction[0] * coef,
                 direction[1] * coef,
             };
@@ -449,7 +450,6 @@ std::optional<IntersectionPoint> IntersectionSystem::FindFirstIntersectionPoint(
     };
 
     DomainDichotomyLineSearch4D lineSearch(s1, s2, 1e-7f);
-    //opt::DichotomyLineSearch lineSearch(0, 0.01f, 1e-7f);
     NearZeroCondition stopCond;
     DistanceBetweenPoints fun(s1, s2);
 
@@ -465,122 +465,13 @@ std::optional<IntersectionPoint> IntersectionSystem::FindFirstIntersectionPoint(
         sol.value()[3]
     );
 
-    if (!SolutionInDomains(result, s1, s2))
+    if (!PointInDomains(s1, s2, result))
         return std::nullopt;
 
     if (ErrorRate(s1, s2, result) > 1e-5)
         return std::nullopt;
 
     return result;
-}
-
-
-class NextPointDistFun final : public root::FunctionToFindRoot {
-public:
-    NextPointDistFun(Surface& s1, Surface& s2, const alg::Vec3& prevPoint,
-                     const alg::Vec3& tangent, const float step):
-        surface1(s1), surface2(s2), prevPoint(prevPoint), tangent(tangent), step(step) {}
-
-    alg::Vec4 Value(alg::Vec4 args) override {
-        if (!IntersectionSystem::SolutionInDomains(IntersectionPoint(args), surface1, surface2)) {
-            outsideDomain = true;
-            return alg::Vec4(NAN);
-        }
-
-        const auto point1 = surface1.PointOnSurface(args.X(), args.Y());
-        const auto point2 = surface2.PointOnSurface(args.Z(), args.W());
-
-        auto diff = point1 - point2;
-        auto v = Dot(point1 - prevPoint, tangent) - step;
-
-        return {
-            diff.X(),
-            diff.Y(),
-            diff.Z(),
-            v
-        };
-    }
-
-    alg::Mat4x4 Jacobian(alg::Vec4 args) override {
-        const auto derE1X = surface1.PartialDerivativeU(args.X(), args.Y());
-        const auto derE1Y = surface1.PartialDerivativeV(args.X(), args.Y());
-
-        const auto derE2Z = surface2.PartialDerivativeU(args.Z(), args.W());
-        const auto derE2W = surface2.PartialDerivativeV(args.Z(), args.W());
-
-        const float partX = Dot(tangent, derE1X);
-        const float partY = Dot(tangent, derE1Y);
-
-        return {
-            derE1X.X(), derE1Y.X(), -derE2Z.X(), -derE2W.X(),
-            derE1X.Y(), derE1Y.Y(), -derE2Z.Y(), -derE2W.Y(),
-            derE1X.Z(), derE1Y.Z(), -derE2Z.Z(), -derE2W.Z(),
-                 partX,      partY,         0.f,         0.f
-        };
-    }
-
-    [[nodiscard]]
-    bool WasEvaluatedOutsideTheDomain() const
-        { return outsideDomain; }
-
-private:
-    Surface& surface1;
-    Surface& surface2;
-
-    alg::Vec3 prevPoint;
-    alg::Vec3 tangent;
-    float step;
-
-    bool outsideDomain = false;
-};
-
-
-std::tuple<std::optional<IntersectionPoint>, bool> IntersectionSystem::FindNextIntersectionPoint(Surface& s1, Surface& s2, const IntersectionPoint &prevSol, float step) const
-{
-    float remainingDist = step;
-    const float minStep = step / 1024.f;
-    std::optional<alg::Vec4> nextPoint;
-    bool endEncountered = false;
-
-    const auto vectorSys = coordinator->GetSystem<VectorSystem>();
-
-    do {
-        alg::Vec3 normal1 = s1.NormalVector(prevSol.U1(), prevSol.V1());
-        alg::Vec3 normal2 = s2.NormalVector(prevSol.U2(), prevSol.V2());
-
-        alg::Vec3 tangent = Cross(normal1, normal2).Normalize();
-        alg::Vec3 prevPoint = s1.PointOnSurface(prevSol.U1(), prevSol.V1());
-
-        vectorSys->AddVector(tangent, prevPoint);
-        vectorSys->AddVector(normal1, prevPoint);
-        vectorSys->AddVector(normal2, prevPoint);
-
-        NextPointDistFun fun(
-            s1, s2,
-            prevPoint,
-            tangent,
-            step
-        );
-
-        nextPoint = NewtonMethod(fun, prevSol.AsVector(), 1e-5);
-        if (!nextPoint.has_value()) {
-            step /= 2.f;
-            if (step < minStep)
-                return {std::nullopt, endEncountered};
-        }
-        else if (fun.WasEvaluatedOutsideTheDomain()) {
-            endEncountered = true;
-            step /= 2.f;
-            remainingDist /= 2.f;
-        }
-        else {
-            remainingDist -= step;
-            step = remainingDist;
-        }
-
-    } while (remainingDist > 0.f);
-
-    return { IntersectionPoint(nextPoint.value()), endEncountered };
 }
 
 
@@ -633,7 +524,7 @@ std::optional<std::tuple<float, float>> IntersectionSystem::NearestPoint(
 
     const auto& sol = solOpt.value();
 
-    if (!SolutionInDomain(s, sol.at(0), sol.at(1)))
+    if (!PointInDomain(s, sol.at(0), sol.at(1)))
         return std::nullopt;
 
     return std::make_tuple(sol.at(0), sol.at(1));
@@ -728,33 +619,33 @@ void IntersectionSystem::FindIntersection(Surface &s1, Surface &s2, const Inters
     const auto firstPoint = s1.PointOnSurface(initPoint.U1(), initPoint.V1());
     pointSys->CreatePoint(firstPoint);
 
-    auto [solOpt, lastPt] = FindNextIntersectionPoint(s1, s2, initPoint, step);
-    if (!solOpt.has_value()) {
+    NextPointFinder nextPointFinder(s1, s2, initPoint, step);
+
+    if (!nextPointFinder.FindNext()) {
         std::cout << "Cannot find second point\n";
         return;
     }
 
-    auto& sol = solOpt.value();
-    pointSys->CreatePoint(s1.PointOnSurface(sol.U1(), sol.V1()));
-    if (lastPt) {
+    const auto& firstInterPoint = nextPointFinder.ActualPoint();
+    pointSys->CreatePoint(s1.PointOnSurface(firstInterPoint.U1(), firstInterPoint.V1()));
+    if (nextPointFinder.WasLastPoint()) {
         FindOpenIntersection(initPoint, s1, s2, step);
         return;
     }
 
     Position newPoint;
     do {
-        std::tie(solOpt, lastPt) = FindNextIntersectionPoint(s1, s2, sol, step);
-        if (!solOpt.has_value()) {
+        if (!nextPointFinder.FindNext()) {
             std::cout << "Cannot find next point\n";
             return;
         }
 
-        sol = solOpt.value();
-        pointSys->CreatePoint(s1.PointOnSurface(sol.U1(), sol.V1()));
+        const auto& nextInterPoint = nextPointFinder.ActualPoint();
+        pointSys->CreatePoint(s1.PointOnSurface(nextInterPoint.U1(), nextInterPoint.V1()));
 
-        newPoint = s1.PointOnSurface(sol.U1(), sol.V1());
+        newPoint = s1.PointOnSurface(nextInterPoint.U1(), nextInterPoint.V1());
 
-        if (lastPt) {
+        if (nextPointFinder.WasLastPoint()) {
             FindOpenIntersection(initPoint, s1, s2, step);
             return;
         }
@@ -767,36 +658,32 @@ void IntersectionSystem::FindOpenIntersection(const IntersectionPoint& firstPoin
     const auto pointSys = coordinator->GetSystem<PointsSystem>();
 
     IntersectionPoint prevSol(firstPoint.U2(), firstPoint.V2(), firstPoint.U1(), firstPoint.V1());
-    bool lastPt;
-    std::optional<IntersectionPoint> solOpt;
+
+    // Passing solutions in reversed order to traverse intersection in other direction
+    NextPointFinder nextPointFinder(s2, s1, prevSol, step);
 
     do {
-        // Passing solutions in reversed order to traverse intersection in other direction
-        std::tie(solOpt, lastPt) = FindNextIntersectionPoint(s2, s1, prevSol, step);
-
-        if (!solOpt.has_value()) {
+        if (!nextPointFinder.FindNext()) {
             std::cout << "Cannot find first point\n";
             return;
         }
 
-        auto& sol = solOpt.value();
+        const auto& sol = nextPointFinder.ActualPoint();
 
         const auto point = s1.PointOnSurface(sol.U2(), sol.V2());
         pointSys->CreatePoint(point);
-
-        prevSol = sol;
-    } while (!lastPt);
+    } while (!nextPointFinder.WasLastPoint());
 }
 
 
-bool IntersectionSystem::SolutionInDomains(const IntersectionPoint &sol, Surface &s1, Surface &s2) {
-    return SolutionInDomain(s1, sol.U1(), sol.V1()) && SolutionInDomain(s2, sol.U2(), sol.V2());
-}
-
-
-bool IntersectionSystem::SolutionInDomain(Surface &s, const float u, const float v) {
-    return s.MinU() <= u && s.MaxU() >= u && s.MinV() <= v && s.MaxV() >= v;
-}
+// bool IntersectionSystem::SolutionInDomains(const IntersectionPoint &sol, Surface &s1, Surface &s2) {
+//     return SolutionInDomain(s1, sol.U1(), sol.V1()) && SolutionInDomain(s2, sol.U2(), sol.V2());
+// }
+//
+//
+// bool IntersectionSystem::SolutionInDomain(Surface &s, const float u, const float v) {
+//     return s.MinU() <= u && s.MaxU() >= u && s.MinV() <= v && s.MaxV() >= v;
+// }
 
 
 float IntersectionSystem::ErrorRate(Surface& s1, Surface& s2, const IntersectionPoint &intPt) const
