@@ -38,6 +38,15 @@ Entity PointsSystem::CreatePoint(const Position& pos)
 }
 
 
+void PointsSystem::AddPoint(const Entity e)
+{
+    if (!coordinator->HasComponent<Position>(e))
+        throw std::runtime_error("Entity has no position");
+
+    entities.insert(e);
+}
+
+
 void PointsSystem::Render(const alg::Mat4x4& cameraMtx) const
 {
     if (entities.empty()) {

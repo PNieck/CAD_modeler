@@ -691,7 +691,7 @@ float IntersectionSystem::ErrorRate(Surface& s1, Surface& s2, const Intersection
 }
 
 
-Entity IntersectionSystem::CreateCurve(Surface& s1, Surface& s2, const std::deque<IntersectionPoint> &interPoints, const bool isOpen) const
+Entity IntersectionSystem::CreateCurve(Surface& s1, Surface& s2, const std::deque<IntersectionPoint> &interPoints, const bool isOpen)
 {
     IntersectionCurve interCurve(interPoints, isOpen);
     for (auto& point : interCurve.intersectionPoints) {
@@ -718,6 +718,7 @@ Entity IntersectionSystem::CreateCurve(Surface& s1, Surface& s2, const std::dequ
     const Entity curve = sys->AddCurve(controlPoints);
 
     coordinator->AddComponent(curve, interCurve);
+    entities.insert(curve);
 
     return curve;
 }

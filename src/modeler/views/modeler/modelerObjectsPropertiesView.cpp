@@ -91,6 +91,9 @@ void ModelerObjectsPropertiesView::RenderSingleObjectProperties(Entity entity) c
     if (components.contains(Modeler::GetComponentId<TriangleOfGregoryPatches>()))
         DisplayGregoryPatchesParameters(entity, model.GetComponent<TriangleOfGregoryPatches>(entity));
 
+    if (components.contains(Modeler::GetComponentId<IntersectionCurve>()))
+        DisplayIntersectionCurveOptions(entity);
+
     if (!components.contains(Modeler::GetComponentId<Unremovable>()))
         DisplayEntityDeletionOption(entity);
 
@@ -472,7 +475,15 @@ void ModelerObjectsPropertiesView::DisplayGregoryPatchesParameters(Entity entity
 }
 
 
-void ModelerObjectsPropertiesView::DisplayNameEditor(Entity entity, const Name &name) const
+void ModelerObjectsPropertiesView::DisplayIntersectionCurveOptions(const Entity entity) const
+{
+    if (ImGui::Button("Turn into interpolation curve")) {
+        model.TurnIntersectionCurveToInterpolation(entity);
+    }
+}
+
+
+void ModelerObjectsPropertiesView::DisplayNameEditor(const Entity entity, const Name &name) const
 {
     Name tmp = name;
 

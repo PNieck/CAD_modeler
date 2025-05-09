@@ -13,6 +13,8 @@ public:
 
     Entity CreatePoint(const Position& pos = Position());
 
+    void AddPoint(Entity e);
+
     void Render(const alg::Mat4x4& cameraMtx) const;
 
 private:

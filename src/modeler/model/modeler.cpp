@@ -426,6 +426,22 @@ std::optional<Entity> Modeler::FindSelfIntersection(const Entity e,const float s
 }
 
 
+void Modeler::TurnIntersectionCurveToInterpolation(const Entity curve)
+{
+    const auto& cps = coordinator.GetComponent<CurveControlPoints>(curve);
+
+    for (const auto cp: cps.GetPoints()) {
+        pointsSystem->AddPoint(cp);
+        nameSystem->SetName(cp, nameGenerator.GenerateName("Point_"));
+    }
+
+    intersectionSystem->RemoveEntity(curve);
+    coordinator.GetSystem<InterpolationCurveSystem>()->AddEntity(curve);
+
+    nameSystem->SetName(curve, nameGenerator.GenerateName("InterpolationCurve_"));
+}
+
+
 void Modeler::ClearScene()
 {
     const std::vector<std::shared_ptr<System>> systemsToClear {

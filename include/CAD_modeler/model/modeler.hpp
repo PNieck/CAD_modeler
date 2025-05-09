@@ -290,9 +290,9 @@ public:
 
     std::optional<Entity> FindSelfIntersection(Entity e, float step);
 
-    void FindSelfIntersection(const Entity e, const float step, const Position& guidance)
-        { intersectionSystem->FindSelfIntersection(e, step, guidance); }
     std::optional<Entity> FindSelfIntersection(Entity e, float step, const Position& guidance);
+
+    void TurnIntersectionCurveToInterpolation(Entity curve);
 
     void ClearScene();
 

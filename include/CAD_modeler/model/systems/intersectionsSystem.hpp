@@ -45,9 +45,9 @@ private:
 
     std::optional<Entity> FindIntersection(interSys::Surface& s1, interSys::Surface& s2, const IntersectionPoint& initPoint, float step);
 
-    std::optional<Entity> FindOpenIntersection(const IntersectionPoint& firstPoint, interSys::Surface& s1, interSys::Surface& s2, float step, std::deque<IntersectionPoint>& points) const;
+    std::optional<Entity> FindOpenIntersection(const IntersectionPoint& firstPoint, interSys::Surface& s1, interSys::Surface& s2, float step, std::deque<IntersectionPoint>& points);
 
     float ErrorRate(interSys::Surface& s1, interSys::Surface& s2, const IntersectionPoint &intPt) const;
 
-    Entity CreateCurve(interSys::Surface& s1, interSys::Surface& s2, const std::deque<IntersectionPoint>& interPoints, bool isOpen) const;
+    Entity CreateCurve(interSys::Surface& s1, interSys::Surface& s2, const std::deque<IntersectionPoint>& interPoints, bool isOpen);
 };
