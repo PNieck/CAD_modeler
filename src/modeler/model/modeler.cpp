@@ -293,7 +293,7 @@ void Modeler::AddColOfC2SurfacePatches(Entity surface, const alg::Vec3 &directio
 }
 
 
-void Modeler::AddRowOfC0CylinderPatches(Entity surface, float radius, const alg::Vec3 &dir)
+void Modeler::AddRowOfC0CylinderPatches(const Entity surface, const float radius, const alg::Vec3 &dir)
 {
     c0CylinderSystem->AddRowOfPatches(surface, cursorSystem->GetPosition(), dir, radius);
 
@@ -339,15 +339,15 @@ void Modeler::AddRowOfC2CylinderPatches(Entity surface, float radius, const alg:
 }
 
 
-void Modeler::AddColOfC2CylinderPatches(Entity surface, float radius, const alg::Vec3 &dir)
+void Modeler::AddColOfC2CylinderPatches(const Entity surface, const float radius, const alg::Vec3 &dir)
 {
     c2CylinderSystem->AddColOfPatches(surface, cursorSystem->GetPosition(), dir, radius);
 
     auto const& patches = coordinator.GetComponent<C2CylinderPatches>(surface);
 
     for (int row=0; row < patches.PointsInRow(); row++) {
-        Entity cp = patches.GetPoint(row, patches.PointsInCol()-C2CylinderSystem::DoublePointsCnt-1);
-        
+        const Entity cp = patches.GetPoint(row, patches.PointsInCol()-C2CylinderSystem::DoublePointsCnt-1);
+
         nameSystem->SetName(cp, nameGenerator.GenerateName("Point_"));
     }
 }
@@ -382,7 +382,7 @@ std::vector<GregoryPatchesSystem::Hole> Modeler::GetHolesPossibleToFill(const st
     std::vector<C0Patches> c0Patches;
     c0Patches.reserve(entities.size());
 
-    for (auto entity: entities)
+    for (const auto entity: entities)
         c0Patches.push_back(coordinator.GetComponent<C0Patches>(entity));
 
     return gregoryPatchesSystem->FindHolesToFill(c0Patches);
@@ -392,7 +392,7 @@ std::vector<GregoryPatchesSystem::Hole> Modeler::GetHolesPossibleToFill(const st
 Entity Modeler::FillHole(const GregoryPatchesSystem::Hole& hole)
 {
     const Entity entity = gregoryPatchesSystem->FillHole(hole);
-    nameSystem->SetName(entity, nameGenerator.GenerateName("GregoryPatches__"));
+    nameSystem->SetName(entity, nameGenerator.GenerateName("GregoryPatches_"));
 
     return entity;
 }

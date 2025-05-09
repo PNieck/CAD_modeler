@@ -9,9 +9,6 @@
 #include <imgui.h>
 #include <misc/cpp/imgui_stdlib.h>
 
-#include <ranges>
-
-
 
 ModelerObjectsPropertiesView::ModelerObjectsPropertiesView(ModelerController &controller, Modeler &model):
     controller(controller), model(model)
@@ -263,13 +260,13 @@ void ModelerObjectsPropertiesView::DisplayTorusProperty(Entity entity, const Tor
 }
 
 
-void ModelerObjectsPropertiesView::DisplayCurveControlPoints(Entity entity, const CurveControlPoints &params) const
+void ModelerObjectsPropertiesView::DisplayCurveControlPoints(const Entity entity, const CurveControlPoints &controlPoints) const
 {
     ImGui::SeparatorText("Control Points");
 
     int selected = -1;
     int n = 0;
-    for (const auto controlPoint: params.GetPoints()) {
+    for (const auto controlPoint: controlPoints.GetPoints()) {
         if (ImGui::Selectable(model.GetEntityName(controlPoint).c_str(), selected == n))
             selected = n;
         if (ImGui::BeginPopupContextItem()) {
@@ -292,9 +289,9 @@ void ModelerObjectsPropertiesView::DisplayCurveControlPoints(Entity entity, cons
 
         for (auto point: points) {
             // TODO: rewrite with set intersection
-            if (std::ranges::find(params.GetPoints(), point) == params.GetPoints().end()) {
+            if (std::ranges::find(controlPoints.GetPoints(), point) == controlPoints.GetPoints().end()) {
                 if (pointsWithNames.contains(point) && ImGui::Selectable(model.GetEntityName(point).c_str(), false)) {
-                    CurveType curveType = GetCurveType(model, entity);
+                    const CurveType curveType = GetCurveType(model, entity);
                     AddControlPointToCurve(model, entity, point, curveType);
                 }
             }

@@ -57,11 +57,11 @@ bool IntersectionSystem::CanBeIntersected(const Entity entity) const
 
 std::optional<Entity> IntersectionSystem::FindIntersection(const Entity e1, const Entity e2, const float step)
 {
-    assert(CanBeIntersected(e1));
-    assert(CanBeIntersected(e2));
-
     if (e1 == e2)
         return FindSelfIntersection(e1, step);
+
+    assert(CanBeIntersected(e1));
+    assert(CanBeIntersected(e2));
 
     const auto surface1 = GetSurface(e1);
     const auto surface2 = GetSurface(e2);
@@ -80,11 +80,11 @@ std::optional<Entity> IntersectionSystem::FindIntersection(const Entity e1, cons
 
 std::optional<Entity> IntersectionSystem::FindIntersection(const Entity e1, const Entity e2, const float step, const Position &guidance)
 {
-    assert(CanBeIntersected(e1));
-    assert(CanBeIntersected(e2));
-
     if (e1 == e2)
         return FindSelfIntersection(e1, step, guidance);
+
+    assert(CanBeIntersected(e1));
+    assert(CanBeIntersected(e2));
 
     const auto surface1 = GetSurface(e1);
     const auto surface2 = GetSurface(e2);
@@ -661,7 +661,7 @@ std::optional<Entity> IntersectionSystem::FindOpenIntersection(
     Surface& s2,
     const float step,
     std::deque<IntersectionPoint>& points
-) const {
+) {
     const IntersectionPoint prevSol(firstPoint.U2(), firstPoint.V2(), firstPoint.U1(), firstPoint.V1());
 
     // Passing solutions in reversed order to traverse intersection in other direction

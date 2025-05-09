@@ -54,7 +54,7 @@ public:
 
     Entity AddC2Cylinder();
 
-    inline void AddControlPointToC0Curve(Entity curve, Entity entity) const
+    void AddControlPointToC0Curve(const Entity curve, const Entity entity) const
         { c0CurveSystem->AddControlPoint(curve, entity); }
 
     inline void AddControlPointToC2Curve(Entity curve, Entity entity) const
