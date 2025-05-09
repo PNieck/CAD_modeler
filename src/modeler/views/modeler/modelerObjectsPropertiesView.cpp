@@ -67,7 +67,7 @@ void ModelerObjectsPropertiesView::RenderSingleObjectProperties(Entity entity) c
     if (components.contains(Modeler::GetComponentId<Name>()))
         DisplayNameEditor(entity, model.GetComponent<Name>(entity));
 
-    if (components.contains(Modeler::GetComponentId<CurveControlPoints>()))
+    if (components.contains(Modeler::GetComponentId<CurveControlPoints>()) && !components.contains(Modeler::GetComponentId<IntersectionCurve>()))
         DisplayCurveControlPoints(entity, model.GetComponent<CurveControlPoints>(entity));
 
     if (components.contains(Modeler::GetComponentId<C0CurveParameters>()))

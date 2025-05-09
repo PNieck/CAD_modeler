@@ -284,17 +284,15 @@ public:
     void SaveScene(const std::string& path)
         { saveManager.SaveScene(path, coordinator); }
 
-    void FindIntersection(const Entity e1, const Entity e2, const float step) const
-        { intersectionSystem->FindIntersection(e1, e2, step); }
+    std::optional<Entity> FindIntersection(Entity e1, Entity e2, float step);
 
-    void FindIntersection(const Entity e1, const Entity e2, const float step, const Position& guidance) const
-        { intersectionSystem->FindIntersection(e1, e2, step, guidance); }
+    std::optional<Entity> FindIntersection(Entity e1, Entity e2, float step, const Position& guidance);
 
-    void FindSelfIntersection(const Entity e, const float step) const
-        { intersectionSystem->FindSelfIntersection(e, step); }
+    std::optional<Entity> FindSelfIntersection(Entity e, float step);
 
     void FindSelfIntersection(const Entity e, const float step, const Position& guidance)
         { intersectionSystem->FindSelfIntersection(e, step, guidance); }
+    std::optional<Entity> FindSelfIntersection(Entity e, float step, const Position& guidance);
 
     void ClearScene();
 
@@ -339,6 +337,8 @@ private:
 
     alg::Vec3 PointFromViewportCoordinates(float x, float y);
     Line LineFromViewportCoordinates(float x, float y);
+
+    std::optional<Entity> SetIntersectionCurveUp(const std::optional<Entity>& curve);
 
     void RenderSystemsObjects(const alg::Mat4x4& viewMtx, const alg::Mat4x4& persMtx, float nearPlane, float farPlane) const override;
 };

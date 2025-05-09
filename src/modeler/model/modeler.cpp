@@ -398,6 +398,34 @@ Entity Modeler::FillHole(const GregoryPatchesSystem::Hole& hole)
 }
 
 
+std::optional<Entity> Modeler::FindIntersection(const Entity e1, const Entity e2, const float step)
+{
+    const auto result = intersectionSystem->FindIntersection(e1, e2, step);
+    return SetIntersectionCurveUp(result);
+}
+
+
+std::optional<Entity> Modeler::FindIntersection(const Entity e1, const Entity e2, const float step, const Position &guidance)
+{
+    const auto result = intersectionSystem->FindIntersection(e1, e2, step, guidance);
+    return SetIntersectionCurveUp(result);
+}
+
+
+std::optional<Entity> Modeler::FindSelfIntersection(const Entity e, const float step)
+{
+    const auto result = intersectionSystem->FindSelfIntersection(e, step);
+    return SetIntersectionCurveUp(result);
+}
+
+
+std::optional<Entity> Modeler::FindSelfIntersection(const Entity e,const float step, const Position &guidance)
+{
+    const auto result = intersectionSystem->FindSelfIntersection(e, step, guidance);
+    return SetIntersectionCurveUp(result);
+}
+
+
 void Modeler::ClearScene()
 {
     const std::vector<std::shared_ptr<System>> systemsToClear {
@@ -613,6 +641,17 @@ Line Modeler::LineFromViewportCoordinates(float x, float y)
     );
 
     return Line::FromTwoPoints(near, far);
+}
+
+
+std::optional<Entity> Modeler::SetIntersectionCurveUp(const std::optional<Entity> &curve)
+{
+    if (!curve.has_value())
+        return std::nullopt;
+
+    nameSystem->SetName(curve.value(), nameGenerator.GenerateName("IntersectionCurve_"));
+
+    return curve.value();
 }
 
 
