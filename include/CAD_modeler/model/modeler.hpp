@@ -292,7 +292,7 @@ public:
 
     std::optional<Entity> FindSelfIntersection(Entity e, float step, const Position& guidance);
 
-    void TurnIntersectionCurveToInterpolation(Entity curve);
+    Entity TurnIntersectionCurveToInterpolation(Entity curve);
 
     void ClearScene();
 
