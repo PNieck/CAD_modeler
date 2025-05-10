@@ -82,16 +82,24 @@ public:
     }
 
 
-    template <typename Comp>
+    template <NotEmptyComponent Comp>
     const Comp& GetComponent(const Entity entity) const {
         return componentMgr.GetComponent<Comp>(entity);
     }
+
+
+    template <EmptyComponent Comp>
+    Comp GetComponent(const Entity entity) const {
+        return componentMgr.GetComponent<Comp>(entity);
+    }
+
 
     template <typename Comp>
     void SetComponent(const Entity entity, const Comp& component) {
         componentMgr.GetComponent<Comp>(entity) = component;
         eventMgr.ComponentChanged<Comp>(entity, component);
     }
+
 
     template <typename Comp>
     void EditComponent(const Entity entity, std::function<void(Comp& component)> func) {
@@ -100,29 +108,36 @@ public:
         eventMgr.ComponentChanged<Comp>(entity, component);
     }
 
+
     template <typename Comp>
     HandlerId Subscribe(const Entity entity, std::shared_ptr<EventHandler<Comp>> function)
         { return eventMgr.Subscribe<Comp>(entity, function); }
+
 
     template <typename Comp>
     void Unsubscribe(const Entity entity, const HandlerId handlerId)
         { eventMgr.Unsubscribe<Comp>(entity, handlerId); }
 
+
     template <typename Comp>
     std::shared_ptr<EventHandler<Comp>> GetEventHandler(const Entity entity, const HandlerId handlerId)
         { return eventMgr.GetHandler<Comp>(entity, handlerId); }
 
+
     const std::set<ComponentId>& GetEntityComponents(const Entity entity) const
         { return componentMgr.GetEntityComponents(entity); }
+
 
     template <typename Comp>
     bool HasComponent(const Entity entity) const
         { return componentMgr.GetEntityComponents(entity).contains(ComponentsManager::GetComponentId<Comp>()); }
 
+
     template <SystemConcept Sys>
     std::shared_ptr<Sys> GetSystem() const {
         return systemsMgr.GetSystem<Sys>();
     }
+
 
     template <typename Comp>
     static constexpr ComponentId GetComponentID() {

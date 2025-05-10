@@ -2,10 +2,11 @@
 
 #include "entitiesManager.hpp"
 #include "componentsCollection.hpp"
+#include "emptyComponentConcept.hpp"
 
 #include <unordered_map>
 #include <memory>
-#include <ranges>
+#include <type_traits>
 #include <set>
 
 
@@ -16,8 +17,10 @@ class ComponentsManager {
 public:
     template<typename T>
     void RegisterComponent() {
-        std::size_t hash = GetComponentId<T>();
-        components.insert({hash, std::make_shared<ComponentCollection<T>>()});
+        if constexpr (std::is_empty_v<T> == false) {
+            std::size_t hash = GetComponentId<T>();
+            components.insert({hash, std::make_shared<ComponentCollection<T>>()});
+        }
     }
 
     void RegisterNewEntity(Entity entity) {
@@ -26,25 +29,41 @@ public:
 
     template<typename T>
     void AddComponent(Entity entity, const T& component) {
-        GetComponentCollection<T>()->AddComponent(entity, component);
         componentsOfEntities[entity].insert(GetComponentId<T>());
+
+        if constexpr (std::is_empty_v<T> == false)
+            GetComponentCollection<T>()->AddComponent(entity, component);
     }
 
-    template<typename T>
-    void AddComponent(Entity entity, T&& component) {
-        GetComponentCollection<T>()->AddComponent(entity, component);
-        componentsOfEntities[entity].insert(GetComponentId<T>());
-    }
+    // template<typename T>
+    // void AddComponent(Entity entity, T&& component) {
+    //     componentsOfEntities[entity].insert(GetComponentId<T>());
+    //
+    //     if constexpr (!std::is_empty_v<T>)
+    //         GetComponentCollection<T>()->AddComponent(entity, component);
+    // }
 
     template<typename T>
     void DeleteComponent(Entity entity) {
-        GetComponentCollection<T>()->DeleteComponent(entity);
         componentsOfEntities[entity].erase(GetComponentId<T>());
+
+        if constexpr (std::is_empty_v<T> == false)
+            GetComponentCollection<T>()->DeleteComponent(entity);
     }
 
-    template<typename T>
+    template<NotEmptyComponent T>
     T& GetComponent(Entity entity) const {
+        static_assert(std::is_empty_v<T> == false);
+
         return GetComponentCollection<T>()->GetComponent(entity);
+    }
+
+    template<EmptyComponent T>
+    T GetComponent(const Entity entity) const {
+        if (!componentsOfEntities.at(entity).contains(GetComponentId<T>()))
+            throw std::out_of_range("Component does not exist");
+
+        return T();
     }
 
     [[nodiscard]]
@@ -53,9 +72,11 @@ public:
     }
 
     void EntityDeleted(const Entity entity) {
-        for (const ComponentId componentId: componentsOfEntities.at(entity)) {
-            const auto collection = components.at(componentId);
-            collection->EntityDestroyed(entity);
+        if constexpr (std::is_empty_v<ComponentId> == false) {
+            for (const ComponentId componentId: componentsOfEntities.at(entity)) {
+                const auto collection = components.at(componentId);
+                collection->EntityDestroyed(entity);
+            }
         }
 
         componentsOfEntities.erase(entity);

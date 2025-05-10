@@ -6,6 +6,7 @@
 #include <set>
 #include <memory>
 #include <algorithm>
+#include <ranges>
 
 #include "system.hpp"
 #include "componentsManager.hpp"

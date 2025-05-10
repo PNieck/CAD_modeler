@@ -9,6 +9,7 @@
 #include <unordered_map>
 #include <stack>
 #include <memory>
+#include <ranges>
 
 
 enum class EventType {
