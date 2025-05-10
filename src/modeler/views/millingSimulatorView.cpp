@@ -39,7 +39,7 @@ void MillingSimulatorView::RenderFileSelection()
         ImGuiFileDialog::Instance()->OpenDialog("ChooseGCodeFileDlgKey", "Choose GCode File", ".k01,.k8,.k16,.f10,.f12", config);
     }
 
-    if (ImGuiFileDialog::Instance()->Display("ChooseFileDlgKey")) {
+    if (ImGuiFileDialog::Instance()->Display("ChooseGCodeFileDlgKey")) {
         if (ImGuiFileDialog::Instance()->IsOk()) {
             filePath = ImGuiFileDialog::Instance()->GetFilePathName();
             model.AddMillingPath(filePath);
