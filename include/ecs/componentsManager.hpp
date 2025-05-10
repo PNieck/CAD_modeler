@@ -53,10 +53,12 @@ public:
     }
 
     void EntityDeleted(const Entity entity) {
-        componentsOfEntities.erase(entity);
-        for (const auto &val: components | std::views::values) {
-            val->EntityDestroyed(entity);
+        for (const ComponentId componentId: componentsOfEntities.at(entity)) {
+            const auto collection = components.at(componentId);
+            collection->EntityDestroyed(entity);
         }
+
+        componentsOfEntities.erase(entity);
     }
 
     template <typename T>
