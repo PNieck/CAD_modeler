@@ -2,6 +2,8 @@
 
 #include <algebra/vec4.hpp>
 
+#include <ecs/eventsManager.hpp>
+
 #include <vector>
 #include <deque>
 
@@ -60,12 +62,13 @@ private:
 
 class IntersectionCurve {
 public:
-    IntersectionCurve(std::vector<IntersectionPoint>&& points, const bool isOpen):
-        isOpen(isOpen), intersectionPoints(std::move(points)) {}
+    IntersectionCurve(std::vector<IntersectionPoint>&& points, const bool isOpen, const HandlerId deletionHandler):
+        isOpen(isOpen), intersectionPoints(std::move(points)), deletionHandler(deletionHandler) {}
 
-    IntersectionCurve(const std::deque<IntersectionPoint>& points, const bool isOpen):
-        isOpen(isOpen), intersectionPoints(points.begin(), points.end()) {}
+    IntersectionCurve(const std::deque<IntersectionPoint>& points, const bool isOpen, const HandlerId deletionHandler):
+        isOpen(isOpen), intersectionPoints(points.begin(), points.end()), deletionHandler(deletionHandler) {}
 
     bool isOpen;
     std::vector<IntersectionPoint> intersectionPoints;
+    HandlerId deletionHandler;
 };

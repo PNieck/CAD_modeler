@@ -693,12 +693,6 @@ float IntersectionSystem::ErrorRate(Surface& s1, Surface& s2, const Intersection
 
 Entity IntersectionSystem::CreateCurve(Surface& s1, Surface& s2, const std::deque<IntersectionPoint> &interPoints, const bool isOpen)
 {
-    IntersectionCurve interCurve(interPoints, isOpen);
-    for (auto& point : interCurve.intersectionPoints) {
-        s1.Normalize(point.U1(), point.V1());
-        s2.Normalize(point.U2(), point.V2());
-    }
-
     std::vector<Entity> controlPoints;
     controlPoints.reserve(interPoints.size());
 
@@ -717,8 +711,35 @@ Entity IntersectionSystem::CreateCurve(Surface& s1, Surface& s2, const std::dequ
     const auto sys = coordinator->GetSystem<InterpolationCurvesRenderingSystem>();
     const Entity curve = sys->AddCurve(controlPoints);
 
-    coordinator->AddComponent(curve, interCurve);
+    const auto handler = std::make_shared<DeletionHandler>(*coordinator);
+    const auto handlerId = coordinator->Subscribe(curve, std::static_pointer_cast<EventHandler<CurveControlPoints>>(handler));
+
+    IntersectionCurve interCurve(interPoints, isOpen, handlerId);
+    for (auto& point : interCurve.intersectionPoints) {
+        s1.Normalize(point.U1(), point.V1());
+        s2.Normalize(point.U2(), point.V2());
+    }
+
+    coordinator->AddComponent<IntersectionCurve>(curve, interCurve);
     entities.insert(curve);
 
     return curve;
 }
+
+
+void IntersectionSystem::DeletionHandler::HandleEvent(
+    Entity entity, const CurveControlPoints& component, const EventType eventType
+) {
+    if (eventType != EventType::ComponentDeleted)
+        return;
+
+    const auto points = component.GetPoints();
+    const std::set toDelete(points.begin(), points.end());
+
+    for (const auto cp : toDelete) {
+        coordinator.DestroyEntity(cp);
+    }
+}
+
+
+

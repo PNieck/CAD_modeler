@@ -73,6 +73,9 @@ void InterpolationCurvesRenderingSystem::Update() const
     auto const& toUpdateSystem = coordinator->GetSystem<ToUpdateSystem>();
 
     for (const auto entity: toUpdateSystem->GetEntitiesToUpdate<InterpolationCurvesRenderingSystem>()) {
+        if (!entities.contains(entity))
+            continue;
+
         auto const cps = coordinator->GetComponent<CurveControlPoints>(entity);
 
         if (!cps.Empty())

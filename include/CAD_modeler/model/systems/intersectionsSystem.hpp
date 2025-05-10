@@ -7,8 +7,10 @@
 #include <tuple>
 #include <deque>
 
+#include "CAD_modeler/model/components/curveControlPoints.hpp"
 #include "CAD_modeler/model/components/position.hpp"
 #include "CAD_modeler/model/components/intersectionCurve.hpp"
+
 #include "intersectionSystem/surfaces.hpp"
 
 
@@ -50,4 +52,14 @@ private:
     float ErrorRate(interSys::Surface& s1, interSys::Surface& s2, const IntersectionPoint &intPt) const;
 
     Entity CreateCurve(interSys::Surface& s1, interSys::Surface& s2, const std::deque<IntersectionPoint>& interPoints, bool isOpen);
+
+    class DeletionHandler final : public EventHandler<CurveControlPoints> {
+    public:
+        explicit DeletionHandler(Coordinator& coordinator):
+            coordinator(coordinator) {}
+
+        void HandleEvent(Entity entity, const CurveControlPoints &component, EventType eventType) override;
+    private:
+        Coordinator& coordinator;
+    };
 };
