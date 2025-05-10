@@ -62,15 +62,16 @@ public:
     }
 
 
-    template <typename Comp>
-    void AddComponent(const Entity entity, Comp&& component) {
-        componentMgr.AddComponent<Comp>(entity, component);
-
-        auto const& componentsSet = componentMgr.GetEntityComponents(entity);
-        systemsMgr.EntityGainedComponent<Comp>(entity, componentsSet);
-
-        eventMgr.ComponentAdded<Comp>(entity, component);
-    }
+    // TODO: fix this
+    // template <typename Comp>
+    // void AddComponent(const Entity entity, Comp&& component) {
+    //     componentMgr.AddComponent<Comp>(entity, component);
+    //
+    //     auto const& componentsSet = componentMgr.GetEntityComponents(entity);
+    //     systemsMgr.EntityGainedComponent<Comp>(entity, componentsSet);
+    //
+    //     eventMgr.ComponentAdded<Comp>(entity, component);
+    // }
 
 
     template <typename Comp>
