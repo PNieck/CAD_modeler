@@ -194,7 +194,7 @@ public:
         { return coordinator.GetEntityComponents(entity); }
 
     template <typename Comp>
-    inline const Comp& GetComponent(Entity entity) const
+    const Comp& GetComponent(const Entity entity) const
         { return coordinator.GetComponent<Comp>(entity); }
 
     template <typename Comp>

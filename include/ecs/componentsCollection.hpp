@@ -17,20 +17,19 @@ public:
 template<typename T>
 class ComponentCollection final : public IComponentCollection {
 public:
-    inline void AddComponent(Entity entity, const T& component) {
+    void AddComponent(Entity entity, const T& component) {
         components.insert({ entity, component });
     }
 
-    inline void DeleteComponent(Entity entity) {
+    void DeleteComponent(Entity entity) {
         components.erase(entity);
     }
 
-    inline T& GetComponent(Entity entity) {
+    T& GetComponent(Entity entity) {
         return components.at(entity);
     }
 
-    void EntityDestroyed(Entity entity) override
-	{
+    void EntityDestroyed(Entity entity) override {
 		components.erase(entity);
 	}
 

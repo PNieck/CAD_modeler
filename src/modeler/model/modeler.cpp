@@ -353,7 +353,7 @@ void Modeler::AddColOfC2CylinderPatches(const Entity surface, const float radius
 }
 
 
-Entity Modeler::Add3DPointFromViewport(float x, float y)
+Entity Modeler::Add3DPointFromViewport(const float x, const float y)
 {
     const Position newPos(PointFromViewportCoordinates(x, y));
     const Entity result = pointsSystem->CreatePoint(newPos);

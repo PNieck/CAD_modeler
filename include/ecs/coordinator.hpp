@@ -12,7 +12,7 @@
 class Coordinator {
 public:
     Coordinator():
-        componentMgr(), entitiesMgr(), systemsMgr(), eventMgr(componentMgr) {}
+        eventMgr(componentMgr) {}
 
     template <typename Comp>
     void RegisterComponent() {

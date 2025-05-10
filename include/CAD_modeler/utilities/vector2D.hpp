@@ -4,7 +4,7 @@
 #include <algorithm>
 
 
-template <typename t>
+template <typename T>
 class Vector2D {
 public:
     Vector2D(unsigned int rows, unsigned int cols);
@@ -33,22 +33,22 @@ public:
     unsigned int Cols() const
         { return cols; }
 
-    t& At(int row, int col)
+    T& At(int row, int col)
         { return data.at(row).at(col); }
 
-    const t& At(int row, int col) const
+    const T& At(int row, int col) const
         { return data.at(row).at(col); }
 
 private:
     unsigned int rows;
     unsigned int cols;
 
-    std::vector<std::vector<t>> data;
+    std::vector<std::vector<T>> data;
 };
 
 
-template <typename t>
-Vector2D<t>::Vector2D(unsigned int rows, unsigned int cols):
+template <typename T>
+Vector2D<T>::Vector2D(unsigned int rows, unsigned int cols):
     rows(rows), cols(cols), data(rows)
 {
     for (auto& row: data) {
@@ -57,8 +57,8 @@ Vector2D<t>::Vector2D(unsigned int rows, unsigned int cols):
 }
 
 
-template <typename t>
-void Vector2D<t>::AddRows(const unsigned int cnt)
+template <typename T>
+void Vector2D<T>::AddRows(const unsigned int cnt)
 {
     rows += cnt;
 
@@ -70,8 +70,8 @@ void Vector2D<t>::AddRows(const unsigned int cnt)
 }
 
 
-template <typename t>
-void Vector2D<t>::AddCols(const unsigned int cnt)
+template <typename T>
+void Vector2D<T>::AddCols(const unsigned int cnt)
 {
     cols += cnt;
 
@@ -81,8 +81,8 @@ void Vector2D<t>::AddCols(const unsigned int cnt)
 }
 
 
-template <typename t>
-void Vector2D<t>::DeleteRows(const unsigned int cnt)
+template <typename T>
+void Vector2D<T>::DeleteRows(const unsigned int cnt)
 {
     rows = std::max<unsigned int>(0u, rows - cnt);
 
@@ -90,8 +90,8 @@ void Vector2D<t>::DeleteRows(const unsigned int cnt)
 }
 
 
-template <typename t>
-void Vector2D<t>::DeleteCols(const unsigned int cnt)
+template <typename T>
+void Vector2D<T>::DeleteCols(const unsigned int cnt)
 {
     cols = std::max<unsigned int>(0u, cols - cnt);
 

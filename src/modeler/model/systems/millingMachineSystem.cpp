@@ -330,7 +330,7 @@ void MillingMachineSystem::MillSection(const Position& oldCutterPos, const Posit
     const int startPixelX = oldPosPixelX - radiusInPixelsX;
     const int startPixelZ = oldPosPixelZ - radiusInPixelsZ;
 
-    const float crossLen = alg::Cross((newCutterPos.vec - oldCutterPos.vec).Normalize(), alg::Vec3(0.f, 1.f, 0.f)).LengthSquared();
+    const float crossLen = Cross((newCutterPos.vec - oldCutterPos.vec).Normalize(), alg::Vec3(0.f, 1.f, 0.f)).LengthSquared();
     const bool straightDown = crossLen < 1e-5;
 
     for (int row = startPixelX; row <= startPixelX + 2*radiusInPixelsX; row++) {

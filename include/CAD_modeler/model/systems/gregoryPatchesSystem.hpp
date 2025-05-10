@@ -61,7 +61,7 @@ private:
     std::vector<float> GenerateNetVertices(const TriangleOfGregoryPatches& params) const;
     std::vector<uint32_t> GenerateNetIndices() const;
 
-    class DeletionHandler: public EventHandler<TriangleOfGregoryPatches> {
+    class DeletionHandler final : public EventHandler<TriangleOfGregoryPatches> {
     public:
         DeletionHandler(Coordinator& coordinator):
             coordinator(coordinator) {}

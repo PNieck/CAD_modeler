@@ -20,30 +20,30 @@ public:
         components.insert({hash, std::make_shared<ComponentCollection<T>>()});
     }
 
-    inline void RegisterNewEntity(Entity entity) {
+    void RegisterNewEntity(Entity entity) {
         componentsOfEntities.insert({entity, {}});
     }
 
     template<typename T>
-    inline void AddComponent(Entity entity, const T& component) {
+    void AddComponent(Entity entity, const T& component) {
         GetComponentCollection<T>()->AddComponent(entity, component);
         componentsOfEntities[entity].insert(GetComponentId<T>());
     }
 
     template<typename T>
-    inline void AddComponent(Entity entity, T&& component) {
+    void AddComponent(Entity entity, T&& component) {
         GetComponentCollection<T>()->AddComponent(entity, component);
         componentsOfEntities[entity].insert(GetComponentId<T>());
     }
 
     template<typename T>
-    inline void DeleteComponent(Entity entity) {
+    void DeleteComponent(Entity entity) {
         GetComponentCollection<T>()->DeleteComponent(entity);
         componentsOfEntities[entity].erase(GetComponentId<T>());
     }
 
     template<typename T>
-    inline T& GetComponent(Entity entity) const {
+    T& GetComponent(Entity entity) const {
         return GetComponentCollection<T>()->GetComponent(entity);
     }
 
@@ -75,7 +75,7 @@ private:
 
     template<typename T>
     std::shared_ptr<ComponentCollection<T>> GetComponentCollection() const {
-        ComponentId id = GetComponentId<T>();
+        const ComponentId id = GetComponentId<T>();
         return std::static_pointer_cast<ComponentCollection<T>>(components.at(id));
     }
 };
