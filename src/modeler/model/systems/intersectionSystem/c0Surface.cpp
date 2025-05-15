@@ -36,7 +36,7 @@ alg::Vec3 interSys::C0Surface::PointOnSurface(float u, float v)
 {
     Normalize(u, v);
 
-    return patchesSys->PointOnPatches(patches, u, v).vec;
+    return patchesSys->PointOnSurface(patches, u, v).vec;
 }
 
 

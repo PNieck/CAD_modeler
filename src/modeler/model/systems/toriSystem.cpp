@@ -86,31 +86,31 @@ void ToriSystem::Render(const alg::Mat4x4& cameraMtx)
 }
 
 
-Position ToriSystem::PointOnTorus(Entity torus, float alpha, float beta) const
+Position ToriSystem::PointOnSurface(Entity torus, float u, float v) const
 {
-    return PointOnTorus(
+    return PointOnSurface(
         coordinator->GetComponent<TorusParameters>(torus),
         coordinator->GetComponent<Position>(torus),
         coordinator->GetComponent<Rotation>(torus),
         coordinator->GetComponent<Scale>(torus),
-        alpha,
-        beta
+        u,
+        v
     );
 }
 
 
-alg::Vec3 ToriSystem::PointOnTorus(const TorusParameters &params, float alpha, float beta) {
+alg::Vec3 ToriSystem::PointOnSurface(const TorusParameters &params, float u, float v) {
     return {
-        (params.majorRadius + params.minorRadius * std::cos(alpha)) * std::cos(beta),
-        params.minorRadius * std::sin(alpha),
-        (params.majorRadius + params.minorRadius * std::cos(alpha)) * std::sin(beta)
+        (params.majorRadius + params.minorRadius * std::cos(u)) * std::cos(v),
+        params.minorRadius * std::sin(u),
+        (params.majorRadius + params.minorRadius * std::cos(u)) * std::sin(v)
     };
 }
 
 
-Position ToriSystem::PointOnTorus(const TorusParameters &params, const Position &pos, const Rotation &rot, const Scale &scale, float alpha, float beta)
+Position ToriSystem::PointOnSurface(const TorusParameters &params, const Position &pos, const Rotation &rot, const Scale &scale, float u, float v)
 {
-    alg::Vec3 result = PointOnTorus(params, alpha, beta);
+    alg::Vec3 result = PointOnSurface(params, u, v);
 
     scale.TransformVector(result);
     rot.Rotate(result);
@@ -119,12 +119,12 @@ Position ToriSystem::PointOnTorus(const TorusParameters &params, const Position 
 }
 
 
-alg::Vec3 ToriSystem::PartialDerivativeWithRespectToAlpha(const TorusParameters &params, const Rotation &rot,
-    const Scale &scale, const float alpha, const float beta) {
+alg::Vec3 ToriSystem::PartialDerivativeU(const TorusParameters &params, const Rotation &rot,
+    const Scale &scale, const float u, const float v) {
     alg::Vec3 result(
-        -params.minorRadius * std::cos(beta) * std::sin(alpha),
-        params.minorRadius * std::cos(alpha),
-        -params.minorRadius * std::sin(beta) * std::sin(alpha)
+        -params.minorRadius * std::cos(v) * std::sin(u),
+        params.minorRadius * std::cos(u),
+        -params.minorRadius * std::sin(v) * std::sin(u)
     );
 
     scale.TransformVector(result);
@@ -134,19 +134,19 @@ alg::Vec3 ToriSystem::PartialDerivativeWithRespectToAlpha(const TorusParameters 
 }
 
 
-alg::Vec3 ToriSystem::PartialDerivativeWithRespectToAlpha(Entity e, float alpha, float beta) const
+alg::Vec3 ToriSystem::PartialDerivativeU(const Entity e, const float u, const float v) const
 {
-    return PartialDerivativeWithRespectToAlpha(
+    return PartialDerivativeU(
         coordinator->GetComponent<TorusParameters>(e),
         coordinator->GetComponent<Rotation>(e),
         coordinator->GetComponent<Scale>(e),
-        alpha,
-        beta
+        u,
+        v
     );
 }
 
 
-alg::Vec3 ToriSystem::PartialDerivativeWithRespectToBeta(const TorusParameters &params, const Rotation &rot,
+alg::Vec3 ToriSystem::PartialDerivativeV(const TorusParameters &params, const Rotation &rot,
                                                          const Scale &scale, const float alpha, const float beta) {
     alg::Vec3 result (
         -(params.minorRadius * std::cos(alpha) + params.majorRadius) * std::sin(beta),
@@ -161,38 +161,38 @@ alg::Vec3 ToriSystem::PartialDerivativeWithRespectToBeta(const TorusParameters &
 }
 
 
-alg::Vec3 ToriSystem::PartialDerivativeWithRespectToBeta(Entity e, float alpha, float beta) const
+alg::Vec3 ToriSystem::PartialDerivativeV(Entity e, float u, float v) const
 {
-    return PartialDerivativeWithRespectToBeta(
+    return PartialDerivativeV(
         coordinator->GetComponent<TorusParameters>(e),
         coordinator->GetComponent<Rotation>(e),
         coordinator->GetComponent<Scale>(e),
-        alpha,
-        beta
+        u,
+        v
     );
 }
 
 
-alg::Vec3 ToriSystem::NormalVec(const TorusParameters &params, const Rotation &rot, const Scale &scale, const float alpha,
+alg::Vec3 ToriSystem::NormalVector(const TorusParameters &params, const Rotation &rot, const Scale &scale, const float alpha,
                                 const float beta)
 {
-    const alg::Vec3 tangent1 = PartialDerivativeWithRespectToAlpha(params, rot, scale, alpha, beta);
-    const alg::Vec3 tangent2 = PartialDerivativeWithRespectToBeta(params, rot, scale, alpha, beta);
+    const alg::Vec3 tangent1 = PartialDerivativeU(params, rot, scale, alpha, beta);
+    const alg::Vec3 tangent2 = PartialDerivativeV(params, rot, scale, alpha, beta);
 
-    const alg::Vec3 result = alg::Cross(tangent1, tangent2);
+    const alg::Vec3 result = Cross(tangent1, tangent2);
 
     return result.Normalize();
 }
 
 
-alg::Vec3 ToriSystem::NormalVec(Entity e, float alpha, float beta) const
+alg::Vec3 ToriSystem::NormalVector(const Entity e, const float u, const float v) const
 {
-    return NormalVec(
+    return NormalVector(
         coordinator->GetComponent<TorusParameters>(e),
         coordinator->GetComponent<Rotation>(e),
         coordinator->GetComponent<Scale>(e),
-        alpha,
-        beta
+        u,
+        v
     );
 }
 
@@ -212,20 +212,20 @@ void ToriSystem::UpdateMesh(Entity e, const TorusParameters &params) const
 
 std::vector<float> ToriSystem::GenerateMeshVertices(const TorusParameters &params)
 {
-    const float deltaAlpha = 2.f * std::numbers::pi_v<float> / params.meshDensityMinR;
-    const float deltaBeta = 2.f * std::numbers::pi_v<float> / params.meshDensityMajR;
+    const float deltaU = 2.f * std::numbers::pi_v<float> / params.meshDensityMinR;
+    const float deltaV = 2.f * std::numbers::pi_v<float> / params.meshDensityMajR;
 
     std::vector<float> result(params.meshDensityMinR * params.meshDensityMajR * 3);
 
     for (int actCirc = 0; actCirc < params.meshDensityMajR; actCirc++) {
-        const float beta = deltaBeta * actCirc;
+        const float v = deltaV * actCirc;
 
         for (int act_pt_in_circ = 0; act_pt_in_circ < params.meshDensityMinR; act_pt_in_circ++) {
             int index = (actCirc * params.meshDensityMinR + act_pt_in_circ) * 3;
 
-            float alpha = deltaAlpha * act_pt_in_circ;
+            float u = deltaU * act_pt_in_circ;
 
-            auto point = PointOnTorus(params, alpha, beta);
+            auto point = PointOnSurface(params, u, v);
 
             result[index] = point.X();
             result[index + 1] = point.Y();

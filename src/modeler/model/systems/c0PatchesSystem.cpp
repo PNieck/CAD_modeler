@@ -74,7 +74,7 @@ alg::Vec4 CubicBernsteinPolynomial(const float t) {
 }
 
 
-Position C0PatchesSystem::PointOnPatches(const C0Patches &patches, float u, float v) const
+Position C0PatchesSystem::PointOnSurface(const C0Patches &patches, float u, float v) const
 {
     CheckUVDomain(patches, u, v);
 

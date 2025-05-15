@@ -10,6 +10,8 @@ class Coordinator;
 
 class System {
 public:
+    virtual ~System() = default;
+
     System() = default;
 
     void RemoveEntity(const Entity entity) {

@@ -40,7 +40,7 @@ namespace interSys {
     {
         Normalize(u, v);
 
-        return surfaceSys->PointOnPatches(patches, u, v).vec;
+        return surfaceSys->PointOnSurface(patches, u, v).vec;
     }
 
 

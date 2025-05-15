@@ -331,7 +331,7 @@ alg::Vec4 CubicBSplinesBaseFunctions(const float t) {
 }
 
 
-Position C2SurfaceSystem::PointOnPatches(const C2Patches &patches, float u, float v) const
+Position C2SurfaceSystem::PointOnSurface(const C2Patches &patches, float u, float v) const
 {
     const SingleC2Patch p(*coordinator, patches, u, v);
 

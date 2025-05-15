@@ -1,15 +1,16 @@
 #pragma once
 
-#include <ecs/system.hpp>
 #include <ecs/coordinator.hpp>
 
 #include "../components/position.hpp"
 #include "../components/c2Patches.hpp"
 #include "../components/patchesDensity.hpp"
+
 #include "controlNetSystem.hpp"
+#include "surfaceSystem.hpp"
 
 
-class C2SurfaceSystem: public System {
+class C2SurfaceSystem: public SurfaceSystem {
 public:
     static void RegisterSystem(Coordinator& coordinator);
 
@@ -43,28 +44,28 @@ public:
 
     void Recalculate(Entity surface, const Position& pos, const alg::Vec3& direction, float length, float width) const;
 
-    Position PointOnPatches(const C2Patches& patches, float u, float v) const;
-    Position PointOnPatches(const Entity entity, const float u, const float v) const
-        { return PointOnPatches(coordinator->GetComponent<C2Patches>(entity), u, v); }
+    Position PointOnSurface(const C2Patches& patches, float u, float v) const;
+    Position PointOnSurface(const Entity entity, const float u, const float v) const override
+        { return PointOnSurface(coordinator->GetComponent<C2Patches>(entity), u, v); }
 
     alg::Vec3 PartialDerivativeU(const C2Patches& patches, float u, float v) const;
-    alg::Vec3 PartialDerivativeU(const Entity entity, const float u, const float v) const
-    { return PartialDerivativeU(coordinator->GetComponent<C2Patches>(entity), u, v); }
+    alg::Vec3 PartialDerivativeU(const Entity entity, const float u, const float v) const override
+        { return PartialDerivativeU(coordinator->GetComponent<C2Patches>(entity), u, v); }
 
     alg::Vec3 PartialDerivativeV(const C2Patches& patches, float u, float v) const;
-    alg::Vec3 PartialDerivativeV(const Entity entity, const float u, const float v) const
+    alg::Vec3 PartialDerivativeV(const Entity entity, const float u, const float v) const override
         { return PartialDerivativeV(coordinator->GetComponent<C2Patches>(entity), u, v); }
 
     static float MaxU(const C2Patches& patches)
         { return static_cast<float>(patches.PatchesInRow()); }
 
-    float MaxU(const Entity entity) const
+    float MaxU(const Entity entity) const override
         { return MaxU(coordinator->GetComponent<C2Patches>(entity)); }
 
     static float MaxV(const C2Patches& patches)
         { return static_cast<float>(patches.PatchesInCol()); }
 
-    float MaxV(const Entity entity) const
+    float MaxV(const Entity entity) const override
         { return MaxV(coordinator->GetComponent<C2Patches>(entity)); }
 
     void Render(const alg::Mat4x4& cameraMtx) const;

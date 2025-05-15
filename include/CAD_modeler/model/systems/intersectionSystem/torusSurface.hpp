@@ -21,13 +21,13 @@ namespace interSys
         ~TorusSurface() override = default;
     
         alg::Vec3 PointOnSurface(const float u, const float v) override
-            { return ToriSystem::PointOnTorus(params, pos, rot, scale, u, v).vec; }
+            { return ToriSystem::PointOnSurface(params, pos, rot, scale, u, v).vec; }
     
         alg::Vec3 PartialDerivativeU(const float u, const float v) override
-            { return ToriSystem::PartialDerivativeWithRespectToAlpha(params, rot, scale, u, v); }
+            { return ToriSystem::PartialDerivativeU(params, rot, scale, u, v); }
 
         alg::Vec3 PartialDerivativeV(const float u, const float v) override
-            { return ToriSystem::PartialDerivativeWithRespectToBeta(params, rot, scale, u, v); }
+            { return ToriSystem::PartialDerivativeV(params, rot, scale, u, v); }
 
         float MaxUSampleVal() override
             { return 2.f * std::numbers::pi_v<float>; }
