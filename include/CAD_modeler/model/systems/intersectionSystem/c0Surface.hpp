@@ -1,6 +1,6 @@
 #pragma once
 
-#include "surfaces.hpp"
+#include "surface.hpp"
 
 #include "../c0PatchesSystem.hpp"
 
@@ -21,10 +21,10 @@ namespace interSys
 
         void Normalize(float &u, float &v) override;
 
-        float MaxUInitSampleVal() override
+        float MaxUSampleVal() override
             { return C0PatchesSystem::MaxU(patches); }
 
-        float MaxVInitSampleVal() override
+        float MaxVSampleVal() override
             { return C0PatchesSystem::MaxV(patches); }
 
         float MaxU() override;

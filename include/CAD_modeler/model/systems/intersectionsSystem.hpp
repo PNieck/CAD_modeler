@@ -11,7 +11,7 @@
 #include "CAD_modeler/model/components/position.hpp"
 #include "CAD_modeler/model/components/intersectionCurve.hpp"
 
-#include "intersectionSystem/surfaces.hpp"
+#include "intersectionSystem/surface.hpp"
 
 
 class IntersectionSystem: public System {

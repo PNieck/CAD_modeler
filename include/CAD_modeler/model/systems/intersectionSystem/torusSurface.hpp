@@ -1,6 +1,6 @@
 #pragma once
 
-#include "surfaces.hpp"
+#include "surface.hpp"
 
 #include <ecs/coordinator.hpp>
 
@@ -29,10 +29,10 @@ namespace interSys
         alg::Vec3 PartialDerivativeV(const float u, const float v) override
             { return ToriSystem::PartialDerivativeWithRespectToBeta(params, rot, scale, u, v); }
 
-        float MaxUInitSampleVal() override
+        float MaxUSampleVal() override
             { return 2.f * std::numbers::pi_v<float>; }
 
-        float MaxVInitSampleVal() override
+        float MaxVSampleVal() override
             { return 2.f * std::numbers::pi_v<float>; }
 
         float MaxU() override

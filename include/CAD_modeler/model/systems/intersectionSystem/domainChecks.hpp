@@ -3,7 +3,7 @@
 
 #include "../../components/intersectionCurve.hpp"
 
-#include "surfaces.hpp"
+#include "surface.hpp"
 
 
 namespace interSys

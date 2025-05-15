@@ -201,17 +201,17 @@ IntersectionPoint IntersectionSystem::FindFirstApproximation(Surface& s1, Surfac
 {
     constexpr int sampleCntInOneDim = 15;
 
-    const float maxU1 = s1.MaxUInitSampleVal();
-    const float minU1 = s1.MinUInitSampleVal();
+    const float maxU1 = s1.MaxUSampleVal();
+    const float minU1 = s1.MinUSampleVal();
 
-    const float maxV1 = s1.MaxVInitSampleVal();
-    const float minV1 = s1.MinVInitSampleVal();
+    const float maxV1 = s1.MaxVSampleVal();
+    const float minV1 = s1.MinVSampleVal();
 
-    const float maxU2 = s2.MaxUInitSampleVal();
-    const float minU2 = s2.MinUInitSampleVal();
+    const float maxU2 = s2.MaxUSampleVal();
+    const float minU2 = s2.MinUSampleVal();
 
-    const float maxV2 = s2.MaxVInitSampleVal();
-    const float minV2 = s2.MinVInitSampleVal();
+    const float maxV2 = s2.MaxVSampleVal();
+    const float minV2 = s2.MinVSampleVal();
 
     const float deltaU1 = (maxU1 - minU1) / static_cast<float>(sampleCntInOneDim + 1);
     const float deltaV1 = (maxV1 - minV1) / static_cast<float>(sampleCntInOneDim + 1);
@@ -259,11 +259,11 @@ IntersectionPoint IntersectionSystem::FindFirstApproximationForSelfIntersection(
     constexpr int sampleCntInOneDim = 40;
     constexpr float penaltyCoef = 0.5f;
 
-    const float maxU = s.MaxUInitSampleVal();
-    const float minU = s.MinUInitSampleVal();
+    const float maxU = s.MaxUSampleVal();
+    const float minU = s.MinUSampleVal();
 
-    const float maxV = s.MaxVInitSampleVal();
-    const float minV = s.MinVInitSampleVal();
+    const float maxV = s.MaxVSampleVal();
+    const float minV = s.MinVSampleVal();
 
     const float deltaU = (maxU - minU) / static_cast<float>(sampleCntInOneDim + 1);
     const float deltaV = (maxV - minV) / static_cast<float>(sampleCntInOneDim + 1);
@@ -537,11 +537,11 @@ std::tuple<float, float> IntersectionSystem::NearestPointApproximation(Surface &
 {
     constexpr int sampleCntInOneDim = 30;
 
-    const float maxU = s.MaxUInitSampleVal();
-    const float minU = s.MinUInitSampleVal();
+    const float maxU = s.MaxUSampleVal();
+    const float minU = s.MinUSampleVal();
 
-    const float maxV = s.MaxVInitSampleVal();
-    const float minV = s.MinVInitSampleVal();
+    const float maxV = s.MaxVSampleVal();
+    const float minV = s.MinVSampleVal();
 
     const float deltaU = (maxU - minU) / static_cast<float>(sampleCntInOneDim + 1);
     const float deltaV = (maxV - minV) / static_cast<float>(sampleCntInOneDim + 1);
@@ -577,11 +577,11 @@ std::tuple<float, float> IntersectionSystem::SecondNearestPointApproximation(
     constexpr int sampleCntInOneDim = 30;
     constexpr float penaltyCoef = 0.5f;
 
-    const float maxU = s.MaxUInitSampleVal();
-    const float minU = s.MinUInitSampleVal();
+    const float maxU = s.MaxUSampleVal();
+    const float minU = s.MinUSampleVal();
 
-    const float maxV = s.MaxVInitSampleVal();
-    const float minV = s.MinVInitSampleVal();
+    const float maxV = s.MaxVSampleVal();
+    const float minV = s.MinVSampleVal();
 
     const float deltaU = (maxU - minU) / static_cast<float>(sampleCntInOneDim + 1);
     const float deltaV = (maxV - minV) / static_cast<float>(sampleCntInOneDim + 1);

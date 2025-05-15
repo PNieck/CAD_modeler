@@ -1,8 +1,6 @@
 #pragma once
 
-#include "surfaces.hpp"
-
-#include <ecs/coordinator.hpp>
+#include "surface.hpp"
 
 #include "../c2SurfacesSystem.hpp"
 
@@ -24,10 +22,10 @@ namespace interSys
 
         void Normalize(float &u, float &v) override;
 
-        float MaxUInitSampleVal() override
+        float MaxUSampleVal() override
             { return C2SurfaceSystem::MaxU(patches); }
 
-        float MaxVInitSampleVal() override
+        float MaxVSampleVal() override
             { return C2SurfaceSystem::MaxV(patches); }
 
         float MaxU() override;

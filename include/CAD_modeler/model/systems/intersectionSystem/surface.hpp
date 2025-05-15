@@ -24,16 +24,16 @@ namespace interSys
 
         virtual void Normalize(float& u, float& v) {}
 
-        virtual float MinUInitSampleVal()
+        virtual float MinUSampleVal()
             { return 0.f; }
 
-        virtual float MaxUInitSampleVal()
+        virtual float MaxUSampleVal()
             { return 1.0f; }
 
-        virtual float MinVInitSampleVal()
+        virtual float MinVSampleVal()
             { return 0.f; }
 
-        virtual float MaxVInitSampleVal()
+        virtual float MaxVSampleVal()
             { return 1.0f; }
 
         virtual float MaxU() = 0;
