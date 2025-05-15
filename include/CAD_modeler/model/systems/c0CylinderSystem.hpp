@@ -9,7 +9,7 @@
 #include "controlNetSystem.hpp"
 
 
-class C0CylinderSystem: public System {
+class C0CylinderSystem final : public System {
 public:
     static void RegisterSystem(Coordinator& coordinator);
 
@@ -17,18 +17,18 @@ public:
 
     Entity CreateCylinder(const Position& pos, const alg::Vec3& direction, float radius);
     
-    void AddRowOfPatches(Entity surface, const Position& pos, const alg::Vec3& direction, float radius) const;
+    void AddRowOfPatches(Entity cylinder, const Position& pos, const alg::Vec3& direction, float radius) const;
     void AddColOfPatches(Entity surface, const Position& pos, const alg::Vec3& direction, float radius) const;
 
     void DeleteRowOfPatches(Entity surface, const Position& pos, const alg::Vec3& direction, float radius) const;
     void DeleteColOfPatches(Entity surface, const Position& pos, const alg::Vec3& direction, float radius) const;
 
-    inline void MergeControlPoints(Entity cylinder, Entity oldCP, Entity newCP)
+    void MergeControlPoints(const Entity cylinder, const Entity oldCP, const Entity newCP)
         { coordinator->GetSystem<C0PatchesSystem>()->MergeControlPoints(cylinder, oldCP, newCP, Coordinator::GetSystemID<C0CylinderSystem>()); }
 
     void ShowBezierPolygon(Entity cylinder) const;
 
-    inline void HideBezierPolygon(Entity cylinder) const
+    void HideBezierPolygon(Entity cylinder) const
         { coordinator->GetSystem<ControlNetSystem>()->DeleteControlPointsNet(cylinder); }
 
     inline void SetDensity(Entity entity, PatchesDensity density) const

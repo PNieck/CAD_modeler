@@ -196,7 +196,7 @@ void C2CylinderSystem::DeleteColOfPatches(Entity surface, const Position &pos, c
 }
 
 
-void C2CylinderSystem::MergeControlPoints(Entity cylinder, Entity oldCP, Entity newCP)
+void C2CylinderSystem::MergeControlPoints(const Entity cylinder, Entity oldCP, Entity newCP)
 {
     coordinator->EditComponent<C2CylinderPatches>(cylinder,
         [oldCP, newCP, this] (C2CylinderPatches& patches) {
@@ -222,7 +222,7 @@ void C2CylinderSystem::MergeControlPoints(Entity cylinder, Entity oldCP, Entity 
 
     coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate<C2CylinderSystem>(cylinder);
 
-    auto registry = coordinator->GetSystem<ControlPointsRegistrySystem>();
+    const auto registry = coordinator->GetSystem<ControlPointsRegistrySystem>();
     registry->UnregisterControlPoint(cylinder, oldCP, Coordinator::GetSystemID<C2CylinderSystem>());
     registry->RegisterControlPoint(cylinder, newCP, Coordinator::GetSystemID<C2CylinderSystem>());
 }
@@ -243,7 +243,7 @@ void C2CylinderSystem::Recalculate(Entity cylinder, const Position &pos, const a
 
     auto const& patches = coordinator->GetComponent<C2CylinderPatches>(cylinder);
 
-    alg::Vec3 offset = direction / float(patches.PointsInRow());
+    alg::Vec3 offset = direction / static_cast<float>(patches.PointsInRow());
 
     Rotation rot(direction, 2.f * std::numbers::pi_v<float> / float(patches.PointsInCol() - doubleControlPoints));
 

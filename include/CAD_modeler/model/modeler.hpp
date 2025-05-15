@@ -184,13 +184,13 @@ public:
     void Deselect(const Entity entity) const
         { return selectionSystem->Deselect(entity); }
 
-    inline void DeselectAllEntities() const
+    void DeselectAllEntities() const
         { selectionSystem->DeselectAllEntities(); }
 
-    inline const std::unordered_set<Entity>& GetAllSelectedEntities() const
+    const std::unordered_set<Entity>& GetAllSelectedEntities() const
         { return selectionSystem->GetEntities(); }
 
-    inline const std::set<ComponentId>& GetEntityComponents(Entity entity) const
+    const std::set<ComponentId>& GetEntityComponents(const Entity entity) const
         { return coordinator.GetEntityComponents(entity); }
 
     template <typename Comp>

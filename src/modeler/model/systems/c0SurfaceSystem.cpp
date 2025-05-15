@@ -36,16 +36,16 @@ void C0SurfaceSystem::Init()
 }
 
 
-Entity C0SurfaceSystem::CreateSurface(const Position& pos, const alg::Vec3& direction, float length, float width)
+Entity C0SurfaceSystem::CreateSurface(const Position& pos, const alg::Vec3& direction, const float length, const float width)
 {
     C0Patches patches(1, 1);
 
     auto const pointsSystem = coordinator->GetSystem<PointsSystem>();
-    auto cpRegistrySystem = coordinator->GetSystem<ControlPointsRegistrySystem>();
+    const auto cpRegistrySystem = coordinator->GetSystem<ControlPointsRegistrySystem>();
 
     Entity surface = coordinator->CreateEntity();
 
-    auto handler = std::make_shared<ControlPointMovedHandler>(surface, *coordinator);
+    const auto handler = std::make_shared<ControlPointMovedHandler>(surface, *coordinator);
 
     for (int i=0; i < patches.PointsInCol(); ++i) {
         for (int j=0; j < patches.PointsInRow(); ++j) {
@@ -62,8 +62,8 @@ Entity C0SurfaceSystem::CreateSurface(const Position& pos, const alg::Vec3& dire
         }
     }
 
-    Mesh mesh;
-    PatchesDensity density(5);
+    const Mesh mesh;
+    const PatchesDensity density(5);
 
     patches.deletionHandler = coordinator->Subscribe<C0Patches>(surface, deletionHandler);
 

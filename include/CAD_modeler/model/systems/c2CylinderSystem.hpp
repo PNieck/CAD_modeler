@@ -9,7 +9,7 @@
 #include "controlNetSystem.hpp"
 
 
-class C2CylinderSystem: public System {
+class C2CylinderSystem final : public System {
 public:
     static constexpr int DoublePointsCnt = 3;
 
@@ -59,9 +59,9 @@ private:
     std::vector<float> GenerateVertices(const C2Patches& patches) const;
     std::vector<uint32_t> GenerateIndices(const C2Patches& patches) const;
 
-    class DeletionHandler: public EventHandler<C2CylinderPatches> {
+    class DeletionHandler final : public EventHandler<C2CylinderPatches> {
     public:
-        DeletionHandler(Coordinator& coordinator):
+        explicit DeletionHandler(Coordinator& coordinator):
             coordinator(coordinator) {}
 
         void HandleEvent(Entity entity, const C2CylinderPatches& component, EventType eventType) override;
@@ -70,7 +70,7 @@ private:
         Coordinator& coordinator;
     };
 
-    class ControlPointMovedHandler: public EventHandler<Position> {
+    class ControlPointMovedHandler final : public EventHandler<Position> {
     public:
         ControlPointMovedHandler(Entity targetObject, Coordinator& coordinator):
             coordinator(coordinator), targetObject(targetObject) {}

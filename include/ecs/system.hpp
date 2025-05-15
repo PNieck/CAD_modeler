@@ -31,6 +31,10 @@ public:
         return entities;
     }
 
+    bool HasEntity(const Entity entity) const {
+        return entities.contains(entity);
+    }
+
 protected:
     std::unordered_set<Entity> entities;
     Coordinator* coordinator;

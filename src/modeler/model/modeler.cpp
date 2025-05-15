@@ -494,7 +494,7 @@ void Modeler::ShowDerivativesU(Entity e)
             const float u = static_cast<float>(row) * maxU / static_cast<float>(cnt);
             const float v = static_cast<float>(col) * maxV / static_cast<float>(cnt);
 
-            auto point = c2SurfaceSystem->PointOnPatches(patches, u, v);
+            auto point = c2SurfaceSystem->PointOnSurface(patches, u, v);
             auto partialU = c2SurfaceSystem->PartialDerivativeU(patches, u, v);
 
             vectorSystem->AddVector(partialU.Normalize(), point);
@@ -516,7 +516,7 @@ void Modeler::ShowDerivativesV(Entity e)
             const float u = static_cast<float>(row) * maxU / static_cast<float>(cnt);
             const float v = static_cast<float>(col) * maxV / static_cast<float>(cnt);
 
-            auto point = c2SurfaceSystem->PointOnPatches(patches, u, v);
+            auto point = c2SurfaceSystem->PointOnSurface(patches, u, v);
             auto partialU = c2SurfaceSystem->PartialDerivativeV(patches, u, v);
 
             vectorSystem->AddVector(partialU.Normalize(), point);
@@ -539,7 +539,7 @@ void Modeler::ShowC2Normals(const Entity e)
             const float u = static_cast<float>(row) * maxU / static_cast<float>(cntRows);
             const float v = static_cast<float>(col) * maxV / static_cast<float>(cntCols);
 
-            auto point = c2SurfaceSystem->PointOnPatches(patches, u, v);
+            auto point = c2SurfaceSystem->PointOnSurface(patches, u, v);
             auto partialV = c2SurfaceSystem->PartialDerivativeV(patches, u, v);
             auto partialU = c2SurfaceSystem->PartialDerivativeU(patches, u, v);
 
@@ -552,7 +552,7 @@ void Modeler::ShowC2Normals(const Entity e)
 
 void Modeler::ShowC2Normals(Entity e, float u, float v)
 {
-    auto point = c2SurfaceSystem->PointOnPatches(e, u, v);
+    auto point = c2SurfaceSystem->PointOnSurface(e, u, v);
     auto partialV = c2SurfaceSystem->PartialDerivativeV(e, u, v);
     auto partialU = c2SurfaceSystem->PartialDerivativeU(e, u, v);
 
@@ -576,7 +576,7 @@ void Modeler::ShowC0Normals(Entity e)
             const float u = 0; //static_cast<float>(row) * maxU / static_cast<float>(cntRows);
             const float v = static_cast<float>(col) * maxV / static_cast<float>(cntCols);
 
-            auto point = c0PatchesSystem->PointOnPatches(patches, u, v);
+            auto point = c0PatchesSystem->PointOnSurface(patches, u, v);
             auto partialV = c0PatchesSystem->PartialDerivativeV(patches, u, v);
             auto partialU = c0PatchesSystem->PartialDerivativeU(patches, u, v);
 
@@ -590,7 +590,7 @@ void Modeler::ShowC0Normals(Entity e)
 
 void Modeler::ShowC0Normals(Entity e, float u, float v)
 {
-    auto point = c0PatchesSystem->PointOnPatches(e, u, v);
+    auto point = c0PatchesSystem->PointOnSurface(e, u, v);
     auto partialV = c0PatchesSystem->PartialDerivativeV(e, u, v);
     auto partialU = c0PatchesSystem->PartialDerivativeU(e, u, v);
 
@@ -637,21 +637,21 @@ alg::Vec3 Modeler::PointFromViewportCoordinates(float x, float y)
 
 Line Modeler::LineFromViewportCoordinates(float x, float y)
 {
-    auto cameraType = cameraManager.GetCurrentCameraType();
+    const auto cameraType = cameraManager.GetCurrentCameraType();
     if (cameraType == CameraManager::CameraType::Anaglyphs)
         cameraManager.SetCameraType(CameraManager::CameraType::Perspective);
 
-    auto viewMtx = cameraManager.ViewMtx();
-    auto perspectiveMtx = cameraManager.PerspectiveMtx();
+    const auto viewMtx = cameraManager.ViewMtx();
+    const auto perspectiveMtx = cameraManager.PerspectiveMtx();
 
     cameraManager.SetCameraType(cameraType);
 
-    auto cameraInv = (perspectiveMtx * viewMtx).Inverse().value();
+    const auto cameraInv = (perspectiveMtx * viewMtx).Inverse().value();
 
     alg::Vec4 nearV4 = cameraInv * alg::Vec4(x, y, 1.0f, 1.0f);
     alg::Vec4 farV4 = cameraInv * alg::Vec4(x, y, -1.0f, 1.0f);
 
-    alg::Vec3 near = alg::Vec3(
+    const auto near = alg::Vec3(
         nearV4.X() / nearV4.W(),
         nearV4.Y() / nearV4.W(),
         nearV4.Z() / nearV4.W()

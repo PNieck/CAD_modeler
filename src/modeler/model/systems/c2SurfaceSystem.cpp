@@ -227,7 +227,7 @@ void C2SurfaceSystem::DeleteColOfPatches(
 }
 
 
-void C2SurfaceSystem::MergeControlPoints(Entity surface, Entity oldCP, Entity newCP)
+void C2SurfaceSystem::MergeControlPoints(const Entity surface, Entity oldCP, Entity newCP)
 {
     coordinator->EditComponent<C2Patches>(surface,
         [oldCP, newCP, this] (C2Patches& patches) {
