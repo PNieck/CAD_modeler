@@ -3,6 +3,7 @@
 #include <array>
 #include <cmath>
 #include <cstddef>
+#include <ostream>
 
 
 namespace alg
@@ -76,5 +77,18 @@ namespace alg
     template <typename DataType>
     DataType DistanceSquared(const Vector2<DataType>& v1, const Vector2<DataType>& v2) {
         return (v1 - v2).LengthSquared();
+    }
+
+    template <typename DataType>
+    bool operator==(const Vector2<DataType>& v1, const Vector2<DataType>& v2) {
+        return v1.X() == v2.X() &&
+               v1.Y() == v2.Y();
+    }
+
+    template <typename DataType>
+    std::ostream& operator<< (std::ostream& stream, const Vector2<DataType>& vec) {
+        stream << "[ " << vec.X() << ", " << vec.Y() << " ]";
+
+        return stream;
     }
 }
