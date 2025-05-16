@@ -15,7 +15,6 @@
 #include "systems/interpolationCurvesRenderingSystem.hpp"
 #include "systems/interpolationCurveSystem.hpp"
 #include "systems/c0SurfaceSystem.hpp"
-#include "systems/c0CylinderSystem.hpp"
 #include "systems/c0PatchesSystem.hpp"
 #include "systems/c2SurfacesSystem.hpp"
 #include "systems/c2CylinderSystem.hpp"
@@ -96,11 +95,11 @@ public:
 
     void AddColOfC2CylinderPatches(Entity surface, float radius = 1.f, const alg::Vec3& dir = alg::Vec3(0.f, 1.f, 0.f));
 
-    inline void DeleteRowOfC0CylinderPatches(Entity surface, float radius = 1.f, const alg::Vec3& dir = alg::Vec3(0.f, 1.f, 0.f)) const
-        { c0CylinderSystem->DeleteRowOfPatches(surface, cursorSystem->GetPosition(), dir, radius); }
+    void DeleteRowOfC0CylinderPatches(const Entity surface, const float radius = 1.f, const alg::Vec3& dir = alg::Vec3(0.f, 1.f, 0.f)) const
+        { c0PatchesSystem->DeleteRowOfCylinderPatches(surface, cursorSystem->GetPosition(), dir, radius); }
 
-    inline void DeleteColOfC0CylinderPatches(Entity surface, float radius = 1.f, const alg::Vec3& dir = alg::Vec3(0.f, 1.f, 0.f)) const
-        { c0CylinderSystem->DeleteColOfPatches(surface, cursorSystem->GetPosition(), dir, radius); }
+    void DeleteColOfC0CylinderPatches(const Entity surface, const float radius = 1.f, const alg::Vec3& dir = alg::Vec3(0.f, 1.f, 0.f)) const
+        { c0PatchesSystem->DeleteColOfCylinderPatches(surface, cursorSystem->GetPosition(), dir, radius); }
 
     inline void DeleteRowOfC2CylinderPatches(Entity surface, float radius = 1.f, const alg::Vec3& dir = alg::Vec3(0.f, 1.f, 0.f)) const
         { c2CylinderSystem->DeleteRowOfPatches(surface, cursorSystem->GetPosition(), dir, radius); }
@@ -108,8 +107,8 @@ public:
     inline void DeleteColOfC2CylinderPatches(Entity surface, float radius = 1.f, const alg::Vec3& dir = alg::Vec3(0.f, 1.f, 0.f)) const
         { c2CylinderSystem->DeleteColOfPatches(surface, cursorSystem->GetPosition(), dir, radius); }
 
-    inline void RecalculateC0Cylinder(Entity surface, float radius = 1.f, const alg::Vec3& dir = alg::Vec3(0.f, 1.f, 0.f)) const
-        { c0CylinderSystem->Recalculate(surface, cursorSystem->GetPosition(), dir, radius); }
+    void RecalculateC0Cylinder(const Entity surface, const float radius = 1.f, const alg::Vec3& dir = alg::Vec3(0.f, 1.f, 0.f)) const
+        { c0PatchesSystem->RecalculateCylinder(surface, cursorSystem->GetPosition(), dir, radius); }
 
     inline void RecalculateC2Cylinder(Entity surface, float radius = 1.f, const alg::Vec3& dir = alg::Vec3(0.f, 1.f, 0.f)) const
         { c2CylinderSystem->Recalculate(surface, cursorSystem->GetPosition(), dir, radius); }
@@ -322,7 +321,6 @@ private:
     std::shared_ptr<C2CurveSystem> c2CurveSystem;
     std::shared_ptr<InterpolationCurvesRenderingSystem> interpolationRenderingSystem;
     std::shared_ptr<C0SurfaceSystem> c0SurfaceSystem;
-    std::shared_ptr<C0CylinderSystem> c0CylinderSystem;
     std::shared_ptr<C0PatchesSystem> c0PatchesSystem;
     std::shared_ptr<C2SurfaceSystem> c2SurfaceSystem;
     std::shared_ptr<C2CylinderSystem> c2CylinderSystem;

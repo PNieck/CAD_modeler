@@ -13,6 +13,18 @@ class C0PatchesSystem final : public SurfaceSystem {
 public:
     static void RegisterSystem(Coordinator& coordinator);
 
+    void Init();
+
+    Entity CreateCylinder(const Position& pos, const alg::Vec3& direction, float radius);
+
+    void AddRowOfCylinderPatches(Entity cylinder, const Position& pos, const alg::Vec3& direction, float radius) const;
+    void AddColOfCylinderPatches(Entity cylinder, const Position& pos, const alg::Vec3& direction, float radius) const;
+
+    void DeleteRowOfCylinderPatches(Entity surface, const Position& pos, const alg::Vec3& direction, float radius) const;
+    void DeleteColOfCylinderPatches(Entity surface, const Position& pos, const alg::Vec3& direction, float radius) const;
+
+    void RecalculateCylinder(Entity cylinder, const Position& pos, const alg::Vec3& direction, float radius) const;
+
     int GetRowsCnt(const Entity surface) const
         { return coordinator->GetComponent<C0Patches>(surface).PatchesInRow(); }
 
@@ -55,11 +67,41 @@ public:
     void Update() const;
 
 private:
+    class DeletionHandler;
+
+    std::shared_ptr<DeletionHandler> deletionHandler;
+
     void UpdateMesh(Entity surface, const C0Patches& patches) const;
 
     static void CheckUVDomain(const C0Patches& patches, float u, float v);
     static void NormalizeUV(const C0Patches& patches, float& u, float& v);
 
+    static bool ShouldWrapU(const C0Patches& patches);
+    static bool ShouldWrapV(const C0Patches& patches);
+
     std::vector<float> GenerateVertices(const C0Patches& patches) const;
     std::vector<uint32_t> GenerateIndices(const C0Patches& patches) const;
+
+    class DeletionHandler final : public EventHandler<C0Patches> {
+    public:
+        explicit DeletionHandler(Coordinator& coordinator):
+            coordinator(coordinator) {}
+
+        void HandleEvent(Entity entity, const C0Patches& component, EventType eventType) override;
+
+    private:
+        Coordinator& coordinator;
+    };
+
+    class ControlPointMovedHandler final : public EventHandler<Position> {
+    public:
+        ControlPointMovedHandler(const Entity targetObject, Coordinator& coordinator):
+            coordinator(coordinator), targetObject(targetObject) {}
+
+        void HandleEvent(Entity entity, const Position& component, EventType eventType) override;
+
+    private:
+        Coordinator& coordinator;
+        Entity targetObject;
+    };
 };

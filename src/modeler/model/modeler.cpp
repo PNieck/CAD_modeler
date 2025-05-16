@@ -31,7 +31,6 @@ Modeler::Modeler(const int viewportWidth, const int viewportHeight):
     InterpolationCurvesRenderingSystem::RegisterSystem(coordinator);
     InterpolationCurveSystem::RegisterSystem(coordinator);
     C0SurfaceSystem::RegisterSystem(coordinator);
-    C0CylinderSystem::RegisterSystem(coordinator);
     C0PatchesSystem::RegisterSystem(coordinator);
     C2SurfaceSystem::RegisterSystem(coordinator);
     C2CylinderSystem::RegisterSystem(coordinator);
@@ -51,7 +50,6 @@ Modeler::Modeler(const int viewportWidth, const int viewportHeight):
     c2CurveSystem = coordinator.GetSystem<C2CurveSystem>();
     interpolationRenderingSystem = coordinator.GetSystem<InterpolationCurvesRenderingSystem>();
     c0SurfaceSystem = coordinator.GetSystem<C0SurfaceSystem>();
-    c0CylinderSystem = coordinator.GetSystem<C0CylinderSystem>();
     c0PatchesSystem = coordinator.GetSystem<C0PatchesSystem>();
     c2SurfaceSystem = coordinator.GetSystem<C2SurfaceSystem>();
     c2CylinderSystem = coordinator.GetSystem<C2CylinderSystem>();
@@ -66,7 +64,7 @@ Modeler::Modeler(const int viewportWidth, const int viewportHeight):
     cursorSystem->Init();
     selectionSystem->Init();
     c0SurfaceSystem->Init();
-    c0CylinderSystem->Init();
+    c0PatchesSystem->Init();
     c2SurfaceSystem->Init();
     c2CylinderSystem->Init();
     gregoryPatchesSystem->Init();
@@ -162,15 +160,16 @@ Entity Modeler::AddC2Surface(const alg::Vec3& direction, const float length, con
 
 Entity Modeler::AddC0Cylinder()
 {
-    const Entity entity = c0CylinderSystem->CreateCylinder(cursorSystem->GetPosition(), alg::Vec3(0.f, 1.f, 0.f), 1.f);
+    const Entity entity = c0PatchesSystem->CreateCylinder(cursorSystem->GetPosition(), alg::Vec3(0.f, 1.f, 0.f), 1.f);
     nameSystem->SetName(entity, nameGenerator.GenerateName("CylinderC0_"));
 
     auto const& patches = coordinator.GetComponent<C0Patches>(entity);
 
     for (int row=0; row < patches.PointsInRow(); ++row) {
         for (int col=0; col < patches.PointsInCol() - 1; ++col) {
-            Entity cp = patches.GetPoint(row, col);
+            const Entity cp = patches.GetPoint(row, col);
             nameSystem->SetName(cp, nameGenerator.GenerateName("Point_"));
+            coordinator.AddComponent<Unremovable>(cp, Unremovable());
         }
     }
 
@@ -187,7 +186,7 @@ Entity Modeler::AddC2Cylinder()
 
     for (int row=0; row < patches.PointsInRow(); ++row) {
         for (int col=0; col < patches.PointsInCol() - C2CylinderSystem::DoublePointsCnt; ++col) {
-            Entity cp = patches.GetPoint(row, col);
+            const Entity cp = patches.GetPoint(row, col);
             nameSystem->SetName(cp, nameGenerator.GenerateName("Point_"));
         }
     }
@@ -211,7 +210,7 @@ void Modeler::MergeControlPoints(const Entity e1, const Entity e2)
             sysId == Coordinator::GetSystemID<InterpolationCurveSystem>())
             curveCPSys->MergeControlPoints(entity, e2, e1, sysId);
 
-        else if (sysId == Coordinator::GetSystemID<C0CylinderSystem>() ||
+        else if (sysId == Coordinator::GetSystemID<C0PatchesSystem>() ||
                  sysId == Coordinator::GetSystemID<C0SurfaceSystem>())
                  c0PatchesSystem->MergeControlPoints(entity, e2, e1, sysId);
 
@@ -295,15 +294,16 @@ void Modeler::AddColOfC2SurfacePatches(Entity surface, const alg::Vec3 &directio
 
 void Modeler::AddRowOfC0CylinderPatches(const Entity surface, const float radius, const alg::Vec3 &dir)
 {
-    c0CylinderSystem->AddRowOfPatches(surface, cursorSystem->GetPosition(), dir, radius);
+    c0PatchesSystem->AddRowOfCylinderPatches(surface, cursorSystem->GetPosition(), dir, radius);
 
     auto const& patches = coordinator.GetComponent<C0Patches>(surface);
 
     for (int col=0; col < patches.PointsInCol() - 1; col++) {
         for (int row=patches.PointsInRow() - 3; row < patches.PointsInRow(); row++) {
-            Entity cp = patches.GetPoint(row, col);
+            const Entity cp = patches.GetPoint(row, col);
 
             nameSystem->SetName(cp, nameGenerator.GenerateName("Point_"));
+            coordinator.AddComponent(cp, Unremovable());
         }
     }
 }
@@ -311,7 +311,7 @@ void Modeler::AddRowOfC0CylinderPatches(const Entity surface, const float radius
 
 void Modeler::AddColOfC0CylinderPatches(Entity surface, float radius, const alg::Vec3 &dir)
 {
-    c0CylinderSystem->AddColOfPatches(surface, cursorSystem->GetPosition(), dir, radius);
+    c0PatchesSystem->AddColOfCylinderPatches(surface, cursorSystem->GetPosition(), dir, radius);
 
     auto const& patches = coordinator.GetComponent<C0Patches>(surface);
 
@@ -320,6 +320,7 @@ void Modeler::AddColOfC0CylinderPatches(Entity surface, float radius, const alg:
             Entity cp = patches.GetPoint(row, col);
 
             nameSystem->SetName(cp, nameGenerator.GenerateName("Point_"));
+            coordinator.AddComponent(cp, Unremovable());
         }
     }
 }
@@ -457,8 +458,8 @@ void Modeler::ClearScene()
         gregoryPatchesSystem,
         c2CylinderSystem,
         c2SurfaceSystem,
-        c0CylinderSystem,
         c0SurfaceSystem,
+        c0PatchesSystem,
         coordinator.GetSystem<InterpolationCurveSystem>(),
         c2CurveSystem,
         c0CurveSystem,
