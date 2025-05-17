@@ -31,8 +31,7 @@ Modeler::Modeler(const int viewportWidth, const int viewportHeight):
     InterpolationCurvesRenderingSystem::RegisterSystem(coordinator);
     InterpolationCurveSystem::RegisterSystem(coordinator);
     C0PatchesSystem::RegisterSystem(coordinator);
-    C2SurfaceSystem::RegisterSystem(coordinator);
-    C2CylinderSystem::RegisterSystem(coordinator);
+    C2PatchesSystem::RegisterSystem(coordinator);
     ControlNetSystem::RegisterSystem(coordinator);
     ControlPointsRegistrySystem::RegisterSystem(coordinator);
     GregoryPatchesSystem::RegisterSystem(coordinator);
@@ -49,8 +48,7 @@ Modeler::Modeler(const int viewportWidth, const int viewportHeight):
     c2CurveSystem = coordinator.GetSystem<C2CurveSystem>();
     interpolationRenderingSystem = coordinator.GetSystem<InterpolationCurvesRenderingSystem>();
     c0PatchesSystem = coordinator.GetSystem<C0PatchesSystem>();
-    c2SurfaceSystem = coordinator.GetSystem<C2SurfaceSystem>();
-    c2CylinderSystem = coordinator.GetSystem<C2CylinderSystem>();
+    c2PatchesSystem = coordinator.GetSystem<C2PatchesSystem>();
     controlNetSystem = coordinator.GetSystem<ControlNetSystem>();
     controlPointsRegistrySys = coordinator.GetSystem<ControlPointsRegistrySystem>();
     gregoryPatchesSystem = coordinator.GetSystem<GregoryPatchesSystem>();
@@ -62,8 +60,7 @@ Modeler::Modeler(const int viewportWidth, const int viewportHeight):
     cursorSystem->Init();
     selectionSystem->Init();
     c0PatchesSystem->Init();
-    c2SurfaceSystem->Init();
-    c2CylinderSystem->Init();
+    c2PatchesSystem->Init();
     gregoryPatchesSystem->Init();
 
     const Entity cursor = cursorSystem->GetCursor();
@@ -138,9 +135,9 @@ Entity Modeler::AddC0Plane(const alg::Vec3& direction, const float length, const
 }
 
 
-Entity Modeler::AddC2Surface(const alg::Vec3& direction, const float length, const float width)
+Entity Modeler::AddC2Plane(const alg::Vec3& direction, const float length, const float width)
 {
-    const Entity entity = c2SurfaceSystem->CreateSurface(cursorSystem->GetPosition(), direction, length, width);
+    const Entity entity = c2PatchesSystem->CreatePlane(cursorSystem->GetPosition(), direction, length, width);
     nameSystem->SetName(entity, nameGenerator.GenerateName("SurfaceC2_"));
 
     auto const& patches = coordinator.GetComponent<C2Patches>(entity);
@@ -149,6 +146,7 @@ Entity Modeler::AddC2Surface(const alg::Vec3& direction, const float length, con
         for (int col=0; col < patches.PointsInCol(); ++col) {
             const Entity cp = patches.GetPoint(row, col);
             nameSystem->SetName(cp, nameGenerator.GenerateName("Point_"));
+            coordinator.AddComponent(cp, Unremovable());
         }
     }
 
@@ -177,15 +175,16 @@ Entity Modeler::AddC0Cylinder()
 
 Entity Modeler::AddC2Cylinder()
 {
-    const Entity entity = c2CylinderSystem->CreateCylinder(cursorSystem->GetPosition(), alg::Vec3(0.f, 1.f, 0.f), 1.f);
+    const Entity entity = c2PatchesSystem->CreateCylinder(cursorSystem->GetPosition(), alg::Vec3(0.f, 1.f, 0.f), 1.f);
     nameSystem->SetName(entity, nameGenerator.GenerateName("CylinderC2_"));
 
-    auto const& patches = coordinator.GetComponent<C2CylinderPatches>(entity);
+    auto const& patches = coordinator.GetComponent<C2Patches>(entity);
 
     for (int row=0; row < patches.PointsInRow(); ++row) {
-        for (int col=0; col < patches.PointsInCol() - C2CylinderSystem::DoublePointsCnt; ++col) {
+        for (int col=0; col < patches.PointsInCol() - C2PatchesSystem::CylinderDoublePointsCnt; ++col) {
             const Entity cp = patches.GetPoint(row, col);
             nameSystem->SetName(cp, nameGenerator.GenerateName("Point_"));
+            coordinator.AddComponent(cp, Unremovable());
         }
     }
 
@@ -211,11 +210,9 @@ void Modeler::MergeControlPoints(const Entity e1, const Entity e2)
         else if (sysId == Coordinator::GetSystemID<C0PatchesSystem>())
                  c0PatchesSystem->MergeControlPoints(entity, e2, e1, sysId);
 
-        else if (sysId == Coordinator::GetSystemID<C2SurfaceSystem>())
-                 c2SurfaceSystem->MergeControlPoints(entity, e2, e1);
+        else if (sysId == Coordinator::GetSystemID<C2PatchesSystem>())
+                 c2PatchesSystem->MergeControlPoints(entity, e2, e1);
 
-        else if (sysId == Coordinator::GetSystemID<C2CylinderSystem>())
-                 c2CylinderSystem->MergeControlPoints(entity, e2, e1);
         else
             throw std::runtime_error("Unknown system");
     }
@@ -262,30 +259,32 @@ void Modeler::AddColOfC0PlanePatches(const Entity surface, const alg::Vec3 &dire
 }
 
 
-void Modeler::AddRowOfC2SurfacePatches(Entity surface, const alg::Vec3 &direction, float length, float width)
+void Modeler::AddRowOfC2PlanePatches(const Entity surface, const alg::Vec3 &direction, const float length, const float width)
 {
-    c2SurfaceSystem->AddRowOfPatches(surface, cursorSystem->GetPosition(), direction, length, width);
+    c2PatchesSystem->AddRowOfPlanePatches(surface, cursorSystem->GetPosition(), direction, length, width);
 
     auto const& patches = coordinator.GetComponent<C2Patches>(surface);
 
     for (int col=0; col < patches.PointsInCol(); col++) {
-        Entity cp = patches.GetPoint(patches.PointsInRow() - 1, col);
+        const Entity cp = patches.GetPoint(patches.PointsInRow() - 1, col);
 
         nameSystem->SetName(cp, nameGenerator.GenerateName("Point_"));
+        
     }
 }
 
 
-void Modeler::AddColOfC2SurfacePatches(Entity surface, const alg::Vec3 &direction, float length, float width)
+void Modeler::AddColOfC2PlanePatches(const Entity surface, const alg::Vec3 &direction, const float length, const float width)
 {
-    c2SurfaceSystem->AddColOfPatches(surface, cursorSystem->GetPosition(), direction, length, width);
+    c2PatchesSystem->AddColOfPlanePatches(surface, cursorSystem->GetPosition(), direction, length, width);
 
     auto const& patches = coordinator.GetComponent<C2Patches>(surface);
 
     for (int row=0; row < patches.PointsInRow(); row++) {
-        Entity cp = patches.GetPoint(row, patches.PointsInCol()-1);
+        const Entity cp = patches.GetPoint(row, patches.PointsInCol()-1);
 
         nameSystem->SetName(cp, nameGenerator.GenerateName("Point_"));
+        coordinator.AddComponent(cp, Unremovable());
     }
 }
 
@@ -324,30 +323,32 @@ void Modeler::AddColOfC0CylinderPatches(Entity surface, float radius, const alg:
 }
 
 
-void Modeler::AddRowOfC2CylinderPatches(Entity surface, float radius, const alg::Vec3 &dir)
+void Modeler::AddRowOfC2CylinderPatches(const Entity surface, const float radius, const alg::Vec3 &dir)
 {
-    c2CylinderSystem->AddRowOfPatches(surface, cursorSystem->GetPosition(), dir, radius);
+    c2PatchesSystem->AddRowOfCylinderPatches(surface, cursorSystem->GetPosition(), dir, radius);
 
-    auto const& patches = coordinator.GetComponent<C2CylinderPatches>(surface);
+    auto const& patches = coordinator.GetComponent<C2Patches>(surface);
 
-    for (int col=0; col < patches.PointsInCol() - C2CylinderSystem::DoublePointsCnt; col++) {
+    for (int col=0; col < patches.PointsInCol() - C2PatchesSystem::CylinderDoublePointsCnt; col++) {
         Entity cp = patches.GetPoint(patches.PointsInRow()-1, col);
         
         nameSystem->SetName(cp, nameGenerator.GenerateName("Point_"));
+        coordinator.AddComponent(cp, Unremovable());
     }
 }
 
 
 void Modeler::AddColOfC2CylinderPatches(const Entity surface, const float radius, const alg::Vec3 &dir)
 {
-    c2CylinderSystem->AddColOfPatches(surface, cursorSystem->GetPosition(), dir, radius);
+    c2PatchesSystem->AddColOfCylinderPatches(surface, cursorSystem->GetPosition(), dir, radius);
 
-    auto const& patches = coordinator.GetComponent<C2CylinderPatches>(surface);
+    auto const& patches = coordinator.GetComponent<C2Patches>(surface);
 
     for (int row=0; row < patches.PointsInRow(); row++) {
-        const Entity cp = patches.GetPoint(row, patches.PointsInCol()-C2CylinderSystem::DoublePointsCnt-1);
+        const Entity cp = patches.GetPoint(row, patches.PointsInCol()-C2PatchesSystem::CylinderDoublePointsCnt-1);
 
         nameSystem->SetName(cp, nameGenerator.GenerateName("Point_"));
+        coordinator.AddComponent(cp, Unremovable());
     }
 }
 
@@ -454,8 +455,7 @@ void Modeler::ClearScene()
         intersectionSystem,
         vectorSystem,
         gregoryPatchesSystem,
-        c2CylinderSystem,
-        c2SurfaceSystem,
+        c2PatchesSystem,
         c0PatchesSystem,
         coordinator.GetSystem<InterpolationCurveSystem>(),
         c2CurveSystem,
@@ -484,16 +484,16 @@ void Modeler::ShowDerivativesU(Entity e)
     constexpr int cnt = 10;
 
     const auto& patches = coordinator.GetComponent<C2Patches>(e);
-    const float maxU = C2SurfaceSystem::MaxU(patches);
-    const float maxV = C2SurfaceSystem::MaxV(patches);
+    const float maxU = C2PatchesSystem::MaxU(patches);
+    const float maxV = C2PatchesSystem::MaxV(patches);
 
     for (int row = 0; row < cnt; row++) {
         for (int col = 0; col < cnt; col++) {
             const float u = static_cast<float>(row) * maxU / static_cast<float>(cnt);
             const float v = static_cast<float>(col) * maxV / static_cast<float>(cnt);
 
-            auto point = c2SurfaceSystem->PointOnSurface(patches, u, v);
-            auto partialU = c2SurfaceSystem->PartialDerivativeU(patches, u, v);
+            auto point = c2PatchesSystem->PointOnSurface(patches, u, v);
+            auto partialU = c2PatchesSystem->PartialDerivativeU(patches, u, v);
 
             vectorSystem->AddVector(partialU.Normalize(), point);
         }
@@ -506,16 +506,16 @@ void Modeler::ShowDerivativesV(Entity e)
     constexpr int cnt = 10;
 
     const auto& patches = coordinator.GetComponent<C2Patches>(e);
-    const float maxU = C2SurfaceSystem::MaxU(patches);
-    const float maxV = C2SurfaceSystem::MaxV(patches);
+    const float maxU = C2PatchesSystem::MaxU(patches);
+    const float maxV = C2PatchesSystem::MaxV(patches);
 
     for (int row = 0; row < cnt; row++) {
         for (int col = 0; col < cnt; col++) {
             const float u = static_cast<float>(row) * maxU / static_cast<float>(cnt);
             const float v = static_cast<float>(col) * maxV / static_cast<float>(cnt);
 
-            auto point = c2SurfaceSystem->PointOnSurface(patches, u, v);
-            auto partialU = c2SurfaceSystem->PartialDerivativeV(patches, u, v);
+            auto point = c2PatchesSystem->PointOnSurface(patches, u, v);
+            auto partialU = c2PatchesSystem->PartialDerivativeV(patches, u, v);
 
             vectorSystem->AddVector(partialU.Normalize(), point);
         }
@@ -529,17 +529,17 @@ void Modeler::ShowC2Normals(const Entity e)
     constexpr int cntCols = 10;
 
     const auto& patches = coordinator.GetComponent<C2Patches>(e);
-    const float maxU = C2SurfaceSystem::MaxU(patches);
-    const float maxV = C2SurfaceSystem::MaxV(patches);
+    const float maxU = C2PatchesSystem::MaxU(patches);
+    const float maxV = C2PatchesSystem::MaxV(patches);
 
     for (int row = 0; row <= cntRows; row++) {
         for (int col = 0; col <= cntCols; col++) {
             const float u = static_cast<float>(row) * maxU / static_cast<float>(cntRows);
             const float v = static_cast<float>(col) * maxV / static_cast<float>(cntCols);
 
-            auto point = c2SurfaceSystem->PointOnSurface(patches, u, v);
-            auto partialV = c2SurfaceSystem->PartialDerivativeV(patches, u, v);
-            auto partialU = c2SurfaceSystem->PartialDerivativeU(patches, u, v);
+            auto point = c2PatchesSystem->PointOnSurface(patches, u, v);
+            auto partialV = c2PatchesSystem->PartialDerivativeV(patches, u, v);
+            auto partialU = c2PatchesSystem->PartialDerivativeU(patches, u, v);
 
             auto normal = alg::Cross(partialV, partialU).Normalize();
 
@@ -550,9 +550,9 @@ void Modeler::ShowC2Normals(const Entity e)
 
 void Modeler::ShowC2Normals(Entity e, float u, float v)
 {
-    auto point = c2SurfaceSystem->PointOnSurface(e, u, v);
-    auto partialV = c2SurfaceSystem->PartialDerivativeV(e, u, v);
-    auto partialU = c2SurfaceSystem->PartialDerivativeU(e, u, v);
+    auto point = c2PatchesSystem->PointOnSurface(e, u, v);
+    auto partialV = c2PatchesSystem->PartialDerivativeV(e, u, v);
+    auto partialU = c2PatchesSystem->PartialDerivativeU(e, u, v);
 
     auto normal = alg::Cross(partialV, partialU).Normalize();
 
@@ -603,8 +603,7 @@ void Modeler::Update() const
     c0CurveSystem->Update();
     c0PatchesSystem->Update();
     c2CurveSystem->Update();
-    c2CylinderSystem->Update();
-    c2SurfaceSystem->Update();
+    c2PatchesSystem->Update();
     gregoryPatchesSystem->Update();
     interpolationRenderingSystem->Update();
 }
@@ -688,8 +687,7 @@ void Modeler::RenderSystemsObjects(const alg::Mat4x4 &viewMtx, const alg::Mat4x4
     c2CurveSystem->Render(cameraMtx);
     interpolationRenderingSystem->Render(cameraMtx);
     c0PatchesSystem->Render(cameraMtx);
-    c2SurfaceSystem->Render(cameraMtx);
-    c2CylinderSystem->Render(cameraMtx);
+    c2PatchesSystem->Render(cameraMtx);
     controlNetSystem->Render(cameraMtx);
     gregoryPatchesSystem->Render(cameraMtx);
     vectorSystem->Render(cameraMtx);

@@ -15,8 +15,7 @@
 #include "systems/interpolationCurvesRenderingSystem.hpp"
 #include "systems/interpolationCurveSystem.hpp"
 #include "systems/c0PatchesSystem.hpp"
-#include "systems/c2SurfacesSystem.hpp"
-#include "systems/c2CylinderSystem.hpp"
+#include "systems/c2PatchesSystem.hpp"
 #include "systems/controlNetSystem.hpp"
 #include "systems/controlPointsRegistrySystem.hpp"
 #include "systems/gregoryPatchesSystem.hpp"
@@ -46,7 +45,7 @@ public:
 
     Entity AddC0Plane(const alg::Vec3& direction, float length, float width);
 
-    Entity AddC2Surface(const alg::Vec3& direction, float length, float width);
+    Entity AddC2Plane(const alg::Vec3& direction, float length, float width);
 
     Entity AddC0Cylinder();
 
@@ -70,21 +69,21 @@ public:
 
     void AddColOfC0PlanePatches(Entity surface, const alg::Vec3& direction, float length, float width);
 
-    void AddRowOfC2SurfacePatches(Entity surface, const alg::Vec3& direction, float length, float width);
+    void AddRowOfC2PlanePatches(Entity surface, const alg::Vec3& direction, float length, float width);
 
-    void AddColOfC2SurfacePatches(Entity surface, const alg::Vec3& direction, float length, float width);
+    void AddColOfC2PlanePatches(Entity surface, const alg::Vec3& direction, float length, float width);
 
-    void DeleteRowOfC0SurfacePatches(const Entity surface, const alg::Vec3& direction, const float length, const float width) const
+    void DeleteRowOfC0PlanePatches(const Entity surface, const alg::Vec3& direction, const float length, const float width) const
         { c0PatchesSystem->DeleteRowOfPlanePatches(surface, cursorSystem->GetPosition(), direction, length, width); }
 
-    void DeleteColOfC0SurfacePatches(const Entity surface, const alg::Vec3& direction, const float length, const float width) const
+    void DeleteColOfC0PlanePatches(const Entity surface, const alg::Vec3& direction, const float length, const float width) const
         { c0PatchesSystem->DeleteColOfPlanePatches(surface, cursorSystem->GetPosition(), direction, length, width); }
 
-    inline void DeleteRowOfC2SurfacePatches(Entity surface, const alg::Vec3& direction, float length, float width) const
-        { c2SurfaceSystem->DeleteRowOfPatches(surface, cursorSystem->GetPosition(), direction, length, width); }
+    void DeleteRowOfC2PlanePatches(const Entity surface, const alg::Vec3& direction, const float length, const float width) const
+        { c2PatchesSystem->DeleteRowOfPlanePatches(surface, cursorSystem->GetPosition(), direction, length, width); }
 
-    inline void DeleteColOfC2SurfacePatches(Entity surface, const alg::Vec3& direction, float length, float width) const
-        { c2SurfaceSystem->DeleteColOfPatches(surface, cursorSystem->GetPosition(), direction, length, width); }
+    void DeleteColOfC2PlanePatches(const Entity surface, const alg::Vec3& direction, const float length, const float width) const
+        { c2PatchesSystem->DeleteColOfPlanePatches(surface, cursorSystem->GetPosition(), direction, length, width); }
 
     void AddRowOfC0CylinderPatches(Entity cylinder, float radius = 1.f, const alg::Vec3& dir = alg::Vec3(0.f, 1.f, 0.f));
 
@@ -100,41 +99,35 @@ public:
     void DeleteColOfC0CylinderPatches(const Entity surface, const float radius = 1.f, const alg::Vec3& dir = alg::Vec3(0.f, 1.f, 0.f)) const
         { c0PatchesSystem->DeleteColOfCylinderPatches(surface, cursorSystem->GetPosition(), dir, radius); }
 
-    inline void DeleteRowOfC2CylinderPatches(Entity surface, float radius = 1.f, const alg::Vec3& dir = alg::Vec3(0.f, 1.f, 0.f)) const
-        { c2CylinderSystem->DeleteRowOfPatches(surface, cursorSystem->GetPosition(), dir, radius); }
+    void DeleteRowOfC2CylinderPatches(const Entity cylinder, const float radius = 1.f, const alg::Vec3& dir = alg::Vec3(0.f, 1.f, 0.f)) const
+        { c2PatchesSystem->DeleteRowOfCylinderPatches(cylinder, cursorSystem->GetPosition(), dir, radius); }
 
-    inline void DeleteColOfC2CylinderPatches(Entity surface, float radius = 1.f, const alg::Vec3& dir = alg::Vec3(0.f, 1.f, 0.f)) const
-        { c2CylinderSystem->DeleteColOfPatches(surface, cursorSystem->GetPosition(), dir, radius); }
+    void DeleteColOfC2CylinderPatches(const Entity surface, const float radius = 1.f, const alg::Vec3& dir = alg::Vec3(0.f, 1.f, 0.f)) const
+        { c2PatchesSystem->DeleteColOfCylinderPatches(surface, cursorSystem->GetPosition(), dir, radius); }
 
     void RecalculateC0Cylinder(const Entity surface, const float radius = 1.f, const alg::Vec3& dir = alg::Vec3(0.f, 1.f, 0.f)) const
         { c0PatchesSystem->RecalculateCylinder(surface, cursorSystem->GetPosition(), dir, radius); }
 
-    inline void RecalculateC2Cylinder(Entity surface, float radius = 1.f, const alg::Vec3& dir = alg::Vec3(0.f, 1.f, 0.f)) const
-        { c2CylinderSystem->Recalculate(surface, cursorSystem->GetPosition(), dir, radius); }
+    void RecalculateC2Cylinder(const Entity surface, const float radius = 1.f, const alg::Vec3& dir = alg::Vec3(0.f, 1.f, 0.f)) const
+        { c2PatchesSystem->RecalculateCylinder(surface, cursorSystem->GetPosition(), dir, radius); }
 
     void RecalculateC0Plane(const Entity surface, const alg::Vec3& direction, const float length, const float width) const
         { c0PatchesSystem->RecalculatePlane(surface, cursorSystem->GetPosition(), direction, length, width); }
 
-    inline void RecalculateC2Surface(Entity surface, const alg::Vec3& direction, float length, float width) const
-        { c2SurfaceSystem->Recalculate(surface, cursorSystem->GetPosition(), direction, length, width); }
+    void RecalculateC2Plane(const Entity surface, const alg::Vec3& direction, const float length, const float width) const
+        { c2PatchesSystem->RecalculatePlane(surface, cursorSystem->GetPosition(), direction, length, width); }
 
-    inline int GetRowsCntOfC0Patches(Entity surface) const
+    int GetRowsCntOfC0Patches(const Entity surface) const
         { return c0PatchesSystem->GetRowsCnt(surface); }
 
-    inline int GetColsOfC0Patches(Entity surface) const
+    int GetColsOfC0Patches(const Entity surface) const
         { return c0PatchesSystem->GetColsCnt(surface); }
 
-    inline int GetRowsCntOfC2Patches(Entity surface) const
-        { return c2SurfaceSystem->GetRowsCnt(surface); }
+    int GetRowsCntOfC2Patches(const Entity surface) const
+        { return c2PatchesSystem->GetRowsCnt(surface); }
 
-    inline int GetColsCntOfC2Patches(Entity surface) const
-        { return c2SurfaceSystem->GetColsCnt(surface); }
-
-    inline int GetColsCntOfC2Cylinder(Entity cylinder) const
-        { return c2CylinderSystem->GetColsCnt(cylinder); }
-
-    inline int GetRowsCntOfC2Cylinder(Entity cylinder) const
-        { return c2CylinderSystem->GetRowsCnt(cylinder); }
+    int GetColsCntOfC2Patches(const Entity surface) const
+        { return c2PatchesSystem->GetColsCnt(surface); }
 
     inline void DeleteControlPointFromCurve(Entity curve, Entity controlPoint) const
         { c0CurveSystem->DeleteControlPoint(curve, controlPoint); }
@@ -142,13 +135,10 @@ public:
     const std::unordered_set<Entity>& GetAllC0Surfaces() const
         { return c0PatchesSystem->GetEntities(); }
 
-    inline const std::unordered_set<Entity>& GetAllC2Surfaces() const
-        { return c2SurfaceSystem->GetEntities(); }
+    const std::unordered_set<Entity>& GetAllC2Surfaces() const
+        { return c2PatchesSystem->GetEntities(); }
 
-    inline const std::unordered_set<Entity>& GetAllC2Cylinders() const
-        { return c2CylinderSystem->GetEntities(); }
-
-    inline const std::unordered_set<Entity>& GetAllTori() const
+    const std::unordered_set<Entity>& GetAllTori() const
         { return toriSystem->GetEntities(); }
 
     inline void SetCursorPosition(float x, float y, float z) const
@@ -320,8 +310,7 @@ private:
     std::shared_ptr<C2CurveSystem> c2CurveSystem;
     std::shared_ptr<InterpolationCurvesRenderingSystem> interpolationRenderingSystem;
     std::shared_ptr<C0PatchesSystem> c0PatchesSystem;
-    std::shared_ptr<C2SurfaceSystem> c2SurfaceSystem;
-    std::shared_ptr<C2CylinderSystem> c2CylinderSystem;
+    std::shared_ptr<C2PatchesSystem> c2PatchesSystem;
     std::shared_ptr<ControlNetSystem> controlNetSystem;
     std::shared_ptr<ControlPointsRegistrySystem> controlPointsRegistrySys;
     std::shared_ptr<GregoryPatchesSystem> gregoryPatchesSystem;

@@ -2,7 +2,7 @@
 
 #include "surface.hpp"
 
-#include "../c2SurfacesSystem.hpp"
+#include "../c2PatchesSystem.hpp"
 
 
 
@@ -23,10 +23,10 @@ namespace interSys
         void Normalize(float &u, float &v) override;
 
         float MaxUSampleVal() override
-            { return C2SurfaceSystem::MaxU(patches); }
+            { return C2PatchesSystem::MaxU(patches); }
 
         float MaxVSampleVal() override
-            { return C2SurfaceSystem::MaxV(patches); }
+            { return C2PatchesSystem::MaxV(patches); }
 
         float MaxU() override;
 
@@ -37,7 +37,7 @@ namespace interSys
         float MinV() override;
 
     private:
-        std::shared_ptr<C2SurfaceSystem> surfaceSys;
+        std::shared_ptr<C2PatchesSystem> patchesSys;
         const C2Patches& patches;
 
         const bool wrapU;

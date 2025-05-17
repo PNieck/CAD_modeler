@@ -28,7 +28,7 @@ namespace interSys {
 
 
     C2Surface::C2Surface(const Coordinator &coord, const C2Patches& patches):
-        surfaceSys(coord.GetSystem<C2SurfaceSystem>()),
+        patchesSys(coord.GetSystem<C2PatchesSystem>()),
         patches(patches),
         wrapU(ShouldWrapU(patches)),
         wrapV(ShouldWrapV(patches))
@@ -40,7 +40,7 @@ namespace interSys {
     {
         Normalize(u, v);
 
-        return surfaceSys->PointOnSurface(patches, u, v).vec;
+        return patchesSys->PointOnSurface(patches, u, v).vec;
     }
 
 
@@ -48,7 +48,7 @@ namespace interSys {
     {
         Normalize(u, v);
 
-        return surfaceSys->PartialDerivativeU(patches, u, v);
+        return patchesSys->PartialDerivativeU(patches, u, v);
     }
 
 
@@ -56,18 +56,18 @@ namespace interSys {
     {
         Normalize(u, v);
 
-        return surfaceSys->PartialDerivativeV(patches, u, v);
+        return patchesSys->PartialDerivativeV(patches, u, v);
     }
 
 
     void C2Surface::Normalize(float &u, float &v) {
         if (wrapU) {
-            if (const float maxU = C2SurfaceSystem::MaxU(patches); u > maxU || u < 0.0f)
+            if (const float maxU = C2PatchesSystem::MaxU(patches); u > maxU || u < 0.0f)
                 u -= std::floor(u / maxU) * maxU;
         }
 
         if (wrapV) {
-            if (const float maxV = C2SurfaceSystem::MaxV(patches); v > maxV || v < 0.f)
+            if (const float maxV = C2PatchesSystem::MaxV(patches); v > maxV || v < 0.f)
                 v -= std::floor(v / maxV) * maxV;
         }
     }
@@ -78,7 +78,7 @@ namespace interSys {
         if (wrapU)
             return std::numeric_limits<float>::infinity();
 
-        return C2SurfaceSystem::MaxU(patches);
+        return C2PatchesSystem::MaxU(patches);
     }
 
 
@@ -96,7 +96,7 @@ namespace interSys {
         if (wrapV)
             return std::numeric_limits<float>::infinity();
 
-        return C2SurfaceSystem::MaxV(patches);
+        return C2PatchesSystem::MaxV(patches);
     }
 
 

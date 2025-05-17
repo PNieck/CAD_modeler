@@ -10,21 +10,30 @@
 #include "surfaceSystem.hpp"
 
 
-class C2SurfaceSystem: public SurfaceSystem {
+class C2PatchesSystem final : public SurfaceSystem {
 public:
+    static constexpr int CylinderDoublePointsCnt = 3;
+
     static void RegisterSystem(Coordinator& coordinator);
 
     void Init();
 
-    Entity CreateSurface(const Position& pos, const alg::Vec3& direction, float length, float width);
+    Entity CreatePlane(const Position& pos, const alg::Vec3& direction, float length, float width);
+    Entity CreateCylinder(const Position& pos, const alg::Vec3& direction, float radius);
 
     Entity CreateSurface(C2Patches& patches);
 
-    void AddRowOfPatches(Entity surface, const Position& pos, const alg::Vec3& direction, float length, float width) const;
-    void AddColOfPatches(Entity surface, const Position& pos, const alg::Vec3& direction, float length, float width) const;
+    void AddRowOfPlanePatches(Entity surface, const Position& pos, const alg::Vec3& direction, float length, float width) const;
+    void AddColOfPlanePatches(Entity surface, const Position& pos, const alg::Vec3& direction, float length, float width) const;
 
-    void DeleteRowOfPatches(Entity surface, const Position& pos, const alg::Vec3& direction, float length, float width) const;
-    void DeleteColOfPatches(Entity surface, const Position& pos, const alg::Vec3& direction, float length, float width) const;
+    void AddRowOfCylinderPatches(Entity surface, const Position& pos, const alg::Vec3& direction, float radius) const;
+    void AddColOfCylinderPatches(Entity surface, const Position& pos, const alg::Vec3& direction, float radius) const;
+
+    void DeleteRowOfPlanePatches(Entity surface, const Position& pos, const alg::Vec3& direction, float length, float width) const;
+    void DeleteColOfPlanePatches(Entity surface, const Position& pos, const alg::Vec3& direction, float length, float width) const;
+
+    void DeleteRowOfCylinderPatches(Entity surface, const Position& pos, const alg::Vec3& direction, float radius) const;
+    void DeleteColOfCylinderPatches(Entity surface, const Position& pos, const alg::Vec3& direction, float radius) const;
 
     void MergeControlPoints(Entity surface, Entity oldCP, Entity newCP);
 
@@ -37,12 +46,14 @@ public:
     int GetColsCnt(const Entity surface) const
         { return coordinator->GetComponent<C2Patches>(surface).PatchesInCol(); }
 
-    void ShowDeBoorNet(Entity surface);
+    void ShowDeBoorNet(Entity surface) const;
 
     void HideDeBoorNet(const Entity surface) const
         { coordinator->GetSystem<ControlNetSystem>()->DeleteControlPointsNet(surface); }
 
-    void Recalculate(Entity surface, const Position& pos, const alg::Vec3& direction, float length, float width) const;
+    void RecalculatePlane(Entity surface, const Position& pos, const alg::Vec3& direction, float length, float width) const;
+
+    void RecalculateCylinder(Entity cylinder, const Position& pos, const alg::Vec3& direction, float radius) const;
 
     Position PointOnSurface(const C2Patches& patches, float u, float v) const;
     Position PointOnSurface(const Entity entity, const float u, const float v) const override
@@ -76,11 +87,16 @@ private:
     class DeletionHandler;
 
     std::shared_ptr<DeletionHandler> deletionHandler;
-    
+
     void UpdateMesh(Entity surface, const C2Patches& patches) const;
+
+    void UpdateDoubleControlPoints(C2Patches& patches) const;
 
     std::vector<float> GenerateVertices(const C2Patches& patches) const;
     std::vector<uint32_t> GenerateIndices(const C2Patches& patches) const;
+
+    static bool ShouldWrapU(const C2Patches& patches);
+    static bool ShouldWrapV(const C2Patches& patches);
 
     static void NormalizeUV(const C2Patches& patches, float& u, float& v);
 

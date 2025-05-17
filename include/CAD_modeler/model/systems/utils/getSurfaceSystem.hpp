@@ -2,9 +2,8 @@
 
 #include <ecs/coordinator.hpp>
 
-#include "../surfaceSystem.hpp"
 #include "CAD_modeler/model/systems/c0PatchesSystem.hpp"
-#include "CAD_modeler/model/systems/c2SurfacesSystem.hpp"
+#include "CAD_modeler/model/systems/c2PatchesSystem.hpp"
 #include "CAD_modeler/model/systems/toriSystem.hpp"
 
 
@@ -13,7 +12,7 @@ inline std::shared_ptr<SurfaceSystem> GetSurfaceSystem(const Coordinator& coordi
     if (result->HasEntity(entity))
         return result;
 
-    result = coordinator.GetSystem<C2SurfaceSystem>();
+    result = coordinator.GetSystem<C2PatchesSystem>();
     if (result->HasEntity(entity))
         return result;
 

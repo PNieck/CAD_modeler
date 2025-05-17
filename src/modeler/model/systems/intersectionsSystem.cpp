@@ -1,8 +1,7 @@
 #include <CAD_modeler/model/systems/intersectionsSystem.hpp>
 
 #include <CAD_modeler/model/systems/c0PatchesSystem.hpp>
-#include <CAD_modeler/model/systems/c2SurfacesSystem.hpp>
-#include <CAD_modeler/model/systems/c2CylinderSystem.hpp>
+#include <CAD_modeler/model/systems/c2PatchesSystem.hpp>
 #include <CAD_modeler/model/systems/toriSystem.hpp>
 #include <CAD_modeler/model/systems/interpolationCurvesRenderingSystem.hpp>
 
@@ -42,10 +41,7 @@ bool IntersectionSystem::CanBeIntersected(const Entity entity) const
     if (coordinator->GetSystem<C0PatchesSystem>()->GetEntities().contains(entity))
         return true;
 
-    if (coordinator->GetSystem<C2SurfaceSystem>()->GetEntities().contains(entity))
-        return true;
-
-    if (coordinator->GetSystem<C2CylinderSystem>()->GetEntities().contains(entity))
+    if (coordinator->GetSystem<C2PatchesSystem>()->GetEntities().contains(entity))
         return true;
 
     if (coordinator->GetSystem<ToriSystem>()->GetEntities().contains(entity))
@@ -187,11 +183,8 @@ std::unique_ptr<Surface> IntersectionSystem::GetSurface(const Entity entity) con
     if (coordinator->GetSystem<C0PatchesSystem>()->GetEntities().contains(entity))
         return std::make_unique<C0Surface>(*coordinator, entity);
 
-    if (coordinator->GetSystem<C2SurfaceSystem>()->GetEntities().contains(entity))
+    if (coordinator->GetSystem<C2PatchesSystem>()->GetEntities().contains(entity))
         return std::make_unique<C2Surface>(*coordinator, coordinator->GetComponent<C2Patches>(entity));
-
-    if (coordinator->GetSystem<C2CylinderSystem>()->GetEntities().contains(entity))
-        return std::make_unique<C2Surface>(*coordinator, coordinator->GetComponent<C2CylinderPatches>(entity));
 
     throw std::runtime_error("Entity cannot be used to calculate intersection curve");
 }

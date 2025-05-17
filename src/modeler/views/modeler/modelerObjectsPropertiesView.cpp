@@ -85,9 +85,6 @@ void ModelerObjectsPropertiesView::RenderSingleObjectProperties(Entity entity) c
     if (components.contains(Modeler::GetComponentId<C2Patches>()))
         DisplaySurfacePatches(entity, model.GetComponent<C2Patches>(entity));
 
-    if (components.contains(Modeler::GetComponentId<C2CylinderPatches>()))
-        DisplaySurfacePatches(entity, model.GetComponent<C2CylinderPatches>(entity));
-
     if (components.contains(Modeler::GetComponentId<TriangleOfGregoryPatches>()))
         DisplayGregoryPatchesParameters(entity, model.GetComponent<TriangleOfGregoryPatches>(entity));
 

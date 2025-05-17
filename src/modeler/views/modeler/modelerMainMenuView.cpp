@@ -196,7 +196,7 @@ void ModelerMainMenuView::RenderAddingSurface(const SurfaceType surfaceType)
         width = 1.0f;
         length = 1.0f;
 
-        entity = AddSurface(surfaceType, dir, length, width);
+        entity = AddPlane(surfaceType, dir, length, width);
     }
 
     int rows = GetSurfaceRowsCnt(entity.value(), surfaceType);
@@ -210,25 +210,25 @@ void ModelerMainMenuView::RenderAddingSurface(const SurfaceType surfaceType)
     valueChanged |= ImGui::DragFloat("Width", &width, DRAG_FLOAT_SPEED);
 
     if (valueChanged)
-        RecalculateSurface(entity.value(), surfaceType,  dir, length, width);
+        RecalculatePlane(entity.value(), surfaceType,  dir, length, width);
 
     if (rows != GetSurfaceRowsCnt(entity.value(), surfaceType)) {
         while (rows > GetSurfaceRowsCnt(entity.value(), surfaceType)) {
-            AddRowOfSurfacePatches(entity.value(), surfaceType, dir, length, width);
+            AddRowOfPlanePatches(entity.value(), surfaceType, dir, length, width);
         }
 
         while (rows < GetSurfaceRowsCnt(entity.value(), surfaceType)) {
-            DeleteRowOfSurfacePatches(entity.value(), surfaceType, dir, length, width);
+            DeleteRowOfPlanePatches(entity.value(), surfaceType, dir, length, width);
         }
     }
 
     if (cols != GetSurfaceColsCnt(entity.value(), surfaceType)) {
         while (cols > GetSurfaceColsCnt(entity.value(), surfaceType)) {
-            AddColOfSurfacePatches(entity.value(), surfaceType, dir, length, width);
+            AddColOfPlanePatches(entity.value(), surfaceType, dir, length, width);
         }
 
         while (cols < GetSurfaceColsCnt(entity.value(), surfaceType)) {
-            DeleteColOfSurfacePatches(entity.value(), surfaceType, dir, length, width);
+            DeleteColOfPlanePatches(entity.value(), surfaceType, dir, length, width);
         }
     }
 
@@ -387,13 +387,6 @@ void ModelerMainMenuView::RenderAddingIntersectionCurve()
     if (!c2Surfaces.empty()) {
         ImGui::SeparatorText("C2 Surfaces");
         RenderSelectableEntitiesList(c2Surfaces);
-    }
-
-
-    const auto& c2Cylinders = model.GetAllC2Cylinders();
-    if (!c2Surfaces.empty()) {
-        ImGui::SeparatorText("C2 Cylinders");
-        RenderSelectableEntitiesList(c2Cylinders);
     }
 
     const auto& tori = model.GetAllTori();
