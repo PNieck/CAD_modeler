@@ -6,19 +6,20 @@
 #include <CAD_modeler/model/systems/c0CurveSystem.hpp>
 #include <CAD_modeler/model/systems/c2CurveSystem.hpp>
 #include <CAD_modeler/model/systems/interpolationCurveSystem.hpp>
-#include <CAD_modeler/model/systems/c0SurfaceSystem.hpp>
 #include <CAD_modeler/model/systems/c2SurfacesSystem.hpp>
 #include <CAD_modeler/model/systems/c2CylinderSystem.hpp>
+#include <CAD_modeler/model/systems/c0PatchesSystem.hpp>
 
 #include <CAD_modeler/model/components/scale.hpp>
 #include <CAD_modeler/model/components/rotation.hpp>
-#include <CAD_modeler/model/components/IsC0Cylinder.hpp>
+#include <CAD_modeler/model/components/wraps.hpp>
 
 #include <nlohmann/json.hpp>
 
 #include <fstream>
 #include <map>
 #include <stack>
+
 
 using json = nlohmann::json;
 
@@ -67,7 +68,7 @@ void SaveManager::LoadScene(const std::string &path, Coordinator &coordinator)
     auto c0CurveSys = coordinator.GetSystem<C0CurveSystem>();
     auto c2CurveSys = coordinator.GetSystem<C2CurveSystem>();
     auto interCurveSys = coordinator.GetSystem<InterpolationCurveSystem>();
-    auto c0SurfaceSys = coordinator.GetSystem<C0SurfaceSystem>();
+    auto c0PatchesSys = coordinator.GetSystem<C0PatchesSystem>();
     auto c2SurfaceSys = coordinator.GetSystem<C2SurfaceSystem>();
     auto nameSys = coordinator.GetSystem<NameSystem>();
 
@@ -170,7 +171,7 @@ void SaveManager::LoadScene(const std::string &path, Coordinator &coordinator)
                 }
             }
 
-            Entity newSurface = c0SurfaceSys->CreateSurface(c0Patches);
+            Entity newSurface = c0PatchesSys->CreateSurface(c0Patches);
             nameSys->SetName(newSurface, geometry["name"]);
         }
 
@@ -246,7 +247,7 @@ void SaveManager::SaveScene(const std::string &path, Coordinator &coordinator)
     auto c0CurveSys = coordinator.GetSystem<C0CurveSystem>();
     auto c2CurveSys = coordinator.GetSystem<C2CurveSystem>();
     auto interCurveSys = coordinator.GetSystem<InterpolationCurveSystem>();
-    auto c0SurfaceSys = coordinator.GetSystem<C0SurfaceSystem>();
+    auto c0PatchesSys = coordinator.GetSystem<C0PatchesSystem>();
     auto c2SurfaceSys = coordinator.GetSystem<C2SurfaceSystem>();
     auto c2CylinderSys = coordinator.GetSystem<C2CylinderSystem>();
     auto nameSys = coordinator.GetSystem<NameSystem>();
@@ -336,7 +337,7 @@ void SaveManager::SaveScene(const std::string &path, Coordinator &coordinator)
         mainJson["geometry"].push_back(interCurveJson);
     }
 
-    for (Entity surfaceC0: c0SurfaceSys->GetEntities()) {
+    for (Entity surfaceC0: c0PatchesSys->GetEntities()) {
         json surfaceC0Json;
 
         surfaceC0Json["objectType"] = "bezierSurfaceC0";
@@ -380,8 +381,8 @@ void SaveManager::SaveScene(const std::string &path, Coordinator &coordinator)
             }
         }
 
-        surfaceC0Json["parameterWrapped"]["u"] = false;
-        surfaceC0Json["parameterWrapped"]["v"] = coordinator.HasComponent<IsC0Cylinder>(surfaceC0);
+        surfaceC0Json["parameterWrapped"]["u"] = coordinator.HasComponent<WrapU>(surfaceC0);
+        surfaceC0Json["parameterWrapped"]["v"] = coordinator.HasComponent<WrapV>(surfaceC0);
 
         mainJson["geometry"].push_back(surfaceC0Json);
     }
@@ -430,8 +431,8 @@ void SaveManager::SaveScene(const std::string &path, Coordinator &coordinator)
             }
         }
 
-        surfaceC2Json["parameterWrapped"]["u"] = false;
-        surfaceC2Json["parameterWrapped"]["v"] = coordinator.HasComponent<IsC0Cylinder>(surfaceC2);
+        surfaceC2Json["parameterWrapped"]["u"] = coordinator.HasComponent<WrapU>(surfaceC2);
+        surfaceC2Json["parameterWrapped"]["v"] = coordinator.HasComponent<WrapV>(surfaceC2);
 
         mainJson["geometry"].push_back(surfaceC2Json);
     }

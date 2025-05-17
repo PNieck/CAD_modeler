@@ -25,6 +25,17 @@ public:
 
     void RecalculateCylinder(Entity cylinder, const Position& pos, const alg::Vec3& direction, float radius) const;
 
+    Entity CreatePlane(const Position& pos, const alg::Vec3& direction, float length, float width);
+    Entity CreateSurface(C0Patches& patches);
+
+    void AddRowOfPlanePatches(Entity surface, const Position& pos, const alg::Vec3& direction, float length, float width) const;
+    void AddColOfPlanePatches(Entity surface, const Position& pos, const alg::Vec3& direction, float length, float width) const;
+
+    void DeleteRowOfPlanePatches(Entity surface, const Position& pos, const alg::Vec3& direction, float length, float width) const;
+    void DeleteColOfPlanePatches(Entity surface, const Position& pos, const alg::Vec3& direction, float length, float width) const;
+
+    void RecalculatePlane(Entity surface, const Position& pos, const alg::Vec3& direction, float length, float width) const;
+
     int GetRowsCnt(const Entity surface) const
         { return coordinator->GetComponent<C0Patches>(surface).PatchesInRow(); }
 

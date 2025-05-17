@@ -30,7 +30,6 @@ Modeler::Modeler(const int viewportWidth, const int viewportHeight):
     ToUpdateSystem::RegisterSystem(coordinator);
     InterpolationCurvesRenderingSystem::RegisterSystem(coordinator);
     InterpolationCurveSystem::RegisterSystem(coordinator);
-    C0SurfaceSystem::RegisterSystem(coordinator);
     C0PatchesSystem::RegisterSystem(coordinator);
     C2SurfaceSystem::RegisterSystem(coordinator);
     C2CylinderSystem::RegisterSystem(coordinator);
@@ -49,7 +48,6 @@ Modeler::Modeler(const int viewportWidth, const int viewportHeight):
     c0CurveSystem = coordinator.GetSystem<C0CurveSystem>();
     c2CurveSystem = coordinator.GetSystem<C2CurveSystem>();
     interpolationRenderingSystem = coordinator.GetSystem<InterpolationCurvesRenderingSystem>();
-    c0SurfaceSystem = coordinator.GetSystem<C0SurfaceSystem>();
     c0PatchesSystem = coordinator.GetSystem<C0PatchesSystem>();
     c2SurfaceSystem = coordinator.GetSystem<C2SurfaceSystem>();
     c2CylinderSystem = coordinator.GetSystem<C2CylinderSystem>();
@@ -63,7 +61,6 @@ Modeler::Modeler(const int viewportWidth, const int viewportHeight):
     gridSystem->Init();
     cursorSystem->Init();
     selectionSystem->Init();
-    c0SurfaceSystem->Init();
     c0PatchesSystem->Init();
     c2SurfaceSystem->Init();
     c2CylinderSystem->Init();
@@ -122,9 +119,9 @@ Entity Modeler::AddInterpolationCurve(const std::vector<Entity>& controlPoints)
 }
 
 
-Entity Modeler::AddC0Surface(const alg::Vec3& direction, const float length, const float width)
+Entity Modeler::AddC0Plane(const alg::Vec3& direction, const float length, const float width)
 {
-    const Entity entity = c0SurfaceSystem->CreateSurface(cursorSystem->GetPosition(), direction, length, width);
+    const Entity entity = c0PatchesSystem->CreatePlane(cursorSystem->GetPosition(), direction, length, width);
     nameSystem->SetName(entity, nameGenerator.GenerateName("SurfaceC0_"));
 
     auto const& patches = coordinator.GetComponent<C0Patches>(entity);
@@ -133,6 +130,7 @@ Entity Modeler::AddC0Surface(const alg::Vec3& direction, const float length, con
         for (int col=0; col < patches.PointsInCol(); ++col) {
             const Entity cp = patches.GetPoint(row, col);
             nameSystem->SetName(cp, nameGenerator.GenerateName("Point_"));
+            coordinator.AddComponent(cp, Unremovable());
         }
     }
 
@@ -210,8 +208,7 @@ void Modeler::MergeControlPoints(const Entity e1, const Entity e2)
             sysId == Coordinator::GetSystemID<InterpolationCurveSystem>())
             curveCPSys->MergeControlPoints(entity, e2, e1, sysId);
 
-        else if (sysId == Coordinator::GetSystemID<C0PatchesSystem>() ||
-                 sysId == Coordinator::GetSystemID<C0SurfaceSystem>())
+        else if (sysId == Coordinator::GetSystemID<C0PatchesSystem>())
                  c0PatchesSystem->MergeControlPoints(entity, e2, e1, sysId);
 
         else if (sysId == Coordinator::GetSystemID<C2SurfaceSystem>())
@@ -232,25 +229,26 @@ void Modeler::MergeControlPoints(const Entity e1, const Entity e2)
 }
 
 
-void Modeler::AddRowOfC0SurfacePatches(Entity surface, const alg::Vec3 &direction, float length, float width)
+void Modeler::AddRowOfC0PlanePatches(const Entity surface, const alg::Vec3 &direction, const float length, const float width)
 {
-    c0SurfaceSystem->AddRowOfPatches(surface, cursorSystem->GetPosition(), direction, length, width);
+    c0PatchesSystem->AddRowOfPlanePatches(surface, cursorSystem->GetPosition(), direction, length, width);
 
     auto const& patches = coordinator.GetComponent<C0Patches>(surface);
 
     for (int col=0; col < patches.PointsInCol(); col++) {
         for (int row=patches.PointsInRow() - 3; row < patches.PointsInRow(); row++) {
-            Entity cp = patches.GetPoint(row, col);
+            const Entity cp = patches.GetPoint(row, col);
 
             nameSystem->SetName(cp, nameGenerator.GenerateName("Point_"));
+            coordinator.AddComponent(cp, Unremovable());
         }
     }
 }
 
 
-void Modeler::AddColOfC0SurfacePatches(Entity surface, const alg::Vec3 &direction, float length, float width)
+void Modeler::AddColOfC0PlanePatches(const Entity surface, const alg::Vec3 &direction, float length, float width)
 {
-    c0SurfaceSystem->AddColOfPatches(surface, cursorSystem->GetPosition(), direction, length, width);
+    c0PatchesSystem->AddColOfPlanePatches(surface, cursorSystem->GetPosition(), direction, length, width);
 
     auto const& patches = coordinator.GetComponent<C0Patches>(surface);
 
@@ -292,11 +290,11 @@ void Modeler::AddColOfC2SurfacePatches(Entity surface, const alg::Vec3 &directio
 }
 
 
-void Modeler::AddRowOfC0CylinderPatches(const Entity surface, const float radius, const alg::Vec3 &dir)
+void Modeler::AddRowOfC0CylinderPatches(const Entity cylinder, const float radius, const alg::Vec3 &dir)
 {
-    c0PatchesSystem->AddRowOfCylinderPatches(surface, cursorSystem->GetPosition(), dir, radius);
+    c0PatchesSystem->AddRowOfCylinderPatches(cylinder, cursorSystem->GetPosition(), dir, radius);
 
-    auto const& patches = coordinator.GetComponent<C0Patches>(surface);
+    auto const& patches = coordinator.GetComponent<C0Patches>(cylinder);
 
     for (int col=0; col < patches.PointsInCol() - 1; col++) {
         for (int row=patches.PointsInRow() - 3; row < patches.PointsInRow(); row++) {
@@ -458,7 +456,6 @@ void Modeler::ClearScene()
         gregoryPatchesSystem,
         c2CylinderSystem,
         c2SurfaceSystem,
-        c0SurfaceSystem,
         c0PatchesSystem,
         coordinator.GetSystem<InterpolationCurveSystem>(),
         c2CurveSystem,

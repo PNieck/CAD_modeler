@@ -3,7 +3,7 @@
 #include <ecs/coordinator.hpp>
 
 #include <CAD_modeler/model/components/mesh.hpp>
-#include <CAD_modeler/model/components/name.hpp>
+#include <CAD_modeler/model/components/wraps.hpp>
 
 #include <CAD_modeler/model/systems/selectionSystem.hpp>
 #include <CAD_modeler/model/systems/shaders/shaderRepository.hpp>
@@ -14,6 +14,9 @@
 void ToriSystem::RegisterSystem(Coordinator & coordinator)
 {
     coordinator.RegisterSystem<ToriSystem>();
+
+    coordinator.RegisterComponent<WrapU>();
+    coordinator.RegisterComponent<WrapV>();
 
     coordinator.RegisterRequiredComponent<ToriSystem, Position>();
     coordinator.RegisterRequiredComponent<ToriSystem, Scale>();
@@ -39,6 +42,9 @@ Entity ToriSystem::AddTorus(const Position& pos, const TorusParameters& params)
 
     coordinator->AddComponent<Mesh>(torus, Mesh());
     UpdateMesh(torus, params);
+
+    coordinator->AddComponent(torus, WrapU());
+    coordinator->AddComponent(torus, WrapV());
 
     return torus;
 }
@@ -197,7 +203,7 @@ alg::Vec3 ToriSystem::NormalVector(const Entity e, const float u, const float v)
 }
 
 
-void ToriSystem::UpdateMesh(Entity e, const TorusParameters &params) const
+void ToriSystem::UpdateMesh(const Entity e, const TorusParameters &params) const
 {
     coordinator->EditComponent<Mesh>(e,
         [this, &params] (Mesh& mesh) {

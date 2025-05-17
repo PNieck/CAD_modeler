@@ -235,6 +235,232 @@ void C0PatchesSystem::RecalculateCylinder(const Entity cylinder, const Position 
 }
 
 
+Entity C0PatchesSystem::CreatePlane(const Position &pos, const alg::Vec3 &direction, float length, float width)
+{
+    C0Patches patches(1, 1);
+
+    auto const pointsSystem = coordinator->GetSystem<PointsSystem>();
+    const auto cpRegistrySystem = coordinator->GetSystem<ControlPointsRegistrySystem>();
+
+    Entity surface = coordinator->CreateEntity();
+
+    const auto handler = std::make_shared<ControlPointMovedHandler>(surface, *coordinator);
+
+    for (int i=0; i < patches.PointsInCol(); ++i) {
+        for (int j=0; j < patches.PointsInRow(); ++j) {
+            // Creating control points with temporary location
+            Entity cp = pointsSystem->CreatePoint(pos.vec);
+            patches.SetPoint(cp, i, j);
+
+            HandlerId cpHandler = coordinator->Subscribe(cp, std::static_pointer_cast<EventHandler<Position>>(handler));
+            patches.controlPointsHandlers.insert({cp, cpHandler});
+
+            cpRegistrySystem->RegisterControlPoint(surface, cp, Coordinator::GetSystemID<C0PatchesSystem>());
+        }
+    }
+
+    patches.deletionHandler = coordinator->Subscribe<C0Patches>(surface, deletionHandler);
+
+    coordinator->AddComponent<Mesh>(surface, Mesh());
+    coordinator->AddComponent<C0Patches>(surface, patches);
+    coordinator->AddComponent<PatchesDensity>(surface, PatchesDensity(5));
+
+    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate<C0PatchesSystem>(surface);
+
+    RecalculatePlane(surface, pos, direction, length, width);
+
+    return surface;
+}
+
+
+Entity C0PatchesSystem::CreateSurface(C0Patches &patches)
+{
+    const auto cpRegistrySystem = coordinator->GetSystem<ControlPointsRegistrySystem>();
+
+    Entity surface = coordinator->CreateEntity();
+
+    const auto handler = std::make_shared<ControlPointMovedHandler>(surface, *coordinator);
+
+    for (int i=0; i < patches.PointsInCol(); ++i) {
+        for (int j=0; j < patches.PointsInRow(); ++j) {
+            // Creating control points with temporary location
+            Entity cp = patches.GetPoint(j, i);
+
+            if (patches.controlPointsHandlers.contains(cp))
+                continue;
+
+            HandlerId cpHandler = coordinator->Subscribe(cp, std::static_pointer_cast<EventHandler<Position>>(handler));
+            patches.controlPointsHandlers.insert({cp, cpHandler});
+
+            cpRegistrySystem->RegisterControlPoint(surface, cp, Coordinator::GetSystemID<C0PatchesSystem>());
+        }
+    }
+
+    patches.deletionHandler = coordinator->Subscribe<C0Patches>(surface, deletionHandler);
+
+    coordinator->AddComponent<Mesh>(surface, Mesh());
+    coordinator->AddComponent<C0Patches>(surface, patches);
+    coordinator->AddComponent<PatchesDensity>(surface, PatchesDensity(5));
+
+    if (ShouldWrapU(patches))
+        coordinator->AddComponent(surface, WrapU());
+
+    if (ShouldWrapV(patches))
+        coordinator->AddComponent(surface, WrapV());
+
+    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate<C0PatchesSystem>(surface);
+
+    return surface;
+}
+
+
+void C0PatchesSystem::AddRowOfPlanePatches(Entity surface, const Position &pos, const alg::Vec3 &direction,
+    const float length, const float width
+) const {
+    coordinator->EditComponent<C0Patches>(surface,
+        [surface, this](C0Patches& patches) {
+            const auto pointSys = coordinator->GetSystem<PointsSystem>();
+            const auto cpRegistrySys = coordinator->GetSystem<ControlPointsRegistrySystem>();
+
+            patches.AddRowOfPatches();
+
+            const Entity firstCP = patches.GetPoint(0,0);
+            const HandlerId firstCpHandler = patches.controlPointsHandlers.at(firstCP);
+            const auto eventHandler = coordinator->GetEventHandler<Position>(firstCP, firstCpHandler);
+
+            for (int col=0; col < patches.PointsInCol(); col++) {
+                for (int row=patches.PointsInRow() - 3; row < patches.PointsInRow(); row++) {
+                    Entity newEntity = pointSys->CreatePoint(Position());
+
+                    patches.SetPoint(newEntity, row, col);
+
+                    HandlerId newHandler = coordinator->Subscribe<Position>(newEntity, eventHandler);
+                    patches.controlPointsHandlers.insert({ newEntity, newHandler });
+
+                    cpRegistrySys->RegisterControlPoint(surface, newEntity, Coordinator::GetSystemID<C0PatchesSystem>());
+                }
+            }
+        }
+    );
+
+    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate<C0PatchesSystem>(surface);
+
+    RecalculatePlane(surface, pos, direction, length, width);
+}
+
+
+void C0PatchesSystem::AddColOfPlanePatches(Entity surface, const Position &pos, const alg::Vec3 &direction,
+    const float length, const float width
+) const {
+    coordinator->EditComponent<C0Patches>(surface,
+        [surface, this](C0Patches& patches) {
+            const auto pointSys = coordinator->GetSystem<PointsSystem>();
+            const auto cpRegistrySys = coordinator->GetSystem<ControlPointsRegistrySystem>();
+
+            patches.AddColOfPatches();
+
+            const Entity firstCP = patches.GetPoint(0,0);
+            const HandlerId firstCpHandler = patches.controlPointsHandlers.at(firstCP);
+            const auto eventHandler = coordinator->GetEventHandler<Position>(firstCP, firstCpHandler);
+
+            for (int row=0; row < patches.PointsInRow(); row++) {
+                for (int col=patches.PointsInCol() - 3; col < patches.PointsInCol(); col++) {
+                    Entity newEntity = pointSys->CreatePoint(Position());
+
+                    patches.SetPoint(newEntity, row, col);
+
+                    HandlerId newHandler = coordinator->Subscribe<Position>(newEntity, eventHandler);
+                    patches.controlPointsHandlers.insert({ newEntity, newHandler });
+
+                    cpRegistrySys->RegisterControlPoint(surface, newEntity, Coordinator::GetSystemID<C0PatchesSystem>());
+                }
+            }
+        }
+    );
+
+    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate<C0PatchesSystem>(surface);
+
+    RecalculatePlane(surface, pos, direction, length, width);
+}
+
+
+void C0PatchesSystem::DeleteRowOfPlanePatches(Entity surface, const Position &pos, const alg::Vec3 &direction,
+    const float length, const float width
+) const {
+    coordinator->EditComponent<C0Patches>(surface,
+        [surface, this](C0Patches& patches) {
+            const auto cpRegistrySys = coordinator->GetSystem<ControlPointsRegistrySystem>();
+
+            for (int col=0; col < patches.PointsInCol(); col++) {
+                for (int row=patches.PointsInRow() - 3; row < patches.PointsInRow(); row++) {
+                    Entity point = patches.GetPoint(row, col);
+                    cpRegistrySys->UnregisterControlPoint(surface, point, Coordinator::GetSystemID<C0PatchesSystem>());
+                    coordinator->DestroyEntity(point);
+
+                    patches.controlPointsHandlers.erase(point);
+                }
+            }
+
+            patches.DeleteRowOfPatches();
+        }
+    );
+
+    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate<C0PatchesSystem>(surface);
+
+    RecalculatePlane(surface, pos, direction, length, width);
+}
+
+
+void C0PatchesSystem::DeleteColOfPlanePatches(Entity surface, const Position &pos, const alg::Vec3 &direction,
+    const float length, const float width
+) const {
+    coordinator->EditComponent<C0Patches>(surface,
+        [surface, this](C0Patches& patches) {
+            const auto cpRegistrySys = coordinator->GetSystem<ControlPointsRegistrySystem>();
+
+            for (int row=0; row < patches.PointsInRow(); row++) {
+                for (int col=patches.PointsInCol() - 3; col < patches.PointsInCol(); col++) {
+                    Entity point = patches.GetPoint(row, col);
+                    cpRegistrySys->UnregisterControlPoint(surface, point, Coordinator::GetSystemID<C0PatchesSystem>());
+                    coordinator->DestroyEntity(point);
+
+                    patches.controlPointsHandlers.erase(point);
+                }
+            }
+
+            patches.DeleteColOfPatches();
+        }
+    );
+
+    coordinator->GetSystem<ToUpdateSystem>()->MarkAsToUpdate<C0PatchesSystem>(surface);
+
+    RecalculatePlane(surface, pos, direction, length, width);
+}
+
+
+void C0PatchesSystem::RecalculatePlane(Entity surface, const Position &pos, const alg::Vec3 &direction, float length,
+    float width
+) const {
+    auto const& patches = coordinator->GetComponent<C0Patches>(surface);
+
+    alg::Vec3 perpendicular1 = GetPerpendicularVec(direction);
+    alg::Vec3 perpendicular2 = Cross(perpendicular1, direction);
+
+    perpendicular1 *= length / static_cast<float>(patches.PointsInRow() - 1);
+    perpendicular2 *= width / static_cast<float>(patches.PointsInCol() - 1);
+
+    for (int i=0; i < patches.PointsInRow(); ++i) {
+        for (int j=0; j < patches.PointsInCol(); ++j) {
+            const Entity cp = patches.GetPoint(i, j);
+
+            alg::Vec3 newPos = pos.vec + perpendicular1 * static_cast<float>(i) + perpendicular2 * static_cast<float>(j);
+
+            coordinator->SetComponent(cp, Position(newPos));
+        }
+    }
+}
+
+
 void C0PatchesSystem::MergeControlPoints(const Entity surface, const Entity oldCP, Entity newCP, const SystemId system)
 {
     if (oldCP == newCP)
