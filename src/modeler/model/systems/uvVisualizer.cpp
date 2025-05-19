@@ -4,6 +4,8 @@
 
 #include <CAD_modeler/model/components/uvVisualization.hpp>
 
+#include "CAD_modeler/model/components/wraps.hpp"
+
 
 void UvVisualizer::VisualizeLineOnParameters(const Entity e, const IntersectionCurve &curve, const SurfaceCurveRelation relation)
 {
@@ -24,6 +26,20 @@ void UvVisualizer::VisualizeLineOnParameters(const Entity e, const IntersectionC
         default:
             throw std::runtime_error("Unknown surface curve relation");
     }
+}
+
+
+void UvVisualizer::FillTrimmingRegion(Entity e, size_t u, size_t v)
+{
+    coordinator.EditComponent<UvVisualization>(e,
+        [this, u, v, e] (UvVisualization& vis) {
+            vis.FillRegion(
+                u, v,
+                this->coordinator.HasComponent<WrapU>(e),
+                this->coordinator.HasComponent<WrapV>(e)
+            );
+        }
+    );
 }
 
 

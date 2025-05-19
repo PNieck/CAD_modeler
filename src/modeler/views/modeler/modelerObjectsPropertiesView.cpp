@@ -48,7 +48,7 @@ void ModelerObjectsPropertiesView::Render()
 }
 
 
-void ModelerObjectsPropertiesView::RenderSingleObjectProperties(Entity entity) const
+void ModelerObjectsPropertiesView::RenderSingleObjectProperties(const Entity entity) const
 {
     auto const& components = model.GetEntityComponents(entity);
 
@@ -162,7 +162,7 @@ void ModelerObjectsPropertiesView::RenderMultipleObjectProperties() const
 }
 
 
-void ModelerObjectsPropertiesView::RenderMergingControlPointsOptionButton(Entity e1, Entity e2) const
+void ModelerObjectsPropertiesView::RenderMergingControlPointsOptionButton(const Entity e1, const Entity e2) const
 {
     ImGui::Separator();
 
@@ -498,9 +498,49 @@ void ModelerObjectsPropertiesView::DisplayNameEditor(const Entity entity, const 
 }
 
 
-void ModelerObjectsPropertiesView::DisplayUvVisualization(Entity entity, const UvVisualization &vis) const
+void ModelerObjectsPropertiesView::DisplayUvVisualization(const Entity entity, const UvVisualization &vis) const
 {
+    static bool showTrimmingOptions = false;
+
     ImGui::SeparatorText("Parameter space visualization");
 
-    ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<intptr_t>(vis.TextureId())), ImVec2(vis.UResolution(), vis.VResolution()));
+    ImGui::Image(
+        reinterpret_cast<ImTextureID>(static_cast<intptr_t>(vis.TextureId())),
+        ImGui::GetContentRegionAvail(),
+        ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f)
+    );
+
+    if (ImGui::Button("Show trimming options")) {
+        showTrimmingOptions = true;
+    }
+
+    if (showTrimmingOptions) {
+        ImGui::Begin("Trimming Options");
+
+        const ImVec2 imagePos = ImGui::GetCursorScreenPos();
+        const auto imageSize = ImVec2(vis.UResolution(), vis.VResolution());
+
+        ImGui::Image(
+            reinterpret_cast<ImTextureID>(static_cast<intptr_t>(vis.TextureId())),
+            imageSize,
+            ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f)
+        );
+
+        const ImVec2 mousePos = ImGui::GetIO().MousePos;
+        if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(0)) {
+            auto localPos = ImVec2(mousePos.x - imagePos.x, mousePos.y - imagePos.y);
+
+            // Clamp to image bounds
+            if (localPos.x >= 0 && localPos.y >= 0 &&
+                localPos.x < imageSize.x && localPos.y < imageSize.y
+            ) {
+                //model.DrawPointOnUV(entity, imageSize.y - localPos.y, localPos.x);
+                model.FillTrimmingRegion(entity, imageSize.y - localPos.y, localPos.x);
+            }
+        }
+
+        if (ImGui::Button("Exit"))
+            showTrimmingOptions = false;
+        ImGui::End();
+    }
 }

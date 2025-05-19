@@ -4,8 +4,6 @@
 
 #include "ecs/coordinator.hpp"
 
-#include "CAD_modeler/model/components/uvVisualization.hpp"
-
 
 class UvVisualizer {
 public:
@@ -19,6 +17,8 @@ public:
         coordinator(coordinator) {}
 
     void VisualizeLineOnParameters(Entity e, const IntersectionCurve& curve, SurfaceCurveRelation relation);
+
+    void FillTrimmingRegion(Entity e, size_t u, size_t v);
 
 private:
     Coordinator& coordinator;

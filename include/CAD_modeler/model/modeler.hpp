@@ -284,6 +284,8 @@ public:
 
     void ClearScene();
 
+    void FillTrimmingRegion(Entity e, size_t u, size_t v);
+
     // TODO: delet
     void ShowDerivativesU(Entity e);
     void ShowDerivativesV(Entity e);

@@ -500,6 +500,13 @@ void Modeler::ClearScene()
 }
 
 
+void Modeler::FillTrimmingRegion(const Entity e, const size_t u, const size_t v)
+{
+    UvVisualizer visualizer(coordinator);
+    visualizer.FillTrimmingRegion(e, u, v);
+}
+
+
 void Modeler::ShowDerivativesU(Entity e)
 {
     constexpr int cnt = 10;
