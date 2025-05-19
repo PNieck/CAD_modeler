@@ -6,7 +6,8 @@
 class Texture2D {
 public:
     enum InternalFormat {
-        Red32BitFloat = GL_R32F
+        Red32BitFloat = GL_R32F,
+        Red8BitFloat = GL_R8
     };
 
     enum InputDataFormat {
@@ -14,8 +15,8 @@ public:
     };
 
     Texture2D(int width, int height, const float *data, InternalFormat internalFormat, InputDataFormat inputFormat);
-    Texture2D(const Texture2D &texture) = delete;
-    ~Texture2D();
+    // Texture2D(const Texture2D &texture) = delete;
+    // ~Texture2D();
 
     void Update(const float *data, InputDataFormat inputFormat) const;
 
@@ -31,6 +32,9 @@ public:
     [[nodiscard]]
     int GetHeight() const
         { return height; }
+
+    unsigned int Id() const
+        { return id; }
 
 private:
     unsigned int id = 0;

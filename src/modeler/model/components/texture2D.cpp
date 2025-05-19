@@ -31,7 +31,7 @@ void Texture2D::ChangeSize(const int texWidth, const int texHeight, const float 
 }
 
 
-Texture2D::~Texture2D()
-{
-    glDeleteTextures(1, &id);
-}
+// Texture2D::~Texture2D()
+// {
+//     glDeleteTextures(1, &id);
+// }

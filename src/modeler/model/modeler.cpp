@@ -9,6 +9,7 @@
 
 #include <CAD_modeler/model/systems/toUpdateSystem.hpp>
 #include <CAD_modeler/model/systems/curveControlPointsSystem.hpp>
+#include "CAD_modeler/model/systems/uvVisualizer.hpp"
 
 #include <stdexcept>
 
@@ -400,29 +401,49 @@ Entity Modeler::FillHole(const GregoryPatchesSystem::Hole& hole)
 
 std::optional<Entity> Modeler::FindIntersection(const Entity e1, const Entity e2, const float step)
 {
-    const auto result = intersectionSystem->FindIntersection(e1, e2, step);
-    return SetIntersectionCurveUp(result);
+    auto result = intersectionSystem->FindIntersection(e1, e2, step);
+    if (!result.has_value())
+        return std::nullopt;
+
+    SetIntersectionCurveUp(result.value(), e1, e2);
+
+    return result.value();
 }
 
 
 std::optional<Entity> Modeler::FindIntersection(const Entity e1, const Entity e2, const float step, const Position &guidance)
 {
     const auto result = intersectionSystem->FindIntersection(e1, e2, step, guidance);
-    return SetIntersectionCurveUp(result);
+    if (!result.has_value())
+        return std::nullopt;
+
+    SetIntersectionCurveUp(result.value(), e1, e2);
+
+    return result.value();
 }
 
 
 std::optional<Entity> Modeler::FindSelfIntersection(const Entity e, const float step)
 {
     const auto result = intersectionSystem->FindSelfIntersection(e, step);
-    return SetIntersectionCurveUp(result);
+    if (!result.has_value())
+        return std::nullopt;
+
+    SetIntersectionCurveUp(result.value(), e, e);
+
+    return result.value();
 }
 
 
 std::optional<Entity> Modeler::FindSelfIntersection(const Entity e,const float step, const Position &guidance)
 {
     const auto result = intersectionSystem->FindSelfIntersection(e, step, guidance);
-    return SetIntersectionCurveUp(result);
+    if (!result.has_value())
+        return std::nullopt;
+
+    SetIntersectionCurveUp(result.value(), e, e);
+
+    return result.value();
 }
 
 
@@ -654,7 +675,7 @@ Line Modeler::LineFromViewportCoordinates(float x, float y)
         nearV4.Z() / nearV4.W()
     );
 
-    alg::Vec3 far = alg::Vec3(
+    const auto far = alg::Vec3(
         farV4.X() / farV4.W(),
         farV4.Y() / farV4.W(),
         farV4.Z() / farV4.W()
@@ -663,15 +684,21 @@ Line Modeler::LineFromViewportCoordinates(float x, float y)
     return Line::FromTwoPoints(near, far);
 }
 
-
-std::optional<Entity> Modeler::SetIntersectionCurveUp(const std::optional<Entity> &curve)
+void Modeler::SetIntersectionCurveUp(const Entity curve, const  Entity e1, const Entity e2)
 {
-    if (!curve.has_value())
-        return std::nullopt;
+    nameSystem->SetName(curve, nameGenerator.GenerateName("IntersectionCurve_"));
 
-    nameSystem->SetName(curve.value(), nameGenerator.GenerateName("IntersectionCurve_"));
+    UvVisualizer visualizer(coordinator);
 
-    return curve.value();
+    const auto& interCurve = coordinator.GetComponent<IntersectionCurve>(curve);
+
+    if (e1 == e2) {
+        visualizer.VisualizeLineOnParameters(e1, interCurve, UvVisualizer::SurfaceCurveRelation::Both);
+        return;
+    }
+
+    visualizer.VisualizeLineOnParameters(e1, interCurve, UvVisualizer::SurfaceCurveRelation::Surface1);
+    visualizer.VisualizeLineOnParameters(e2, interCurve, UvVisualizer::SurfaceCurveRelation::Surface2);
 }
 
 

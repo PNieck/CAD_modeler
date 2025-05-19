@@ -88,8 +88,12 @@ void ModelerObjectsPropertiesView::RenderSingleObjectProperties(Entity entity) c
     if (components.contains(Modeler::GetComponentId<TriangleOfGregoryPatches>()))
         DisplayGregoryPatchesParameters(entity, model.GetComponent<TriangleOfGregoryPatches>(entity));
 
+    if (components.contains(Modeler::GetComponentId<UvVisualization>()))
+        DisplayUvVisualization(entity, model.GetComponent<UvVisualization>(entity));
+
     if (components.contains(Modeler::GetComponentId<IntersectionCurve>()))
-        DisplayIntersectionCurveOptions(entity);
+        if (DisplayIntersectionCurveOptions(entity))
+            return;
 
     if (!components.contains(Modeler::GetComponentId<Unremovable>()))
         DisplayEntityDeletionOption(entity);
@@ -472,11 +476,14 @@ void ModelerObjectsPropertiesView::DisplayGregoryPatchesParameters(Entity entity
 }
 
 
-void ModelerObjectsPropertiesView::DisplayIntersectionCurveOptions(const Entity entity) const
+bool ModelerObjectsPropertiesView::DisplayIntersectionCurveOptions(const Entity entity) const
 {
     if (ImGui::Button("Turn into interpolation curve")) {
         model.TurnIntersectionCurveToInterpolation(entity);
+        return true;
     }
+
+    return false;
 }
 
 
@@ -488,4 +495,12 @@ void ModelerObjectsPropertiesView::DisplayNameEditor(const Entity entity, const 
 
     if (ImGui::InputText("##objectName", &tmp))
         model.ChangeEntityName(entity, tmp);
+}
+
+
+void ModelerObjectsPropertiesView::DisplayUvVisualization(Entity entity, const UvVisualization &vis) const
+{
+    ImGui::SeparatorText("Parameter space visualization");
+
+    ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<intptr_t>(vis.TextureId())), ImVec2(vis.UResolution(), vis.VResolution()));
 }

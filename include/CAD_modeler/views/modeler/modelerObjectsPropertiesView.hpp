@@ -1,8 +1,9 @@
 #pragma once
 
-#include "../../model/modeler.hpp"
-#include "../../model/components/c0CurveParameters.hpp"
-#include "../../model/components/c2CurveParameters.hpp"
+#include "CAD_modeler/model/modeler.hpp"
+#include "CAD_modeler/model/components/c0CurveParameters.hpp"
+#include "CAD_modeler/model/components/c2CurveParameters.hpp"
+#include "CAD_modeler/model/components/uvVisualization.hpp"
 
 
 class ModelerController;
@@ -33,7 +34,9 @@ private:
     void DisplaySurfaceDensityParameter(Entity entity, const PatchesDensity& density) const;
     void DisplaySurfacePatches(Entity entity, const Patches& patches) const;
     void DisplayGregoryPatchesParameters(Entity entity, const TriangleOfGregoryPatches& triangle) const;
-    void DisplayIntersectionCurveOptions(Entity entity) const;
+    [[nodiscard]]
+    bool DisplayIntersectionCurveOptions(Entity entity) const;
+    void DisplayUvVisualization(Entity entity, const UvVisualization& vis) const;
 
     void DisplayNameEditor(Entity entity, const Name& name) const;
 };

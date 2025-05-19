@@ -323,7 +323,7 @@ private:
     alg::Vec3 PointFromViewportCoordinates(float x, float y);
     Line LineFromViewportCoordinates(float x, float y);
 
-    std::optional<Entity> SetIntersectionCurveUp(const std::optional<Entity>& curve);
+    void SetIntersectionCurveUp(Entity curve, Entity e1, Entity e2);
 
     void RenderSystemsObjects(const alg::Mat4x4& viewMtx, const alg::Mat4x4& persMtx, float nearPlane, float farPlane) const override;
 };
