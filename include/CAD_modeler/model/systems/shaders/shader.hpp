@@ -24,6 +24,12 @@ public:
     void Use() const
         { glUseProgram(id); }
 
+    Shader(const Shader&) = delete;
+    Shader(Shader&&) = delete;
+    Shader& operator=(const Shader&) = delete;
+    Shader& operator=(Shader&&) = delete;
+
+protected:
     void SetBool(const std::string &name, bool value) const;
     void SetInt(const std::string &name, int value) const;
     void SetFloat(const std::string &name, float value) const;

@@ -3,7 +3,7 @@
 #include "shader.hpp"
 
 
-class MillingShader: private Shader {
+class MillingShader: public Shader {
 public:
     MillingShader():
         Shader(
@@ -30,7 +30,4 @@ public:
 
     void SetCameraPosition(const alg::Vec3& pos) const
         { SetVec3("cameraPos", pos); }
-
-    void Use() const
-        { Shader::Use(); }
 };

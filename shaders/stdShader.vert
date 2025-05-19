@@ -2,6 +2,7 @@
 
 layout (location = 0) in vec3 aPos;
 
+// Model View Perspective matrix
 uniform mat4 MVP;
 
 void main()
