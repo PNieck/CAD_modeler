@@ -8,6 +8,7 @@
 #include "gregoryPatchShader.hpp"
 #include "passThrough.hpp"
 #include "millingShader.hpp"
+#include "trimmedTorusShader.hpp"
 
 
 class ShaderRepository {
@@ -49,6 +50,9 @@ public:
     const MillingShader& GetMillingShader() const
         { return millingShader; }
 
+    const TrimmedTorusShader& GetTrimmedTorusShader() const
+        { return trimmedTorusShader; }
+
     ShaderRepository(const ShaderRepository&) = delete;
     ShaderRepository(ShaderRepository&&) = delete;
     ShaderRepository& operator=(const ShaderRepository&) = delete;
@@ -62,6 +66,7 @@ private:
     GregoryPatchShader gregoryPatchShader;
     PassThroughShader passThroughShader;
     MillingShader millingShader;
+    TrimmedTorusShader trimmedTorusShader;
 
     ShaderRepository() = default;
 };

@@ -20,6 +20,8 @@ Modeler::Modeler(const int viewportWidth, const int viewportHeight):
     RegisterAllComponents(coordinator);
 
     ToriSystem::RegisterSystem(coordinator);
+    ToriRenderingSystem::RegisterSystem(coordinator);
+    TrimmedToriRenderingSystem::RegisterSystem(coordinator);
     GridSystem::RegisterSystem(coordinator);
     CursorSystem::RegisterSystem(coordinator);
     PointsSystem::RegisterSystem(coordinator);
@@ -40,6 +42,9 @@ Modeler::Modeler(const int viewportWidth, const int viewportHeight):
     IntersectionSystem::RegisterSystem(coordinator);
 
     toriSystem = coordinator.GetSystem<ToriSystem>();
+    toriRenderingSystem = coordinator.GetSystem<ToriRenderingSystem>();
+    trimmedToriRenderingSystem = coordinator.GetSystem<TrimmedToriRenderingSystem>();
+
     gridSystem = coordinator.GetSystem<GridSystem>();
     cursorSystem = coordinator.GetSystem<CursorSystem>();
     pointsSystem = coordinator.GetSystem<PointsSystem>();
@@ -84,6 +89,8 @@ Entity Modeler::AddTorus()
 
     const Entity entity = toriSystem->AddTorus(cursorPos, params);
     nameSystem->SetName(entity, nameGenerator.GenerateName("Torus_"));
+
+    toriRenderingSystem->AddEntity(entity);
 
     return entity;
 }
@@ -507,6 +514,15 @@ void Modeler::FillTrimmingRegion(const Entity e, const size_t u, const size_t v)
 }
 
 
+void Modeler::ApplyTrimming(Entity e)
+{
+    if (toriRenderingSystem->HasEntity(e))
+        toriRenderingSystem->RemoveEntity(e);
+
+    trimmedToriRenderingSystem->AddEntity(e);
+}
+
+
 void Modeler::ShowDerivativesU(Entity e)
 {
     constexpr int cnt = 10;
@@ -709,11 +725,14 @@ void Modeler::SetIntersectionCurveUp(const Entity curve, const  Entity e1, const
 }
 
 
-void Modeler::RenderSystemsObjects(const alg::Mat4x4 &viewMtx, const alg::Mat4x4 &persMtx, float nearPlane, float farPlane) const
-{
+void Modeler::RenderSystemsObjects(
+    const alg::Mat4x4 &viewMtx, const alg::Mat4x4 &persMtx, const float nearPlane, const float farPlane
+) const {
     const alg::Mat4x4 cameraMtx = persMtx * viewMtx;
 
-    toriSystem->Render(cameraMtx);
+    toriRenderingSystem->Render(cameraMtx);
+    trimmedToriRenderingSystem->Render(cameraMtx);
+
     cursorSystem->Render(cameraMtx);
     pointsSystem->Render(cameraMtx);
     selectionSystem->RenderMiddlePoint(cameraMtx);

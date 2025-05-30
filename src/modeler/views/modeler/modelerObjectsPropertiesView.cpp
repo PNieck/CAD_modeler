@@ -528,7 +528,7 @@ void ModelerObjectsPropertiesView::DisplayUvVisualization(const Entity entity, c
 
         const ImVec2 mousePos = ImGui::GetIO().MousePos;
         if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(0)) {
-            auto localPos = ImVec2(mousePos.x - imagePos.x, mousePos.y - imagePos.y);
+            const auto localPos = ImVec2(mousePos.x - imagePos.x, mousePos.y - imagePos.y);
 
             // Clamp to image bounds
             if (localPos.x >= 0 && localPos.y >= 0 &&
@@ -541,6 +541,12 @@ void ModelerObjectsPropertiesView::DisplayUvVisualization(const Entity entity, c
 
         if (ImGui::Button("Exit"))
             showTrimmingOptions = false;
+
+        ImGui::SameLine();
+
+        if (ImGui::Button("Apply trimming"))
+            model.ApplyTrimming(entity);
+
         ImGui::End();
     }
 }

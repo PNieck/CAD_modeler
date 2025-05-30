@@ -7,8 +7,6 @@
 #include "../components/scale.hpp"
 #include "../components/torusParameters.hpp"
 
-#include <vector>
-
 
 class ToriSystem final : public SurfaceSystem {
 public:
@@ -17,8 +15,6 @@ public:
     Entity AddTorus(const Position& pos, const TorusParameters& params);
 
     void SetParameters(Entity entity, const TorusParameters& params);
-
-    void Render(const alg::Mat4x4& cameraMtx);
 
     Position PointOnSurface(Entity torus, float u, float v) const override;
 
@@ -62,15 +58,15 @@ public:
     );
     alg::Vec3 NormalVector(Entity e, float u, float v) const override;
 
+    static constexpr float MaxU()
+        { return 2.f * std::numbers::pi_v<float>; }
+
     float MaxU(Entity e) const override
+        { return MaxU(); }
+
+    static constexpr float MaxV()
         { return 2.f * std::numbers::pi_v<float>; }
 
     float MaxV(Entity e) const override
-        { return 2.f * std::numbers::pi_v<float>; }
-
-private:
-    void UpdateMesh(Entity e, const TorusParameters& params) const;
-
-    static std::vector<float> GenerateMeshVertices(const TorusParameters& params);
-    static std::vector<uint32_t> GenerateMeshIndices(const TorusParameters& params);
+        { return MaxV(); }
 };

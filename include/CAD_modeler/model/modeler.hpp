@@ -5,6 +5,8 @@
 #include "managers/saveManager.hpp"
 
 #include "systems/toriSystem.hpp"
+#include "systems/toriRenderingSystem.hpp"
+#include "systems/trimmedToriRenderingSystem.hpp"
 #include "systems/gridSystem.hpp"
 #include "systems/cursorSystem.hpp"
 #include "systems/pointsSystem.hpp"
@@ -285,6 +287,7 @@ public:
     void ClearScene();
 
     void FillTrimmingRegion(Entity e, size_t u, size_t v);
+    void ApplyTrimming(Entity e);
 
     // TODO: delet
     void ShowDerivativesU(Entity e);
@@ -303,6 +306,9 @@ public:
 
 private:
     std::shared_ptr<ToriSystem> toriSystem;
+    std::shared_ptr<ToriRenderingSystem> toriRenderingSystem;
+    std::shared_ptr<TrimmedToriRenderingSystem> trimmedToriRenderingSystem;
+
     std::shared_ptr<GridSystem> gridSystem;
     std::shared_ptr<CursorSystem> cursorSystem;
     std::shared_ptr<PointsSystem> pointsSystem;
@@ -332,5 +338,12 @@ private:
 
 
 template <>
-inline void Modeler::SetComponent<TorusParameters>(const Entity entity, const TorusParameters& params)
-    { toriSystem->SetParameters(entity, params); }
+inline void Modeler::SetComponent<TorusParameters>(const Entity entity, const TorusParameters& params) {
+    toriSystem->SetParameters(entity, params);
+
+    if (toriRenderingSystem->HasEntity(entity))
+        toriRenderingSystem->Update(entity);
+
+    if (trimmedToriRenderingSystem->HasEntity(entity))
+        trimmedToriRenderingSystem->Update(entity);
+}

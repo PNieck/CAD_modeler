@@ -19,6 +19,8 @@
 #include <map>
 #include <stack>
 
+#include "CAD_modeler/model/systems/toriRenderingSystem.hpp"
+
 
 using json = nlohmann::json;
 
@@ -64,6 +66,7 @@ void SaveManager::LoadScene(const std::string &path, Coordinator &coordinator)
 
     auto pointsSys = coordinator.GetSystem<PointsSystem>();
     auto toriSys = coordinator.GetSystem<ToriSystem>();
+    auto toriRenderingSys = coordinator.GetSystem<ToriRenderingSystem>();
     auto c0CurveSys = coordinator.GetSystem<C0CurveSystem>();
     auto c2CurveSys = coordinator.GetSystem<C2CurveSystem>();
     auto interCurveSys = coordinator.GetSystem<InterpolationCurveSystem>();
@@ -98,6 +101,7 @@ void SaveManager::LoadScene(const std::string &path, Coordinator &coordinator)
             Position pos = ParsePosition(geometry);
 
             Entity newTorus = toriSys->AddTorus(pos, torusParams);
+            toriRenderingSys->AddEntity(newTorus);
 
             coordinator.SetComponent(newTorus, ParseRotation(geometry));
             coordinator.SetComponent(newTorus, ParseScale(geometry));
