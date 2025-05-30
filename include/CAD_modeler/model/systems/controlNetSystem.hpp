@@ -9,7 +9,7 @@
 #include "../components/controlNetMesh.hpp"
 
 
-class ControlNetSystem : public System {
+class ControlNetSystem final : public System {
 public:
     static void RegisterSystem(Coordinator& coordinator);
 

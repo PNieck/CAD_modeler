@@ -33,6 +33,7 @@ public:
     int GetHeight() const
         { return height; }
 
+    [[nodiscard]]
     unsigned int Id() const
         { return id; }
 

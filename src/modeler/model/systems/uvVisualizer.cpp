@@ -3,7 +3,6 @@
 #include <CAD_modeler/model/systems/utils/getSurfaceSystem.hpp>
 
 #include <CAD_modeler/model/components/uvVisualization.hpp>
-
 #include "CAD_modeler/model/components/wraps.hpp"
 
 

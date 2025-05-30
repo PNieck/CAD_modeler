@@ -19,10 +19,10 @@ namespace alg
             float _30, float _31, float _32, float _33
         );
 
-        inline float& operator()(const size_t row, const size_t col)
+        float& operator()(const size_t row, const size_t col)
             { return data[row * Rows + col]; }
 
-        inline float operator()(const size_t row, const size_t col) const
+        float operator()(const size_t row, const size_t col) const
             { return data[row * Rows + col]; }
 
         [[nodiscard]]
@@ -30,7 +30,7 @@ namespace alg
 
         void TransposeSelf();
 
-        inline float* Data()
+        float* Data()
             { return data.data(); }
 
         [[nodiscard]]
@@ -47,14 +47,14 @@ namespace alg
         friend Mat4x4 operator*(const Mat4x4& mat1, const Mat4x4& mat2);
 
     private:
-        std::array<float, Rows*Cols> data;
+        std::array<float, Rows*Cols> data{};
     };
 
 
-    Mat4x4 TranslationMtx(const Vec3& vector);
+    Mat4x4 TranslationMtx(const Vec3& vec);
 
 
-    Mat4x4 TranslationInverseMtx(const Vec3& vector);
+    Mat4x4 TranslationInverseMtx(const Vec3& vec);
 
 
     Mat4x4 LookAt(const Vec3& cameraPos, const Vec3& direction, const Vec3& upVector);

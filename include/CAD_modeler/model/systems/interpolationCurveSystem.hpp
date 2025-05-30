@@ -2,12 +2,10 @@
 
 #include <ecs/system.hpp>
 
-#include "curveControlPointsSystem.hpp"
-
 #include <vector>
 
 
-class InterpolationCurveSystem: public System {
+class InterpolationCurveSystem final : public System {
 public:
     static void RegisterSystem(Coordinator& coordinator);
 

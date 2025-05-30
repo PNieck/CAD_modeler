@@ -9,7 +9,7 @@
 #include <vector>
 
 
-class InterpolationCurvesRenderingSystem : public System {
+class InterpolationCurvesRenderingSystem final : public System {
 public:
     static void RegisterSystem(Coordinator& coordinator);
 
