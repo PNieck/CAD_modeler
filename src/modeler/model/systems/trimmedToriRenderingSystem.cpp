@@ -78,9 +78,9 @@ void TrimmedToriRenderingSystem::Update(const Entity e)
     const auto& params = coordinator->GetComponent<TorusParameters>(e);
 
     coordinator->EditComponent<MeshWithUV>(e,
-        [this, &params, e] (MeshWithUV& mesh) {
+        [this, &params] (MeshWithUV& mesh) {
             mesh.Update(
-                GenerateMeshVertices(e, params),
+                GenerateMeshVertices(params),
                 GenerateMeshIndices(params)
             );
         }
@@ -88,7 +88,7 @@ void TrimmedToriRenderingSystem::Update(const Entity e)
 }
 
 
-std::vector<float> TrimmedToriRenderingSystem::GenerateMeshVertices(Entity e, const TorusParameters &params) const
+std::vector<float> TrimmedToriRenderingSystem::GenerateMeshVertices(const TorusParameters &params)
 {
     constexpr float maxU = ToriSystem::MaxU();
     constexpr float maxV = ToriSystem::MaxV();
@@ -96,9 +96,9 @@ std::vector<float> TrimmedToriRenderingSystem::GenerateMeshVertices(Entity e, co
     const float deltaU = 2.f * std::numbers::pi_v<float> / params.meshDensityMinR;
     const float deltaV = 2.f * std::numbers::pi_v<float> / params.meshDensityMajR;
 
-    // TODO: fix reserve number
     std::vector<float> result;
-    result.reserve(params.meshDensityMinR * params.meshDensityMajR * 5);
+    const size_t size = (params.meshDensityMinR + 1) * (params.meshDensityMajR + 1) * 5;
+    result.reserve(size);
 
     for (int actCirc = 0; actCirc <= params.meshDensityMajR; actCirc++) {
         const float v = deltaV * static_cast<float>(actCirc);
@@ -116,19 +116,18 @@ std::vector<float> TrimmedToriRenderingSystem::GenerateMeshVertices(Entity e, co
         }
     }
 
+    assert(result.size() == size);
+
     return result;
 }
 
 
 std::vector<uint32_t> TrimmedToriRenderingSystem::GenerateMeshIndices(const TorusParameters &params)
 {
-    // std::vector<uint32_t> result(
-    //     params.meshDensityMinR * params.meshDensityMajR + params.meshDensityMajR + params.meshDensityMinR*params.meshDensityMajR + params.meshDensityMinR
-    // );
-
-    // TODO: fix reserve number
     std::vector<uint32_t> result;
-    result.reserve(params.meshDensityMinR * params.meshDensityMajR + params.meshDensityMajR + params.meshDensityMinR*params.meshDensityMajR + params.meshDensityMinR);
+    const size_t size = (params.meshDensityMinR+1) * params.meshDensityMajR + params.meshDensityMajR +
+        params.meshDensityMinR*(params.meshDensityMajR+1) + params.meshDensityMinR;
+    result.reserve(size);
 
     for (int i = 0; i < params.meshDensityMajR; i++) {
         for (int j=0; j <= params.meshDensityMinR; j++) {
@@ -145,6 +144,8 @@ std::vector<uint32_t> TrimmedToriRenderingSystem::GenerateMeshIndices(const Toru
 
         result.push_back(std::numeric_limits<uint32_t>::max());
     }
+
+    assert(result.size() == size);
 
     return result;
 }

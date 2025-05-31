@@ -19,6 +19,6 @@ public:
 
     void Update(Entity e);
 private:
-    std::vector<float> GenerateMeshVertices(Entity e, const TorusParameters& params) const;
+    static std::vector<float> GenerateMeshVertices(const TorusParameters& params);
     static std::vector<uint32_t> GenerateMeshIndices(const TorusParameters& params);
 };
