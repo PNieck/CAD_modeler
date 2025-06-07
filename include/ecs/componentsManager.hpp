@@ -72,12 +72,13 @@ public:
     }
 
     void EntityDeleted(const Entity entity) {
-        if constexpr (std::is_empty_v<ComponentId> == false) {
-            for (const ComponentId componentId: componentsOfEntities.at(entity)) {
-                const auto collection = components.at(componentId);
-                collection->EntityDestroyed(entity);
+        for (const ComponentId componentId: componentsOfEntities.at(entity)) {
+            auto it = components.find(componentId);
+            if (it != components.end()) {
+                it->second->EntityDestroyed(entity);
             }
         }
+
 
         componentsOfEntities.erase(entity);
     }
