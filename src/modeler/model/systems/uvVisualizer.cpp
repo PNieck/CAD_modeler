@@ -42,6 +42,16 @@ void UvVisualizer::FillTrimmingRegion(Entity e, size_t u, size_t v)
 }
 
 
+void UvVisualizer::DrawPoint(Entity e, size_t u, size_t v)
+{
+    coordinator.EditComponent<UvVisualization>(e,
+        [u, v] (UvVisualization& vis) {
+            vis.DrawPoint(u, v);
+        }
+    );
+}
+
+
 void UvVisualizer::DrawCurveOnUV(
     const Entity e, const IntersectionCurve &curve, const size_t i, const size_t j
 ) const {

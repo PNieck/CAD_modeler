@@ -20,6 +20,8 @@ public:
 
     void FillTrimmingRegion(Entity e, size_t u, size_t v);
 
+    void DrawPoint(Entity e, size_t u, size_t v);
+
 private:
     Coordinator& coordinator;
 

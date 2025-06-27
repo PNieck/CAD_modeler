@@ -30,21 +30,21 @@ void UvVisualization::DrawLine(const std::vector<alg::IVec2> &points) {
 
 void UvVisualization::DrawPoint(const size_t u, const size_t v)
 {
-    textureData.At(u, v) = BorderValue;
+    textureData.At(v, u) = BorderValue;
     texture.Update(textureData.Data(), Texture2D::Red);
 }
 
 
 void UvVisualization::FillRegion(size_t u, size_t v, const bool wrapU, const bool wrapV)
 {
-    const float initVal = textureData.At(u, v);
+    const float initVal = textureData.At(v, u);
     if (initVal == BorderValue)
         return;
 
     const float paintVal = initVal == EmptyValue ? FilledValue : EmptyValue;
     const float paintOverVal = paintVal == FilledValue ? EmptyValue :FilledValue;
 
-    textureData.At(u, v) = paintVal;
+    textureData.At(v, u) = paintVal;
     std::queue<UVPoint> toVisit;
     toVisit.emplace(u, v);
 
@@ -148,9 +148,9 @@ std::optional<UvVisualization::UVPoint> UvVisualization::WestNeighbour(const UVP
 
 void UvVisualization::ProcessPoint(const UVPoint &p, const float paintVal, const float paintOver, std::queue<UVPoint> &points)
 {
-    if (textureData.At(p.u, p.v) != paintOver)
+    if (textureData.At(p.v, p.u) != paintOver)
         return;
 
-    textureData.At(p.u, p.v) = paintVal;
+    textureData.At(p.v, p.u) = paintVal;
     points.push(p);
 }

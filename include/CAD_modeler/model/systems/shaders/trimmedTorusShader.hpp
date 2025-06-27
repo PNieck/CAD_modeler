@@ -8,7 +8,7 @@ public:
     TrimmedTorusShader():
         Shader(
             "../../shaders/trimmedTorusShader.vert",
-            "../../shaders/trimmedTorusShader.frag"
+            "../../shaders/trimmedShader.frag"
         ) {}
 
     void SetColor(const alg::Vec4& color) const

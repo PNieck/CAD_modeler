@@ -6,6 +6,8 @@
 #include <CAD_modeler/model/components/registerComponents.hpp>
 #include <CAD_modeler/model/components/cameraParameters.hpp>
 #include <CAD_modeler/model/components/unremovable.hpp>
+#include <CAD_modeler/model/components/drawTrimmed.hpp>
+#include <CAD_modeler/model/components/drawStd.hpp>
 
 #include <CAD_modeler/model/systems/toUpdateSystem.hpp>
 #include <CAD_modeler/model/systems/curveControlPointsSystem.hpp>
@@ -34,6 +36,8 @@ Modeler::Modeler(const int viewportWidth, const int viewportHeight):
     InterpolationCurvesRenderingSystem::RegisterSystem(coordinator);
     InterpolationCurveSystem::RegisterSystem(coordinator);
     C0PatchesSystem::RegisterSystem(coordinator);
+    C0PatchesRenderSystem::RegisterSystem(coordinator);
+    TrimmedC0PatchesRenderSystem::RegisterSystem(coordinator);
     C2PatchesSystem::RegisterSystem(coordinator);
     ControlNetSystem::RegisterSystem(coordinator);
     ControlPointsRegistrySystem::RegisterSystem(coordinator);
@@ -53,7 +57,11 @@ Modeler::Modeler(const int viewportWidth, const int viewportHeight):
     c0CurveSystem = coordinator.GetSystem<C0CurveSystem>();
     c2CurveSystem = coordinator.GetSystem<C2CurveSystem>();
     interpolationRenderingSystem = coordinator.GetSystem<InterpolationCurvesRenderingSystem>();
+
     c0PatchesSystem = coordinator.GetSystem<C0PatchesSystem>();
+    c0PatchesRenderSystem = coordinator.GetSystem<C0PatchesRenderSystem>();
+    trimmedC0PatchesRenderSystem = coordinator.GetSystem<TrimmedC0PatchesRenderSystem>();
+
     c2PatchesSystem = coordinator.GetSystem<C2PatchesSystem>();
     controlNetSystem = coordinator.GetSystem<ControlNetSystem>();
     controlPointsRegistrySys = coordinator.GetSystem<ControlPointsRegistrySystem>();
@@ -139,6 +147,8 @@ Entity Modeler::AddC0Plane(const alg::Vec3& direction, const float length, const
         }
     }
 
+    coordinator.AddComponent<DrawStd>(entity, DrawStd());
+
     return entity;
 }
 
@@ -176,6 +186,8 @@ Entity Modeler::AddC0Cylinder()
             coordinator.AddComponent<Unremovable>(cp, Unremovable());
         }
     }
+
+    coordinator.AddComponent<DrawStd>(entity, DrawStd());
 
     return entity;
 }
@@ -514,12 +526,24 @@ void Modeler::FillTrimmingRegion(const Entity e, const size_t u, const size_t v)
 }
 
 
-void Modeler::ApplyTrimming(Entity e)
+void Modeler::DrawPointOnUV(const Entity e, const size_t u, const size_t v)
 {
-    if (toriRenderingSystem->HasEntity(e))
-        toriRenderingSystem->RemoveEntity(e);
+    UvVisualizer visualizer(coordinator);
+    visualizer.DrawPoint(e, u, v);
+}
 
-    trimmedToriRenderingSystem->AddEntity(e);
+
+void Modeler::ApplyTrimming(const Entity e)
+{
+    if (toriRenderingSystem->HasEntity(e)) {
+        toriRenderingSystem->RemoveEntity(e);
+        trimmedToriRenderingSystem->AddEntity(e);
+    }
+
+    if (coordinator.HasComponent<DrawStd>(e))
+        coordinator.DeleteComponent<DrawStd>(e);
+
+    coordinator.AddComponent<DrawTrimmed>(e, DrawTrimmed());
 }
 
 
@@ -653,17 +677,17 @@ void Modeler::Update() const
 }
 
 
-alg::Vec3 Modeler::PointFromViewportCoordinates(float x, float y)
+alg::Vec3 Modeler::PointFromViewportCoordinates(const float x, const float y)
 {
-    auto cameraParams = cameraManager.GetBaseParams();
+    const auto cameraParams = cameraManager.GetBaseParams();
     auto const& cameraTarget = cameraParams.target;
     auto const& cameraPos = cameraManager.GetCameraPosition();
-    auto cursorPos = cursorSystem->GetPosition();
+    const auto cursorPos = cursorSystem->GetPosition();
 
-    Line nearToFar = LineFromViewportCoordinates(x, y);
+    const Line nearToFar = LineFromViewportCoordinates(x, y);
 
-    alg::Vec3 cameraDirection = cameraTarget.vec - cameraPos.vec;
-    Plane perpendicularToScreenWithCursor(cursorPos.vec, cameraDirection);
+    const alg::Vec3 cameraDirection = cameraTarget.vec - cameraPos.vec;
+    const Plane perpendicularToScreenWithCursor(cursorPos.vec, cameraDirection);
 
     std::optional<alg::Vec3> intersection =
         perpendicularToScreenWithCursor.Intersect(nearToFar);
@@ -676,7 +700,7 @@ alg::Vec3 Modeler::PointFromViewportCoordinates(float x, float y)
 }
 
 
-Line Modeler::LineFromViewportCoordinates(float x, float y)
+Line Modeler::LineFromViewportCoordinates(const float x, const float y)
 {
     const auto cameraType = cameraManager.GetCurrentCameraType();
     if (cameraType == CameraManager::CameraType::Anaglyphs)
@@ -689,8 +713,8 @@ Line Modeler::LineFromViewportCoordinates(float x, float y)
 
     const auto cameraInv = (perspectiveMtx * viewMtx).Inverse().value();
 
-    alg::Vec4 nearV4 = cameraInv * alg::Vec4(x, y, 1.0f, 1.0f);
-    alg::Vec4 farV4 = cameraInv * alg::Vec4(x, y, -1.0f, 1.0f);
+    alg::Vec4 nearV4 = cameraInv * alg::Vec4(x, y, -1.0f, 1.0f);
+    alg::Vec4 farV4 = cameraInv * alg::Vec4(x, y, 1.0f, 1.0f);
 
     const auto near = alg::Vec3(
         nearV4.X() / nearV4.W(),
@@ -739,7 +763,8 @@ void Modeler::RenderSystemsObjects(
     c0CurveSystem->Render(cameraMtx);
     c2CurveSystem->Render(cameraMtx);
     interpolationRenderingSystem->Render(cameraMtx);
-    c0PatchesSystem->Render(cameraMtx);
+    c0PatchesRenderSystem->Render(cameraMtx);
+    trimmedC0PatchesRenderSystem->Render(cameraMtx);
     c2PatchesSystem->Render(cameraMtx);
     controlNetSystem->Render(cameraMtx);
     gregoryPatchesSystem->Render(cameraMtx);

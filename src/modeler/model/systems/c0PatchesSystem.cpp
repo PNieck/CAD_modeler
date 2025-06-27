@@ -32,7 +32,7 @@ void C0PatchesSystem::Init()
 }
 
 
-Entity C0PatchesSystem::CreateCylinder(const Position &pos, const alg::Vec3 &direction, float radius)
+Entity C0PatchesSystem::CreateCylinder(const Position &pos, const alg::Vec3 &direction, const float radius)
 {
     C0Patches patches(1, 1);
 
@@ -609,43 +609,6 @@ alg::Vec3 C0PatchesSystem::PartialDerivativeV(const C0Patches &patches, float u,
     const auto a3 = bu.X()*p.Point(0, 3) + bu.Y()*p.Point(1, 3) + bu.Z()*p.Point(2, 3) + bu.W()*p.Point(3, 3);
 
     return Derivative(v, a0, a1, a2, a3);
-}
-
-
-void C0PatchesSystem::Render(const alg::Mat4x4& cameraMtx) const
-{
-    if (entities.empty()) {
-        return;
-    }
-
-    auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
-    auto const& shader = ShaderRepository::GetInstance().GetBezierSurfaceShader();
-
-    shader.Use();
-    shader.SetColor(alg::Vec4(1.0f));
-    shader.SetMVP(cameraMtx);
-
-    glPatchParameteri(GL_PATCH_VERTICES, 16);
-
-    for (auto const entity: entities) {
-        const bool selection = selectionSystem->IsSelected(entity);
-
-        if (selection)
-            shader.SetColor(alg::Vec4(1.0f, 0.5f, 0.0f, 1.0f));
-
-        auto const& mesh = coordinator->GetComponent<Mesh>(entity);
-        mesh.Use();
-
-        auto const& density = coordinator->GetComponent<PatchesDensity>(entity);
-        float v[] = {5.f, 64.f, 64.f, 64.f};
-        v[0] = static_cast<float>(density.GetDensity());
-        glPatchParameterfv(GL_PATCH_DEFAULT_OUTER_LEVEL, v);
-
-	    glDrawElements(GL_PATCHES, mesh.GetElementsCnt(), GL_UNSIGNED_INT, nullptr);
-
-        if (selection)
-            shader.SetColor(alg::Vec4(1.0f));
-    }
 }
 
 

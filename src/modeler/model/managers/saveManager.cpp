@@ -12,6 +12,7 @@
 #include <CAD_modeler/model/components/scale.hpp>
 #include <CAD_modeler/model/components/rotation.hpp>
 #include <CAD_modeler/model/components/wraps.hpp>
+#include <CAD_modeler/model/components/drawStd.hpp>
 
 #include <nlohmann/json.hpp>
 
@@ -176,6 +177,7 @@ void SaveManager::LoadScene(const std::string &path, Coordinator &coordinator)
 
             Entity newSurface = c0PatchesSys->CreateSurface(c0Patches);
             nameSys->SetName(newSurface, geometry["name"]);
+            coordinator.AddComponent<DrawStd>(newSurface, DrawStd());
         }
 
         else if (objectType == "bezierSurfaceC2") {
