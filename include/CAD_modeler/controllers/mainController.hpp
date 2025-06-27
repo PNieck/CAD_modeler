@@ -30,7 +30,7 @@ public:
     void KeyboardKeyPressed(KeyboardKey key);
 
     [[nodiscard]]
-    inline ModelType GetModelType() const
+    ModelType GetModelType() const
         { return actModelType; }
 
     void SetModelType(const ModelType modelType)

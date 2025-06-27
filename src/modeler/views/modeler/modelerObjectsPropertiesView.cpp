@@ -463,7 +463,7 @@ void ModelerObjectsPropertiesView::DisplaySurfacePatches(const Entity entity, co
 }
 
 
-void ModelerObjectsPropertiesView::DisplayGregoryPatchesParameters(Entity entity, const TriangleOfGregoryPatches &triangle) const
+void ModelerObjectsPropertiesView::DisplayGregoryPatchesParameters(const Entity entity, const TriangleOfGregoryPatches &triangle) const
 {
     bool hasNet = triangle.hasNet;
 
@@ -534,8 +534,8 @@ void ModelerObjectsPropertiesView::DisplayUvVisualization(const Entity entity, c
             if (localPos.x >= 0 && localPos.y >= 0 &&
                 localPos.x < imageSize.x && localPos.y < imageSize.y
             ) {
-                //model.DrawPointOnUV(entity, imageSize.y - localPos.y, localPos.x);
-                model.FillTrimmingRegion(entity, imageSize.y - localPos.y, localPos.x);
+                //model.DrawPointOnUV(entity, localPos.x, imageSize.y - localPos.y);
+                model.FillTrimmingRegion(entity, localPos.x, imageSize.y - localPos.y);
             }
         }
 
