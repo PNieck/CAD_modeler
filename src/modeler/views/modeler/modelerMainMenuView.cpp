@@ -196,7 +196,7 @@ void ModelerMainMenuView::RenderAddingSurface(const SurfaceType surfaceType)
         width = 1.0f;
         length = 1.0f;
 
-        entity = AddSurface(surfaceType, dir, length, width);
+        entity = AddPlane(surfaceType, dir, length, width);
     }
 
     int rows = GetSurfaceRowsCnt(entity.value(), surfaceType);
@@ -210,25 +210,25 @@ void ModelerMainMenuView::RenderAddingSurface(const SurfaceType surfaceType)
     valueChanged |= ImGui::DragFloat("Width", &width, DRAG_FLOAT_SPEED);
 
     if (valueChanged)
-        RecalculateSurface(entity.value(), surfaceType,  dir, length, width);
+        RecalculatePlane(entity.value(), surfaceType,  dir, length, width);
 
     if (rows != GetSurfaceRowsCnt(entity.value(), surfaceType)) {
         while (rows > GetSurfaceRowsCnt(entity.value(), surfaceType)) {
-            AddRowOfSurfacePatches(entity.value(), surfaceType, dir, length, width);
+            AddRowOfPlanePatches(entity.value(), surfaceType, dir, length, width);
         }
 
         while (rows < GetSurfaceRowsCnt(entity.value(), surfaceType)) {
-            DeleteRowOfSurfacePatches(entity.value(), surfaceType, dir, length, width);
+            DeleteRowOfPlanePatches(entity.value(), surfaceType, dir, length, width);
         }
     }
 
     if (cols != GetSurfaceColsCnt(entity.value(), surfaceType)) {
         while (cols > GetSurfaceColsCnt(entity.value(), surfaceType)) {
-            AddColOfSurfacePatches(entity.value(), surfaceType, dir, length, width);
+            AddColOfPlanePatches(entity.value(), surfaceType, dir, length, width);
         }
 
         while (cols < GetSurfaceColsCnt(entity.value(), surfaceType)) {
-            DeleteColOfSurfacePatches(entity.value(), surfaceType, dir, length, width);
+            DeleteColOfPlanePatches(entity.value(), surfaceType, dir, length, width);
         }
     }
 
@@ -389,13 +389,6 @@ void ModelerMainMenuView::RenderAddingIntersectionCurve()
         RenderSelectableEntitiesList(c2Surfaces);
     }
 
-
-    const auto& c2Cylinders = model.GetAllC2Cylinders();
-    if (!c2Surfaces.empty()) {
-        ImGui::SeparatorText("C2 Cylinders");
-        RenderSelectableEntitiesList(c2Cylinders);
-    }
-
     const auto& tori = model.GetAllTori();
     if (!tori.empty()) {
         ImGui::SeparatorText("Tori");
@@ -403,27 +396,71 @@ void ModelerMainMenuView::RenderAddingIntersectionCurve()
     }
 
     static float step = 0.1f;
+    static bool useGuidance = false;
 
     ImGui::DragFloat("Step", &step, 0.001f, 1e-5f);
+
+    ImGui::Checkbox("Use 3D cursor as guidance", &useGuidance);
+    if (useGuidance) {
+        const auto& cursorPos = model.GetCursorPosition();
+
+        float x = cursorPos.GetX();
+        float y = cursorPos.GetY();
+        float z = cursorPos.GetZ();
+        bool valueChanged = false;
+
+        ImGui::Text("%s", "Cursor position");
+
+        valueChanged |= ImGui::DragFloat("X##CursorPos", &x, DRAG_FLOAT_SPEED);
+        valueChanged |= ImGui::DragFloat("Y##CursorPos", &y, DRAG_FLOAT_SPEED);
+        valueChanged |= ImGui::DragFloat("Z##CursorPos", &z, DRAG_FLOAT_SPEED);
+
+        if (valueChanged)
+            model.SetCursorPosition(x, y, z);
+    }
 
     if (ImGui::Button("Accept")) {
         auto const& entities = model.GetAllSelectedEntities();
 
-        if (entities.size() != 2)
-            ImGui::OpenPopup("Wrong number of elements to intersect");
-        else {
+        if (entities.size() == 1) {
+            if (useGuidance)
+                model.FindSelfIntersection(*entities.begin(), step, model.GetCursorPosition());
+            else
+                model.FindSelfIntersection(*entities.begin(), step);
+        }
+        else if (entities.size() == 2) {
             const Entity e1 = *entities.begin();
             const Entity e2 = *(++entities.begin());
-            model.FindIntersection(e1, e2, step);
+
+            if (useGuidance)
+                model.FindIntersection(e1, e2, step, model.GetCursorPosition());
+            else
+                model.FindIntersection(e1, e2, step);
+
+            //try {
+
+            // }
+            // catch (...) {
+            //     ImGui::OpenPopup("Cannot find intersection curve");
+            // }
+
+        }
+        else {
+            ImGui::OpenPopup("Wrong number of elements to intersect");
         }
     }
 
     if (ImGui::BeginPopupModal("Wrong number of elements to intersect", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
-        ImGui::Text("Wrong number of selected entities to intersect. Two objects must be selected");
+        ImGui::Text("Wrong number of selected entities to intersect. One or two objects must be selected");
         if (ImGui::Button("OK")) { ImGui::CloseCurrentPopup(); }
         ImGui::EndPopup();
     }
 
+    if (ImGui::BeginPopupModal("Cannot find intersection curve", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+        ImGui::Text("Cannot find intersection curve. Try to use 3d cursor");
+        if (ImGui::Button("OK")) { ImGui::CloseCurrentPopup(); }
+        ImGui::EndPopup();
+    }
 
     if (ImGui::Button("Cancel"))
         controller.SetModelerState(ModelerState::Default);

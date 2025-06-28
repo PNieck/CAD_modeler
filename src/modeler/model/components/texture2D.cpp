@@ -19,6 +19,7 @@ Texture2D::Texture2D(const int width, const int height, const float *data, const
 
 void Texture2D::Update(const float *data, const InputDataFormat inputFormat) const
 {
+    Use();
     glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, inputFormat, GL_FLOAT, data);
 }
 
@@ -31,7 +32,7 @@ void Texture2D::ChangeSize(const int texWidth, const int texHeight, const float 
 }
 
 
-Texture2D::~Texture2D()
-{
-    glDeleteTextures(1, &id);
-}
+// Texture2D::~Texture2D()
+// {
+//     glDeleteTextures(1, &id);
+// }

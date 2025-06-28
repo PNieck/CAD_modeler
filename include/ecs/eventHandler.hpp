@@ -6,7 +6,10 @@
 enum class EventType;
 
 
-class IEventHandler {};
+class IEventHandler {
+public:
+    virtual ~IEventHandler() = default;
+};
 
 
 template<typename Comp>

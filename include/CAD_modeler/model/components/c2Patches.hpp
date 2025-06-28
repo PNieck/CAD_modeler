@@ -9,7 +9,7 @@ public:
     static constexpr int ColsInPatch = 4;
     static constexpr int PointsInPatch = RowsInPatch * ColsInPatch;
 
-    C2Patches(int rows=1, int cols=1):
+    explicit C2Patches(const int rows=1, const int cols=1):
         Patches(RowsInPatch + rows - 1, ColsInPatch + cols - 1) {}
 
     void AddRowOfPatches() override

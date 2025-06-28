@@ -12,13 +12,13 @@ class Patches {
 public:
     virtual ~Patches() = default;
 
-    Patches(int rows=1, int cols=1):
+    explicit Patches(const int rows=1, const int cols=1):
         controlPoints(rows, cols) {};
 
-    inline void SetPoint(Entity pt, int row, int col)
+    void SetPoint(const Entity pt, const int row, const int col)
         { controlPoints.At(row, col) = pt; }
 
-    inline Entity GetPoint(int row, int col) const
+    Entity GetPoint(const int row, const int col) const
         { return controlPoints.At(row, col); }
 
     virtual void AddRowOfPatches() = 0;
@@ -29,13 +29,13 @@ public:
 
     virtual void DeleteColOfPatches() = 0;
 
-    inline int PointsInRow() const
+    unsigned int PointsInRow() const
         { return controlPoints.Rows(); }
 
-    inline int PointsInCol() const
+    unsigned int PointsInCol() const
         { return controlPoints.Cols(); }
 
-    inline int PointsCnt() const
+    unsigned int PointsCnt() const
         { return PointsInRow() * PointsInCol(); }
 
     virtual int PatchesInRow() const = 0;

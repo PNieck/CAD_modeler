@@ -23,7 +23,7 @@ namespace alg
         auto size = diagonalElems.size();
         std::vector<VectorType> result(size);
 
-        for (int i=0; i < size - 1; ++i) {
+        for (size_t i=0; i < size - 1; ++i) {
             if (diagonalElems[i] == 0)
                 return std::nullopt;
 

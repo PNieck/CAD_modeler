@@ -1,16 +1,14 @@
 #pragma once
 
-#include <ecs/system.hpp>
+#include "surfaceSystem.hpp"
 
 #include "../components/position.hpp"
 #include "../components/rotation.hpp"
 #include "../components/scale.hpp"
 #include "../components/torusParameters.hpp"
 
-#include <vector>
 
-
-class ToriSystem: public System {
+class ToriSystem final : public SurfaceSystem {
 public:
     static void RegisterSystem(Coordinator& coordinator);
 
@@ -18,51 +16,57 @@ public:
 
     void SetParameters(Entity entity, const TorusParameters& params);
 
-    void Render(const alg::Mat4x4& cameraMtx);
+    Position PointOnSurface(Entity torus, float u, float v) const override;
 
-    Position PointOnTorus(Entity torus, float alpha, float beta) const;
+    static alg::Vec3 PointOnSurface(const TorusParameters& params, float u, float v);
 
-    static alg::Vec3 PointOnTorus(const TorusParameters& params, float alpha, float beta);
-
-    static Position PointOnTorus(
+    static Position PointOnSurface(
         const TorusParameters& params,
         const Position& pos,
         const Rotation& rot,
         const Scale& scale,
-        float alpha,
-        float beta
+        float u,
+        float v
     );
 
-    static alg::Vec3 PartialDerivativeWithRespectToAlpha(
+    static alg::Vec3 PartialDerivativeU(
+        const TorusParameters &params,
+        const Rotation &rot,
+        const Scale &scale,
+        float u,
+        float v
+    );
+
+    [[nodiscard]]
+    alg::Vec3 PartialDerivativeU(Entity e, float u, float v) const override;
+
+    static alg::Vec3 PartialDerivativeV(
         const TorusParameters &params,
         const Rotation &rot,
         const Scale &scale,
         float alpha,
         float beta
     );
-    [[nodiscard]] alg::Vec3 PartialDerivativeWithRespectToAlpha(Entity e, float alpha, float beta) const;
+    alg::Vec3 PartialDerivativeV(Entity e, float u, float v) const override;
 
-    static alg::Vec3 PartialDerivativeWithRespectToBeta(
+    static alg::Vec3 NormalVector(
         const TorusParameters &params,
         const Rotation &rot,
         const Scale &scale,
         float alpha,
         float beta
     );
-    alg::Vec3 PartialDerivativeWithRespectToBeta(Entity e, float alpha, float beta) const;
+    alg::Vec3 NormalVector(Entity e, float u, float v) const override;
 
-    static alg::Vec3 NormalVec(
-        const TorusParameters &params,
-        const Rotation &rot,
-        const Scale &scale,
-        float alpha,
-        float beta
-    );
-    alg::Vec3 NormalVec(Entity e, float alpha, float beta) const;
+    static constexpr float MaxU()
+        { return 2.f * std::numbers::pi_v<float>; }
 
-private:
-    void UpdateMesh(Entity e, const TorusParameters& params) const;
+    float MaxU(Entity e) const override
+        { return MaxU(); }
 
-    static std::vector<float> GenerateMeshVertices(const TorusParameters& params);
-    static std::vector<uint32_t> GenerateMeshIndices(const TorusParameters& params);
+    static constexpr float MaxV()
+        { return 2.f * std::numbers::pi_v<float>; }
+
+    float MaxV(Entity e) const override
+        { return MaxV(); }
 };

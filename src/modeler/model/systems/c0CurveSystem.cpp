@@ -28,9 +28,10 @@ void C0CurveSystem::RegisterSystem(Coordinator & coordinator)
 
 Entity C0CurveSystem::CreateC0Curve(const std::vector<Entity>& cps)
 {
-    Entity curve = coordinator->GetSystem<CurveControlPointsSystem>()->CreateControlPoints(cps, Coordinator::GetSystemID<C0CurveSystem>());
+    const Entity curve = coordinator->GetSystem<CurveControlPointsSystem>()
+        ->CreateControlPoints(cps, Coordinator::GetSystemID<C0CurveSystem>());
 
-    C0CurveParameters params;
+    constexpr C0CurveParameters params;
 
     auto const& controlPoints = coordinator->GetComponent<CurveControlPoints>(curve);
 
@@ -68,7 +69,7 @@ void C0CurveSystem::Render(const alg::Mat4x4& cameraMtx) const
         if (params.drawPolygon)
             polygonsToDraw.push(entity);
 
-        bool selection = selectionSystem->IsSelected(entity);
+        const bool selection = selectionSystem->IsSelected(entity);
 
         if (selection)
             shader.SetColor(alg::Vec4(1.0f, 0.5f, 0.0f, 1.0f));
@@ -77,7 +78,7 @@ void C0CurveSystem::Render(const alg::Mat4x4& cameraMtx) const
         mesh.Use();
 
         glPatchParameteri(GL_PATCH_VERTICES, 4);
-	    glDrawElements(GL_PATCHES, mesh.GetElementsCnt(), GL_UNSIGNED_INT, 0);
+	    glDrawElements(GL_PATCHES, mesh.GetElementsCnt(), GL_UNSIGNED_INT, nullptr);
 
         if (selection)
             shader.SetColor(alg::Vec4(1.0f));
@@ -90,13 +91,12 @@ void C0CurveSystem::Render(const alg::Mat4x4& cameraMtx) const
 
 void C0CurveSystem::Update() const
 {
-    auto toUpdateSystem = coordinator->GetSystem<ToUpdateSystem>();
-    auto toUpdate = toUpdateSystem->GetEntitiesToUpdate<C0CurveSystem>();
+    const auto toUpdateSystem = coordinator->GetSystem<ToUpdateSystem>();
 
-    for (auto entity: toUpdate) {
+    for (const auto entity: toUpdateSystem->GetEntitiesToUpdate<C0CurveSystem>()) {
         auto const& cps = coordinator->GetComponent<CurveControlPoints>(entity);
 
-        if (cps.Size() != 0)
+        if (!cps.Empty())
             UpdateMesh(entity, cps);
         else
             coordinator->DestroyEntity(entity);
@@ -130,8 +130,8 @@ Position CalculatePositionInSinglePatch(const Position& cp1, const Position& cp2
 
 Position C0CurveSystem::CalculatePosition(const std::vector<Position>& cpPositions, float t)
 {
-    float tFloor = std::floor(t);
-    int firstIdx = static_cast<int>(tFloor);
+    const float tFloor = std::floor(t);
+    const int firstIdx = static_cast<int>(tFloor);
 
     // Normalizing t so it is between 0 and 1
     t -= tFloor;
@@ -148,8 +148,8 @@ Position C0CurveSystem::CalculatePosition(const std::vector<Position>& cpPositio
 
 Position C0CurveSystem::CalculatePosition(const std::vector<Entity>& cps, float t) const
 {
-    float tFloor = std::floor(t);
-    int firstIdx = static_cast<int>(tFloor);
+    const float tFloor = std::floor(t);
+    const int firstIdx = static_cast<int>(tFloor);
 
     // Normalizing t so it is between 0 and 1
     t -= tFloor;
@@ -174,10 +174,10 @@ void C0CurveSystem::RenderCurvesPolygons(std::stack<Entity>& cps, const alg::Mat
     shader.SetMVP(cameraMtx);
 
     while (!cps.empty()) {
-        Entity entity = cps.top();
+        const Entity entity = cps.top();
         cps.pop();
 
-        bool selection = selectionSystem->IsSelected(entity);
+        const bool selection = selectionSystem->IsSelected(entity);
 
         if (selection)
             shader.SetColor(alg::Vec4(1.0f, 0.5f, 0.0f, 1.0f));
@@ -225,18 +225,16 @@ std::vector<float> C0CurveSystem::GenerateBezierPolygonVertices(const CurveContr
 }
 
 
-inline size_t ceiling(size_t x, size_t y) {
+inline size_t ceiling(const size_t x, const size_t y) {
     return (x + y - 1) / y;
 }
 
 
 std::vector<uint32_t> C0CurveSystem::GenerateBezierPolygonIndices(const CurveControlPoints& params) const
 {
-    auto const& controlPoints = params.GetPoints();
-
-    size_t fullSegmentsCnt = (controlPoints.size() - 1) / (CONTROL_POINTS_PER_SEGMENT - 1);
-    size_t allSegmentsCnt = ceiling(controlPoints.size() - 1, CONTROL_POINTS_PER_SEGMENT - 1);
-    size_t resultSize = allSegmentsCnt * CONTROL_POINTS_PER_SEGMENT;
+    const size_t fullSegmentsCnt = (params.Size() - 1) / (CONTROL_POINTS_PER_SEGMENT - 1);
+    const size_t allSegmentsCnt = ceiling(params.Size() - 1, CONTROL_POINTS_PER_SEGMENT - 1);
+    const size_t resultSize = allSegmentsCnt * CONTROL_POINTS_PER_SEGMENT;
 
     std::vector<uint32_t> result;
     result.reserve(resultSize);
@@ -252,14 +250,14 @@ std::vector<uint32_t> C0CurveSystem::GenerateBezierPolygonIndices(const CurveCon
 
     // Add the rest of control points
     int i = firstControlPoint;
-    while (i < controlPoints.size()) {
+    while (i < params.Size()) {
         result.push_back(i++);
     }
 
     // Repeat the last control point
     while (result.size() < resultSize)
         result.push_back(
-            static_cast<uint32_t>(controlPoints.size() - 1)
+            static_cast<uint32_t>(params.Size() - 1)
         );
 
     return result;

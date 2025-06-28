@@ -3,7 +3,7 @@
 #include "mesh.hpp"
 
 
-class MeshWithNormals: private Mesh {
+class MeshWithNormals: Mesh {
 public:
     MeshWithNormals() = default;
 

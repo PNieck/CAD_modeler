@@ -12,7 +12,7 @@
 class Coordinator {
 public:
     Coordinator():
-        componentMgr(), entitiesMgr(), systemsMgr(), eventMgr(componentMgr) {}
+        eventMgr(componentMgr) {}
 
     template <typename Comp>
     void RegisterComponent() {
@@ -30,7 +30,7 @@ public:
 
 
     template <SystemConcept Sys, typename Comp>
-    inline void RegisterRequiredComponent() {
+    void RegisterRequiredComponent() {
         systemsMgr.RegisterRequiredComponent<Sys, Comp>();
     }
 
@@ -62,66 +62,82 @@ public:
     }
 
 
+    // TODO: fix this
+    // template <typename Comp>
+    // void AddComponent(const Entity entity, Comp&& component) {
+    //     componentMgr.AddComponent<Comp>(entity, component);
+    //
+    //     auto const& componentsSet = componentMgr.GetEntityComponents(entity);
+    //     systemsMgr.EntityGainedComponent<Comp>(entity, componentsSet);
+    //
+    //     eventMgr.ComponentAdded<Comp>(entity, component);
+    // }
+
+
     template <typename Comp>
-    void AddComponent(const Entity entity, Comp&& component) {
-        componentMgr.AddComponent<Comp>(entity, component);
-
-        auto const& componentsSet = componentMgr.GetEntityComponents(entity);
-        systemsMgr.EntityGainedComponent<Comp>(entity, componentsSet);
-
-        eventMgr.ComponentAdded<Comp>(entity, component);
-    }
-
-
-    template <typename Comp>
-    void DeleteComponent(Entity entity) {
+    void DeleteComponent(const Entity entity) {
         eventMgr.ComponentDeleted<Comp>(entity);
         componentMgr.DeleteComponent<Comp>(entity);
         systemsMgr.EntityLostComponent<Comp>(entity);
     }
 
 
-    template <typename Comp>
-    inline const Comp& GetComponent(Entity entity) const {
+    template <NotEmptyComponent Comp>
+    const Comp& GetComponent(const Entity entity) const {
         return componentMgr.GetComponent<Comp>(entity);
     }
 
+
+    template <EmptyComponent Comp>
+    Comp GetComponent(const Entity entity) const {
+        return componentMgr.GetComponent<Comp>(entity);
+    }
+
+
     template <typename Comp>
-    void SetComponent(Entity entity, const Comp& component) {
+    void SetComponent(const Entity entity, const Comp& component) {
         componentMgr.GetComponent<Comp>(entity) = component;
         eventMgr.ComponentChanged<Comp>(entity, component);
     }
 
+
     template <typename Comp>
-    void EditComponent(Entity entity, std::function<void(Comp& component)> func) {
+    void EditComponent(const Entity entity, std::function<void(Comp& component)> func) {
         Comp& component = componentMgr.GetComponent<Comp>(entity);
         func(component);
         eventMgr.ComponentChanged<Comp>(entity, component);
     }
 
+
     template <typename Comp>
-    inline HandlerId Subscribe(Entity entity, std::shared_ptr<EventHandler<Comp>> function)
+    HandlerId Subscribe(const Entity entity, std::shared_ptr<EventHandler<Comp>> function)
         { return eventMgr.Subscribe<Comp>(entity, function); }
 
+
     template <typename Comp>
-    inline void Unsubscribe(Entity entity, HandlerId handlerId)
+    void Unsubscribe(const Entity entity, const HandlerId handlerId)
         { eventMgr.Unsubscribe<Comp>(entity, handlerId); }
 
+
     template <typename Comp>
-    inline std::shared_ptr<EventHandler<Comp>> GetEventHandler(Entity entity, HandlerId handlerId)
+    std::shared_ptr<EventHandler<Comp>> GetEventHandler(const Entity entity, const HandlerId handlerId)
         { return eventMgr.GetHandler<Comp>(entity, handlerId); }
 
-    inline const std::set<ComponentId>& GetEntityComponents(Entity entity) const
+
+    const std::set<ComponentId>& GetEntityComponents(const Entity entity) const
         { return componentMgr.GetEntityComponents(entity); }
 
+
     template <typename Comp>
-    inline bool HasComponent(Entity entity) const
+    bool HasComponent(const Entity entity) const
         { return componentMgr.GetEntityComponents(entity).contains(ComponentsManager::GetComponentId<Comp>()); }
 
+
     template <SystemConcept Sys>
-    inline std::shared_ptr<Sys> GetSystem() const {
+    std::shared_ptr<Sys> GetSystem() const {
         return systemsMgr.GetSystem<Sys>();
     }
+
 
     template <typename Comp>
     static constexpr ComponentId GetComponentID() {

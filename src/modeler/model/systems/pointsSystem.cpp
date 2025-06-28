@@ -17,11 +17,11 @@ void PointsSystem::RegisterSystem(Coordinator& coordinator)
 
 PointsSystem::PointsSystem()
 {
-    std::vector<float> vertices = {
+    const std::vector vertices = {
         0.0f, 0.0f, 0.0f
     };
 
-    std::vector<uint32_t> indices = { 0 };
+    const std::vector<uint32_t> indices = { 0 };
 
     pointsMesh.Update(vertices, indices);
 }
@@ -29,12 +29,21 @@ PointsSystem::PointsSystem()
 
 Entity PointsSystem::CreatePoint(const Position& pos)
 {
-    Entity newPoint = coordinator->CreateEntity();
+    const Entity newPoint = coordinator->CreateEntity();
 
     coordinator->AddComponent<Position>(newPoint, pos);
     entities.insert(newPoint);
 
     return newPoint;
+}
+
+
+void PointsSystem::AddPoint(const Entity e)
+{
+    if (!coordinator->HasComponent<Position>(e))
+        throw std::runtime_error("Entity has no position");
+
+    entities.insert(e);
 }
 
 

@@ -22,52 +22,57 @@ namespace alg
 
         Quat(float pitch, float yaw, float roll);
 
-        Quat(const alg::Vec3& axis, float angle);
+        Quat(const Vec3& axis, float angle);
 
-        inline float& X()
+        float& X()
             { return data.X(); }
 
-        inline float& Y()
+        float& Y()
             { return data.Y(); }
 
-        inline float& Z()
+        float& Z()
             { return data.Z(); }
 
-        inline float& W()    
+        float& W()
             { return data.W(); }
 
-        inline float X() const
+        float X() const
             { return data.X(); }
 
-        inline float Y() const
+        float Y() const
             { return data.Y(); }
 
-        inline float Z() const
+        float Z() const
             { return data.Z(); }
 
-        inline float W() const  
+        float W() const
             { return data.W(); }
 
-        alg::Vec3 Rotate(const alg::Vec3& v) const;
+        Vec3 Rotate(const alg::Vec3& v) const;
         
+        [[nodiscard]]
         Quat Conjugation() const
             { return { -X(), -Y(), -Z(), W() }; }
 
-        inline Quat Normalize() const
-            { return Quat(data.Normalize()); }
+        [[nodiscard]]
+        Quat Normalize() const
+            { return data.Normalize(); }
 
-        alg::Mat4x4 ToRotationMatrix() const;
-        alg::Vec3 ToRollPitchYaw() const;
+        [[nodiscard]]
+        Mat4x4 ToRotationMatrix() const;
+
+        [[nodiscard]]
+        Vec3 ToRollPitchYaw() const;
         
 
         Quat operator*(const Quat& q) const;
 
         static Quat Identity()
-            { return Quat(0.0f, 0.0f, 0.0f, 1.0f); }
+            { return {0.0f, 0.0f, 0.0f, 1.0f}; }
 
         static Quat FromVectors(const Vec3& v1, const Vec3& v2);
         
     private:
-        Vec4 data;
+        Vec4 data{};
     };
 };

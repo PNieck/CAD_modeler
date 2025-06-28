@@ -9,9 +9,6 @@
 #include <imgui.h>
 #include <misc/cpp/imgui_stdlib.h>
 
-#include <ranges>
-
-
 
 ModelerObjectsPropertiesView::ModelerObjectsPropertiesView(ModelerController &controller, Modeler &model):
     controller(controller), model(model)
@@ -51,7 +48,7 @@ void ModelerObjectsPropertiesView::Render()
 }
 
 
-void ModelerObjectsPropertiesView::RenderSingleObjectProperties(Entity entity) const
+void ModelerObjectsPropertiesView::RenderSingleObjectProperties(const Entity entity) const
 {
     auto const& components = model.GetEntityComponents(entity);
 
@@ -70,7 +67,7 @@ void ModelerObjectsPropertiesView::RenderSingleObjectProperties(Entity entity) c
     if (components.contains(Modeler::GetComponentId<Name>()))
         DisplayNameEditor(entity, model.GetComponent<Name>(entity));
 
-    if (components.contains(Modeler::GetComponentId<CurveControlPoints>()))
+    if (components.contains(Modeler::GetComponentId<CurveControlPoints>()) && !components.contains(Modeler::GetComponentId<IntersectionCurve>()))
         DisplayCurveControlPoints(entity, model.GetComponent<CurveControlPoints>(entity));
 
     if (components.contains(Modeler::GetComponentId<C0CurveParameters>()))
@@ -88,14 +85,20 @@ void ModelerObjectsPropertiesView::RenderSingleObjectProperties(Entity entity) c
     if (components.contains(Modeler::GetComponentId<C2Patches>()))
         DisplaySurfacePatches(entity, model.GetComponent<C2Patches>(entity));
 
-    if (components.contains(Modeler::GetComponentId<C2CylinderPatches>()))
-        DisplaySurfacePatches(entity, model.GetComponent<C2CylinderPatches>(entity));
-
     if (components.contains(Modeler::GetComponentId<TriangleOfGregoryPatches>()))
         DisplayGregoryPatchesParameters(entity, model.GetComponent<TriangleOfGregoryPatches>(entity));
 
+    if (components.contains(Modeler::GetComponentId<UvVisualization>()))
+        DisplayUvVisualization(entity, model.GetComponent<UvVisualization>(entity));
+
+    if (components.contains(Modeler::GetComponentId<IntersectionCurve>()))
+        if (DisplayIntersectionCurveOptions(entity))
+            return;
+
     if (!components.contains(Modeler::GetComponentId<Unremovable>()))
         DisplayEntityDeletionOption(entity);
+
+    ImGui::Text("Object ID: %d", entity);
 }
 
 
@@ -159,7 +162,7 @@ void ModelerObjectsPropertiesView::RenderMultipleObjectProperties() const
 }
 
 
-void ModelerObjectsPropertiesView::RenderMergingControlPointsOptionButton(Entity e1, Entity e2) const
+void ModelerObjectsPropertiesView::RenderMergingControlPointsOptionButton(const Entity e1, const Entity e2) const
 {
     ImGui::Separator();
 
@@ -170,7 +173,7 @@ void ModelerObjectsPropertiesView::RenderMergingControlPointsOptionButton(Entity
 }
 
 
-void ModelerObjectsPropertiesView::DisplayPositionProperty(Entity entity, const Position &pos) const
+void ModelerObjectsPropertiesView::DisplayPositionProperty(const Entity entity, const Position &pos) const
 {
     float x = pos.GetX();
     float y = pos.GetY();
@@ -261,13 +264,13 @@ void ModelerObjectsPropertiesView::DisplayTorusProperty(Entity entity, const Tor
 }
 
 
-void ModelerObjectsPropertiesView::DisplayCurveControlPoints(Entity entity, const CurveControlPoints &params) const
+void ModelerObjectsPropertiesView::DisplayCurveControlPoints(const Entity entity, const CurveControlPoints &controlPoints) const
 {
     ImGui::SeparatorText("Control Points");
 
     int selected = -1;
     int n = 0;
-    for (const auto controlPoint: params.GetPoints()) {
+    for (const auto controlPoint: controlPoints.GetPoints()) {
         if (ImGui::Selectable(model.GetEntityName(controlPoint).c_str(), selected == n))
             selected = n;
         if (ImGui::BeginPopupContextItem()) {
@@ -290,9 +293,9 @@ void ModelerObjectsPropertiesView::DisplayCurveControlPoints(Entity entity, cons
 
         for (auto point: points) {
             // TODO: rewrite with set intersection
-            if (std::ranges::find(params.GetPoints(), point) == params.GetPoints().end()) {
+            if (std::ranges::find(controlPoints.GetPoints(), point) == controlPoints.GetPoints().end()) {
                 if (pointsWithNames.contains(point) && ImGui::Selectable(model.GetEntityName(point).c_str(), false)) {
-                    CurveType curveType = GetCurveType(model, entity);
+                    const CurveType curveType = GetCurveType(model, entity);
                     AddControlPointToCurve(model, entity, point, curveType);
                 }
             }
@@ -362,7 +365,7 @@ void ModelerObjectsPropertiesView::DisplayEntityDeletionOption(Entity entity) co
 }
 
 
-void ModelerObjectsPropertiesView::DisplaySurfaceDensityParameter(Entity entity, const PatchesDensity &density) const
+void ModelerObjectsPropertiesView::DisplaySurfaceDensityParameter(const Entity entity, const PatchesDensity &density) const
 {
     int d = density.GetDensity();
 
@@ -374,7 +377,7 @@ void ModelerObjectsPropertiesView::DisplaySurfaceDensityParameter(Entity entity,
 }
 
 
-void ModelerObjectsPropertiesView::DisplaySurfacePatches(Entity entity, const Patches &patches) const
+void ModelerObjectsPropertiesView::DisplaySurfacePatches(const Entity entity, const Patches &patches) const
 {
     ImGui::SeparatorText("Control Points");
 
@@ -403,13 +406,64 @@ void ModelerObjectsPropertiesView::DisplaySurfacePatches(Entity entity, const Pa
     for (int row=0; row < patches.PointsInRow(); row++) {
         for (int col=0; col < patches.PointsInCol(); col++) {
             const Entity cp = patches.GetPoint(row, col);
-            ImGui::Text(model.GetEntityName(cp).c_str());
+            ImGui::Text("%s", model.GetEntityName(cp).c_str());
+        }
+    }
+
+    // TODO: delete
+    if (model.GetAllC2Surfaces().contains(entity)) {
+        if (ImGui::Button("Show derivatives U")) {
+            model.ShowDerivativesU(entity);
+        }
+
+        if (ImGui::Button("Show derivatives V")) {
+            model.ShowDerivativesV(entity);
+        }
+
+        if (ImGui::Button("Show normals")) {
+            model.ShowC2Normals(entity);
+        }
+
+        static float u = 0.f, v = 0.f;
+
+        ImGui::DragFloat("U", &u);
+        ImGui::DragFloat("V", &v);
+
+        float maxU = static_cast<float>(patches.PatchesInRow());
+        float maxV = static_cast<float>(patches.PatchesInCol());
+
+        ImGui::Text("Max U: %f", maxU);
+        ImGui::Text("Max V: %f", maxV);
+
+        if (ImGui::Button("Add normal")) {
+            model.ShowC2Normals(entity, u, v);
+        }
+    }
+
+    if (model.GetAllC0Surfaces().contains(entity)) {
+        if (ImGui::Button("Show normals")) {
+            model.ShowC0Normals(entity);
+        }
+
+        static float u = 0.f, v = 0.f;
+
+        ImGui::DragFloat("U", &u);
+        ImGui::DragFloat("V", &v);
+
+        float maxU = static_cast<float>(patches.PatchesInRow());
+        float maxV = static_cast<float>(patches.PatchesInCol());
+
+        ImGui::Text("Max U: %f", maxU);
+        ImGui::Text("Max V: %f", maxV);
+
+        if (ImGui::Button("Add normal")) {
+            model.ShowC0Normals(entity, u, v);
         }
     }
 }
 
 
-void ModelerObjectsPropertiesView::DisplayGregoryPatchesParameters(Entity entity, const TriangleOfGregoryPatches &triangle) const
+void ModelerObjectsPropertiesView::DisplayGregoryPatchesParameters(const Entity entity, const TriangleOfGregoryPatches &triangle) const
 {
     bool hasNet = triangle.hasNet;
 
@@ -422,7 +476,18 @@ void ModelerObjectsPropertiesView::DisplayGregoryPatchesParameters(Entity entity
 }
 
 
-void ModelerObjectsPropertiesView::DisplayNameEditor(Entity entity, const Name &name) const
+bool ModelerObjectsPropertiesView::DisplayIntersectionCurveOptions(const Entity entity) const
+{
+    if (ImGui::Button("Turn into interpolation curve")) {
+        model.TurnIntersectionCurveToInterpolation(entity);
+        return true;
+    }
+
+    return false;
+}
+
+
+void ModelerObjectsPropertiesView::DisplayNameEditor(const Entity entity, const Name &name) const
 {
     Name tmp = name;
 
@@ -430,4 +495,61 @@ void ModelerObjectsPropertiesView::DisplayNameEditor(Entity entity, const Name &
 
     if (ImGui::InputText("##objectName", &tmp))
         model.ChangeEntityName(entity, tmp);
+}
+
+
+void ModelerObjectsPropertiesView::DisplayUvVisualization(const Entity entity, const UvVisualization &vis) const
+{
+    static bool showTrimmingOptions = false;
+
+    ImGui::SeparatorText("Parameter space visualization");
+
+    ImGui::Image(
+        reinterpret_cast<ImTextureID>(static_cast<intptr_t>(vis.TextureId())),
+        ImGui::GetContentRegionAvail(),
+        ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f)
+    );
+
+    if (ImGui::Button("Show trimming options")) {
+        showTrimmingOptions = true;
+    }
+
+    if (showTrimmingOptions) {
+        ImGui::Begin("Trimming Options");
+
+        const ImVec2 imagePos = ImGui::GetCursorScreenPos();
+        const auto imageSize = ImVec2(vis.UResolution(), vis.VResolution());
+
+        ImGui::Image(
+            reinterpret_cast<ImTextureID>(static_cast<intptr_t>(vis.TextureId())),
+            imageSize,
+            ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f)
+        );
+
+        const ImVec2 mousePos = ImGui::GetIO().MousePos;
+        if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(0)) {
+            const auto localPos = ImVec2(mousePos.x - imagePos.x, mousePos.y - imagePos.y);
+
+            // Clamp to image bounds
+            if (localPos.x >= 0 && localPos.y >= 0 &&
+                localPos.x < imageSize.x && localPos.y < imageSize.y
+            )
+                model.FillTrimmingRegion(entity, localPos.x, imageSize.y - localPos.y);
+        }
+
+        if (ImGui::Button("Exit"))
+            showTrimmingOptions = false;
+
+        ImGui::SameLine();
+
+        if (ImGui::Button("Apply trimming"))
+            model.ApplyTrimming(entity);
+
+        ImGui::SameLine();
+
+        if (ImGui::Button("Clear trimming"))
+            model.ClearTrimming(entity);
+
+        ImGui::End();
+    }
 }

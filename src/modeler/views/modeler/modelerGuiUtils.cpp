@@ -58,15 +58,15 @@ Entity ModelerMainMenuView::AddCurve(const std::vector<Entity>& entities, CurveT
 }
 
 
-Entity ModelerMainMenuView::AddSurface(SurfaceType surfaceType, const alg::Vec3 &dir, float length, float width) const
+Entity ModelerMainMenuView::AddPlane(const SurfaceType surfaceType, const alg::Vec3 &dir, const float length, const float width) const
 {
     switch (surfaceType)
     {
     case SurfaceType::C0:
-        return model.AddC0Surface(dir, length, width);
+        return model.AddC0Plane(dir, length, width);
 
     case SurfaceType::C2:
-        return model.AddC2Surface(dir, length, width);
+        return model.AddC2Plane(dir, length, width);
     
     default:
         throw std::runtime_error("Unknown surface type");
@@ -90,16 +90,16 @@ Entity ModelerMainMenuView::AddCylinder(CylinderType cylinderType) const
 }
 
 
-void ModelerMainMenuView::AddRowOfSurfacePatches(Entity surface, SurfaceType surfaceType, const alg::Vec3 &dir, float length, float width)
+void ModelerMainMenuView::AddRowOfPlanePatches(Entity surface, SurfaceType surfaceType, const alg::Vec3 &dir, float length, float width)
 {
     switch (surfaceType)
     {
     case SurfaceType::C0:
-        model.AddRowOfC0SurfacePatches(surface, dir, length, width);
+        model.AddRowOfC0PlanePatches(surface, dir, length, width);
         break;
 
     case SurfaceType::C2:
-        model.AddRowOfC2SurfacePatches(surface, dir, length, width);
+        model.AddRowOfC2PlanePatches(surface, dir, length, width);
         break;
 
     default:
@@ -108,16 +108,16 @@ void ModelerMainMenuView::AddRowOfSurfacePatches(Entity surface, SurfaceType sur
 }
 
 
-void ModelerMainMenuView::AddColOfSurfacePatches(Entity surface, SurfaceType surfaceType, const alg::Vec3 &dir, float length, float width)
+void ModelerMainMenuView::AddColOfPlanePatches(Entity surface, SurfaceType surfaceType, const alg::Vec3 &dir, float length, float width)
 {
     switch (surfaceType)
     {
     case SurfaceType::C0:
-        model.AddColOfC0SurfacePatches(surface, dir, length, width);
+        model.AddColOfC0PlanePatches(surface, dir, length, width);
         break;
 
     case SurfaceType::C2:
-        model.AddColOfC2SurfacePatches(surface, dir, length, width);
+        model.AddColOfC2PlanePatches(surface, dir, length, width);
         break;
 
     default:
@@ -126,16 +126,16 @@ void ModelerMainMenuView::AddColOfSurfacePatches(Entity surface, SurfaceType sur
 }
 
 
-void ModelerMainMenuView::DeleteRowOfSurfacePatches(Entity surface, SurfaceType surfaceType, const alg::Vec3 &dir, float length, float width)
+void ModelerMainMenuView::DeleteRowOfPlanePatches(Entity surface, SurfaceType surfaceType, const alg::Vec3 &dir, float length, float width)
 {
     switch (surfaceType)
     {
     case SurfaceType::C0:
-        model.DeleteRowOfC0SurfacePatches(surface, dir, length, width);
+        model.DeleteRowOfC0PlanePatches(surface, dir, length, width);
         break;
 
     case SurfaceType::C2:
-        model.DeleteRowOfC2SurfacePatches(surface, dir, length, width);
+        model.DeleteRowOfC2PlanePatches(surface, dir, length, width);
         break;
 
     default:
@@ -144,16 +144,16 @@ void ModelerMainMenuView::DeleteRowOfSurfacePatches(Entity surface, SurfaceType 
 }
 
 
-void ModelerMainMenuView::DeleteColOfSurfacePatches(Entity surface, SurfaceType surfaceType, const alg::Vec3 &dir, float length, float width)
+void ModelerMainMenuView::DeleteColOfPlanePatches(Entity surface, SurfaceType surfaceType, const alg::Vec3 &dir, float length, float width)
 {
     switch (surfaceType)
     {
     case SurfaceType::C0:
-        model.DeleteColOfC0SurfacePatches(surface, dir, length, width);
+        model.DeleteColOfC0PlanePatches(surface, dir, length, width);
         break;
 
     case SurfaceType::C2:
-        model.DeleteColOfC2SurfacePatches(surface, dir, length, width);
+        model.DeleteColOfC2PlanePatches(surface, dir, length, width);
         break;
 
     default:
@@ -194,16 +194,17 @@ int ModelerMainMenuView::GetSurfaceColsCnt(Entity surface, SurfaceType surfaceTy
 }
 
 
-void ModelerMainMenuView::RecalculateSurface(Entity surface, SurfaceType surfaceType, const alg::Vec3 &dir, float length, float width)
-{
+void ModelerMainMenuView::RecalculatePlane(
+    const Entity surface, const SurfaceType surfaceType, const alg::Vec3 &dir, const float length, const float width
+) {
     switch (surfaceType)
     {
     case SurfaceType::C0:
-        model.RecalculateC0Surface(surface, dir, length, width);
+        model.RecalculateC0Plane(surface, dir, length, width);
         break;
 
     case SurfaceType::C2:
-        model.RecalculateC2Surface(surface, dir, length, width);
+        model.RecalculateC2Plane(surface, dir, length, width);
         break;
 
     default:
@@ -284,7 +285,7 @@ void ModelerMainMenuView::DeleteColOfCylinderPatches(Entity cylinder, CylinderTy
 }
 
 
-int ModelerMainMenuView::GetCylinderRowsCnt(Entity cylinder, CylinderType CylinderType) const
+int ModelerMainMenuView::GetCylinderRowsCnt(const Entity cylinder, const CylinderType CylinderType) const
 {
     switch (CylinderType)
     {
@@ -292,7 +293,7 @@ int ModelerMainMenuView::GetCylinderRowsCnt(Entity cylinder, CylinderType Cylind
             return model.GetRowsCntOfC0Patches(cylinder);
 
         case CylinderType::C2:
-            return model.GetRowsCntOfC2Cylinder(cylinder);
+            return model.GetRowsCntOfC2Patches(cylinder);
 
         default:
             throw std::runtime_error("Unknown surface type");
@@ -300,7 +301,7 @@ int ModelerMainMenuView::GetCylinderRowsCnt(Entity cylinder, CylinderType Cylind
 }
 
 
-int ModelerMainMenuView::GetCylinderColsCnt(Entity cylinder, CylinderType CylinderType) const
+int ModelerMainMenuView::GetCylinderColsCnt(const Entity cylinder, const CylinderType CylinderType) const
 {
     switch (CylinderType)
     {
@@ -308,7 +309,7 @@ int ModelerMainMenuView::GetCylinderColsCnt(Entity cylinder, CylinderType Cylind
             return model.GetColsOfC0Patches(cylinder);
 
         case CylinderType::C2:
-            return model.GetColsCntOfC2Cylinder(cylinder);
+            return model.GetColsCntOfC2Patches(cylinder);
 
         default:
             throw std::runtime_error("Unknown surface type");

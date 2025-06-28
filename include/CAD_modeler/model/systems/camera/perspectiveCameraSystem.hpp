@@ -26,14 +26,14 @@ public:
     Position GetCameraPos() const
         { return coordinator->GetComponent<Position>(camera); }
 
-    inline void SetCameraPos(const Position& pos) const
+    void SetCameraPos(const Position& pos) const
         { coordinator->SetComponent<Position>(camera, pos); }
 
     [[nodiscard]]
     CameraParameters GetParameters() const
         { return coordinator->GetComponent<CameraParameters>(camera); }
 
-    inline void SetParameters(const CameraParameters& params) const
+    void SetParameters(const CameraParameters& params) const
         { coordinator->SetComponent<CameraParameters>(camera, params); }
 
     [[nodiscard]]

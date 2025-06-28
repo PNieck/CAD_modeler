@@ -3,7 +3,7 @@
 #include "shader.hpp"
 
 
-class PassThroughShader: private Shader {
+class PassThroughShader: public Shader {
 public:
     PassThroughShader():
         Shader(
@@ -11,9 +11,6 @@ public:
             "../../shaders/stdShader.frag"
         ) {}
 
-    inline void SetColor(const alg::Vec4& color) const
+    void SetColor(const alg::Vec4& color) const
         { SetVec4("color", color); }
-
-    inline void Use() const
-        { Shader::Use(); }
 };

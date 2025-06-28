@@ -5,12 +5,11 @@
 #include "eventHandler.hpp"
 #include "idManager.hpp"
 
-#include <any>
 #include <functional>
 #include <unordered_map>
-#include <optional>
 #include <stack>
 #include <memory>
+#include <ranges>
 
 
 enum class EventType {
@@ -25,7 +24,7 @@ using HandlerId = Id;
 
 class EventsManager {
 public:
-    EventsManager(ComponentsManager& compMgr):
+    explicit EventsManager(ComponentsManager& compMgr):
         componentsMgr(compMgr) {}
 
     template <typename Comp>
@@ -37,7 +36,7 @@ public:
 
 
     template <typename Comp>
-    HandlerId Subscribe(Entity entity, std::shared_ptr<EventHandler<Comp>> handler) {
+    HandlerId Subscribe(const Entity entity, std::shared_ptr<EventHandler<Comp>> handler) {
         HandlerId newHandlerId = handlersIdManager.CreateNewId();
         listeners[entity][ComponentsManager::GetComponentId<Comp>()].insert({ newHandlerId, handler });
 
@@ -46,7 +45,7 @@ public:
 
 
     template <typename Comp>
-    void Unsubscribe(Entity entity, HandlerId handlerId) {
+    void Unsubscribe(const Entity entity, HandlerId handlerId) {
         auto handlers = GetHandlers(entity, ComponentsManager::GetComponentId<Comp>());
 
         if (handlers != nullptr)
@@ -55,7 +54,7 @@ public:
 
 
     template <typename Comp>
-    std::shared_ptr<EventHandler<Comp>> GetHandler(Entity entity, HandlerId handlerId) {
+    std::shared_ptr<EventHandler<Comp>> GetHandler(const Entity entity, HandlerId handlerId) {
         auto handlers = GetHandlers(entity, ComponentsManager::GetComponentId<Comp>());
 
         return std::static_pointer_cast<EventHandler<Comp>>(handlers->at(handlerId));
@@ -63,31 +62,29 @@ public:
 
 
     template <typename Comp>
-    inline void ComponentChanged(Entity entity, const Comp& component)
+    void ComponentChanged(const Entity entity, const Comp& component)
         { ComponentEvent<Comp>(entity, component, EventType::ComponentChanged); }
 
 
     template <typename Comp>
-    void ComponentDeleted(Entity entity)
+    void ComponentDeleted(const Entity entity)
         { ComponentEvent<Comp>(entity, componentsMgr.GetComponent<Comp>(entity), EventType::ComponentDeleted); }
 
 
     template <typename Comp>
-    inline void ComponentAdded(Entity entity, const Comp& component)
+    void ComponentAdded(const Entity entity, const Comp& component)
         { ComponentEvent<Comp>(entity, component, EventType::NewComponent); }
 
 
-    void EntityDeleted(Entity entity) {
-        auto const& components = componentsMgr.GetEntityComponents(entity);
-
+    void EntityDeleted(const Entity entity) {
         // Run events for all components deletion
-        for (auto compId: components) {
+        for (auto compId: componentsMgr.GetEntityComponents(entity)) {
             componentDeletionFunctions.at(compId)(*this, entity);
         }
 
-        for (auto const& pairs: listeners[entity]) {
-            for (auto const& handler: pairs.second) {
-                handlersIdManager.DestroyId(handler.first);
+        for (const auto &val: listeners[entity] | std::views::values) {
+            for (const auto &key: val | std::views::keys) {
+                handlersIdManager.DestroyId(key);
             }
         }
 
@@ -113,16 +110,16 @@ private:
 
     ComponentsManager& componentsMgr;
 
-    std::unordered_map<HandlerId, std::shared_ptr<void>>* GetHandlers(Entity entity, ComponentId compId) {
-        auto it = listeners.find(entity);
+    std::unordered_map<HandlerId, std::shared_ptr<void>>* GetHandlers(const Entity entity, const ComponentId compId) {
+        const auto it = listeners.find(entity);
         if (it == listeners.end())
             return nullptr;
 
-        auto it2 = (*it).second.find(compId);
-        if (it2 == (*it).second.end())
+        const auto it2 = it->second.find(compId);
+        if (it2 == it->second.end())
             return nullptr;
 
-        return &((*it2).second);
+        return &it2->second;
     }
 
     template <typename Comp>

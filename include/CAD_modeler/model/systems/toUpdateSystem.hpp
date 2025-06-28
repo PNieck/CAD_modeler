@@ -4,35 +4,34 @@
 #include <ecs/coordinator.hpp>
 
 #include <set>
-#include <optional>
 
 
-class ToUpdateSystem: public System {
+class ToUpdateSystem final : public System {
 public:
     static void RegisterSystem(Coordinator& coordinator);
 
-    template <typename Sys>
-    inline void MarkAsToUpdate(Entity entity) {
+    template <SystemConcept Sys>
+    void MarkAsToUpdate(const Entity entity) {
         MarkAsToUpdate(entity, Coordinator::GetSystemID<Sys>());
     }
 
-    void MarkAsToUpdate(Entity entity, SystemId systemId)
+    void MarkAsToUpdate(const Entity entity, const SystemId systemId)
         { entitiesToUpdate[systemId].insert(entity); }
 
-    template <typename Sys>
+    template <SystemConcept Sys>
     void Unmark(Entity entity)
         { Umark(entity, Coordinator::GetSystemID<Sys>()); }
 
     void Unmark(Entity entity, SystemId systemId);
 
-    template <typename Sys>
+    template <SystemConcept Sys>
     void UnmarkAll()
         { UnmarkAll(Coordinator::GetSystemID<Sys>()); }
 
-    void UnmarkAll(SystemId system)
+    void UnmarkAll(const SystemId system)
         { entitiesToUpdate.erase(system); }
 
-    template <typename Sys>
+    template <SystemConcept Sys>
     const std::set<Entity>& GetEntitiesToUpdate() const
         { return GetEntitiesToUpdate(Coordinator::GetSystemID<Sys>()); }
 

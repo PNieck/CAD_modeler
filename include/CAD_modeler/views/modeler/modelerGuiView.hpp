@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../../model/modeler.hpp"
-#include "modelerMainMenuBar.hpp"
+#include "modelerMenuBar.hpp"
 #include "modelerMainMenuView.hpp"
 #include "modelerObjectsPropertiesView.hpp"
 
@@ -16,7 +16,7 @@ public:
     void Render();
 
 private:
-    ModelerMainMenuBar menuBar;
+    ModelerMenuBar menuBar;
     ModelerMainMenuView mainMenu;
     ModelerObjectsPropertiesView propertiesView;
 };

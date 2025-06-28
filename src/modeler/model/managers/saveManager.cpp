@@ -6,19 +6,22 @@
 #include <CAD_modeler/model/systems/c0CurveSystem.hpp>
 #include <CAD_modeler/model/systems/c2CurveSystem.hpp>
 #include <CAD_modeler/model/systems/interpolationCurveSystem.hpp>
-#include <CAD_modeler/model/systems/c0SurfaceSystem.hpp>
-#include <CAD_modeler/model/systems/c2SurfacesSystem.hpp>
-#include <CAD_modeler/model/systems/c2CylinderSystem.hpp>
+#include <CAD_modeler/model/systems/c2PatchesSystem.hpp>
+#include <CAD_modeler/model/systems/c0PatchesSystem.hpp>
 
 #include <CAD_modeler/model/components/scale.hpp>
 #include <CAD_modeler/model/components/rotation.hpp>
-#include <CAD_modeler/model/components/IsC0Cylinder.hpp>
+#include <CAD_modeler/model/components/wraps.hpp>
+#include <CAD_modeler/model/components/drawStd.hpp>
 
 #include <nlohmann/json.hpp>
 
 #include <fstream>
 #include <map>
 #include <stack>
+
+#include "CAD_modeler/model/systems/toriRenderingSystem.hpp"
+
 
 using json = nlohmann::json;
 
@@ -35,23 +38,23 @@ Position ParsePosition(const auto& json)
 
 Rotation ParseRotation(const auto& json)
 {
-    float x = json["rotation"]["x"];
-    float y = json["rotation"]["y"];
-    float z = json["rotation"]["z"];
+    const float x = json["rotation"]["x"];
+    const float y = json["rotation"]["y"];
+    const float z = json["rotation"]["z"];
 
-    return Rotation(x, y, z);
+    return {x, y, z};
 }
 
 
 Scale ParseScale(const auto& json)
 {
-    float x = json["scale"]["x"];
-    float y = json["scale"]["y"];
-    float z = json["scale"]["z"];
+    const float x = json["scale"]["x"];
+    const float y = json["scale"]["y"];
+    const float z = json["scale"]["z"];
 
-    return Scale(
+    return {
         x, y, z
-    );
+    };
 }
 
 
@@ -64,11 +67,12 @@ void SaveManager::LoadScene(const std::string &path, Coordinator &coordinator)
 
     auto pointsSys = coordinator.GetSystem<PointsSystem>();
     auto toriSys = coordinator.GetSystem<ToriSystem>();
+    auto toriRenderingSys = coordinator.GetSystem<ToriRenderingSystem>();
     auto c0CurveSys = coordinator.GetSystem<C0CurveSystem>();
     auto c2CurveSys = coordinator.GetSystem<C2CurveSystem>();
     auto interCurveSys = coordinator.GetSystem<InterpolationCurveSystem>();
-    auto c0SurfaceSys = coordinator.GetSystem<C0SurfaceSystem>();
-    auto c2SurfaceSys = coordinator.GetSystem<C2SurfaceSystem>();
+    auto c0PatchesSys = coordinator.GetSystem<C0PatchesSystem>();
+    auto c2PatchesSys = coordinator.GetSystem<C2PatchesSystem>();
     auto nameSys = coordinator.GetSystem<NameSystem>();
 
     std::map<LoadedId, Entity> idMap;
@@ -98,6 +102,7 @@ void SaveManager::LoadScene(const std::string &path, Coordinator &coordinator)
             Position pos = ParsePosition(geometry);
 
             Entity newTorus = toriSys->AddTorus(pos, torusParams);
+            toriRenderingSys->AddEntity(newTorus);
 
             coordinator.SetComponent(newTorus, ParseRotation(geometry));
             coordinator.SetComponent(newTorus, ParseScale(geometry));
@@ -136,7 +141,6 @@ void SaveManager::LoadScene(const std::string &path, Coordinator &coordinator)
             nameSys->SetName(newInterCurve, geometry["name"]);
         }
 
-
         else if (objectType == "bezierSurfaceC0") {
             C0Patches c0Patches(
                 geometry["size"]["y"],
@@ -147,7 +151,7 @@ void SaveManager::LoadScene(const std::string &path, Coordinator &coordinator)
             int patchRow = 0;
 
             for (auto& patch: geometry["patches"]) {
-                
+
                 int startCol = patchCol * 3;
                 int startRow = patchRow * 3;
 
@@ -170,8 +174,9 @@ void SaveManager::LoadScene(const std::string &path, Coordinator &coordinator)
                 }
             }
 
-            Entity newSurface = c0SurfaceSys->CreateSurface(c0Patches);
+            Entity newSurface = c0PatchesSys->CreateSurface(c0Patches);
             nameSys->SetName(newSurface, geometry["name"]);
+            coordinator.AddComponent<DrawStd>(newSurface, DrawStd());
         }
 
         else if (objectType == "bezierSurfaceC2") {
@@ -184,7 +189,7 @@ void SaveManager::LoadScene(const std::string &path, Coordinator &coordinator)
             int patchRow = 0;
 
             for (auto& patch: geometry["patches"]) {
-                
+
                 int startCol = patchCol;
                 int startRow = patchRow;
 
@@ -206,8 +211,9 @@ void SaveManager::LoadScene(const std::string &path, Coordinator &coordinator)
                 }
             }
 
-            Entity newSurface = c2SurfaceSys->CreateSurface(c2Patches);
+            Entity newSurface = c2PatchesSys->CreateSurface(c2Patches);
             nameSys->SetName(newSurface, geometry["name"]);
+            coordinator.AddComponent<DrawStd>(newSurface, DrawStd());
         }
     }
 }
@@ -246,9 +252,8 @@ void SaveManager::SaveScene(const std::string &path, Coordinator &coordinator)
     auto c0CurveSys = coordinator.GetSystem<C0CurveSystem>();
     auto c2CurveSys = coordinator.GetSystem<C2CurveSystem>();
     auto interCurveSys = coordinator.GetSystem<InterpolationCurveSystem>();
-    auto c0SurfaceSys = coordinator.GetSystem<C0SurfaceSystem>();
-    auto c2SurfaceSys = coordinator.GetSystem<C2SurfaceSystem>();
-    auto c2CylinderSys = coordinator.GetSystem<C2CylinderSystem>();
+    auto c0PatchesSys = coordinator.GetSystem<C0PatchesSystem>();
+    auto c2PatchesSystem = coordinator.GetSystem<C2PatchesSystem>();
     auto nameSys = coordinator.GetSystem<NameSystem>();
 
     std::stack<Entity> fakeIDs;
@@ -336,9 +341,8 @@ void SaveManager::SaveScene(const std::string &path, Coordinator &coordinator)
         mainJson["geometry"].push_back(interCurveJson);
     }
 
-    for (Entity surfaceC0: c0SurfaceSys->GetEntities()) {
+    for (Entity surfaceC0: c0PatchesSys->GetEntities()) {
         json surfaceC0Json;
-        
 
         surfaceC0Json["objectType"] = "bezierSurfaceC0";
         surfaceC0Json["id"] = surfaceC0;
@@ -373,7 +377,7 @@ void SaveManager::SaveScene(const std::string &path, Coordinator &coordinator)
 
                         cpJson["id"] = cp;
                         patchJson["controlPoints"].push_back(cpJson);
-                        
+
                     }
                 }
 
@@ -381,24 +385,24 @@ void SaveManager::SaveScene(const std::string &path, Coordinator &coordinator)
             }
         }
 
-        surfaceC0Json["parameterWrapped"]["u"] = false;
-        surfaceC0Json["parameterWrapped"]["v"] = coordinator.HasComponent<IsC0Cylinder>(surfaceC0);
+        surfaceC0Json["parameterWrapped"]["u"] = coordinator.HasComponent<WrapU>(surfaceC0);
+        surfaceC0Json["parameterWrapped"]["v"] = coordinator.HasComponent<WrapV>(surfaceC0);
 
         mainJson["geometry"].push_back(surfaceC0Json);
     }
 
-    for (Entity surfaceC2: c2SurfaceSys->GetEntities()) {
+    for (Entity patchesC2: c2PatchesSystem->GetEntities()) {
         json surfaceC2Json;
 
         surfaceC2Json["objectType"] = "bezierSurfaceC2";
-        surfaceC2Json["id"] = surfaceC2;
-        surfaceC2Json["name"] = nameSys->GetName(surfaceC2);
+        surfaceC2Json["id"] = patchesC2;
+        surfaceC2Json["name"] = nameSys->GetName(patchesC2);
 
-        const auto& patches = coordinator.GetComponent<C2Patches>(surfaceC2);
+        const auto& patches = coordinator.GetComponent<C2Patches>(patchesC2);
         surfaceC2Json["size"]["y"] = patches.PatchesInRow();
         surfaceC2Json["size"]["x"] = patches.PatchesInCol();
 
-        const auto& density = coordinator.GetComponent<PatchesDensity>(surfaceC2);
+        const auto& density = coordinator.GetComponent<PatchesDensity>(patchesC2);
 
         for (int rowPatch=0; rowPatch < patches.PatchesInRow(); rowPatch++ ) {
             for (int colPatch=0; colPatch < patches.PatchesInCol(); colPatch++) {
@@ -423,7 +427,7 @@ void SaveManager::SaveScene(const std::string &path, Coordinator &coordinator)
 
                         cpJson["id"] = cp;
                         patchJson["controlPoints"].push_back(cpJson);
-                        
+
                     }
                 }
 
@@ -431,61 +435,10 @@ void SaveManager::SaveScene(const std::string &path, Coordinator &coordinator)
             }
         }
 
-        surfaceC2Json["parameterWrapped"]["u"] = false;
-        surfaceC2Json["parameterWrapped"]["v"] = coordinator.HasComponent<IsC0Cylinder>(surfaceC2);
+        surfaceC2Json["parameterWrapped"]["u"] = coordinator.HasComponent<WrapU>(patchesC2);
+        surfaceC2Json["parameterWrapped"]["v"] = coordinator.HasComponent<WrapV>(patchesC2);
 
         mainJson["geometry"].push_back(surfaceC2Json);
-    }
-
-
-    for (Entity cylinderC2: c2CylinderSys->GetEntities()) {
-        json cylinderC2Json;
-
-        cylinderC2Json["objectType"] = "bezierSurfaceC2";
-        cylinderC2Json["id"] = cylinderC2;
-        cylinderC2Json["name"] = nameSys->GetName(cylinderC2);
-
-        const auto& patches = coordinator.GetComponent<C2CylinderPatches>(cylinderC2);
-        cylinderC2Json["size"]["x"] = patches.PatchesInRow();
-        cylinderC2Json["size"]["y"] = patches.PatchesInCol()+2;
-
-        const auto& density = coordinator.GetComponent<PatchesDensity>(cylinderC2);
-
-        for (int rowPatch=0; rowPatch < patches.PatchesInRow(); rowPatch++ ) {
-            for (int colPatch=0; colPatch < patches.PatchesInCol()+2; colPatch++) {
-                json patchJson;
-
-                patchJson["objectType"] = "bezierPatchC2";
-                Entity fakeID = coordinator.CreateEntity();
-                patchJson["id"] = fakeID;
-                patchJson["name"] = "";
-                fakeIDs.push(fakeID);
-
-                patchJson["samples"]["x"] = density.GetDensity();
-                patchJson["samples"]["y"] = density.GetDensity();
-
-                for (int row=0; row < 4; row++) {
-                    for (int col=0; col < 4; col++) {
-                        json cpJson;
-                        Entity cp = patches.GetPoint(
-                            rowPatch + row,
-                            colPatch + col
-                        );
-
-                        cpJson["id"] = cp;
-                        patchJson["controlPoints"].push_back(cpJson);
-                        
-                    }
-                }
-
-                cylinderC2Json["patches"].push_back(patchJson);
-            }
-        }
-
-        cylinderC2Json["parameterWrapped"]["u"] = false;
-        cylinderC2Json["parameterWrapped"]["v"] = true;
-
-        mainJson["geometry"].push_back(cylinderC2Json);
     }
 
     output << std::setw(4) << mainJson;

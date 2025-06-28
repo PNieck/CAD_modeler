@@ -3,72 +3,63 @@
 #include <ecs/system.hpp>
 
 #include <optional>
+#include <memory>
+#include <tuple>
+#include <deque>
 
-#include "algebra/vec4.hpp"
+#include "CAD_modeler/model/components/curveControlPoints.hpp"
+#include "CAD_modeler/model/components/position.hpp"
+#include "CAD_modeler/model/components/intersectionCurve.hpp"
+
+#include "intersectionSystem/surface.hpp"
 
 
-class IntersectionSystem: public System {
+class IntersectionSystem final : public System {
 public:
     static void RegisterSystem(Coordinator& coordinator);
 
     bool CanBeIntersected(Entity entity) const;
 
-    void FindIntersection(Entity e1, Entity e2, float step);
+    std::optional<Entity> FindIntersection(Entity e1, Entity e2, float step);
+
+    std::optional<Entity> FindIntersection(Entity e1, Entity e2, float step, const Position& guidance);
+
+    std::optional<Entity> FindSelfIntersection(Entity e, float step);
+
+    std::optional<Entity> FindSelfIntersection(Entity e, float step, const Position& guidance);
 
 private:
-    class IntersectionPoint {
+    [[nodiscard]]
+    std::unique_ptr<interSys::Surface> GetSurface(Entity entity) const;
+
+    [[nodiscard]]
+    IntersectionPoint FindFirstApproximation(interSys::Surface& s1, interSys::Surface& s2) const;
+
+    IntersectionPoint FindFirstApproximationForSelfIntersection(interSys::Surface& s) const;
+
+    [[nodiscard]]
+    std::optional<IntersectionPoint> FindFirstIntersectionPoint(interSys::Surface& s1, interSys::Surface& s2, const IntersectionPoint& initSol) const;
+
+    std::optional<std::tuple<float, float>> NearestPoint(interSys::Surface& s, const Position& guidance, float initU, float initV) const;
+    std::tuple<float, float> NearestPointApproximation(interSys::Surface& s, const Position& guidance) const;
+
+    std::tuple<float, float> SecondNearestPointApproximation(interSys::Surface& s, const Position& guidance, float u, float v) const;
+
+    std::optional<Entity> FindIntersection(interSys::Surface& s1, interSys::Surface& s2, const IntersectionPoint& initPoint, float step);
+
+    std::optional<Entity> FindOpenIntersection(const IntersectionPoint& firstPoint, interSys::Surface& s1, interSys::Surface& s2, float step, std::deque<IntersectionPoint>& points);
+
+    float ErrorRate(interSys::Surface& s1, interSys::Surface& s2, const IntersectionPoint &intPt) const;
+
+    Entity CreateCurve(interSys::Surface& s1, interSys::Surface& s2, const std::deque<IntersectionPoint>& interPoints, bool isOpen);
+
+    class DeletionHandler final : public EventHandler<CurveControlPoints> {
     public:
-        IntersectionPoint(float v1, float u1, float v2, float u2):
-            vec(v1, u1, v2, u2) {}
+        explicit DeletionHandler(Coordinator& coordinator):
+            coordinator(coordinator) {}
 
-        explicit IntersectionPoint(alg::Vec4&& vec):
-            vec(vec) {}
-
-        IntersectionPoint():
-            IntersectionPoint(0.f, 0.f, 0.f, 0.f) {}
-
-        inline float& V1()
-            { return vec.X(); }
-
-        inline float& U1()
-            { return vec.Y(); }
-
-        inline float& V2()
-            { return vec.Z(); }
-
-        inline float& U2()
-            { return vec.W(); }
-
-        inline float V1() const
-            { return vec.X(); }
-
-        inline float U1() const
-            { return vec.Y(); }
-
-        inline float V2() const
-            { return vec.Z(); }
-
-        inline float U2() const
-            { return vec.W(); }
-
-        inline alg::Vec4& AsVector()
-            { return vec; }
-
+        void HandleEvent(Entity entity, const CurveControlPoints &component, EventType eventType) override;
     private:
-        alg::Vec4 vec;
+        Coordinator& coordinator;
     };
-
-    [[nodiscard]]
-    IntersectionPoint FindFirstApproximation(Entity e1, Entity e2) const;
-
-    [[nodiscard]]
-    std::optional<IntersectionPoint> FindFirstIntersectionPointDLib(Entity e1, Entity e2, const IntersectionPoint& initSol) const;
-
-    [[nodiscard]]
-    std::optional<IntersectionPoint> FindFirstIntersectionPoint(Entity e1, Entity e2, const IntersectionPoint& initSol) const;
-
-    std::optional<IntersectionPoint> FindNextIntersectionPoint(Entity e1, Entity e2, IntersectionPoint &prevSol, float step) const;
-
-    bool CheckIfSolutionIsInDomain(IntersectionPoint &sol) const;
-    float ErrorRate(Entity e1, Entity e2, const IntersectionPoint &intPt) const;
 };

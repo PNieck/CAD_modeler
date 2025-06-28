@@ -3,7 +3,7 @@
 #include "shader.hpp"
 
 
-class BicubicBezierSurfaceShader: private Shader {
+class BicubicBezierSurfaceShader: public Shader {
 public:
     BicubicBezierSurfaceShader():
         Shader(
@@ -13,12 +13,9 @@ public:
             "../../shaders/bezierSurfaceShader.tese"
         ) {}
 
-    inline void SetColor(const alg::Vec4& color) const
+    void SetColor(const alg::Vec4& color) const
         { SetVec4("color", color); }
 
-    inline void SetMVP(const alg::Mat4x4& matrix) const
+    void SetMVP(const alg::Mat4x4& matrix) const
         { SetMatrix4("MVP", matrix); }
-
-    inline void Use() const
-        { Shader::Use(); }
 };

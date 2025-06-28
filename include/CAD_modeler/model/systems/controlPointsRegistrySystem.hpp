@@ -27,20 +27,20 @@ public:
     
     using OwnersSet = std::unordered_set<Owner, OwnerHash>;
 
-    inline static void RegisterSystem(Coordinator& coordinator)
+    static void RegisterSystem(Coordinator& coordinator)
         { coordinator.RegisterSystem<ControlPointsRegistrySystem>(); }
 
-    inline void RegisterControlPoint(Entity owner, Entity cp, SystemId system)
+    void RegisterControlPoint(Entity owner, const Entity cp, SystemId system)
         { controlPointsOwners[cp].insert({owner, system}); }
 
-    void UnregisterControlPoint(Entity ower, Entity cp, SystemId system);
+    void UnregisterControlPoint(Entity owner, Entity cp, SystemId system);
 
-    inline bool IsAControlPoint(Entity cp) const
+    bool IsAControlPoint(const Entity cp) const
         { return controlPointsOwners.contains(cp); }
 
-    inline const OwnersSet& GetOwnersOfControlPoints(Entity cp) const
+    const OwnersSet& GetOwnersOfControlPoints(const Entity cp) const
         { return controlPointsOwners.at(cp); }
 
 private:
-        std::unordered_map<Entity, OwnersSet> controlPointsOwners;
+    std::unordered_map<Entity, OwnersSet> controlPointsOwners;
 };

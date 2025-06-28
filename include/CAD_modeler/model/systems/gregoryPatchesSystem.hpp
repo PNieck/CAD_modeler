@@ -18,13 +18,13 @@ public:
 
     class Hole {
     public:
-        static const int innerCpNb = 9;
-        static const int outerCpNb = 12;
+        static constexpr int innerCpNb = 9;
+        static constexpr int outerCpNb = 12;
 
-        inline Entity GetInnerControlPoint(int index) const
+        Entity GetInnerControlPoint(const int index) const
             { return innerCp[index]; }
 
-        inline Entity GetOuterControlPoint(int index) const
+        Entity GetOuterControlPoint(const int index) const
             { return outerCp[index]; }
 
     private:
@@ -61,9 +61,9 @@ private:
     std::vector<float> GenerateNetVertices(const TriangleOfGregoryPatches& params) const;
     std::vector<uint32_t> GenerateNetIndices() const;
 
-    class DeletionHandler: public EventHandler<TriangleOfGregoryPatches> {
+    class DeletionHandler final : public EventHandler<TriangleOfGregoryPatches> {
     public:
-        DeletionHandler(Coordinator& coordinator):
+        explicit DeletionHandler(Coordinator& coordinator):
             coordinator(coordinator) {}
 
         void HandleEvent(Entity entity, const TriangleOfGregoryPatches& component, EventType eventType) override;
@@ -72,9 +72,9 @@ private:
         Coordinator& coordinator;
     };
 
-    class ControlPointMovedHandler: public EventHandler<Position> {
+    class ControlPointMovedHandler final : public EventHandler<Position> {
     public:
-        ControlPointMovedHandler(Entity targetObject, Coordinator& coordinator):
+        ControlPointMovedHandler(const Entity targetObject, Coordinator& coordinator):
             coordinator(coordinator), targetObject(targetObject) {}
 
         void HandleEvent(Entity entity, const Position& component, EventType eventType) override;

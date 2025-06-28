@@ -1,7 +1,7 @@
 #include <CAD_modeler/model/systems/controlPointsRegistrySystem.hpp>
 
 
-void ControlPointsRegistrySystem::UnregisterControlPoint(Entity owner, Entity cp, SystemId system)
+void ControlPointsRegistrySystem::UnregisterControlPoint(Entity owner, const Entity cp, SystemId system)
 {
     if (!controlPointsOwners.contains(cp))
         return;

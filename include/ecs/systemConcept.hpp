@@ -7,4 +7,4 @@
 
 
 template<typename Sys>
-concept SystemConcept = (std::derived_from<Sys, System> && std::is_default_constructible<Sys>::value);
+concept SystemConcept = std::derived_from<Sys, System> && std::is_default_constructible_v<Sys>;

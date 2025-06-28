@@ -12,13 +12,13 @@ protected:
 
     static MouseState mouseState;
 
-    inline static void WindowSizeChanged(const int width, const int height, Model& model)
+    static void WindowSizeChanged(const int width, const int height, Model& model)
         { model.ChangeViewportSize(width, height); }
 
-    inline static void MouseRelease(const MouseButton button)
+    static void MouseRelease(const MouseButton button)
         { mouseState.ButtonReleased(button); }
 
-    inline static void MouseClick(const MouseButton button)
+    static void MouseClick(const MouseButton button)
         { mouseState.ButtonClicked(button); }
 
     static void MouseMove(int x, int y, Model& model);

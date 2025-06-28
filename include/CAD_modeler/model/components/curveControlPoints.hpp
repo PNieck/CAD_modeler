@@ -1,33 +1,33 @@
 #pragma once
 
 #include <ecs/coordinator.hpp>
-#include <ecs/eventHandler.hpp>
 
 #include <vector>
 #include <unordered_map>
 
-#include "position.hpp"
-
 
 class CurveControlPoints {
 public:
-    CurveControlPoints(const std::vector<Entity> controlPoints):
+    explicit CurveControlPoints(const std::vector<Entity>& controlPoints):
         controlPoints(controlPoints) {}
 
-    inline void AddControlPoint(Entity entity)
+    void AddControlPoint(const Entity entity)
         { controlPoints.push_back(entity); }
 
-    inline void DeleteControlPoint(Entity entity)
-        { controlPoints.erase(std::find(controlPoints.begin(), controlPoints.end(), entity)); }
+    void DeleteControlPoint(const Entity entity)
+        { controlPoints.erase(std::ranges::find(controlPoints, entity)); }
 
-    inline void SwapControlPoint(Entity oldCP, Entity newCP)
-        { std::replace(controlPoints.begin(), controlPoints.end(), oldCP, newCP); }
+    void SwapControlPoint(const Entity oldCP, const Entity newCP)
+        { std::ranges::replace(controlPoints, oldCP, newCP); }
 
-    inline const std::vector<Entity>& GetPoints() const
+    const std::vector<Entity>& GetPoints() const
         { return controlPoints; }
 
-    inline size_t Size() const
+    size_t Size() const
         { return controlPoints.size(); }
+
+    bool Empty() const
+        { return controlPoints.empty(); }
 
     std::unordered_map<Entity, HandlerId> controlPointsHandlers;
     HandlerId deletionHandler;

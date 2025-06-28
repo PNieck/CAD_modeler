@@ -17,15 +17,15 @@ public:
 
     void Render();
 
-    inline void WindowSizeChanged(const int width, const int height) const
+    void WindowSizeChanged(const int width, const int height) const
         { SubController::WindowSizeChanged(width, height, modeler); }
 
     void MouseClick(MouseButton button);
     void MouseMove(int x, int y) const;
-    inline void ScrollMoved(const int offset) const
+    void ScrollMoved(const int offset) const
         { SubController::ScrollMoved(offset, modeler); }
 
-    inline void MouseRelease(const MouseButton button) const
+    void MouseRelease(const MouseButton button) const
         { SubController::MouseRelease(button); }
     void KeyboardKeyPressed(KeyboardKey key);
 

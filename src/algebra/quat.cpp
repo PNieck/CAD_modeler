@@ -5,14 +5,14 @@
 #include <cassert>
 
 
-alg::Quat::Quat(float pitch, float yaw, float roll)
+alg::Quat::Quat(const float pitch, const float yaw, const float roll)
 {
-    const float cz = cos(roll * 0.5f);
-    const float sz = sin(roll * 0.5f);
-    const float cx = cos(pitch * 0.5f);
-    const float sx = sin(pitch * 0.5f);
-    const float cy = cos(yaw * 0.5f);
-    const float sy = sin(yaw * 0.5f);
+    const float cz = std::cos(roll * 0.5f);
+    const float sz = std::sin(roll * 0.5f);
+    const float cx = std::cos(pitch * 0.5f);
+    const float sx = std::sin(pitch * 0.5f);
+    const float cy = std::cos(yaw * 0.5f);
+    const float sy = std::sin(yaw * 0.5f);
 
     W() = cx * cy * cz + sx * sy * sz;
     X() = sx * cy * cz - cx * sy * sz;
@@ -21,20 +21,22 @@ alg::Quat::Quat(float pitch, float yaw, float roll)
 }
 
 
-alg::Quat::Quat(const alg::Vec3 &axis, float angle)
+alg::Quat::Quat(const Vec3& axis, const float angle)
 {
-    alg::Vec3 axisNorm = axis.Normalize();
+    Vec3 axisNorm = axis.Normalize();
+    const float halfAngle = angle * 0.5f;
+    const float sinHalfAngle = std::sin(halfAngle);
 
-    X() = axisNorm.X() * sin(angle / 2.f);
-    Y() = axisNorm.Y() * sin(angle / 2.f);
-    Z() = axisNorm.Z() * sin(angle / 2.f);
-    W() = cos(angle / 2.f);
+    X() = axisNorm.X() * sinHalfAngle;
+    Y() = axisNorm.Y() * sinHalfAngle;
+    Z() = axisNorm.Z() * sinHalfAngle;
+    W() = std::cos(halfAngle);
 }
 
 
 alg::Vec3 alg::Quat::Rotate(const Vec3& v) const
 {
-    alg::Quat tmp(v.X(), v.Y(), v.Z(), 0.0f);
+    Quat tmp(v.X(), v.Y(), v.Z(), 0.0f);
 
     tmp = (*this) * tmp * this->Conjugation();
 

@@ -1,8 +1,9 @@
 #include <CAD_modeler/utilities/linePlotter.hpp>
 
 
-std::tuple<std::deque<alg::IVec2>, LinePlotter::LineType> LinePlotter::DeterminePlotLines(int x0, int y0, int x1, int y1)
-{
+std::tuple<std::deque<alg::IVec2>, LinePlotter::LineType> LinePlotter::DeterminePlotLines(
+    const int x0, const int y0, const int x1, const int y1
+) {
     if (std::abs(y1 - y0) < std::abs(x1 - x0)) {
         if (x0 > x1)
             return { PlotLineLow(x1, y1, x0, y0), LineType::Low };
@@ -18,7 +19,7 @@ std::tuple<std::deque<alg::IVec2>, LinePlotter::LineType> LinePlotter::Determine
 }
 
 
-std::deque<alg::IVec2> LinePlotter::PlotLineLow(int x0, int y0, int x1, int y1)
+std::deque<alg::IVec2> LinePlotter::PlotLineLow(const int x0, int y0, int x1, int y1)
 {
     std::deque<alg::IVec2> result;
 
@@ -36,7 +37,6 @@ std::deque<alg::IVec2> LinePlotter::PlotLineLow(int x0, int y0, int x1, int y1)
 
     for (int x = x0; x <= x1; x++) {
         result.emplace_back(x, y);
-
 
         if (D > 0) {
             y += yi;
@@ -63,7 +63,7 @@ std::deque<alg::IVec2> LinePlotter::PlotLineHigh(int x0, int y0, int x1, int y1)
         dx = -dx;
     }
 
-    int D = (2*dx) - dy;
+    int D = 2*dx - dy;
     int x = x0;
 
     for (int y = y0; y <= y1; y++) {
