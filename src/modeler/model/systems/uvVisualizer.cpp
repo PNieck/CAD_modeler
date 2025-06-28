@@ -5,6 +5,8 @@
 #include <CAD_modeler/model/components/uvVisualization.hpp>
 #include "CAD_modeler/model/components/wraps.hpp"
 
+#include <CAD_modeler/utilities/wrapToRange.hpp>
+
 
 void UvVisualizer::VisualizeLineOnParameters(const Entity e, const IntersectionCurve &curve, const SurfaceCurveRelation relation)
 {
@@ -80,18 +82,60 @@ void UvVisualizer::DrawCurveOnUV(
         points.emplace_back(u, v);
     }
 
-    if (!curve.isOpen) {
-        const auto& point = curve.intersectionPoints[0];
-
-        int u = static_cast<int>(std::round(point.AsVector()[i] / maxU * uRes));
-        int v = static_cast<int>(std::round(point.AsVector()[j] / maxV * vRes));
-
-        points.emplace_back(u, v);
-    }
-
     coordinator.EditComponent<UvVisualization>(e,
         [&points] (UvVisualization& vis) {
             vis.DrawLine(points);
         }
     );
+
+    if (!curve.isOpen) {
+        const auto& firstPoint = curve.intersectionPoints[0];
+        const auto& lastPoint = curve.intersectionPoints[curve.intersectionPoints.size() - 1];
+
+        float firstU = firstPoint.AsVector()[i];
+        float firstV = firstPoint.AsVector()[j];
+
+        float lastU = lastPoint.AsVector()[i];
+        float lastV = lastPoint.AsVector()[j];
+
+        const bool firstNorm = PointIsNormalised(*sys, e, firstU, firstV);
+        const bool lastNorm = PointIsNormalised(*sys, e, lastU, lastV);
+
+        if (firstNorm != lastNorm) {
+            if (firstNorm)
+                NormalizePoint(*sys, e, firstU, firstV);
+            else
+                NormalizePoint(*sys, e, lastU, lastV);
+        }
+
+        int firstUI = static_cast<int>(std::round(firstU / maxU * uRes));
+        int firstVI = static_cast<int>(std::round(firstV / maxV * vRes));
+
+        int lastUI = static_cast<int>(std::round(lastU / maxU * uRes));
+        int lastVI = static_cast<int>(std::round(lastV / maxV * vRes));
+
+        points.clear();
+        points.reserve(2);
+        points.emplace_back(firstUI, firstVI);
+        points.emplace_back(lastUI, lastVI);
+
+        coordinator.EditComponent<UvVisualization>(e,
+            [&points] (UvVisualization& vis) {
+                vis.DrawLine(points);
+            }
+        );
+    }
+}
+
+
+bool UvVisualizer::PointIsNormalised(const SurfaceSystem &sys, const Entity e, const float u, const float v) const
+{
+    return u >= 0.f && u <= sys.MaxU(e) && v >= 0.f && v <= sys.MaxV(e);
+}
+
+
+void UvVisualizer::NormalizePoint(const SurfaceSystem &sys, const Entity e, float &u, float &v) const
+{
+    u = WrapToRange(u, sys.MaxU(e));
+    v = WrapToRange(v, sys.MaxV(e));
 }

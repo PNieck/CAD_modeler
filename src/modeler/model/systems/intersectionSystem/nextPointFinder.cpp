@@ -85,7 +85,6 @@ bool NextPointFinder::FindNext()
     float actStep = step;
     float remainingDist = step;
     const float minStep = step / 1024.f;
-    std::optional<alg::Vec4> nextPoint;
 
     do {
         alg::Vec3 actSurfacePoint = surface1.PointOnSurface(actPoint.U1(), actPoint.V1());
@@ -97,7 +96,7 @@ bool NextPointFinder::FindNext()
             actStep
         );
 
-        nextPoint = NewtonMethod(fun, actPoint.AsVector(), 1e-5);
+        std::optional<alg::Vec4> nextPoint = NewtonMethod(fun, actPoint.AsVector(), 1e-5);
         if (!nextPoint.has_value()) {
             actStep /= 2.f;
             if (actStep < minStep)

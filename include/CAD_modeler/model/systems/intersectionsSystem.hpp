@@ -14,7 +14,7 @@
 #include "intersectionSystem/surface.hpp"
 
 
-class IntersectionSystem: public System {
+class IntersectionSystem final : public System {
 public:
     static void RegisterSystem(Coordinator& coordinator);
 

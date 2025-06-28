@@ -19,13 +19,13 @@ public:
         return Cross(tangent1, tangent2);
     }
 
-    virtual float MinU(Entity e) const
-        { return 0.f; }
+    // virtual float MinU(Entity e) const
+    //     { return 0.f; }
 
     virtual float MaxU(Entity e) const = 0;
 
-    virtual float MinV(Entity e) const
-        { return 0.f; }
+    // virtual float MinV(Entity e) const
+    //     { return 0.f; }
 
     virtual float MaxV(Entity e) const = 0;
 };
