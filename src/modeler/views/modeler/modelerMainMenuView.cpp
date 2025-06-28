@@ -375,7 +375,7 @@ void ModelerMainMenuView::RenderAddingGregoryPatches()
 
 void ModelerMainMenuView::RenderAddingIntersectionCurve()
 {
-    ImGui::Text("Select two objects to intersect");
+    ImGui::Text("Select object(s) to intersect");
 
     const auto& c0Surfaces = model.GetAllC0Surfaces();
     if (!c0Surfaces.empty()) {
@@ -397,6 +397,7 @@ void ModelerMainMenuView::RenderAddingIntersectionCurve()
 
     static float step = 0.1f;
     static bool useGuidance = false;
+    static std::optional<Entity> curve;
 
     ImGui::DragFloat("Step", &step, 0.001f, 1e-5f);
 
@@ -419,32 +420,36 @@ void ModelerMainMenuView::RenderAddingIntersectionCurve()
             model.SetCursorPosition(x, y, z);
     }
 
-    if (ImGui::Button("Accept")) {
+    if (ImGui::Button("Try")) {
         auto const& entities = model.GetAllSelectedEntities();
 
         if (entities.size() == 1) {
+            if (curve.has_value())
+                model.DeleteEntity(curve.value());
+
             if (useGuidance)
-                model.FindSelfIntersection(*entities.begin(), step, model.GetCursorPosition());
+                curve = model.FindSelfIntersection(*entities.begin(), step, model.GetCursorPosition());
             else
-                model.FindSelfIntersection(*entities.begin(), step);
+                curve = model.FindSelfIntersection(*entities.begin(), step);
+
+            if (!curve.has_value())
+                ImGui::OpenPopup("Cannot find intersection curve");
         }
         else if (entities.size() == 2) {
+            if (curve.has_value())
+                model.DeleteEntity(curve.value());
+
             const Entity e1 = *entities.begin();
             const Entity e2 = *(++entities.begin());
 
             if (useGuidance)
-                model.FindIntersection(e1, e2, step, model.GetCursorPosition());
+                curve = model.FindIntersection(e1, e2, step, model.GetCursorPosition());
             else
-                model.FindIntersection(e1, e2, step);
+                curve = model.FindIntersection(e1, e2, step);
 
-            //try {
-
-            // }
-            // catch (...) {
-            //     ImGui::OpenPopup("Cannot find intersection curve");
-            // }
-
-        }
+            if (!curve.has_value())
+                ImGui::OpenPopup("Cannot find intersection curve");
+                    }
         else {
             ImGui::OpenPopup("Wrong number of elements to intersect");
         }
@@ -462,8 +467,22 @@ void ModelerMainMenuView::RenderAddingIntersectionCurve()
         ImGui::EndPopup();
     }
 
-    if (ImGui::Button("Cancel"))
+    if (ImGui::Button("Accept")) {
+        curve.reset();
         controller.SetModelerState(ModelerState::Default);
+    }
+
+    ImGui::SameLine();
+
+    if (ImGui::Button("Cancel")) {
+        if (curve.has_value()) {
+            model.DeleteEntity(curve.value());
+            curve.reset();
+        }
+
+        controller.SetModelerState(ModelerState::Default);
+    }
+
 }
 
 
@@ -525,11 +544,11 @@ void ModelerMainMenuView::RenderSelectableEntitiesList(const std::unordered_set<
     for (const auto entity: entities) {
         selected = model.IsSelected(entity);
 
-        if (ImGui::Selectable(
-            model.GetEntityName(entity).c_str(),
-            &selected
-        )) {
-            model.Select(entity);
+        if (ImGui::Selectable(model.GetEntityName(entity).c_str(), &selected)) {
+            if (selected)
+                model.Select(entity);
+            else
+                model.Deselect(entity);
         }
     }
 }
