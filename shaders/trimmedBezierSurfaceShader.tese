@@ -33,36 +33,21 @@ void main()
     vec4 bv = CubicBernsteinPolynomials(uvCoord.y);
 
     // Update UV coordinates
-    if (gl_PrimitiveID % 2 == 0) {
-        int patchID = gl_PrimitiveID / 2;
-        int row = patchID / surfaceRows;
-        int col = patchID % surfaceCols;
+    int patchID = gl_PrimitiveID / 2;
+    int row = patchID / surfaceCols;
+    int col = patchID % surfaceCols;
 
-        uvCoord.x /= surfaceRows;
-        uvCoord.y /= surfaceCols;
-
-        uvCoord.x += float(row) / float(surfaceRows);
-        uvCoord.y += float(col) / float(surfaceCols);
-
-    }
-    else {
-        int patchID = gl_PrimitiveID / 2;
-        int row = patchID % surfaceRows;
-        int col = patchID / surfaceCols;
-
-        uvCoord.x /= surfaceRows;
-        uvCoord.y /= surfaceCols;
-
-        uvCoord.x += float(row) / float(surfaceRows);
-        uvCoord.y += float(col) / float(surfaceCols);
-
+    if (gl_PrimitiveID % 2 == 1) {
         float tmp = uvCoord.x;
         uvCoord.x = uvCoord.y;
         uvCoord.y = tmp;
-
-//        uvCoord.x = 10;
-//        uvCoord.y = 10;
     }
+
+    uvCoord.x /= surfaceRows;
+    uvCoord.y /= surfaceCols;
+
+    uvCoord.x += float(row) / float(surfaceRows);
+    uvCoord.y += float(col) / float(surfaceCols);
 
     // Control points
     vec3 p00 = gl_in[0].gl_Position.xyz;
