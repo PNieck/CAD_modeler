@@ -79,8 +79,6 @@ public:
     float MaxV(const Entity entity) const override
         { return MaxV(coordinator->GetComponent<C2Patches>(entity)); }
 
-    void Render(const alg::Mat4x4& cameraMtx) const;
-
     void Update() const;
 
 private:

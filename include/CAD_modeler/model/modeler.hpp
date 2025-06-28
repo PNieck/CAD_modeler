@@ -20,6 +20,8 @@
 #include "systems/c0PatchesRenderSystem.hpp"
 #include "systems/trimmedC0PatchesRenderSystem.hpp"
 #include "systems/c2PatchesSystem.hpp"
+#include "systems/c2PatchesRenderSystem.hpp"
+#include "systems/trimmedC2PatchesRenderSystem.hpp"
 #include "systems/controlNetSystem.hpp"
 #include "systems/controlPointsRegistrySystem.hpp"
 #include "systems/gregoryPatchesSystem.hpp"
@@ -326,6 +328,9 @@ private:
     std::shared_ptr<TrimmedC0PatchesRenderSystem> trimmedC0PatchesRenderSystem;
 
     std::shared_ptr<C2PatchesSystem> c2PatchesSystem;
+    std::shared_ptr<C2PatchesRenderSystem> c2PatchesRenderSystem;
+    std::shared_ptr<TrimmedC2PatchesRenderSystem> trimmedC2PatchesRenderSystem;
+
     std::shared_ptr<ControlNetSystem> controlNetSystem;
     std::shared_ptr<ControlPointsRegistrySystem> controlPointsRegistrySys;
     std::shared_ptr<GregoryPatchesSystem> gregoryPatchesSystem;

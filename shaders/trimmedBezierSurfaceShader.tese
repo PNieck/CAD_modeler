@@ -23,8 +23,8 @@ vec4 CubicBernsteinPolynomials(float t) {
 
 void main()
 {
-    uvCoord.x = gl_TessCoord.x;
-    uvCoord.y = gl_TessCoord.y;
+    uvCoord.x = gl_TessCoord.x; // U
+    uvCoord.y = gl_TessCoord.y; // V
 
     uvCoord.y *= float(gl_TessLevelOuter[0]) / float(gl_TessLevelOuter[0] - 1);
 

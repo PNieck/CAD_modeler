@@ -18,4 +18,9 @@ public:
 
     void SetMVP(const alg::Mat4x4& matrix) const
         { SetMatrix4("MVP", matrix); }
+
+    void SetSurfaceSize(const int rows, const int cols) const {
+        SetInt("surfaceRows", rows);
+        SetInt("surfaceCols", cols);
+    }
 };

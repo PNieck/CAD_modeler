@@ -3,6 +3,8 @@
 layout (isolines, equal_spacing) in;
 
 uniform mat4 MVP;
+uniform int surfaceRows;
+uniform int surfaceCols;
 
 out vec2 uvCoord;
 
@@ -44,14 +46,31 @@ vec4 CubicBSplinesBaseFunctions(float t) {
 
 void main()
 {
-    uvCoord.x = gl_TessCoord.x;
-    uvCoord.y = gl_TessCoord.y;
+    uvCoord.x = gl_TessCoord.x; // U
+    uvCoord.y = gl_TessCoord.y; // V
 
     uvCoord.y *= float(gl_TessLevelOuter[0]) / float(gl_TessLevelOuter[0] - 1);
 
     // BSpline polynomials
     vec4 Nu = CubicBSplinesBaseFunctions(uvCoord.x);
     vec4 Nv = CubicBSplinesBaseFunctions(uvCoord.y);
+
+    // Update UV coordinates
+    int patchID = gl_PrimitiveID / 2;
+    int row = patchID / surfaceCols;
+    int col = patchID % surfaceCols;
+
+    if (gl_PrimitiveID % 2 == 1) {
+        float tmp = uvCoord.x;
+        uvCoord.x = uvCoord.y;
+        uvCoord.y = tmp;
+    }
+
+    uvCoord.x /= surfaceRows;
+    uvCoord.y /= surfaceCols;
+
+    uvCoord.x += float(row) / float(surfaceRows);
+    uvCoord.y += float(col) / float(surfaceCols);
 
     // Control points
     vec3 p00 = gl_in[0].gl_Position.xyz;

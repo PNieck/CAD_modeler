@@ -141,7 +141,6 @@ void SaveManager::LoadScene(const std::string &path, Coordinator &coordinator)
             nameSys->SetName(newInterCurve, geometry["name"]);
         }
 
-
         else if (objectType == "bezierSurfaceC0") {
             C0Patches c0Patches(
                 geometry["size"]["y"],
@@ -214,6 +213,7 @@ void SaveManager::LoadScene(const std::string &path, Coordinator &coordinator)
 
             Entity newSurface = c2PatchesSys->CreateSurface(c2Patches);
             nameSys->SetName(newSurface, geometry["name"]);
+            coordinator.AddComponent<DrawStd>(newSurface, DrawStd());
         }
     }
 }

@@ -39,6 +39,8 @@ Modeler::Modeler(const int viewportWidth, const int viewportHeight):
     C0PatchesRenderSystem::RegisterSystem(coordinator);
     TrimmedC0PatchesRenderSystem::RegisterSystem(coordinator);
     C2PatchesSystem::RegisterSystem(coordinator);
+    C2PatchesRenderSystem::RegisterSystem(coordinator);
+    TrimmedC2PatchesRenderSystem::RegisterSystem(coordinator);
     ControlNetSystem::RegisterSystem(coordinator);
     ControlPointsRegistrySystem::RegisterSystem(coordinator);
     GregoryPatchesSystem::RegisterSystem(coordinator);
@@ -63,6 +65,9 @@ Modeler::Modeler(const int viewportWidth, const int viewportHeight):
     trimmedC0PatchesRenderSystem = coordinator.GetSystem<TrimmedC0PatchesRenderSystem>();
 
     c2PatchesSystem = coordinator.GetSystem<C2PatchesSystem>();
+    c2PatchesRenderSystem = coordinator.GetSystem<C2PatchesRenderSystem>();
+    trimmedC2PatchesRenderSystem = coordinator.GetSystem<TrimmedC2PatchesRenderSystem>();
+
     controlNetSystem = coordinator.GetSystem<ControlNetSystem>();
     controlPointsRegistrySys = coordinator.GetSystem<ControlPointsRegistrySystem>();
     gregoryPatchesSystem = coordinator.GetSystem<GregoryPatchesSystem>();
@@ -168,6 +173,8 @@ Entity Modeler::AddC2Plane(const alg::Vec3& direction, const float length, const
         }
     }
 
+    coordinator.AddComponent<DrawStd>(entity, DrawStd());
+
     return entity;
 }
 
@@ -207,6 +214,8 @@ Entity Modeler::AddC2Cylinder()
             coordinator.AddComponent(cp, Unremovable());
         }
     }
+
+    coordinator.AddComponent<DrawStd>(entity, DrawStd());
 
     return entity;
 }
@@ -763,9 +772,13 @@ void Modeler::RenderSystemsObjects(
     c0CurveSystem->Render(cameraMtx);
     c2CurveSystem->Render(cameraMtx);
     interpolationRenderingSystem->Render(cameraMtx);
+
     c0PatchesRenderSystem->Render(cameraMtx);
     trimmedC0PatchesRenderSystem->Render(cameraMtx);
-    c2PatchesSystem->Render(cameraMtx);
+
+    c2PatchesRenderSystem->Render(cameraMtx);
+    trimmedC2PatchesRenderSystem->Render(cameraMtx);
+
     controlNetSystem->Render(cameraMtx);
     gregoryPatchesSystem->Render(cameraMtx);
     vectorSystem->Render(cameraMtx);

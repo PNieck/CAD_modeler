@@ -604,43 +604,6 @@ alg::Vec3 C2PatchesSystem::PartialDerivativeV(const C2Patches &patches, float u,
 }
 
 
-void C2PatchesSystem::Render(const alg::Mat4x4 &cameraMtx) const
-{
-    if (entities.empty()) {
-        return;
-    }
-
-    auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
-    auto const& shader = ShaderRepository::GetInstance().GetBSplineSurfaceShader();
-
-    shader.Use();
-    shader.SetColor(alg::Vec4(1.0f));
-    shader.SetMVP(cameraMtx);
-
-    glPatchParameteri(GL_PATCH_VERTICES, 16);
-
-    for (auto const entity: entities) {
-        const bool selection = selectionSystem->IsSelected(entity);
-
-        if (selection)
-            shader.SetColor(alg::Vec4(1.0f, 0.5f, 0.0f, 1.0f));
-
-        auto const& mesh = coordinator->GetComponent<Mesh>(entity);
-        mesh.Use();
-
-        auto const& density = coordinator->GetComponent<PatchesDensity>(entity);
-        float v[] = {5.f, 64.f, 64.f, 64.f};
-        v[0] = static_cast<float>(density.GetDensity());
-        glPatchParameterfv(GL_PATCH_DEFAULT_OUTER_LEVEL, v);
-
-        glDrawElements(GL_PATCHES, mesh.GetElementsCnt(), GL_UNSIGNED_INT, 0);
-
-        if (selection)
-            shader.SetColor(alg::Vec4(1.0f));
-    }
-}
-
-
 void C2PatchesSystem::Update() const
 {
     auto const toUpdateSystem = coordinator->GetSystem<ToUpdateSystem>();
