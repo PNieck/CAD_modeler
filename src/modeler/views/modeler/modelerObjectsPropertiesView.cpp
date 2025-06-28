@@ -533,10 +533,8 @@ void ModelerObjectsPropertiesView::DisplayUvVisualization(const Entity entity, c
             // Clamp to image bounds
             if (localPos.x >= 0 && localPos.y >= 0 &&
                 localPos.x < imageSize.x && localPos.y < imageSize.y
-            ) {
-                //model.DrawPointOnUV(entity, localPos.x, imageSize.y - localPos.y);
+            )
                 model.FillTrimmingRegion(entity, localPos.x, imageSize.y - localPos.y);
-            }
         }
 
         if (ImGui::Button("Exit"))
@@ -546,6 +544,11 @@ void ModelerObjectsPropertiesView::DisplayUvVisualization(const Entity entity, c
 
         if (ImGui::Button("Apply trimming"))
             model.ApplyTrimming(entity);
+
+        ImGui::SameLine();
+
+        if (ImGui::Button("Clear trimming"))
+            model.ClearTrimming(entity);
 
         ImGui::End();
     }

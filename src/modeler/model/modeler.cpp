@@ -556,6 +556,20 @@ void Modeler::ApplyTrimming(const Entity e)
 }
 
 
+void Modeler::ClearTrimming(const Entity e)
+{
+    if (trimmedToriRenderingSystem->HasEntity(e)) {
+        trimmedToriRenderingSystem->RemoveEntity(e);
+        toriRenderingSystem->AddEntity(e);
+    }
+
+    if (coordinator.HasComponent<DrawTrimmed>(e))
+        coordinator.DeleteComponent<DrawTrimmed>(e);
+
+    coordinator.AddComponent<DrawStd>(e, DrawStd());
+}
+
+
 void Modeler::ShowDerivativesU(Entity e)
 {
     constexpr int cnt = 10;

@@ -135,7 +135,7 @@ public:
     int GetColsCntOfC2Patches(const Entity surface) const
         { return c2PatchesSystem->GetColsCnt(surface); }
 
-    inline void DeleteControlPointFromCurve(Entity curve, Entity controlPoint) const
+    void DeleteControlPointFromCurve(const Entity curve, const Entity controlPoint) const
         { c0CurveSystem->DeleteControlPoint(curve, controlPoint); }
 
     const std::unordered_set<Entity>& GetAllC0Surfaces() const
@@ -195,7 +195,7 @@ public:
     void SetComponent(const Entity entity, const Comp& comp)
         { coordinator.SetComponent<Comp>(entity, comp); }
 
-    inline void DeleteEntity(Entity entity)
+    void DeleteEntity(const Entity entity)
         { coordinator.DestroyEntity(entity); }
 
     inline Entity GetMiddlePoint() const
@@ -293,6 +293,7 @@ public:
     void FillTrimmingRegion(Entity e, size_t u, size_t v);
     void DrawPointOnUV(Entity e, size_t u, size_t v);
     void ApplyTrimming(Entity e);
+    void ClearTrimming(Entity e);
 
     // TODO: delete
     void ShowDerivativesU(Entity e);
