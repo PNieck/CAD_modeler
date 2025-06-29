@@ -65,8 +65,16 @@ void ModelerController::MouseMove(const int x, const int y) const
 
 void ModelerController::KeyboardKeyPressed(const KeyboardKey key)
 {
+    SubController::KeyboardKeyPressed(key);
+
     if (key == KeyboardKey::c)
         modeler.selectingEntities = !modeler.selectingEntities;
+}
+
+
+void ModelerController::KeyboardKeyReleased(KeyboardKey key)
+{
+    SubController::KeyboardKeyReleased(key);
 }
 
 

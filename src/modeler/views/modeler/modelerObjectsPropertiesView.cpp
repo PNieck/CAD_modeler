@@ -121,6 +121,9 @@ void ModelerObjectsPropertiesView::RenderMultipleObjectProperties() const
     if (valueChanged)
         model.ChangeSelectedEntitiesPosition(Position(x, y, z));
 
+    if (ImGui::Button("Center camera"))
+        CenterCameraOnObject(pos);
+
     x = 1.0f;
     y = 1.0f;
     z = 1.0f;
@@ -188,6 +191,10 @@ void ModelerObjectsPropertiesView::DisplayPositionProperty(const Entity entity, 
 
     if (valueChanged)
         model.SetComponent<Position>(entity, Position(x, y, z));
+
+    if (ImGui::Button("Center camera on object")) {
+        CenterCameraOnObject(pos);
+    }
 }
 
 
@@ -495,6 +502,14 @@ void ModelerObjectsPropertiesView::DisplayNameEditor(const Entity entity, const 
 
     if (ImGui::InputText("##objectName", &tmp))
         model.ChangeEntityName(entity, tmp);
+}
+
+
+void ModelerObjectsPropertiesView::CenterCameraOnObject(const Position &pos) const
+{
+    auto camParams = model.cameraManager.GetBaseParams();
+    camParams.target = pos;
+    model.cameraManager.SetBaseParams(camParams);
 }
 
 

@@ -39,4 +39,6 @@ private:
     void DisplayUvVisualization(Entity entity, const UvVisualization& vis) const;
 
     void DisplayNameEditor(Entity entity, const Name& name) const;
+
+    void CenterCameraOnObject(const Position& pos) const;
 };

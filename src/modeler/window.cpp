@@ -173,19 +173,45 @@ void Window::ScrollCallback(GLFWwindow * glfwWindow, double xoffset, double yoff
 
 void Window::KeyboardButtonCallback(GLFWwindow *glfwWindow, int key, int scancode, int action, int mods)
 {
-    if (action != GLFW_PRESS)
-        return;
-
     Window* window = (Window*)glfwGetWindowUserPointer(glfwWindow);
 
-    switch (key)
-    {
-    case GLFW_KEY_C:
-        window->controller.KeyboardKeyPressed(KeyboardKey::c);
-        break;
-    
-    default:
-        break;
+    if (action == GLFW_PRESS) {
+        switch (key)
+        {
+            case GLFW_KEY_C:
+                window->controller.KeyboardKeyPressed(KeyboardKey::c);
+                break;
+
+            case GLFW_KEY_LEFT_SHIFT:
+                window->controller.KeyboardKeyPressed(KeyboardKey::left_shift);
+                break;
+
+            case GLFW_KEY_RIGHT_SHIFT:
+                window->controller.KeyboardKeyPressed(KeyboardKey::right_shift);
+                break;
+
+            default:
+                break;
+        }
+    }
+    else if (action == GLFW_RELEASE) {
+        switch (key)
+        {
+            case GLFW_KEY_C:
+                window->controller.KeyboardKeyReleased(KeyboardKey::c);
+                break;
+
+            case GLFW_KEY_LEFT_SHIFT:
+                window->controller.KeyboardKeyReleased(KeyboardKey::left_shift);
+                break;
+
+            case GLFW_KEY_RIGHT_SHIFT:
+                window->controller.KeyboardKeyReleased(KeyboardKey::right_shift);
+                break;
+
+            default:
+                break;
+        }
     }
 
     (void)scancode;

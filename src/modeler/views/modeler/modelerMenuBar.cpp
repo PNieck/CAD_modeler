@@ -46,6 +46,12 @@ void ModelerMenuBar::Render() const
                 controller.SetModelerState(ModelerState::AnaglyphsSettings);
             }
 
+            if (ImGui::MenuItem("Center camera")) {
+                auto params = model.cameraManager.GetBaseParams();
+                params.target = Position(0.f);
+                model.cameraManager.SetBaseParams(params);
+            }
+
             ImGui::EndMenu();
         }
 

@@ -21,7 +21,7 @@ void MainController::MouseMoved(const int x, const int y)
     switch (actModelType) {
         case ModelType::Modeler:
             modelerController.MouseMove(x, y);
-        break;
+            break;
 
         case ModelType::MillerMachineSim:
             millSimController.MouseMove(x, y);
@@ -118,11 +118,11 @@ void MainController::SizeChanged(const int width, const int height)
     switch (actModelType) {
         case ModelType::Modeler:
             modelerController.WindowSizeChanged(width, height);
-        break;
+            break;
 
         case ModelType::MillerMachineSim:
             millSimController.WindowSizeChanged(width, height);
-        break;
+            break;
 
         default:
             throw std::runtime_error("Unknown model type");
@@ -155,9 +155,27 @@ void MainController::KeyboardKeyPressed(const KeyboardKey key)
     switch (actModelType) {
         case ModelType::Modeler:
             modelerController.KeyboardKeyPressed(key);
-        break;
+            break;
 
         case ModelType::MillerMachineSim:
+            millSimController.KeyboardKeyPressed(key);
+            break;
+
+        default:
+            throw std::runtime_error("Unknown model type");
+    }
+}
+
+
+void MainController::KeyboardKeyReleased(KeyboardKey key)
+{
+    switch (actModelType) {
+        case ModelType::Modeler:
+            modelerController.KeyboardKeyReleased(key);
+            break;
+
+        case ModelType::MillerMachineSim:
+            millSimController.KeyboardKeyReleased(key);
             break;
 
         default:

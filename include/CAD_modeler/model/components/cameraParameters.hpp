@@ -12,6 +12,7 @@ public:
     float nearPlane;
     float farPlane;
 
-    inline float GetAspectRatio() const
+    [[nodiscard]]
+    float GetAspectRatio() const
         { return static_cast<float>(viewportWidth) / static_cast<float>(viewportHeight); }
 };

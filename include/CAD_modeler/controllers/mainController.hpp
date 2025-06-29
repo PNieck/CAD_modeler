@@ -28,6 +28,7 @@ public:
     void MouseMoved(int x, int y);
     void ScrollMoved(int offset);
     void KeyboardKeyPressed(KeyboardKey key);
+    void KeyboardKeyReleased(KeyboardKey key);
 
     [[nodiscard]]
     ModelType GetModelType() const

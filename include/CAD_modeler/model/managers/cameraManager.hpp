@@ -29,6 +29,8 @@ public:
 
     void RotateCamera(float x, float y);
 
+    void MoveCameraWithTarget(float x, float y);
+
     [[nodiscard]]
     float GetDistanceFromTarget() const;
 

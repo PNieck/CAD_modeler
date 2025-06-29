@@ -28,12 +28,13 @@ public:
     void MouseRelease(const MouseButton button) const
         { SubController::MouseRelease(button); }
     void KeyboardKeyPressed(KeyboardKey key);
+    void KeyboardKeyReleased(KeyboardKey key);
 
     [[nodiscard]]
     ModelerState GetModelerState() const
         { return modelerState; }
 
-    inline void SetModelerState(const ModelerState state)
+    void SetModelerState(const ModelerState state)
         { modelerState = state; }
 
 private:

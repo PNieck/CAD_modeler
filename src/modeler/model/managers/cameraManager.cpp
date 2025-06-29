@@ -4,6 +4,8 @@
 #include <CAD_modeler/model/systems/positionSystem.hpp>
 #include <CAD_modeler/utilities/visitorHelper.hpp>
 
+#include <algebra/vec3.hpp>
+
 #include <stdexcept>
 
 
@@ -74,6 +76,25 @@ void CameraManager::RotateCamera(const float x, const float y)
     const Entity camera = GetCameraEntity();
 
     positionSys->RotateAround(camera, params.target, x, y);
+}
+
+
+void CameraManager::MoveCameraWithTarget(const float x, const float y)
+{
+    const Entity camera = GetCameraEntity();
+    auto const& camPos = coordinator.GetComponent<Position>(camera);
+    auto params = GetBaseParams();
+
+    constexpr alg::Vec3 up(0.f, 1.f, 0.f);
+    const alg::Vec3 toTarget = params.target.vec - camPos.vec;
+    const alg::Vec3 right = alg::Cross(up, toTarget).Normalize();
+
+    const alg::Vec3 offset = right * x + up * y;
+
+    coordinator.SetComponent<Position>(camera, Position(camPos.vec + offset));
+
+    params.target = params.target.vec + offset;
+    SetBaseParams(params);
 }
 
 
@@ -187,14 +208,14 @@ void CameraManager::SetEyeSeparation(float eyeSep)
 }
 
 
-void CameraManager::SetConvergence(float conv)
+void CameraManager::SetConvergence(const float conv)
 {
     this->convergence = conv;
 
     if (GetCurrentCameraType() != CameraType::Anaglyphs)
         return;
 
-    auto sys = std::get<AnaglyphsSys>(currentCameraSys);
+    const auto sys = std::get<AnaglyphsSys>(currentCameraSys);
     auto params = sys->GetParameters();
     params.convergence = conv;
     sys->SetParameters(params);
@@ -214,10 +235,10 @@ void CameraManager::SetBaseParams(const CameraParameters &params)
 {
     std::visit(
         Overloaded {
-            [&params] (PerspectiveSys sys) { sys->SetParameters(params); },
-            [&params] (AnaglyphsSys sys) { 
-                auto oldParams = sys->GetParameters();
-                AnaglyphsCameraParameters newParams(params, oldParams.eyeSeparation, oldParams.convergence);
+            [&params] (const PerspectiveSys &sys) { sys->SetParameters(params); },
+            [&params] (const AnaglyphsSys &sys) {
+                const auto oldParams = sys->GetParameters();
+                const AnaglyphsCameraParameters newParams(params, oldParams.eyeSeparation, oldParams.convergence);
                 sys->SetParameters(newParams);
             }
         }, currentCameraSys
