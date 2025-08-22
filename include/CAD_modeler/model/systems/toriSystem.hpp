@@ -7,6 +7,8 @@
 #include "../components/scale.hpp"
 #include "../components/torusParameters.hpp"
 
+#include <numbers>
+
 
 class ToriSystem final : public SurfaceSystem {
 public:

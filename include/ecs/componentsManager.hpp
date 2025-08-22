@@ -8,6 +8,7 @@
 #include <memory>
 #include <type_traits>
 #include <set>
+#include <stdexcept>
 
 
 using ComponentId = std::size_t;

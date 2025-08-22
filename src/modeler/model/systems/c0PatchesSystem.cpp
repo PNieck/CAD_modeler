@@ -10,7 +10,8 @@
 #include "CAD_modeler/model/systems/controlPointsRegistrySystem.hpp"
 #include "CAD_modeler/model/systems/c0PatchesSystem/singleC0Patch.hpp"
 #include "CAD_modeler/model/systems/pointsSystem.hpp"
-#include "CAD_modeler/model/systems/shaders/shaderRepository.hpp"
+
+#include <numbers>
 
 
 void C0PatchesSystem::RegisterSystem(Coordinator &coordinator)
