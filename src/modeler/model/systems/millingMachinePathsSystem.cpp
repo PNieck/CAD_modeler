@@ -13,7 +13,7 @@ MillingMachinePath MillingMachinePathsSystem::ParseGCode(const std::string &file
     std::ifstream file;
     MillingMachinePath result;
 
-    std::regex lineRegex(R"(^N(\d+)G01((X)(-?\d+\.\d+))?((Y)(-?\d+\.\d+))?((Z)(-?\d+\.\d+))?$)");
+    std::regex lineRegex(R"(^N(\d+)G01((X)(-?\d+\.\d+))?((Y)(-?\d+\.\d+))?((Z)(-?\d+\.\d+))?\r?$)");
 
     file.open(filePath);
 
