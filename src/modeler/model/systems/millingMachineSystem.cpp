@@ -54,8 +54,8 @@ void MillingMachineSystem::Init(const int xResolution, const int zResolution)
     heightmap.ChangeSize(xResolution, zResolution, textureData.data(), Texture2D::Red);
 
     material.Update(
-        GenerateVertices(),
-        GenerateIndices()
+        GenerateMaterialVertices(),
+        GenerateMaterialIndices()
     );
 
     millingCutter = coordinator->CreateEntity();
@@ -120,6 +120,11 @@ void MillingMachineSystem::SetMaterialResolution(const int xRes, const int zRes)
     textureData.resize(xRes * zRes);
     std::ranges::fill(textureData, initMaterialThickness);
     heightmap.ChangeSize(xRes, zRes, textureData.data(), Texture2D::Red);
+
+    material.Update(
+        GenerateMaterialVertices(),
+        GenerateMaterialIndices()
+    );
 }
 
 
@@ -132,8 +137,8 @@ void MillingMachineSystem::SetMaterialSize(const float xLen, const float zLen)
     mainHeightMapCorner.Z() = -zLen / 2.f;
 
     material.Update(
-        GenerateVertices(),
-        GenerateIndices()
+        GenerateMaterialVertices(),
+        GenerateMaterialIndices()
     );
 }
 
@@ -150,8 +155,8 @@ void MillingMachineSystem::SetBaseLevel(const float level)
     mainHeightMapCorner.Y() = level;
 
     material.Update(
-        GenerateVertices(),
-        GenerateIndices()
+        GenerateMaterialVertices(),
+        GenerateMaterialIndices()
     );
 }
 
@@ -242,51 +247,15 @@ void MillingMachineSystem::Update(const double dt)
 
 void MillingMachineSystem::Render(const alg::Mat4x4& view, const alg::Mat4x4& perspective, const alg::Vec3& camPos)
 {
-    const auto& shaderRepo = ShaderRepository::GetInstance();
-    const auto& shader = shaderRepo.GetMillingShader();
-
-    shader.Use();
-    heightmap.Use();
-    shader.SetCameraPosition(camPos);
-
     const auto cameraMtx = perspective * view;
 
-    shader.SetHeightMapZLen(heightMapZLen);
-    shader.SetHeightMapXLen(heightMapXLen);
-    shader.SetMainHeightmapCorner(mainHeightMapCorner);
-    shader.SetMVP(cameraMtx);
-
-    material.Use();
-    glPatchParameteri(GL_PATCH_VERTICES, 4);
-    glDrawElements(GL_PATCHES, material.GetElementsCnt(), GL_UNSIGNED_INT, nullptr);
+    RenderMaterial(cameraMtx, camPos);
 
     if (entities.empty())
         return;
 
-    auto const& stdShader = shaderRepo.GetStdShader();
-
-    stdShader.Use();
-
-    // Neon green
-    stdShader.SetColor(alg::Vec4(23.f/255.f, 227.f/255.f, 33.f/255.f, 1.f));
-    shader.SetMVP(cameraMtx);
-
-    for (auto const entity : entities) {
-        auto const& mesh = coordinator->GetComponent<Mesh>(entity);
-        mesh.Use();
-
-        glDrawElements(GL_LINE_STRIP, mesh.GetElementsCnt(), GL_UNSIGNED_INT, nullptr);
-    }
-
-    auto const& pos = coordinator->GetComponent<Position>(millingCutter);
-    auto const& scale = coordinator->GetComponent<Scale>(millingCutter);
-
-    stdShader.SetMVP(cameraMtx * pos.TranslationMatrix() * scale.ScaleMatrix());
-    stdShader.SetColor(alg::Vec4(1.f));
-    auto const& cutterMesh = coordinator->GetComponent<Mesh>(millingCutter);
-    cutterMesh.Use();
-
-    glDrawElements(GL_TRIANGLES, cutterMesh.GetElementsCnt(), GL_UNSIGNED_INT, nullptr);
+    RenderPaths(cameraMtx);
+    RenderCutter(cameraMtx);
 }
 
 
@@ -444,18 +413,77 @@ float MillingMachineSystem::UpdateHeightMap(const int row, const int col, const 
 }
 
 
-std::vector<float> MillingMachineSystem::GenerateVertices()
+void MillingMachineSystem::RenderMaterial(const alg::Mat4x4 &cameraMtx, const alg::Vec3 &camPos) const
+{
+    const auto& shaderRepo = ShaderRepository::GetInstance();
+    const auto& shader = shaderRepo.GetMillingShader();
+
+    shader.Use();
+    heightmap.Use();
+    shader.SetCameraPosition(camPos);
+
+    shader.SetHeightMapZLen(heightMapZLen);
+    shader.SetHeightMapXLen(heightMapXLen);
+    shader.SetMainHeightmapCorner(mainHeightMapCorner);
+    shader.SetMVP(cameraMtx);
+
+    material.Use();
+    glDrawElements(GL_TRIANGLES, material.GetElementsCnt(), GL_UNSIGNED_INT, nullptr);
+}
+
+
+void MillingMachineSystem::RenderPaths(const alg::Mat4x4 &cameraMtx) const
+{
+    const auto& shaderRepo = ShaderRepository::GetInstance();
+    auto const& shader = shaderRepo.GetStdShader();
+
+    shader.Use();
+
+    // Neon green
+    shader.SetColor(alg::Vec4(23.f/255.f, 227.f/255.f, 33.f/255.f, 1.f));
+    shader.SetMVP(cameraMtx);
+
+    for (auto const entity : entities) {
+        auto const& mesh = coordinator->GetComponent<Mesh>(entity);
+        mesh.Use();
+
+        glDrawElements(GL_LINE_STRIP, mesh.GetElementsCnt(), GL_UNSIGNED_INT, nullptr);
+    }
+}
+
+
+void MillingMachineSystem::RenderCutter(const alg::Mat4x4 &cameraMtx) const
+{
+    const auto& shaderRepo = ShaderRepository::GetInstance();
+    auto const& shader = shaderRepo.GetStdShader();
+
+    auto const& pos = coordinator->GetComponent<Position>(millingCutter);
+    auto const& scale = coordinator->GetComponent<Scale>(millingCutter);
+
+    shader.SetMVP(cameraMtx * pos.TranslationMatrix() * scale.ScaleMatrix());
+    shader.SetColor(alg::Vec4(1.f));
+    auto const& cutterMesh = coordinator->GetComponent<Mesh>(millingCutter);
+    cutterMesh.Use();
+
+    glDrawElements(GL_TRIANGLES, cutterMesh.GetElementsCnt(), GL_UNSIGNED_INT, nullptr);
+}
+
+
+std::vector<float> MillingMachineSystem::GenerateMaterialVertices()
 {
     std::vector<float> result;
-    const int pointsInX = heightmap.GetWidth() / 50 + 1;
-    const int pointsInZ = heightmap.GetHeight() / 50 + 1;
+    const int pointsInX = GetMaterialXResolution();
+    const int pointsInZ = GetMaterialZResolution();
 
     result.reserve(pointsInX * pointsInZ * alg::Vec3::dim);
 
+    const float pixelXLen = heightMapXLen / static_cast<float>(pointsInX);
+    const float pixelZLen = heightMapZLen / static_cast<float>(pointsInZ);
+
     for (int row = 0; row < pointsInZ; row++) {
         for (int col = 0; col < pointsInX; col++) {
-            const float x = heightMapXLen / static_cast<float>((pointsInX - 1)) * col;
-            const float z = heightMapZLen / static_cast<float>((pointsInZ - 1)) * row;
+            const float x = pixelXLen/2.f + col * pixelXLen;
+            const float z = pixelZLen/2.f + row * pixelZLen;
 
             result.push_back(mainHeightMapCorner.X() + x);
             result.push_back(mainHeightMapCorner.Y());
@@ -467,21 +495,27 @@ std::vector<float> MillingMachineSystem::GenerateVertices()
 }
 
 
-std::vector<uint32_t> MillingMachineSystem::GenerateIndices()
+std::vector<uint32_t> MillingMachineSystem::GenerateMaterialIndices()
 {
     std::vector<uint32_t> result;
 
-    const int pointsInX = heightmap.GetWidth() / 50 + 1;
-    const int pointsInZ = heightmap.GetHeight() / 50 + 1;
+    const int pointsInX = GetMaterialXResolution();
+    const int pointsInZ = GetMaterialZResolution();
+
+    result.reserve((pointsInZ - 1) * (pointsInX - 1) * 6);
 
     for (int row = 0; row < pointsInZ - 1; row ++) {
         for (int col = 0; col < pointsInX - 1; col++) {
-            result.push_back(row + pointsInZ * col + pointsInZ);
+
+            // First triangle
             result.push_back(row + pointsInZ * col);
-
-            result.push_back(row + pointsInZ * col + pointsInZ + 1);
             result.push_back(row + pointsInZ * col + 1);
+            result.push_back(row + pointsInZ * col + pointsInX + 1);
 
+            // Second triangle
+            result.push_back(row + pointsInZ * col);
+            result.push_back(row + pointsInZ * col + pointsInX + 1);
+            result.push_back(row + pointsInZ * col + pointsInX);
         }
     }
 

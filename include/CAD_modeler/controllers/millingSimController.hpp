@@ -30,7 +30,7 @@ public:
     void KeyboardKeyPressed(const KeyboardKey key) const
         { SubController::KeyboardKeyPressed(key); }
 
-    void KeyboardKeyReleased(KeyboardKey key)
+    void KeyboardKeyReleased(const KeyboardKey key)
         { SubController::KeyboardKeyReleased(key); }
 
     void Render();

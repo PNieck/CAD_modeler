@@ -124,10 +124,13 @@ private:
 
     float UpdateHeightMap(int row, int col, float cutterY, float cutterHeight, bool pathToDown);
 
-    std::vector<float> GenerateVertices();
-    std::vector<uint32_t> GenerateIndices();
+    void RenderMaterial(const alg::Mat4x4& cameraMtx, const alg::Vec3& camPos) const;
+    void RenderPaths(const alg::Mat4x4& cameraMtx) const;
+    void RenderCutter(const alg::Mat4x4& cameraMtx) const;
+
+    std::vector<float> GenerateMaterialVertices();
+    std::vector<uint32_t> GenerateMaterialIndices();
 
     static std::vector<float> GeneratePathsVertices(const MillingMachinePath& paths);
-
     static std::vector<uint32_t> GeneratePathsIndices(const MillingMachinePath& paths);
 };
