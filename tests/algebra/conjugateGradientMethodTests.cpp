@@ -5,6 +5,7 @@
 #include <cmath>
 
 #include "optimization/lineSearchMethods/dichotomyLineSearch.hpp"
+#include "optimization/stopConditions/smallGradient.hpp"
 
 
 using namespace opt;
@@ -33,14 +34,15 @@ class SimpleTestFunction final : public FunctionToOptimize {
 
 TEST(ConjungateGradientMethodTests, SimpleFunctionToOptimize) {
     SimpleTestFunction function;
-    DichotomyLineSearch lineSearch()
+    auto lineSearch = DichotomyLineSearch(0.f, 10.f, 1e-7);
+    auto stopCondition = SmallGradient(1e-5);
 
     const auto solution = ConjugateGradientMethod(
         function,
-
+        lineSearch,
         { 0, 3 },
-        0.1f,
-        0.00001
+        1000,
+        stopCondition
     );
 
     ASSERT_TRUE(solution.has_value());

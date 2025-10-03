@@ -15,6 +15,8 @@ target_link_libraries(
     GTest::gtest_main
     algebra
     glm
+    optimization
+    rootFinding
 )
 
 gtest_discover_tests(algebra_tests)
