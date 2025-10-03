@@ -1,9 +1,13 @@
 #include <gtest/gtest.h>
 
-#include <algebra/conjugateGradientMethod.hpp>
+#include <optimization/conjugateGradientMethod.hpp>
+
+#include <cmath>
+
+#include "optimization/lineSearchMethods/dichotomyLineSearch.hpp"
 
 
-using namespace alg;
+using namespace opt;
 
 
 class SimpleTestFunction final : public FunctionToOptimize {
@@ -12,7 +16,7 @@ class SimpleTestFunction final : public FunctionToOptimize {
         if (args.size() != 2)
             throw std::invalid_argument("Wrong number of arguments");
 
-        return std::powf(args[0] - 2.f, 4) + std::powf(args[0] - 2.f*args[1], 2);
+        return std::pow(args[0] - 2.f, 4.f) + std::pow(args[0] - 2.f*args[1], 2.f);
     }
 
     std::vector<float> Gradient(const std::vector<float> &args) override {
@@ -20,7 +24,7 @@ class SimpleTestFunction final : public FunctionToOptimize {
             throw std::invalid_argument("Wrong number of arguments");
 
         return {
-            4.f * std::powf(args[0] - 2.f, 3) + 2.f * (args[0] - 2.f*args[1]),
+            4.f * std::pow(args[0] - 2.f, 3.f) + 2.f * (args[0] - 2.f*args[1]),
             -4.f * (args[0] - 2.f*args[1])
         };
     }
@@ -29,9 +33,11 @@ class SimpleTestFunction final : public FunctionToOptimize {
 
 TEST(ConjungateGradientMethodTests, SimpleFunctionToOptimize) {
     SimpleTestFunction function;
+    DichotomyLineSearch lineSearch()
 
-    const auto solution = ConjugationGradientMethod(
+    const auto solution = ConjugateGradientMethod(
         function,
+
         { 0, 3 },
         0.1f,
         0.00001
