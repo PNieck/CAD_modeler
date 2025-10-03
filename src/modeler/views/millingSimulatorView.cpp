@@ -36,7 +36,13 @@ void MillingSimulatorView::RenderFileSelection()
     if (ImGui::Button("Load")) {
         IGFD::FileDialogConfig config;
 	    config.path = ".";
-        ImGuiFileDialog::Instance()->OpenDialog("ChooseGCodeFileDlgKey", "Choose GCode File", ".k01,.k8,.k16,.f10,.f12", config);
+
+        ImGuiFileDialog::Instance()->OpenDialog(
+            "ChooseGCodeFileDlgKey",
+            "Choose GCode File",
+            "GCode files {.k01,.k08,.k16,.f10,.f12}",
+            config
+        );
     }
 
     if (ImGuiFileDialog::Instance()->Display("ChooseGCodeFileDlgKey")) {
