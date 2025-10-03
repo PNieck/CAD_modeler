@@ -1,21 +1,24 @@
 #include <gtest/gtest.h>
 
-#include <algebra/newtonMethod.hpp>
+#include <rootFinding/newtonMethod.hpp>
+#include <algebra/vec4.hpp>
+#include <cmath>
 
 
+using namespace root;
 using namespace alg;
 
 
 class FourSameIndependentEquations final : public FunctionToFindRoot {
 public:
-    alg::Vec4 Value(Vec4 args) override {
-        const float v = std::powf(args.X(), 3) - std::powf(args.X(), 2) + 2.f;
+    Vec4 Value(Vec4 args) override {
+        const float v = std::pow(args.X(), 3.f) - std::pow(args.X(), 2.f) + 2.f;
 
         return Vec4(v);
     }
 
-    alg::Mat4x4 Jacobian(Vec4 args) override {
-        const float v = 3.f * std::powf(args.X(), 2.f) - 2.f*args.X();
+    Mat4x4 Jacobian(Vec4 args) override {
+        const float v = 3.f * std::pow(args.X(), 2.f) - 2.f*args.X();
 
         return {
               v, 0.f, 0.f, 0.f,
