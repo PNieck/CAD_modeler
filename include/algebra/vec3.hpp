@@ -68,7 +68,7 @@ namespace alg
         const DataType& operator[](const size_t pos) const
             { return data[pos]; }
 
-        Vector3 operator+(const Vector3& v) const {
+        constexpr Vector3 operator+(const Vector3& v) const {
             return Vector3(
                 data[0] + v.data[0],
                 data[1] + v.data[1],
@@ -76,7 +76,7 @@ namespace alg
             );
         }
 
-        Vector3& operator+=(const Vector3& v) {
+        constexpr Vector3& operator+=(const Vector3& v) {
             data[0] += v.data[0];
             data[1] += v.data[1];
             data[2] += v.data[2];
@@ -84,7 +84,7 @@ namespace alg
             return *this;
         }
 
-        Vector3& operator-=(const Vector3& v) {
+        constexpr Vector3& operator-=(const Vector3& v) {
             data[0] -= v.data[0];
             data[1] -= v.data[1];
             data[2] -= v.data[2];
@@ -92,7 +92,7 @@ namespace alg
             return *this;
         }
 
-        Vector3& operator*=(DataType scalar) {
+        constexpr Vector3& operator*=(DataType scalar) {
             data[0] *= scalar;
             data[1] *= scalar;
             data[2] *= scalar;
@@ -100,7 +100,7 @@ namespace alg
             return *this;
         }
 
-        Vector3 operator-(const Vector3& v) const {
+        constexpr Vector3 operator-(const Vector3& v) const {
             return Vector3(
                 data[0] - v.data[0],
                 data[1] - v.data[1],
@@ -109,7 +109,7 @@ namespace alg
         }
 
 
-        Vector3 operator-() const {
+        constexpr Vector3 operator-() const {
             return Vector3(
                 -data[0],
                 -data[1],
@@ -118,7 +118,7 @@ namespace alg
         }
 
 
-        Vector3& operator/=(DataType scalar) {
+        constexpr Vector3& operator/=(DataType scalar) {
             data[0] /= scalar;
             data[1] /= scalar;
             data[2] /= scalar;
@@ -127,7 +127,7 @@ namespace alg
         }
 
 
-        Vector3& operator=(const Vector3& v) {
+        constexpr Vector3& operator=(const Vector3& v) {
             data[0] = v.data[0];
             data[1] = v.data[1];
             data[2] = v.data[2];
