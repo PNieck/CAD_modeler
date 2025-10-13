@@ -135,6 +135,18 @@ namespace alg
             return *this;
         }
 
+        static constexpr Vector3 UnitX() {
+            return Vector3(1, 0, 0);
+        }
+
+        static constexpr Vector3 UnitY() {
+            return Vector3(0, 1, 0);
+        }
+
+        static constexpr Vector3 UnitZ() {
+            return Vector3(0, 0, 1);
+        }
+
     protected:
         std::array<DataType, 3> data;
     };
