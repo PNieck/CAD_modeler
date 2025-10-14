@@ -8,11 +8,10 @@
 #include <vector>
 #include <thread>
 
-#include "../components/mesh.hpp"
+#include "../components/millingMaterial.hpp"
 #include "../components/MillingMachinePath.hpp"
 #include "../components/millingCutter.hpp"
 #include "../components/millingWarningsRepo.hpp"
-#include "../components/texture2D.hpp"
 #include "../../utilities/asyncWorker.hpp"
 
 
@@ -44,34 +43,38 @@ public:
 
     [[nodiscard]]
     int GetMaterialXResolution() const
-        { return heightmap.GetWidth(); }
+        { return material.XResolution(); }
 
     [[nodiscard]]
     int GetMaterialZResolution() const
-        { return heightmap.GetHeight(); }
+        { return material.ZResolution(); }
 
-    void SetMaterialResolution(int xRes, int zRes);
+    void SetMaterialResolution(const int xRes, const int zRes)
+        { material.SetResolution(xRes, zRes); }
 
     [[nodiscard]]
     float GetMaterialXLength() const
-        { return heightMapXLen; }
+        { return material.XLength(); }
 
     [[nodiscard]]
     float GetMaterialZLength() const
-        { return heightMapZLen; }
+        { return material.ZLength(); }
 
-    void SetMaterialSize(float xLen, float zLen);
+    void SetMaterialSize(const float xLen, const float zLen)
+        { material.SetSize(xLen, zLen); }
 
     [[nodiscard]]
     float GetInitMaterialThickness() const
-        { return initMaterialThickness; }
+        { return material.InitThickness(); }
 
-    void SetInitMaterialThickness(float thickness);
+    void SetInitMaterialThickness(const float thickness)
+        { material.SetThickness(thickness); }
 
-    float GetBaseLevel()
-        { return mainHeightMapCorner.Y(); }
+    float GetBaseLevel() const
+        { return material.BaseLevel(); }
 
-    void SetBaseLevel(float level);
+    void SetBaseLevel(float level)
+        { material.SetBaseLevel(level); }
 
     void SetCutterSpeed(const float newSpeed)
         { cutterSpeed = newSpeed; }
@@ -80,7 +83,8 @@ public:
     float GetCuterSpeed() const
         { return cutterSpeed; }
 
-    void ResetMaterial();
+    void ResetMaterial()
+        { material.Reset(); }
 
     void ResetSimulation();
 
@@ -98,21 +102,13 @@ public:
         { return millingWarnings; }
 
 private:
-    Texture2D heightmap;
+    MillingMaterial material;
 
-    Mesh material;
-    Mesh materialTop;
-    Mesh materialBottom;
     Entity millingCutter = 0;
     float t = 0.f;
     bool cutterRuns = false;
     float cutterSpeed = 15.f/60.f;
     int actCommand = 1;
-    std::vector<float> textureData;
-    alg::Vec3 mainHeightMapCorner;
-    float heightMapZLen = 1.5f;
-    float heightMapXLen = 1.5f;
-    float initMaterialThickness = 0.5f;
 
     AsyncWorker instantWorker;
 
@@ -124,17 +120,10 @@ private:
 
     static float CutterY(const MillingCutter& cutter, const Position& cutterPos, float x, float z);
 
-    float UpdateHeightMap(int row, int col, float cutterY, float cutterHeight, bool pathToDown);
+    float UpdateHeightMap(int x, int z, float cutterY, float cutterHeight, bool pathToDown);
 
-    void RenderMaterial(const alg::Mat4x4& cameraMtx, const alg::Vec3& camPos) const;
     void RenderPaths(const alg::Mat4x4& cameraMtx) const;
     void RenderCutter(const alg::Mat4x4& cameraMtx) const;
-
-    std::vector<float> GenerateMaterialTopVertices();
-    std::vector<uint32_t> GenerateMaterialTopIndices();
-
-    std::vector<float> GenerateMaterialBottomVertices() const;
-    std::vector<uint32_t> GenerateMaterialBottomIndices();
 
     static std::vector<float> GeneratePathsVertices(const MillingMachinePath& paths);
     static std::vector<uint32_t> GeneratePathsIndices(const MillingMachinePath& paths);

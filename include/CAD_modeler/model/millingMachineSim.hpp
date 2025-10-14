@@ -61,10 +61,10 @@ public:
     float GetCutterSpeed() const
         { return millingMachineSystem->GetCuterSpeed(); }
 
-    void SetCutterSpeed(float speed)
+    void SetCutterSpeed(const float speed)
         { millingMachineSystem->SetCutterSpeed(speed); }
 
-    void SetCutterHeight(float height)
+    void SetCutterHeight(const float height)
         { millingMachineSystem->SetCutterHeight(height); }
 
     [[nodiscard]]
