@@ -101,13 +101,15 @@ private:
     Texture2D heightmap;
 
     Mesh material;
+    Mesh materialTop;
+    Mesh materialBottom;
     Entity millingCutter = 0;
     float t = 0.f;
     bool cutterRuns = false;
     float cutterSpeed = 15.f/60.f;
     int actCommand = 1;
     std::vector<float> textureData;
-    alg::Vec3 mainHeightMapCorner = alg::Vec3(-0.75f, 0.f, -0.75f);
+    alg::Vec3 mainHeightMapCorner;
     float heightMapZLen = 1.5f;
     float heightMapXLen = 1.5f;
     float initMaterialThickness = 0.5f;
@@ -128,8 +130,11 @@ private:
     void RenderPaths(const alg::Mat4x4& cameraMtx) const;
     void RenderCutter(const alg::Mat4x4& cameraMtx) const;
 
-    std::vector<float> GenerateMaterialVertices();
-    std::vector<uint32_t> GenerateMaterialIndices();
+    std::vector<float> GenerateMaterialTopVertices();
+    std::vector<uint32_t> GenerateMaterialTopIndices();
+
+    std::vector<float> GenerateMaterialBottomVertices() const;
+    std::vector<uint32_t> GenerateMaterialBottomIndices();
 
     static std::vector<float> GeneratePathsVertices(const MillingMachinePath& paths);
     static std::vector<uint32_t> GeneratePathsIndices(const MillingMachinePath& paths);

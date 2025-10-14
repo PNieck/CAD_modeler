@@ -3,9 +3,9 @@
 #include "shader.hpp"
 
 
-class MillingShader: public Shader {
+class MillingMaterialTopShader: public Shader {
 public:
-    MillingShader():
+    MillingMaterialTopShader():
         Shader(
             "../../shaders/heightMapShader.vert",
             "../../shaders/phongShader.frag"
