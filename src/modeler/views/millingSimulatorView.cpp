@@ -171,9 +171,10 @@ void MillingSimulatorView::RenderWarnings() const
     ImGui::SeparatorText("Warnings");
 
     auto const& warningsRepo = model.GetMillingWarnings();
-    if (warningsRepo.Empty()) {
+    if (warningsRepo.Empty())
         ImGui::Text("No warnings");
-    }
+    else if (ImGui::Button("Clear warnings"))
+        model.ClearMillingWarnings();
 
     for (const auto&[commandId, warningsTypes] : warningsRepo.GetWarnings()) {
         if (warningsTypes & MillingWarningsRepo::MillingStraightDown)

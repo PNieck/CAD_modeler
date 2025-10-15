@@ -31,13 +31,13 @@ public:
     float GetMaterialZLength() const
         { return millingMachineSystem->GetMaterialZLength(); }
 
-    void SetMaterialLength(float xLen, float zLen)
+    void SetMaterialLength(const float xLen, const float zLen)
         { millingMachineSystem->SetMaterialSize(xLen, zLen); }
 
     float GetMaterialThickness()
         { return millingMachineSystem->GetInitMaterialThickness(); }
 
-    void SetMaterialThickness(float thickness)
+    void SetMaterialThickness(const float thickness)
         { millingMachineSystem->SetInitMaterialThickness(thickness); }
 
     float GetMaterialBaseLevel() const
@@ -78,6 +78,9 @@ public:
     [[nodiscard]]
     const auto& GetMillingWarnings() const
         { return millingMachineSystem->GetWarnings(); }
+
+    void ClearMillingWarnings()
+        { millingMachineSystem->ClearWarnings(); }
 
 private:
     void RenderSystemsObjects(const alg::Mat4x4 &viewMtx, const alg::Mat4x4 &persMtx, float nearPlane,

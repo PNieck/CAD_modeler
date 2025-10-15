@@ -73,7 +73,7 @@ public:
     float GetBaseLevel() const
         { return material.BaseLevel(); }
 
-    void SetBaseLevel(float level)
+    void SetBaseLevel(const float level)
         { material.SetBaseLevel(level); }
 
     void SetCutterSpeed(const float newSpeed)
@@ -100,6 +100,9 @@ public:
     [[nodiscard]]
     const auto& GetWarnings() const
         { return millingWarnings; }
+
+    void ClearWarnings()
+        { millingWarnings.Clear(); }
 
 private:
     MillingMaterial material;
