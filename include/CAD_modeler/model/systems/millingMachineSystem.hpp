@@ -9,7 +9,7 @@
 #include <thread>
 
 #include "../components/millingMaterial.hpp"
-#include "../components/MillingMachinePath.hpp"
+#include "../components/millingMachinePath.hpp"
 #include "../components/millingCutter.hpp"
 #include "../components/millingWarningsRepo.hpp"
 #include "../../utilities/asyncWorker.hpp"

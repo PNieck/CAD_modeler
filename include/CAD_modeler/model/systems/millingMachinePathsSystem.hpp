@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../components/MillingMachinePath.hpp"
+#include "../components/millingMachinePath.hpp"
 #include "../components/millingCutter.hpp"
 
 #include <string>

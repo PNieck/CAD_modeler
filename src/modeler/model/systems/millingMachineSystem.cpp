@@ -3,7 +3,7 @@
 #include <CAD_modeler/model/systems/shaders/shaderRepository.hpp>
 #include <CAD_modeler/model/systems/meshLoader.hpp>
 
-#include <CAD_modeler/model/components/MillingMachinePath.hpp>
+#include <CAD_modeler/model/components/millingMachinePath.hpp>
 #include <CAD_modeler/model/components/scale.hpp>
 
 #include <CAD_modeler/utilities/lineDrawer.hpp>
