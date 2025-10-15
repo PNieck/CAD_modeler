@@ -1,7 +1,5 @@
 #include <CAD_modeler/model/components/millingMaterial.hpp>
 
-#include <CAD_modeler/model/systems/shaders/shaderRepository.hpp>
-
 #include <algorithm>
 #include <numeric>
 
@@ -145,67 +143,60 @@ float MillingMaterial::GlobalZ(const int z) const
 
 void MillingMaterial::Render(const alg::Mat4x4 &cameraMtx, const alg::Vec3 &camPos) const
 {
-    const auto& shaderRepo = ShaderRepository::GetInstance();
-    const auto& materialTopShader = shaderRepo.GetMillingMaterialTopShader();
-
     // Render material top
-    materialTopShader.Use();
+    topShader.Use();
     heightMap.Use();
-    materialTopShader.SetCameraPosition(camPos);
+    topShader.SetCameraPosition(camPos);
 
-    materialTopShader.SetHeightMapZLen(zLen);
-    materialTopShader.SetHeightMapXLen(xLen);
-    materialTopShader.SetMainHeightmapCorner(mainHeightMapCorner);
-    materialTopShader.SetMVP(cameraMtx);
+    topShader.SetHeightMapZLen(zLen);
+    topShader.SetHeightMapXLen(xLen);
+    topShader.SetMainHeightmapCorner(mainHeightMapCorner);
+    topShader.SetMVP(cameraMtx);
 
     top.Use();
     glDrawElements(GL_TRIANGLES, top.GetElementsCnt(), GL_UNSIGNED_INT, nullptr);
 
     // Render material bottom
-    const auto& materialRestShader = shaderRepo.GetMillingMaterialBottomShader();
+    bottomShader.Use();
 
-    materialRestShader.Use();
-
-    materialRestShader.SetCameraPosition(camPos);
-    materialRestShader.SetNormal(-alg::Vec3::UnitY());
-    materialRestShader.SetVP(cameraMtx);
+    bottomShader.SetCameraPosition(camPos);
+    bottomShader.SetNormal(-alg::Vec3::UnitY());
+    bottomShader.SetVP(cameraMtx);
 
     bottom.Use();
     glDrawElements(GL_TRIANGLE_STRIP, bottom.GetElementsCnt(), GL_UNSIGNED_INT, nullptr);
 
     // Render sides
-    const auto& materialSideShader = shaderRepo.GetMillingMaterialSideShader();
-
-    materialSideShader.Use();
+    sideShader.Use();
     heightMap.Use();
-    materialSideShader.SetCameraPosition(camPos);
-    materialSideShader.SetHeightMapZLen(zLen);
-    materialSideShader.SetHeightMapXLen(xLen);
-    materialSideShader.SetMainHeightmapCorner(mainHeightMapCorner);
-    materialSideShader.SetVP(cameraMtx);
+    sideShader.SetCameraPosition(camPos);
+    sideShader.SetHeightMapZLen(zLen);
+    sideShader.SetHeightMapXLen(xLen);
+    sideShader.SetMainHeightmapCorner(mainHeightMapCorner);
+    sideShader.SetVP(cameraMtx);
 
     // Positive X side
-    materialSideShader.SetNormal(alg::Vec3::UnitX());
-    materialSideShader.SetSideType(MillingMaterialSideShader::SideType::PositiveX);
+    sideShader.SetNormal(alg::Vec3::UnitX());
+    sideShader.SetSideType(MillingMaterialSideShader::SideType::PositiveX);
 
     sideX.Use();
     glDrawElements(GL_TRIANGLE_STRIP, sideX.GetElementsCnt(), GL_UNSIGNED_INT, nullptr);
 
     // Negative X side
-    materialSideShader.SetNormal(-alg::Vec3::UnitX());
-    materialSideShader.SetSideType(MillingMaterialSideShader::SideType::NegativeX);
+    sideShader.SetNormal(-alg::Vec3::UnitX());
+    sideShader.SetSideType(MillingMaterialSideShader::SideType::NegativeX);
     glDrawElements(GL_TRIANGLE_STRIP, sideX.GetElementsCnt(), GL_UNSIGNED_INT, nullptr);
 
     // Positive Z side
-    materialSideShader.SetNormal(alg::Vec3::UnitZ());
-    materialSideShader.SetSideType(MillingMaterialSideShader::SideType::PositiveZ);
+    sideShader.SetNormal(alg::Vec3::UnitZ());
+    sideShader.SetSideType(MillingMaterialSideShader::SideType::PositiveZ);
 
     sideZ.Use();
     glDrawElements(GL_TRIANGLE_STRIP, sideZ.GetElementsCnt(), GL_UNSIGNED_INT, nullptr);
 
     // Negative Z side
-    materialSideShader.SetNormal(-alg::Vec3::UnitZ());
-    materialSideShader.SetSideType(MillingMaterialSideShader::SideType::NegativeZ);
+    sideShader.SetNormal(-alg::Vec3::UnitZ());
+    sideShader.SetSideType(MillingMaterialSideShader::SideType::NegativeZ);
     glDrawElements(GL_TRIANGLE_STRIP, sideZ.GetElementsCnt(), GL_UNSIGNED_INT, nullptr);
 }
 

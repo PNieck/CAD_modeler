@@ -2,6 +2,9 @@
 
 #include "texture2D.hpp"
 #include "mesh.hpp"
+#include "../systems/shaders/millingMaterial/millingMaterialTopShader.hpp"
+#include "../systems/shaders/millingMaterial/millingMaterialSideShader.hpp"
+#include "../systems/shaders/millingMaterial/millingMaterialBottomShader.hpp"
 
 #include <algebra/vec3.hpp>
 #include <algebra/mat4x4.hpp>
@@ -88,6 +91,11 @@ private:
     Mesh bottom;
     Mesh sideX;
     Mesh sideZ;
+
+    // Shaders
+    MillingMaterialTopShader topShader;
+    MillingMaterialSideShader sideShader;
+    MillingMaterialBottomShader bottomShader;
 
     std::vector<float> GenerateMaterialTopVertices() const;
     std::vector<uint32_t> GenerateMaterialTopIndices() const;
