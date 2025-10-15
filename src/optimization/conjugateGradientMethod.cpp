@@ -14,7 +14,7 @@ std::optional<std::vector<float>> opt::ConjugateGradientMethod(
 ) {
     std::vector solution(initSol);
 
-    // At first search direction is equal to gradient with minus sign
+    // At first a search direction is equal to gradient with minus sign
     std::vector<float> searchDir = fun.Gradient(solution);
     for (float & i : searchDir)
         i = -i;
@@ -30,17 +30,17 @@ std::optional<std::vector<float>> opt::ConjugateGradientMethod(
         std::vector<float> oldSolution = solution;
 
         // Update solution
-        for (int i=0; i < solution.size(); i++)
+        for (size_t i=0; i < solution.size(); i++)
             solution[i] += step * searchDir[i];
 
-        // Update search direction
+        // Update a search direction
         
         std::vector<float> oldGradient = fun.Gradient(oldSolution);
         std::vector<float> newGradient = fun.Gradient(solution);
 
         const float beta = LengthSquared(newGradient) / LengthSquared(oldGradient);
 
-        for (int i=0; i < searchDir.size(); i++)
+        for (size_t i=0; i < searchDir.size(); i++)
             searchDir[i] = -newGradient[i] + beta * searchDir[i];
         
     }
