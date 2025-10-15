@@ -11,7 +11,7 @@ float opt::DichotomyLineSearch::Search(FunctionToOptimize &fun, const std::vecto
 
     std::vector arg(start);
 
-    for (int i=0; i < start.size(); i++)
+    for (size_t i=0; i < start.size(); i++)
         arg[i] += x_m*direction[i];
 
     float f_x_m = fun.Value(arg);
@@ -20,12 +20,12 @@ float opt::DichotomyLineSearch::Search(FunctionToOptimize &fun, const std::vecto
         const float x_1 = a + delta/4.f;
         const float x_2 = b - delta/4.f;
 
-        for (int i=0; i < start.size(); i++)
+        for (size_t i=0; i < start.size(); i++)
             arg[i] = start[i] + x_1*direction[i];
 
         const float f_x_1 = fun.Value(arg);
 
-        for (int i=0; i < start.size(); i++)
+        for (size_t i=0; i < start.size(); i++)
             arg[i] = start[i] + x_2*direction[i];
 
         const float f_x_2 = fun.Value(arg);

@@ -1,23 +1,18 @@
 #pragma once
 
-#include "shader.hpp"
+#include "../shader.hpp"
 
 
-class MillingShader: public Shader {
+class MillingMaterialTopShader: public Shader {
 public:
-    MillingShader():
+    MillingMaterialTopShader():
         Shader(
-            "../../shaders/passThroughShader.vert",
-            "../../shaders/phongShader.frag",
-            "../../shaders/heightmapShader.tesc",
-            "../../shaders/heightmapShader.tese"
+            "../../shaders/heightMapShader.vert",
+            "../../shaders/phongShader.frag"
         ) {}
 
     void SetMVP(const alg::Mat4x4& matrix) const
         { SetMatrix4("MVP", matrix); }
-
-    void SetProjection00(const float val) const
-        { SetFloat("projection00", val); }
 
     void SetMainHeightmapCorner(const alg::Vec3& coord) const
         { SetVec3("mainHeightMapCorner", coord); }

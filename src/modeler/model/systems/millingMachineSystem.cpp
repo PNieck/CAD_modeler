@@ -3,10 +3,10 @@
 #include <CAD_modeler/model/systems/shaders/shaderRepository.hpp>
 #include <CAD_modeler/model/systems/meshLoader.hpp>
 
-#include <CAD_modeler/model/components/MillingMachinePath.hpp>
+#include <CAD_modeler/model/components/millingMachinePath.hpp>
 #include <CAD_modeler/model/components/scale.hpp>
 
-#include <CAD_modeler/utilities/linePlotter.hpp>
+#include <CAD_modeler/utilities/lineDrawer.hpp>
 #include <CAD_modeler/utilities/lineSegment.hpp>
 
 #include <ecs/coordinator.hpp>
@@ -38,7 +38,7 @@ void MillingMachineSystem::RegisterSystem(Coordinator &coordinator)
 
 
 MillingMachineSystem::MillingMachineSystem():
-    heightmap(0, 0, nullptr, Texture2D::Red32BitFloat, Texture2D::Red),
+    material(0, 0, 1.5f, 1.5f, 0.5f),
     instantWorker([this](std::stop_token token) {
         InstantMillingThreadFunc(token);
     })
@@ -48,15 +48,7 @@ MillingMachineSystem::MillingMachineSystem():
 
 void MillingMachineSystem::Init(const int xResolution, const int zResolution)
 {
-    textureData.resize(xResolution * zResolution);
-    std::ranges::fill(textureData, initMaterialThickness);
-
-    heightmap.ChangeSize(xResolution, zResolution, textureData.data(), Texture2D::Red);
-
-    material.Update(
-        GenerateVertices(),
-        GenerateIndices()
-    );
+    material.SetResolution(xResolution, zResolution);
 
     millingCutter = coordinator->CreateEntity();
 
@@ -115,55 +107,6 @@ void MillingMachineSystem::StopInstantMilling()
 }
 
 
-void MillingMachineSystem::SetMaterialResolution(const int xRes, const int zRes)
-{
-    textureData.resize(xRes * zRes);
-    std::ranges::fill(textureData, initMaterialThickness);
-    heightmap.ChangeSize(xRes, zRes, textureData.data(), Texture2D::Red);
-}
-
-
-void MillingMachineSystem::SetMaterialSize(const float xLen, const float zLen)
-{
-    heightMapXLen = xLen;
-    heightMapZLen = zLen;
-
-    mainHeightMapCorner.X() = -xLen / 2.f;
-    mainHeightMapCorner.Z() = -zLen / 2.f;
-
-    material.Update(
-        GenerateVertices(),
-        GenerateIndices()
-    );
-}
-
-
-void MillingMachineSystem::SetInitMaterialThickness(const float thickness)
-{
-    initMaterialThickness = thickness;
-    ResetMaterial();
-}
-
-
-void MillingMachineSystem::SetBaseLevel(const float level)
-{
-    mainHeightMapCorner.Y() = level;
-
-    material.Update(
-        GenerateVertices(),
-        GenerateIndices()
-    );
-}
-
-
-void MillingMachineSystem::ResetMaterial()
-{
-    std::ranges::fill(textureData, initMaterialThickness);
-
-    heightmap.Update(textureData.data(), Texture2D::Red);
-}
-
-
 void MillingMachineSystem::ResetSimulation()
 {
     ResetMaterial();
@@ -198,7 +141,7 @@ void MillingMachineSystem::Update(const double dt)
     if (InstantMillingRuns()) {
         if (instantWorker.WaitsForJoin()) {
             instantWorker.JoinWorker();
-            heightmap.Update(textureData.data(), Texture2D::Red);
+            material.SyncVisualization();
         }
     }
 
@@ -222,7 +165,7 @@ void MillingMachineSystem::Update(const double dt)
 
             coordinator->SetComponent<Position>(millingCutter, newCutterPos);
 
-            heightmap.Update(textureData.data(), Texture2D::Red);
+            material.SyncVisualization();
             return;
         }
 
@@ -230,63 +173,27 @@ void MillingMachineSystem::Update(const double dt)
         cutterPos = actDest;
         actCommand++;
         dist -= remainingCommandDist;
-    } while (actCommand < commands.size());
+    } while (static_cast<size_t>(actCommand) < commands.size());
 
     StopMachine();
     actCommand = 1;
     coordinator->SetComponent<Position>(millingCutter, commands[0].destination);
 
-    heightmap.Update(textureData.data(), Texture2D::Red);
+    material.SyncVisualization();
 }
 
 
 void MillingMachineSystem::Render(const alg::Mat4x4& view, const alg::Mat4x4& perspective, const alg::Vec3& camPos)
 {
-    const auto& shaderRepo = ShaderRepository::GetInstance();
-    const auto& shader = shaderRepo.GetMillingShader();
-
-    shader.Use();
-    heightmap.Use();
-    shader.SetCameraPosition(camPos);
-
     const auto cameraMtx = perspective * view;
 
-    shader.SetHeightMapZLen(heightMapZLen);
-    shader.SetHeightMapXLen(heightMapXLen);
-    shader.SetMainHeightmapCorner(mainHeightMapCorner);
-    shader.SetMVP(cameraMtx);
-
-    material.Use();
-    glPatchParameteri(GL_PATCH_VERTICES, 4);
-    glDrawElements(GL_PATCHES, material.GetElementsCnt(), GL_UNSIGNED_INT, nullptr);
+    material.Render(cameraMtx, camPos);
 
     if (entities.empty())
         return;
 
-    auto const& stdShader = shaderRepo.GetStdShader();
-
-    stdShader.Use();
-
-    // Neon green
-    stdShader.SetColor(alg::Vec4(23.f/255.f, 227.f/255.f, 33.f/255.f, 1.f));
-    shader.SetMVP(cameraMtx);
-
-    for (auto const entity : entities) {
-        auto const& mesh = coordinator->GetComponent<Mesh>(entity);
-        mesh.Use();
-
-        glDrawElements(GL_LINE_STRIP, mesh.GetElementsCnt(), GL_UNSIGNED_INT, nullptr);
-    }
-
-    auto const& pos = coordinator->GetComponent<Position>(millingCutter);
-    auto const& scale = coordinator->GetComponent<Scale>(millingCutter);
-
-    stdShader.SetMVP(cameraMtx * pos.TranslationMatrix() * scale.ScaleMatrix());
-    stdShader.SetColor(alg::Vec4(1.f));
-    auto const& cutterMesh = coordinator->GetComponent<Mesh>(millingCutter);
-    cutterMesh.Use();
-
-    glDrawElements(GL_TRIANGLES, cutterMesh.GetElementsCnt(), GL_UNSIGNED_INT, nullptr);
+    RenderPaths(cameraMtx);
+    RenderCutter(cameraMtx);
 }
 
 
@@ -297,7 +204,7 @@ void MillingMachineSystem::InstantMillingThreadFunc(std::stop_token stoken)
 
     const auto&[commands] = coordinator->GetComponent<MillingMachinePath>(*entities.begin());
 
-    while (actCommand < commands.size() && !stoken.stop_requested()) {
+    while (static_cast<size_t>(actCommand) < commands.size() && !stoken.stop_requested()) {
         const auto& prevDest = commands[actCommand - 1].destination;
         const auto& actDest = commands[actCommand].destination;
 
@@ -311,19 +218,24 @@ void MillingMachineSystem::InstantMillingThreadFunc(std::stop_token stoken)
 
 void MillingMachineSystem::MillSection(const Position& oldCutterPos, const Position& newCutterPos)
 {
-    // Step 1 Mill around starting position
+    if (oldCutterPos.vec == newCutterPos.vec)
+        return;
+
+    // Step 1 Mill around the starting position
     const auto& cutterParams = coordinator->GetComponent<MillingCutter>(millingCutter);
 
-    const float pixelXLen = heightMapXLen / static_cast<float>(heightmap.GetWidth());
-    const float pixelZLen = heightMapZLen / static_cast<float>(heightmap.GetHeight());
+    const float pixelXLen = material.PixelXLen();
+    const float pixelZLen = material.PixelZLen();
 
-    auto diff = oldCutterPos.vec - mainHeightMapCorner;
-    const int oldPosPixelX = static_cast<int>(std::round(diff.X() / pixelXLen));
-    const int oldPosPixelZ = static_cast<int>(std::round(diff.Z() / pixelZLen));
+    float diffX = oldCutterPos.GetX() - material.MinX();
+    float diffZ = oldCutterPos.GetZ() - material.MinZ();
+    const int oldPosPixelX = static_cast<int>(std::round(diffX / pixelXLen));
+    const int oldPosPixelZ = static_cast<int>(std::round(diffZ / pixelZLen));
 
-    diff = newCutterPos.vec - mainHeightMapCorner;
-    const int newPosPixelX = static_cast<int>(std::round(diff.X() / pixelXLen));
-    const int newPosPixelZ = static_cast<int>(std::round(diff.Z() / pixelZLen));
+    diffX = newCutterPos.GetX() - material.MinX();
+    diffZ = newCutterPos.GetZ() - material.MinZ();
+    const int newPosPixelX = static_cast<int>(std::round(diffX / pixelXLen));
+    const int newPosPixelZ = static_cast<int>(std::round(diffZ / pixelZLen));
 
     const int radiusInPixelsX = static_cast<int>(std::ceil(cutterParams.radius / pixelXLen));
     const int radiusInPixelsZ = static_cast<int>(std::ceil(cutterParams.radius / pixelZLen));
@@ -333,64 +245,54 @@ void MillingMachineSystem::MillSection(const Position& oldCutterPos, const Posit
     const float crossLen = Cross((newCutterPos.vec - oldCutterPos.vec).Normalize(), alg::Vec3(0.f, 1.f, 0.f)).LengthSquared();
     const bool straightDown = crossLen < 1e-5;
 
-    for (int row = startPixelX; row <= startPixelX + 2*radiusInPixelsX; row++) {
-        for (int col = startPixelZ; col <= startPixelZ + 2*radiusInPixelsZ; col++) {
-            if (row < 0 || row >= heightmap.GetHeight() || col < 0 || col >= heightmap.GetWidth())
+    for (int x = startPixelX; x <= startPixelX + 2*radiusInPixelsX; x++) {
+        for (int z = startPixelZ; z <= startPixelZ + 2*radiusInPixelsZ; z++) {
+            if (x < 0 || x >= material.XResolution() || z < 0 || z >= material.ZResolution())
                 continue;
 
-            const float globalX = static_cast<float>(row) * pixelXLen + mainHeightMapCorner.X();
-            const float globalZ = static_cast<float>(col) * pixelZLen + mainHeightMapCorner.Z();
+            const float globalX = material.GlobalX(x);
+            const float globalZ = material.GlobalZ(z);
 
             const float cutterY = CutterY(cutterParams, oldCutterPos, globalX, globalZ);
 
-            UpdateHeightMap(row, col, cutterY, cutterParams.height, straightDown);
+            UpdateHeightMap(x, z, cutterY, cutterParams.height, straightDown);
         }
     }
 
     // Step 2: Milling along the whole line
-    const auto [points, lineTyp] = LinePlotter::DeterminePlotLines(
-        oldPosPixelX, oldPosPixelZ,
-        newPosPixelX, newPosPixelZ
-    );
+    const alg::IVec2 oldPosPixel(oldPosPixelX, oldPosPixelZ);
+    const alg::IVec2 newPosPixel(newPosPixelX, newPosPixelZ);
+
+    const auto lineDrawer = GetLineDrawer(oldPosPixel, newPosPixel);
 
     const LineSegment lineSegment(oldCutterPos.vec, newCutterPos.vec);
+    const bool lineIsSteep = IsSteepLine(oldPosPixel, newPosPixel);
 
-    for (auto const& point : points) {
-        int cutterRadius;
+    const int cutterRadius = lineIsSteep ? radiusInPixelsZ : radiusInPixelsX;
 
-        switch (lineTyp) {
-            case LinePlotter::LineType::Low:
-                cutterRadius = radiusInPixelsX;
-                break;
-
-            case LinePlotter::LineType::High:
-                cutterRadius = radiusInPixelsZ;
-                break;
-
-            default:
-                throw std::runtime_error("Unknown line type");
-        }
-
+    do {
         for (int i = -cutterRadius; i <= cutterRadius; i++) {
-            const int row = lineTyp == LinePlotter::LineType::High ? point.X() + i : point.X();
-            const int col = lineTyp == LinePlotter::LineType::Low ? point.Y() + i : point.Y();
+            const alg::IVec2& actPoint = lineDrawer->ActualPoint();
 
-            if (row < 0 || row >= heightmap.GetHeight() || col < 0 || col >= heightmap.GetWidth())
+            const int x = lineIsSteep ? actPoint.X() + i : actPoint.X();
+            const int z = !lineIsSteep ? actPoint.Y() + i : actPoint.Y();
+
+            if (x < 0 || x >= material.XResolution() || z < 0 || z >= material.ZResolution())
                 continue;
 
-            const float globalX = static_cast<float>(row) * pixelXLen + mainHeightMapCorner.X();
-            const float globalZ = static_cast<float>(col) * pixelZLen + mainHeightMapCorner.Z();
+            const float globalX = material.GlobalX(x);
+            const float globalZ = material.GlobalZ(z);
 
             const auto cutterPos = lineSegment.NearestPoint(alg::Vec3(globalX, 0.f, globalZ));
             const float cutterY = CutterY(cutterParams, cutterPos, globalX, globalZ);
 
-            UpdateHeightMap(row, col, cutterY, cutterParams.height, straightDown);
+            UpdateHeightMap(x, z, cutterY, cutterParams.height, straightDown);
         }
-    }
+    } while (lineDrawer->NextPoint());
 }
 
 
-float MillingMachineSystem::CutterY(const MillingCutter& cutter, const Position& cutterPos, float x, float z)
+float MillingMachineSystem::CutterY(const MillingCutter& cutter, const Position& cutterPos, const float x, const float z)
 {
     const float diffX = x - cutterPos.GetX();
     const float diffZ = z - cutterPos.GetZ();
@@ -414,15 +316,17 @@ float MillingMachineSystem::CutterY(const MillingCutter& cutter, const Position&
 }
 
 
-float MillingMachineSystem::UpdateHeightMap(const int row, const int col, const float cutterY, const float cutterHeight, const bool pathToDown)
+float MillingMachineSystem::UpdateHeightMap(const int x, const int z, const float cutterY, const float cutterHeight, const bool pathToDown)
 {
-    const float diff = std::max(textureData[col*heightmap.GetWidth() + row] - cutterY, 0.f);
-    if (diff > 0.0f) {
-        const float value = textureData[col*heightmap.GetWidth() + row] - diff;
-        textureData[col*heightmap.GetWidth() + row] = value;
-    }
+    const float oldHeight = material.HeightAt(x, z);
+    const float diff = std::max(oldHeight - cutterY, 0.f);
+    if (diff == 0.f)
+        return diff;
 
-    if (textureData[col*heightmap.GetWidth() + row] - mainHeightMapCorner.Y() < 0.f) {
+    const float newHeight = oldHeight - diff;
+    material.ChangeHeightAt(x, z, newHeight);
+
+    if (newHeight < material.BaseLevel()) {
         auto const& path = coordinator->GetComponent<MillingMachinePath>(*entities.begin());
         const auto commandId = path.commands[actCommand].id;
         millingWarnings.AddWarning(commandId, MillingWarningsRepo::MillingUnderTheBase);
@@ -434,7 +338,7 @@ float MillingMachineSystem::UpdateHeightMap(const int row, const int col, const 
         millingWarnings.AddWarning(commandId, MillingWarningsRepo::MillingTooDeep);
     }
 
-    if (pathToDown && diff > 0.f) {
+    if (pathToDown) {
         auto const& path = coordinator->GetComponent<MillingMachinePath>(*entities.begin());
         const auto commandId = path.commands[actCommand].id;
         millingWarnings.AddWarning(commandId, MillingWarningsRepo::MillingStraightDown);
@@ -444,48 +348,40 @@ float MillingMachineSystem::UpdateHeightMap(const int row, const int col, const 
 }
 
 
-std::vector<float> MillingMachineSystem::GenerateVertices()
+void MillingMachineSystem::RenderPaths(const alg::Mat4x4 &cameraMtx) const
 {
-    std::vector<float> result;
-    const int pointsInX = heightmap.GetWidth() / 50 + 1;
-    const int pointsInZ = heightmap.GetHeight() / 50 + 1;
+    const auto& shaderRepo = ShaderRepository::GetInstance();
+    auto const& shader = shaderRepo.GetStdShader();
 
-    result.reserve(pointsInX * pointsInZ * alg::Vec3::dim);
+    shader.Use();
 
-    for (int row = 0; row < pointsInZ; row++) {
-        for (int col = 0; col < pointsInX; col++) {
-            const float x = heightMapXLen / static_cast<float>((pointsInX - 1)) * col;
-            const float z = heightMapZLen / static_cast<float>((pointsInZ - 1)) * row;
+    // Neon green
+    shader.SetColor(alg::Vec4(23.f/255.f, 227.f/255.f, 33.f/255.f, 1.f));
+    shader.SetMVP(cameraMtx);
 
-            result.push_back(mainHeightMapCorner.X() + x);
-            result.push_back(mainHeightMapCorner.Y());
-            result.push_back(mainHeightMapCorner.Z() + z);
-        }
+    for (auto const entity : entities) {
+        auto const& mesh = coordinator->GetComponent<Mesh>(entity);
+        mesh.Use();
+
+        glDrawElements(GL_LINE_STRIP, mesh.GetElementsCnt(), GL_UNSIGNED_INT, nullptr);
     }
-
-    return result;
 }
 
 
-std::vector<uint32_t> MillingMachineSystem::GenerateIndices()
+void MillingMachineSystem::RenderCutter(const alg::Mat4x4 &cameraMtx) const
 {
-    std::vector<uint32_t> result;
+    const auto& shaderRepo = ShaderRepository::GetInstance();
+    auto const& shader = shaderRepo.GetStdShader();
 
-    const int pointsInX = heightmap.GetWidth() / 50 + 1;
-    const int pointsInZ = heightmap.GetHeight() / 50 + 1;
+    auto const& pos = coordinator->GetComponent<Position>(millingCutter);
+    auto const& scale = coordinator->GetComponent<Scale>(millingCutter);
 
-    for (int row = 0; row < pointsInZ - 1; row ++) {
-        for (int col = 0; col < pointsInX - 1; col++) {
-            result.push_back(row + pointsInZ * col + pointsInZ);
-            result.push_back(row + pointsInZ * col);
+    shader.SetMVP(cameraMtx * pos.TranslationMatrix() * scale.ScaleMatrix());
+    shader.SetColor(alg::Vec4(1.f));
+    auto const& cutterMesh = coordinator->GetComponent<Mesh>(millingCutter);
+    cutterMesh.Use();
 
-            result.push_back(row + pointsInZ * col + pointsInZ + 1);
-            result.push_back(row + pointsInZ * col + 1);
-
-        }
-    }
-
-    return result;
+    glDrawElements(GL_TRIANGLES, cutterMesh.GetElementsCnt(), GL_UNSIGNED_INT, nullptr);
 }
 
 

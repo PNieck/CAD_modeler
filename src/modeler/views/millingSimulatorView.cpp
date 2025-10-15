@@ -36,7 +36,13 @@ void MillingSimulatorView::RenderFileSelection()
     if (ImGui::Button("Load")) {
         IGFD::FileDialogConfig config;
 	    config.path = ".";
-        ImGuiFileDialog::Instance()->OpenDialog("ChooseGCodeFileDlgKey", "Choose GCode File", ".k01,.k8,.k16,.f10,.f12", config);
+
+        ImGuiFileDialog::Instance()->OpenDialog(
+            "ChooseGCodeFileDlgKey",
+            "Choose GCode File",
+            "GCode files {.k01,.k1,.k08,.k8,.k16,.f10,.f12}",
+            config
+        );
     }
 
     if (ImGuiFileDialog::Instance()->Display("ChooseGCodeFileDlgKey")) {
@@ -63,7 +69,7 @@ void MillingSimulatorView::RenderMaterialOptions() const
     valuesChanged |= ImGui::InputInt("X resolution", &xResolution);
     valuesChanged |= ImGui::InputInt("Z resolution", &zResolution);
 
-    if (valuesChanged) {
+    if (valuesChanged && xResolution > 0 && zResolution > 0) {
         model.SetMaterialResolution(xResolution, zResolution);
         valuesChanged = false;
     }
@@ -73,16 +79,16 @@ void MillingSimulatorView::RenderMaterialOptions() const
     valuesChanged |= ImGui::DragFloat("Material size X", &materialXLen, 0.1f);
     valuesChanged |= ImGui::DragFloat("Material size Z", &materialZLen, 0.1f);
 
-    if (valuesChanged) {
+    if (valuesChanged && materialXLen > 0.f && materialZLen > 0.f) {
         model.SetMaterialLength(materialXLen, materialZLen);
     }
 
     float thickness = model.GetMaterialThickness();
-    if (ImGui::DragFloat("Material thickness", &thickness))
+    if (ImGui::DragFloat("Material thickness", &thickness, 0.1f) && thickness > 0.f)
         model.SetMaterialThickness(thickness);
 
     float base = model.GetMaterialBaseLevel();
-    if (ImGui::DragFloat("Material base level", &base))
+    if (ImGui::DragFloat("Material base level", &base, 0.1f))
         model.SetMaterialBaseLevel(base);
 
     ImGui::EndDisabled();
@@ -165,21 +171,19 @@ void MillingSimulatorView::RenderWarnings() const
     ImGui::SeparatorText("Warnings");
 
     auto const& warningsRepo = model.GetMillingWarnings();
-    if (warningsRepo.Empty()) {
+    if (warningsRepo.Empty())
         ImGui::Text("No warnings");
-    }
+    else if (ImGui::Button("Clear warnings"))
+        model.ClearMillingWarnings();
 
     for (const auto&[commandId, warningsTypes] : warningsRepo.GetWarnings()) {
-        if (warningsTypes | MillingWarningsRepo::MillingStraightDown)
+        if (warningsTypes & MillingWarningsRepo::MillingStraightDown)
             ImGui::Text("Milling straight down during %d command", commandId);
 
-        if (warningsTypes | MillingWarningsRepo::MillingTooDeep)
+        if (warningsTypes & MillingWarningsRepo::MillingTooDeep)
             ImGui::Text("Milling too deep during %d command", commandId);
 
-        if (warningsTypes | MillingWarningsRepo::MillingUnderTheBase)
+        if (warningsTypes & MillingWarningsRepo::MillingUnderTheBase)
             ImGui::Text("Milling under the base during %d command", commandId);
     }
 }
-
-
-

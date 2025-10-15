@@ -7,7 +7,6 @@
 #include "bicubicBSplineSurfaceShader.hpp"
 #include "gregoryPatchShader.hpp"
 #include "passThrough.hpp"
-#include "millingShader.hpp"
 #include "trimmedTorusShader.hpp"
 #include "trimmedBicubicBezierSurfaceShader.hpp"
 #include "trimmedBicubicBSplineSurfaceShader.hpp"
@@ -49,10 +48,6 @@ public:
         { return passThroughShader; }
 
     [[nodiscard]]
-    const MillingShader& GetMillingShader() const
-        { return millingShader; }
-
-    [[nodiscard]]
     const TrimmedTorusShader& GetTrimmedTorusShader() const
         { return trimmedTorusShader; }
 
@@ -76,7 +71,6 @@ private:
     BicubicBSplineSurfaceShader bSplineSurfaceShader;
     GregoryPatchShader gregoryPatchShader;
     PassThroughShader passThroughShader;
-    MillingShader millingShader;
     TrimmedTorusShader trimmedTorusShader;
     TrimmedBicubicBezierSurfaceShader trimmedBicubicBezierSurfaceShader;
     TrimmedBicubicBSplineSurfaceShader trimmedBicubicBSplineSurfaceShader;
