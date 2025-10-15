@@ -3,6 +3,7 @@
 #include <CAD_modeler/model/systems/shaders/shaderRepository.hpp>
 
 #include <algorithm>
+#include <numeric>
 
 
 MillingMaterial::MillingMaterial(const int xResolution, const int zResolution, const float xLen, const float zLen, const float thickness):
@@ -12,14 +13,24 @@ MillingMaterial::MillingMaterial(const int xResolution, const int zResolution, c
     textureData.resize(xResolution * zResolution);
     std::ranges::fill(textureData, initThickness);
 
-    materialTop.Update(
+    top.Update(
         GenerateMaterialTopVertices(),
         GenerateMaterialTopIndices()
     );
 
-    materialBottom.Update(
+    bottom.Update(
         GenerateMaterialBottomVertices(),
         GenerateMaterialBottomIndices()
+    );
+
+    sideX.Update(
+        GenerateMaterialSideXVertices(),
+        GenerateMaterialSideXIndices()
+    );
+
+    sideZ.Update(
+        GenerateMaterialSideZVertices(),
+        GenerateMaterialSideZIndices()
     );
 }
 
@@ -30,9 +41,19 @@ void MillingMaterial::SetResolution(const int xRes, const int zRes)
     std::ranges::fill(textureData, initThickness);
     heightMap.ChangeSize(xRes, zRes, textureData.data(), Texture2D::Red);
 
-    materialTop.Update(
+    top.Update(
         GenerateMaterialTopVertices(),
         GenerateMaterialTopIndices()
+    );
+
+    sideX.Update(
+         GenerateMaterialSideXVertices(),
+         GenerateMaterialSideXIndices()
+    );
+
+    sideZ.Update(
+        GenerateMaterialSideZVertices(),
+        GenerateMaterialSideZIndices()
     );
 }
 
@@ -45,14 +66,24 @@ void MillingMaterial::SetSize(const float xLen, const float zLen)
     mainHeightMapCorner.X() = -xLen / 2.f;
     mainHeightMapCorner.Z() = -zLen / 2.f;
 
-    materialTop.Update(
+    top.Update(
         GenerateMaterialTopVertices(),
         GenerateMaterialTopIndices()
     );
 
-    materialBottom.Update(
+    bottom.Update(
         GenerateMaterialBottomVertices(),
         GenerateMaterialBottomIndices()
+    );
+
+    sideX.Update(
+        GenerateMaterialSideXVertices(),
+        GenerateMaterialSideXIndices()
+    );
+
+    sideZ.Update(
+        GenerateMaterialSideZVertices(),
+        GenerateMaterialSideZIndices()
     );
 }
 
@@ -68,14 +99,24 @@ void MillingMaterial::SetBaseLevel(const float level)
 {
     mainHeightMapCorner.Y() = level;
 
-    materialTop.Update(
+    top.Update(
         GenerateMaterialTopVertices(),
         GenerateMaterialTopIndices()
     );
 
-    materialBottom.Update(
+    bottom.Update(
         GenerateMaterialBottomVertices(),
         GenerateMaterialBottomIndices()
+    );
+
+    sideX.Update(
+        GenerateMaterialSideXVertices(),
+        GenerateMaterialSideXIndices()
+     );
+
+    sideZ.Update(
+        GenerateMaterialSideZVertices(),
+        GenerateMaterialSideZIndices()
     );
 }
 
@@ -117,8 +158,8 @@ void MillingMaterial::Render(const alg::Mat4x4 &cameraMtx, const alg::Vec3 &camP
     materialTopShader.SetMainHeightmapCorner(mainHeightMapCorner);
     materialTopShader.SetMVP(cameraMtx);
 
-    materialTop.Use();
-    glDrawElements(GL_TRIANGLES, materialTop.GetElementsCnt(), GL_UNSIGNED_INT, nullptr);
+    top.Use();
+    glDrawElements(GL_TRIANGLES, top.GetElementsCnt(), GL_UNSIGNED_INT, nullptr);
 
     // Render material bottom
     const auto& materialRestShader = shaderRepo.GetMillingMaterialBottomShader();
@@ -129,8 +170,43 @@ void MillingMaterial::Render(const alg::Mat4x4 &cameraMtx, const alg::Vec3 &camP
     materialRestShader.SetNormal(-alg::Vec3::UnitY());
     materialRestShader.SetVP(cameraMtx);
 
-    materialBottom.Use();
-    glDrawElements(GL_TRIANGLE_STRIP, materialBottom.GetElementsCnt(), GL_UNSIGNED_INT, nullptr);
+    bottom.Use();
+    glDrawElements(GL_TRIANGLE_STRIP, bottom.GetElementsCnt(), GL_UNSIGNED_INT, nullptr);
+
+    // Render sides
+    const auto& materialSideShader = shaderRepo.GetMillingMaterialSideShader();
+
+    materialSideShader.Use();
+    heightMap.Use();
+    materialSideShader.SetCameraPosition(camPos);
+    materialSideShader.SetHeightMapZLen(zLen);
+    materialSideShader.SetHeightMapXLen(xLen);
+    materialSideShader.SetMainHeightmapCorner(mainHeightMapCorner);
+    materialSideShader.SetVP(cameraMtx);
+
+    // Positive X side
+    materialSideShader.SetNormal(alg::Vec3::UnitX());
+    materialSideShader.SetSideType(MillingMaterialSideShader::SideType::PositiveX);
+
+    sideX.Use();
+    glDrawElements(GL_TRIANGLE_STRIP, sideX.GetElementsCnt(), GL_UNSIGNED_INT, nullptr);
+
+    // Negative X side
+    materialSideShader.SetNormal(-alg::Vec3::UnitX());
+    materialSideShader.SetSideType(MillingMaterialSideShader::SideType::NegativeX);
+    glDrawElements(GL_TRIANGLE_STRIP, sideX.GetElementsCnt(), GL_UNSIGNED_INT, nullptr);
+
+    // Positive Z side
+    materialSideShader.SetNormal(alg::Vec3::UnitZ());
+    materialSideShader.SetSideType(MillingMaterialSideShader::SideType::PositiveZ);
+
+    sideZ.Use();
+    glDrawElements(GL_TRIANGLE_STRIP, sideZ.GetElementsCnt(), GL_UNSIGNED_INT, nullptr);
+
+    // Negative Z side
+    materialSideShader.SetNormal(-alg::Vec3::UnitZ());
+    materialSideShader.SetSideType(MillingMaterialSideShader::SideType::NegativeZ);
+    glDrawElements(GL_TRIANGLE_STRIP, sideZ.GetElementsCnt(), GL_UNSIGNED_INT, nullptr);
 }
 
 
@@ -191,7 +267,7 @@ std::vector<uint32_t> MillingMaterial::GenerateMaterialTopIndices() const
 std::vector<float> MillingMaterial::GenerateMaterialBottomVertices() const
 {
     const float valX = xLen / 2.f;
-    const float valY = mainHeightMapCorner.Y();
+    const float valY = BaseLevel();
     const float valZ = zLen / 2.f;
 
     return std::vector{
@@ -223,4 +299,74 @@ std::vector<uint32_t> MillingMaterial::GenerateMaterialBottomIndices() const
     return std::vector{
         0u, 1u, 2u, 3u
     };
+}
+
+
+std::vector<float> MillingMaterial::GenerateMaterialSideXVertices() const
+{
+    std::vector<float> result;
+    result.reserve(ZResolution() * 2 * alg::Vec3::dim);
+
+    const float baseLevel = BaseLevel();
+
+    for (int z = 0; z < ZResolution(); z++) {
+        constexpr float posX = 0.f;
+        const float posY = baseLevel;
+        const float posZ = GlobalZ(z);
+
+        result.push_back(posX);
+        result.push_back(posY);
+        result.push_back(posZ);
+
+        result.push_back(posX);
+        result.push_back(posY);
+        result.push_back(posZ);
+    }
+
+    return result;
+}
+
+
+std::vector<uint32_t> MillingMaterial::GenerateMaterialSideXIndices() const
+{
+    std::vector<uint32_t> result(ZResolution() * 2);
+
+    std::iota(result.begin(), result.end(), 0u);
+
+    return result;
+}
+
+
+std::vector<float> MillingMaterial::GenerateMaterialSideZVertices() const
+{
+    std::vector<float> result;
+    result.reserve(XResolution() * 2 * alg::Vec3::dim);
+
+    const float baseLevel = BaseLevel();
+
+    for (int x = 0; x < XResolution(); x++) {
+        const float posX = GlobalX(x);
+        const float posY = baseLevel;
+        constexpr float posZ = 0.f;
+
+        result.push_back(posX);
+        result.push_back(posY);
+        result.push_back(posZ);
+
+        result.push_back(posX);
+        result.push_back(posY);
+        result.push_back(posZ);
+    }
+
+    return result;
+}
+
+
+std::vector<uint32_t> MillingMaterial::GenerateMaterialSideZIndices() const
+{
+    std::vector<uint32_t> result(XResolution() * 2);
+
+    std::iota(result.begin(), result.end(), 0u);
+
+    return result;
 }

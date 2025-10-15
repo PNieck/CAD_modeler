@@ -84,12 +84,20 @@ private:
     float initThickness;
 
     // Meshes
-    Mesh materialTop;
-    Mesh materialBottom;
+    Mesh top;
+    Mesh bottom;
+    Mesh sideX;
+    Mesh sideZ;
 
     std::vector<float> GenerateMaterialTopVertices() const;
     std::vector<uint32_t> GenerateMaterialTopIndices() const;
 
     std::vector<float> GenerateMaterialBottomVertices() const;
     std::vector<uint32_t> GenerateMaterialBottomIndices() const;
+
+    std::vector<float> GenerateMaterialSideXVertices() const;
+    std::vector<uint32_t> GenerateMaterialSideXIndices() const;
+
+    std::vector<float> GenerateMaterialSideZVertices() const;
+    std::vector<uint32_t> GenerateMaterialSideZIndices() const;
 };

@@ -9,6 +9,7 @@
 #include "passThrough.hpp"
 #include "millingMaterialTopShader.hpp"
 #include "millingMaterialBottomShader.hpp"
+#include "millingMaterialSideShader.hpp"
 #include "trimmedTorusShader.hpp"
 #include "trimmedBicubicBezierSurfaceShader.hpp"
 #include "trimmedBicubicBSplineSurfaceShader.hpp"
@@ -58,6 +59,10 @@ public:
         { return millingBottomShader; }
 
     [[nodiscard]]
+    const MillingMaterialSideShader& GetMillingMaterialSideShader() const
+        { return millingSideShader; }
+
+    [[nodiscard]]
     const TrimmedTorusShader& GetTrimmedTorusShader() const
         { return trimmedTorusShader; }
 
@@ -83,6 +88,7 @@ private:
     PassThroughShader passThroughShader;
     MillingMaterialTopShader millingShader;
     MillingMaterialBottomShader millingBottomShader;
+    MillingMaterialSideShader millingSideShader;
     TrimmedTorusShader trimmedTorusShader;
     TrimmedBicubicBezierSurfaceShader trimmedBicubicBezierSurfaceShader;
     TrimmedBicubicBSplineSurfaceShader trimmedBicubicBSplineSurfaceShader;

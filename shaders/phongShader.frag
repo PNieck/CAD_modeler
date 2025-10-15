@@ -16,7 +16,7 @@ void main()
     const vec3 lightColor = vec3(1.f, 1.f, 1.f);
 
     // ambient
-    const float ambientStrength = 0.1;
+    const float ambientStrength = 0.2;
     vec3 ambient = ambientStrength * lightColor;
 
     // diffuse
