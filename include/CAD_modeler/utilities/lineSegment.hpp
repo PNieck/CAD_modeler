@@ -8,6 +8,7 @@ public:
     LineSegment(const alg::Vec3& startPoint, const alg::Vec3& endPoint):
         startingPoint(startPoint), direction((endPoint - startPoint).Normalize()), maxT((endPoint - startPoint).Length()) {}
 
+    [[nodiscard]]
     alg::Vec3 NearestPoint(const alg::Vec3& point) const;
 
 private:

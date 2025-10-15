@@ -6,7 +6,7 @@
 #include <CAD_modeler/model/components/MillingMachinePath.hpp>
 #include <CAD_modeler/model/components/scale.hpp>
 
-#include <CAD_modeler/utilities/linePlotter.hpp>
+#include <CAD_modeler/utilities/lineDrawer.hpp>
 #include <CAD_modeler/utilities/lineSegment.hpp>
 
 #include <ecs/coordinator.hpp>
@@ -260,32 +260,22 @@ void MillingMachineSystem::MillSection(const Position& oldCutterPos, const Posit
     }
 
     // Step 2: Milling along the whole line
-    const auto [points, lineType] = LinePlotter::DeterminePlotLines(
-        oldPosPixelX, oldPosPixelZ,
-        newPosPixelX, newPosPixelZ
-    );
+    const alg::IVec2 oldPosPixel(oldPosPixelX, oldPosPixelZ);
+    const alg::IVec2 newPosPixel(newPosPixelX, newPosPixelZ);
+
+    const auto lineDrawer = GetLineDrawer(oldPosPixel, newPosPixel);
 
     const LineSegment lineSegment(oldCutterPos.vec, newCutterPos.vec);
+    const bool lineIsSteep = IsSteepLine(oldPosPixel, newPosPixel);
 
-    for (auto const& point : points) {
-        int cutterRadius;
+    const int cutterRadius = lineIsSteep ? radiusInPixelsZ : radiusInPixelsX;
 
-        switch (lineType) {
-            case LinePlotter::LineType::Low:
-                cutterRadius = radiusInPixelsX;
-                break;
-
-            case LinePlotter::LineType::High:
-                cutterRadius = radiusInPixelsZ;
-                break;
-
-            default:
-                throw std::runtime_error("Unknown line type");
-        }
-
+    do {
         for (int i = -cutterRadius; i <= cutterRadius; i++) {
-            const int x = lineType == LinePlotter::LineType::High ? point.X() + i : point.X();
-            const int z = lineType == LinePlotter::LineType::Low ? point.Y() + i : point.Y();
+            const alg::IVec2& actPoint = lineDrawer->ActualPoint();
+
+            const int x = lineIsSteep ? actPoint.X() + i : actPoint.X();
+            const int z = !lineIsSteep ? actPoint.Y() + i : actPoint.Y();
 
             if (x < 0 || x >= material.XResolution() || z < 0 || z >= material.ZResolution())
                 continue;
@@ -298,7 +288,7 @@ void MillingMachineSystem::MillSection(const Position& oldCutterPos, const Posit
 
             UpdateHeightMap(x, z, cutterY, cutterParams.height, straightDown);
         }
-    }
+    } while (lineDrawer->NextPoint());
 }
 
 
