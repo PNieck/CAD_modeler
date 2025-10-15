@@ -333,10 +333,7 @@ float MillingMachineSystem::UpdateHeightMap(const int x, const int z, const floa
     if (diff == 0.f)
         return diff;
 
-    float newHeight = oldHeight - diff;
-    if (std::isnan(newHeight))
-        newHeight = 0.f;
-
+    const float newHeight = oldHeight - diff;
     material.ChangeHeightAt(x, z, newHeight);
 
     if (newHeight < material.BaseLevel()) {

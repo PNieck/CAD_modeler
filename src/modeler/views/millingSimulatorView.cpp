@@ -176,13 +176,13 @@ void MillingSimulatorView::RenderWarnings() const
     }
 
     for (const auto&[commandId, warningsTypes] : warningsRepo.GetWarnings()) {
-        if (warningsTypes | MillingWarningsRepo::MillingStraightDown)
+        if (warningsTypes & MillingWarningsRepo::MillingStraightDown)
             ImGui::Text("Milling straight down during %d command", commandId);
 
-        if (warningsTypes | MillingWarningsRepo::MillingTooDeep)
+        if (warningsTypes & MillingWarningsRepo::MillingTooDeep)
             ImGui::Text("Milling too deep during %d command", commandId);
 
-        if (warningsTypes | MillingWarningsRepo::MillingUnderTheBase)
+        if (warningsTypes & MillingWarningsRepo::MillingUnderTheBase)
             ImGui::Text("Milling under the base during %d command", commandId);
     }
 }
