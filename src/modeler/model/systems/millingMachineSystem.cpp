@@ -173,7 +173,7 @@ void MillingMachineSystem::Update(const double dt)
         cutterPos = actDest;
         actCommand++;
         dist -= remainingCommandDist;
-    } while (actCommand < commands.size());
+    } while (static_cast<size_t>(actCommand) < commands.size());
 
     StopMachine();
     actCommand = 1;
@@ -204,7 +204,7 @@ void MillingMachineSystem::InstantMillingThreadFunc(std::stop_token stoken)
 
     const auto&[commands] = coordinator->GetComponent<MillingMachinePath>(*entities.begin());
 
-    while (actCommand < commands.size() && !stoken.stop_requested()) {
+    while (static_cast<size_t>(actCommand) < commands.size() && !stoken.stop_requested()) {
         const auto& prevDest = commands[actCommand - 1].destination;
         const auto& actDest = commands[actCommand].destination;
 
