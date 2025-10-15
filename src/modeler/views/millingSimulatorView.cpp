@@ -40,7 +40,7 @@ void MillingSimulatorView::RenderFileSelection()
         ImGuiFileDialog::Instance()->OpenDialog(
             "ChooseGCodeFileDlgKey",
             "Choose GCode File",
-            "GCode files {.k01,.k08,.k16,.f10,.f12}",
+            "GCode files {.k01,.k1,.k08,.k8,.k16,.f10,.f12}",
             config
         );
     }
@@ -84,11 +84,11 @@ void MillingSimulatorView::RenderMaterialOptions() const
     }
 
     float thickness = model.GetMaterialThickness();
-    if (ImGui::DragFloat("Material thickness", &thickness))
+    if (ImGui::DragFloat("Material thickness", &thickness, 0.1f))
         model.SetMaterialThickness(thickness);
 
     float base = model.GetMaterialBaseLevel();
-    if (ImGui::DragFloat("Material base level", &base))
+    if (ImGui::DragFloat("Material base level", &base, 0.1f))
         model.SetMaterialBaseLevel(base);
 
     ImGui::EndDisabled();
@@ -187,6 +187,3 @@ void MillingSimulatorView::RenderWarnings() const
             ImGui::Text("Milling under the base during %d command", commandId);
     }
 }
-
-
-
