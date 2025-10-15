@@ -69,7 +69,7 @@ void MillingSimulatorView::RenderMaterialOptions() const
     valuesChanged |= ImGui::InputInt("X resolution", &xResolution);
     valuesChanged |= ImGui::InputInt("Z resolution", &zResolution);
 
-    if (valuesChanged) {
+    if (valuesChanged && xResolution > 0 && zResolution > 0) {
         model.SetMaterialResolution(xResolution, zResolution);
         valuesChanged = false;
     }
@@ -79,12 +79,12 @@ void MillingSimulatorView::RenderMaterialOptions() const
     valuesChanged |= ImGui::DragFloat("Material size X", &materialXLen, 0.1f);
     valuesChanged |= ImGui::DragFloat("Material size Z", &materialZLen, 0.1f);
 
-    if (valuesChanged) {
+    if (valuesChanged && materialXLen > 0.f && materialZLen > 0.f) {
         model.SetMaterialLength(materialXLen, materialZLen);
     }
 
     float thickness = model.GetMaterialThickness();
-    if (ImGui::DragFloat("Material thickness", &thickness, 0.1f))
+    if (ImGui::DragFloat("Material thickness", &thickness, 0.1f) && thickness > 0.f)
         model.SetMaterialThickness(thickness);
 
     float base = model.GetMaterialBaseLevel();
