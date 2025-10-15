@@ -5,31 +5,13 @@
 
 
 MillingMaterial::MillingMaterial(const int xResolution, const int zResolution, const float xLen, const float zLen, const float thickness):
-    heightMap(xLen, zLen, nullptr, Texture2D::Red32BitFloat, Texture2D::Red),
+    heightMap(xResolution, zResolution, nullptr, Texture2D::Red32BitFloat, Texture2D::Red),
     mainHeightMapCorner(-xLen/2.f, 0.f, -zLen/2.f), xLen(xLen), zLen(zLen), initThickness(thickness)
 {
     textureData.resize(xResolution * zResolution);
     std::ranges::fill(textureData, initThickness);
 
-    top.Update(
-        GenerateMaterialTopVertices(),
-        GenerateMaterialTopIndices()
-    );
-
-    bottom.Update(
-        GenerateMaterialBottomVertices(),
-        GenerateMaterialBottomIndices()
-    );
-
-    sideX.Update(
-        GenerateMaterialSideXVertices(),
-        GenerateMaterialSideXIndices()
-    );
-
-    sideZ.Update(
-        GenerateMaterialSideZVertices(),
-        GenerateMaterialSideZIndices()
-    );
+    UpdateMeshes();
 }
 
 
@@ -39,20 +21,7 @@ void MillingMaterial::SetResolution(const int xRes, const int zRes)
     std::ranges::fill(textureData, initThickness);
     heightMap.ChangeSize(xRes, zRes, textureData.data(), Texture2D::Red);
 
-    top.Update(
-        GenerateMaterialTopVertices(),
-        GenerateMaterialTopIndices()
-    );
-
-    sideX.Update(
-         GenerateMaterialSideXVertices(),
-         GenerateMaterialSideXIndices()
-    );
-
-    sideZ.Update(
-        GenerateMaterialSideZVertices(),
-        GenerateMaterialSideZIndices()
-    );
+    UpdateMeshes();
 }
 
 
@@ -64,25 +33,7 @@ void MillingMaterial::SetSize(const float xLen, const float zLen)
     mainHeightMapCorner.X() = -xLen / 2.f;
     mainHeightMapCorner.Z() = -zLen / 2.f;
 
-    top.Update(
-        GenerateMaterialTopVertices(),
-        GenerateMaterialTopIndices()
-    );
-
-    bottom.Update(
-        GenerateMaterialBottomVertices(),
-        GenerateMaterialBottomIndices()
-    );
-
-    sideX.Update(
-        GenerateMaterialSideXVertices(),
-        GenerateMaterialSideXIndices()
-    );
-
-    sideZ.Update(
-        GenerateMaterialSideZVertices(),
-        GenerateMaterialSideZIndices()
-    );
+    UpdateMeshes();
 }
 
 
@@ -97,25 +48,7 @@ void MillingMaterial::SetBaseLevel(const float level)
 {
     mainHeightMapCorner.Y() = level;
 
-    top.Update(
-        GenerateMaterialTopVertices(),
-        GenerateMaterialTopIndices()
-    );
-
-    bottom.Update(
-        GenerateMaterialBottomVertices(),
-        GenerateMaterialBottomIndices()
-    );
-
-    sideX.Update(
-        GenerateMaterialSideXVertices(),
-        GenerateMaterialSideXIndices()
-     );
-
-    sideZ.Update(
-        GenerateMaterialSideZVertices(),
-        GenerateMaterialSideZIndices()
-    );
+    UpdateMeshes();
 }
 
 
@@ -201,6 +134,30 @@ void MillingMaterial::Render(const alg::Mat4x4 &cameraMtx, const alg::Vec3 &camP
 }
 
 
+void MillingMaterial::UpdateMeshes()
+{
+    top.Update(
+        GenerateMaterialTopVertices(),
+        GenerateMaterialTopIndices()
+    );
+
+    bottom.Update(
+        GenerateMaterialBottomVertices(),
+        GenerateMaterialBottomIndices()
+    );
+
+    sideX.Update(
+        GenerateMaterialSideXVertices(),
+        GenerateMaterialSideXIndices()
+    );
+
+    sideZ.Update(
+        GenerateMaterialSideZVertices(),
+        GenerateMaterialSideZIndices()
+    );
+}
+
+
 std::vector<float> MillingMaterial::GenerateMaterialTopVertices() const
 {
     std::vector<float> result;
@@ -257,9 +214,9 @@ std::vector<uint32_t> MillingMaterial::GenerateMaterialTopIndices() const
 
 std::vector<float> MillingMaterial::GenerateMaterialBottomVertices() const
 {
-    const float valX = xLen / 2.f;
+    const float valX = (xLen - PixelXLen()) / 2.f;
     const float valY = BaseLevel();
-    const float valZ = zLen / 2.f;
+    const float valZ = (zLen - PixelZLen()) / 2.f;
 
     return std::vector{
         // First vertex

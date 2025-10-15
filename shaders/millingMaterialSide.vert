@@ -57,7 +57,7 @@ void main()
     else if (sideType == positiveX)
         worldPos.x = mainHeightMapCorner.x + xResolution*pixelXLen - pixelXLen/2.f;
     else // if (sideType == negativeX)
-        worldPos.x = mainHeightMapCorner.x;
+        worldPos.x = mainHeightMapCorner.x + pixelXLen/2.f;
 
     if (gl_VertexID % 2 == 0)
         worldPos = PointPosition(worldPos);

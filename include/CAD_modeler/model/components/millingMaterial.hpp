@@ -48,22 +48,29 @@ public:
     float BaseLevel() const
         { return mainHeightMapCorner.Y(); }
 
+    [[nodiscard]]
     float PixelXLen() const
         { return xLen / static_cast<float>(XResolution()); }
 
+    [[nodiscard]]
     float PixelZLen() const
         { return zLen / static_cast<float>(ZResolution()); }
 
+    [[nodiscard]]
     float MinX() const
         { return mainHeightMapCorner.X(); }
 
+    [[nodiscard]]
     float MinZ() const
         { return mainHeightMapCorner.Z(); }
 
+    [[nodiscard]]
     float GlobalX(int x) const;
 
+    [[nodiscard]]
     float GlobalZ(int z) const;
 
+    [[nodiscard]]
     float HeightAt(const int x, const int z) const
         { return textureData[z*XResolution() + x]; }
 
@@ -97,15 +104,17 @@ private:
     MillingMaterialSideShader sideShader;
     MillingMaterialBottomShader bottomShader;
 
-    std::vector<float> GenerateMaterialTopVertices() const;
-    std::vector<uint32_t> GenerateMaterialTopIndices() const;
+    void UpdateMeshes();
 
-    std::vector<float> GenerateMaterialBottomVertices() const;
-    std::vector<uint32_t> GenerateMaterialBottomIndices() const;
+    [[nodiscard]] std::vector<float> GenerateMaterialTopVertices() const;
+    [[nodiscard]] std::vector<uint32_t> GenerateMaterialTopIndices() const;
 
-    std::vector<float> GenerateMaterialSideXVertices() const;
-    std::vector<uint32_t> GenerateMaterialSideXIndices() const;
+    [[nodiscard]] std::vector<float> GenerateMaterialBottomVertices() const;
+    [[nodiscard]] std::vector<uint32_t> GenerateMaterialBottomIndices() const;
 
-    std::vector<float> GenerateMaterialSideZVertices() const;
-    std::vector<uint32_t> GenerateMaterialSideZIndices() const;
+    [[nodiscard]] std::vector<float> GenerateMaterialSideXVertices() const;
+    [[nodiscard]] std::vector<uint32_t> GenerateMaterialSideXIndices() const;
+
+    [[nodiscard]] std::vector<float> GenerateMaterialSideZVertices() const;
+    [[nodiscard]] std::vector<uint32_t> GenerateMaterialSideZIndices() const;
 };
