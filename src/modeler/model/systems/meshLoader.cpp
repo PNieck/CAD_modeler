@@ -65,13 +65,3 @@ Mesh MeshLoader::LoadPositionsFromObj(const std::string &filepath) const
 
     return result;
 }
-
-
-// MeshWithNormals MeshLoader::LoadWithNormalsFromObj(const std::string &filepath)
-// {
-// }
-//
-//
-// bool MeshLoader::TryParsePosition(const std::string &line, std::vector<float> &positions) const
-// {
-// }
