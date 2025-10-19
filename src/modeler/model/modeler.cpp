@@ -226,7 +226,8 @@ void Modeler::MergeControlPoints(const Entity e1, const Entity e2)
     const auto registrySys = coordinator.GetSystem<ControlPointsRegistrySystem>();
     const auto curveCPSys = coordinator.GetSystem<CurveControlPointsSystem>();
 
-    for (auto owner: registrySys->GetOwnersOfControlPoints(e2)) {
+    // Making a copy because set changes during a loop
+    for (const auto owners = registrySys->GetOwnersOfControlPoints(e2); auto owner: owners) {
         // Getting system ID
         const auto sysId = std::get<1>(owner);
         const Entity entity = std::get<0>(owner);
