@@ -17,6 +17,8 @@ public:
 
     void Render(const alg::Mat4x4& cameraMtx) const;
 
+    bool renderPoints = true;
+
 private:
     Mesh pointsMesh;
 };

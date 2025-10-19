@@ -154,7 +154,7 @@ public:
         { return cursorSystem->GetPosition(); }
 
     // TODO; Change to normal coordinates
-    inline void SetCursorPositionFromViewport(float x, float y)
+    void SetCursorPositionFromViewport(float x, float y)
         { cursorSystem->SetPosition(PointFromViewportCoordinates(x, y)); }
 
     Entity Add3DPointFromViewport(float x, float y);
@@ -198,37 +198,37 @@ public:
     void DeleteEntity(const Entity entity)
         { coordinator.DestroyEntity(entity); }
 
-    inline Entity GetMiddlePoint() const
+    Entity GetMiddlePoint() const
         { return selectionSystem->GetMiddlePoint(); }
 
-    inline void ChangeSelectedEntitiesPosition(const Position& newMidPoint)
+    void ChangeSelectedEntitiesPosition(const Position& newMidPoint)
         { selectionSystem->MoveSelected(newMidPoint); }
 
-    inline void ChangeSelectedEntitiesScale(const Scale& scale)
+    void ChangeSelectedEntitiesScale(const Scale& scale)
         { selectionSystem->ScaleSelected(scale); }
 
-    inline void RotateSelectedEntities(const Rotation& rotation)
+    void RotateSelectedEntities(const Rotation& rotation)
         { selectionSystem->RotateSelected(rotation); }
 
-    inline void ChangeEntityName(Entity entity, const Name& name)
+    void ChangeEntityName(const Entity entity, const Name& name)
         { nameSystem->SetName(entity, name); }
 
-    inline const std::unordered_set<Entity>& GetAllPoints() const
+    const std::unordered_set<Entity>& GetAllPoints() const
         { return pointsSystem->GetEntities(); }
 
-    inline const std::unordered_set<Entity>& GetAllCurves() const
+    const std::unordered_set<Entity>& GetAllCurves() const
         { return coordinator.GetSystem<CurveControlPointsSystem>()->GetEntities(); }
 
-    inline const std::unordered_set<Entity>& GetAllC0Curves() const
+    const std::unordered_set<Entity>& GetAllC0Curves() const
         { return c0CurveSystem->GetEntities(); }
 
-    inline const std::unordered_set<Entity>& GetAllC2Curves() const
+    const std::unordered_set<Entity>& GetAllC2Curves() const
         { return c2CurveSystem->GetEntities(); }
 
     const std::unordered_set<Entity>& GetAllInterpolationCurves() const
         { return coordinator.GetSystem<InterpolationCurveSystem>()->GetEntities(); }
 
-    inline void ShowC2BSplinePolygon(Entity entity) const
+    void ShowC2BSplinePolygon(const Entity entity) const
         { return c2CurveSystem->ShowBSplinePolygon(entity); }
 
     void HideC2BSplinePolygon(const Entity entity) const
@@ -294,6 +294,9 @@ public:
     void DrawPointOnUV(Entity e, size_t u, size_t v);
     void ApplyTrimming(Entity e);
     void ClearTrimming(Entity e);
+
+    bool& Points3DRendering()
+        { return pointsSystem->renderPoints; }
 
     // TODO: delete
     void ShowDerivativesU(Entity e);

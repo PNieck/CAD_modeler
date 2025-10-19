@@ -63,6 +63,19 @@ void ModelerMenuBar::Render() const
             ImGui::EndMenu();
         }
 
+        if (ImGui::BeginMenu("Rendering")) {
+            if (ImGui::BeginMenu("3D Points")) {
+                const bool renderPoints = model.Points3DRendering();
+                if (ImGui::MenuItem("Render", nullptr, renderPoints)) {
+                    model.Points3DRendering() = !renderPoints;
+                }
+
+                ImGui::EndMenu();
+            }
+
+            ImGui::EndMenu();
+        }
+
 #       ifndef NDEBUG // is true only during debug compilation
 
             static bool renderImGuiDemo = false;
