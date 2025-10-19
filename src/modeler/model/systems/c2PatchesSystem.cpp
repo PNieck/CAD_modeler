@@ -69,7 +69,7 @@ Entity C2PatchesSystem::CreatePlane(
 }
 
 
-Entity C2PatchesSystem::CreateCylinder(const Position &pos, const alg::Vec3 &direction, float radius)
+Entity C2PatchesSystem::CreateCylinder(const Position &pos, const alg::Vec3 &direction, const float radius)
 {
     C2Patches patches(1, 3);
 
@@ -484,16 +484,20 @@ void C2PatchesSystem::RecalculateCylinder(
 
     const alg::Vec3 offset = direction / static_cast<float>(patches.PointsInRow());
 
-    const Rotation rot(direction, 2.f * std::numbers::pi_v<float> / static_cast<float>(patches.PointsInCol() - CylinderDoublePointsCnt));
+    const float angle = 2.f * std::numbers::pi_v<float> / static_cast<float>(patches.PointsInCol() - CylinderDoublePointsCnt);
 
     alg::Vec3 v = GetPerpendicularVec(direction) * radius + pos.vec;
 
     for (int i=0; i < patches.PointsInRow(); ++i) {
         for (int j=0; j < patches.PointsInCol() - CylinderDoublePointsCnt; ++j) {
-            const Entity cp = patches.GetPoint(i, j);
-            coordinator->SetComponent(cp, Position(v));
 
-            rot.Rotate(v);
+            const Rotation rot(direction, static_cast<float>(j)*angle);
+            alg::Vec3 endPos = v;
+
+            rot.Rotate(endPos);
+
+            const Entity cp = patches.GetPoint(i, j);
+            coordinator->SetComponent(cp, Position(endPos));
         }
 
         v += offset;
