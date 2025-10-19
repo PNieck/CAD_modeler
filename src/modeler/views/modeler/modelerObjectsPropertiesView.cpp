@@ -118,8 +118,10 @@ void ModelerObjectsPropertiesView::RenderMultipleObjectProperties() const
     valueChanged |= ImGui::DragFloat("Y##Pos", &y, DRAG_FLOAT_SPEED);
     valueChanged |= ImGui::DragFloat("Z##Pos", &z, DRAG_FLOAT_SPEED);
 
-    if (valueChanged)
+    if (valueChanged) {
         model.ChangeSelectedEntitiesPosition(Position(x, y, z));
+        valueChanged = false;
+    }
 
     if (ImGui::Button("Center camera"))
         CenterCameraOnObject(pos);
@@ -127,7 +129,6 @@ void ModelerObjectsPropertiesView::RenderMultipleObjectProperties() const
     x = 1.0f;
     y = 1.0f;
     z = 1.0f;
-    valueChanged = false;
 
     ImGui::SeparatorText("Scale");
 
@@ -135,8 +136,15 @@ void ModelerObjectsPropertiesView::RenderMultipleObjectProperties() const
     valueChanged |= ImGui::DragFloat("Y##Scale", &y, DRAG_FLOAT_SPEED, MIN_SCALE, 0.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
     valueChanged |= ImGui::DragFloat("Z##Scale", &z, DRAG_FLOAT_SPEED, MIN_SCALE, 0.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
 
-    if (valueChanged)
+    if (valueChanged) {
         model.ChangeSelectedEntitiesScale(Scale(x, y, z));
+        valueChanged = false;
+    }
+
+    float uniformScale = 1.0f;
+
+    if (ImGui::DragFloat("Uniform##Scale", &uniformScale, DRAG_FLOAT_SPEED, MIN_SCALE, 0.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp))
+        model.ChangeSelectedEntitiesScale(Scale(uniformScale));
 
     const Rotation rotation;
 
@@ -144,8 +152,6 @@ void ModelerObjectsPropertiesView::RenderMultipleObjectProperties() const
     vector.X() = Angle::FromRadians(vector.X()).ToDegrees();
     vector.Y() = Angle::FromRadians(vector.Y()).ToDegrees();
     vector.Z() = Angle::FromRadians(vector.Z()).ToDegrees();
-
-    valueChanged = false;
 
     ImGui::SeparatorText("Rotation");
 
@@ -198,7 +204,7 @@ void ModelerObjectsPropertiesView::DisplayPositionProperty(const Entity entity, 
 }
 
 
-void ModelerObjectsPropertiesView::DisplayScaleProperty(Entity entity, const Scale &scale) const
+void ModelerObjectsPropertiesView::DisplayScaleProperty(const Entity entity, const Scale &scale) const
 {
     float x = scale.GetX();
     float y = scale.GetY();
@@ -216,7 +222,7 @@ void ModelerObjectsPropertiesView::DisplayScaleProperty(Entity entity, const Sca
 }
 
 
-void ModelerObjectsPropertiesView::DisplayRotationProperty(Entity entity, const Rotation &rotation) const
+void ModelerObjectsPropertiesView::DisplayRotationProperty(const Entity entity, const Rotation &rotation) const
 {
     auto vector = rotation.GetRollPitchRoll();
     vector.X() = Angle::FromRadians(vector.X()).ToDegrees();
