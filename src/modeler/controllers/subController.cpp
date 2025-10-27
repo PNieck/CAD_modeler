@@ -5,11 +5,11 @@ MouseState SubController::mouseState = {};
 bool SubController::shiftClicked = false;
 
 
-void SubController::MouseMove(const int x, const int y, Model &model)
+void SubController::MouseMove(const int x, const int y)
 {
     mouseState.Moved(x, y);
 
-    if (mouseState.IsButtonClicked(MouseButton::Middle)) {
+    if (mouseState.IsButtonClicked(Middle)) {
         auto offset = mouseState.TranslationGet();
 
         if (!shiftClicked) {
@@ -25,9 +25,9 @@ void SubController::MouseMove(const int x, const int y, Model &model)
 }
 
 
-void SubController::ScrollMoved(const int offset, Model &model)
+void SubController::ScrollMoved(const int offset)
 {
-    float val = offset * SCROLL_COEF;
+    float val = static_cast<float>(offset) * SCROLL_COEF;
 
     if (val < 0.0f) {
         val = -1.0f / val;
@@ -38,13 +38,13 @@ void SubController::ScrollMoved(const int offset, Model &model)
 }
 
 
-void SubController::KeyboardKeyPressed(KeyboardKey key) {
+void SubController::KeyboardKeyPressed(const KeyboardKey key) {
     if (key == KeyboardKey::left_shift || key == KeyboardKey::right_shift)
         shiftClicked = true;
 }
 
 
-void SubController::KeyboardKeyReleased(KeyboardKey key) {
+void SubController::KeyboardKeyReleased(const KeyboardKey key) {
     if (key == KeyboardKey::left_shift || key == KeyboardKey::right_shift)
         shiftClicked = false;
 }

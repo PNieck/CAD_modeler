@@ -12,23 +12,15 @@ class ModelerController: public SubController {
 public:
     explicit ModelerController(Modeler& modeler);
 
-    void Update() const
+    void Update(double dt) override
         { modeler.Update(); }
 
-    void Render();
+    void Render() override;
 
-    void WindowSizeChanged(const int width, const int height) const
-        { SubController::WindowSizeChanged(width, height, modeler); }
+    void MouseClick(MouseButton button) override;
+    void MouseMove(int x, int y) override;
 
-    void MouseClick(MouseButton button);
-    void MouseMove(int x, int y) const;
-    void ScrollMoved(const int offset) const
-        { SubController::ScrollMoved(offset, modeler); }
-
-    void MouseRelease(const MouseButton button) const
-        { SubController::MouseRelease(button); }
-    void KeyboardKeyPressed(KeyboardKey key);
-    void KeyboardKeyReleased(KeyboardKey key);
+    void KeyboardKeyPressed(KeyboardKey key) override;
 
     [[nodiscard]]
     ModelerState GetModelerState() const

@@ -1,7 +1,6 @@
 #include "CAD_modeler/model/millingMachineSim.hpp"
 
 #include <CAD_modeler/model/systems/millingMachinePathsSystem.hpp>
-#include <CAD_modeler/model/systems/shaders/shaderRepository.hpp>
 
 
 MillingMachineSim::MillingMachineSim(const int viewportWidth, const int viewportHeight):

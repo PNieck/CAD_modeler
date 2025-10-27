@@ -14,4 +14,7 @@ public:
 
     [[nodiscard]]
     bool WantCaptureMouse() const;
+
+    [[nodiscard]]
+    bool WantCaptureKeyboard() const;
 };

@@ -3,5 +3,6 @@
 
 enum class ModelType {
     Modeler,
-    MillerMachineSim
+    MillerMachineSim,
+    MillingPathsDesigner
 };

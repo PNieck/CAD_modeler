@@ -4,10 +4,13 @@
 MainController::MainController(GLFWwindow* window, const int windowWidth, const int windowHeight):
     modeler(windowWidth, windowHeight),
     millingSim(windowWidth, windowHeight),
+    pathsDesigner(windowWidth, windowHeight),
     millSimController(millingSim),
     modelerController(modeler),
+    millingPathsDesignerController(pathsDesigner),
     guiController(window),
     actModelType(ModelType::Modeler),
+    actController(ActController()),
     modelChooser(*this)
 {
 }
@@ -18,18 +21,7 @@ void MainController::MouseMoved(const int x, const int y)
     if (guiController.WantCaptureMouse())
         return;
 
-    switch (actModelType) {
-        case ModelType::Modeler:
-            modelerController.MouseMove(x, y);
-            break;
-
-        case ModelType::MillerMachineSim:
-            millSimController.MouseMove(x, y);
-            break;
-
-        default:
-            throw std::runtime_error("Unknown model type");
-    }
+    actController->MouseMove(x, y);
 }
 
 
@@ -38,18 +30,7 @@ void MainController::MouseClicked(const MouseButton button)
     if (guiController.WantCaptureMouse())
         return;
 
-    switch (actModelType) {
-        case ModelType::Modeler:
-            modelerController.MouseClick(button);
-            break;
-
-        case ModelType::MillerMachineSim:
-            millSimController.MouseClick(button);
-            break;
-
-        default:
-            throw std::runtime_error("Unknown model type");
-    }
+    actController->MouseClick(button);
 }
 
 
@@ -58,18 +39,7 @@ void MainController::MouseReleased(const MouseButton button)
     if (guiController.WantCaptureMouse())
         return;
 
-    switch (actModelType) {
-        case ModelType::Modeler:
-            modelerController.MouseRelease(button);
-            break;
-
-        case ModelType::MillerMachineSim:
-            millSimController.MouseRelease(button);
-            break;
-
-        default:
-            throw std::runtime_error("Unknown model type");
-    }
+    actController->MouseRelease(button);
 }
 
 
@@ -78,55 +48,8 @@ void MainController::Render()
     guiController.PreFrameRender();
 
     modelChooser.Render();
-
-    switch (actModelType) {
-        case ModelType::Modeler:
-            modelerController.Render();
-            break;
-
-        case ModelType::MillerMachineSim:
-            millSimController.Render();
-            break;
-
-        default:
-            throw std::runtime_error("Unknown model type");
-    }
-
+    actController->Render();
     guiController.PostFrameRender();
-}
-
-
-void MainController::Update(double dt)
-{
-    switch (actModelType) {
-        case ModelType::Modeler:
-            modelerController.Update();
-            break;
-
-        case ModelType::MillerMachineSim:
-            millSimController.Update(dt);
-            break;
-
-        default:
-            throw std::runtime_error("Unknown model type");
-    }
-}
-
-
-void MainController::SizeChanged(const int width, const int height)
-{
-    switch (actModelType) {
-        case ModelType::Modeler:
-            modelerController.WindowSizeChanged(width, height);
-            break;
-
-        case ModelType::MillerMachineSim:
-            millSimController.WindowSizeChanged(width, height);
-            break;
-
-        default:
-            throw std::runtime_error("Unknown model type");
-    }
 }
 
 
@@ -135,48 +58,46 @@ void MainController::ScrollMoved(const int offset)
     if (guiController.WantCaptureMouse())
         return;
 
-    switch (actModelType) {
-        case ModelType::Modeler:
-            modelerController.ScrollMoved(offset);
-            break;
-
-        case ModelType::MillerMachineSim:
-            millSimController.ScrollMoved(offset);
-            break;
-
-        default:
-            throw std::runtime_error("Unknown model type");
-    }
+    actController->ScrollMoved(offset);
 }
 
 
 void MainController::KeyboardKeyPressed(const KeyboardKey key)
 {
-    switch (actModelType) {
-        case ModelType::Modeler:
-            modelerController.KeyboardKeyPressed(key);
-            break;
+    if (guiController.WantCaptureKeyboard())
+        return;
 
-        case ModelType::MillerMachineSim:
-            millSimController.KeyboardKeyPressed(key);
-            break;
-
-        default:
-            throw std::runtime_error("Unknown model type");
-    }
+    actController->KeyboardKeyPressed(key);
 }
 
 
-void MainController::KeyboardKeyReleased(KeyboardKey key)
+void MainController::KeyboardKeyReleased(const KeyboardKey key)
+{
+    if (guiController.WantCaptureKeyboard())
+        return;
+
+    actController->KeyboardKeyReleased(key);
+}
+
+
+void MainController::SetModelType(const ModelType modelType)
+{
+    actModelType = modelType;
+    actController = ActController();
+}
+
+
+SubController* MainController::ActController()
 {
     switch (actModelType) {
         case ModelType::Modeler:
-            modelerController.KeyboardKeyReleased(key);
-            break;
+            return &modelerController;
 
         case ModelType::MillerMachineSim:
-            millSimController.KeyboardKeyReleased(key);
-            break;
+            return &millSimController;
+
+        case ModelType::MillingPathsDesigner:
+            return &millingPathsDesignerController;
 
         default:
             throw std::runtime_error("Unknown model type");
