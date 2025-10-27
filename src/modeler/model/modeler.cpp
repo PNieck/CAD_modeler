@@ -13,6 +13,8 @@
 #include <CAD_modeler/model/systems/curveControlPointsSystem.hpp>
 #include "CAD_modeler/model/systems/uvVisualizer.hpp"
 
+#include <CAD_modeler/model/managers/loadManager.hpp>
+
 #include <stdexcept>
 
 
@@ -425,6 +427,13 @@ Entity Modeler::FillHole(const GregoryPatchesSystem::Hole& hole)
     nameSystem->SetName(entity, nameGenerator.GenerateName("GregoryPatches_"));
 
     return entity;
+}
+
+
+void Modeler::LoadScene(const std::string &path)
+{
+    LoadManager loadManager;
+    loadManager.Load(path, coordinator);
 }
 
 

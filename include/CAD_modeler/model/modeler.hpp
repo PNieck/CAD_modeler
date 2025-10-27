@@ -272,8 +272,7 @@ public:
     static constexpr ComponentId GetComponentId()
         { return ComponentsManager::GetComponentId<Comp>(); }
 
-    void LoadScene(const std::string& path)
-        { saveManager.LoadScene(path, coordinator); }
+    void LoadScene(const std::string& path);
 
     void SaveScene(const std::string& path)
         { saveManager.SaveScene(path, coordinator); }
