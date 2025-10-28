@@ -17,6 +17,8 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
+#include <functional>
+
 
 class MainController {
 public:
@@ -24,10 +26,10 @@ public:
     
     void Render();
     void Update(const double dt)
-        { actController->Update(dt); }
+        { actController.get().Update(dt); }
 
     void SizeChanged(const int width, const int height)
-        { actController->WindowSizeChanged(width, height); }
+        { actController.get().WindowSizeChanged(width, height); }
 
     void MouseClicked(MouseButton button);
     void MouseReleased(MouseButton button);
@@ -53,9 +55,9 @@ private:
     GuiController guiController;
 
     ModelType actModelType;
-    SubController* actController;
+    std::reference_wrapper<SubController> actController;
 
     ModelChooser modelChooser;
 
-    SubController* ActController();
+    SubController& ActController();
 };
