@@ -1,4 +1,4 @@
-#include <CAD_modeler/views/modeler/modelerGuiView.hpp>
+#include <../../../../include/CAD_modeler/views/modelerGuiView.hpp>
 
 #include <CAD_modeler/controllers/modelerController.hpp>
 

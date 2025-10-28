@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../model/modeler.hpp"
-#include "../views/modeler/modelerGuiView.hpp"
+#include "../views/modelerGuiView.hpp"
 #include "utils/keyboardKey.hpp"
 #include "utils/mouseState.hpp"
 #include "utils/modelerState.hpp"
