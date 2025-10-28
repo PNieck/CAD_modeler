@@ -39,13 +39,14 @@ private:
         bool ParseAll() const
             { return parseAll; }
 
-        bool ShouldParse(IdFromFile id) const;
+        bool ShouldParse(const IdFromFile id) const
+            { return parseAll || idsToParse.contains(id); }
 
     private:
         bool parseAll = false;
         std::unordered_set<IdFromFile> idsToParse;
 
-        bool InsertRange(auto begin, auto end, int pointsCnt);
+        bool FillIdsToParse(json &data, size_t pointsCnt);
     };
 
     void LoadPoints(json& data, Coordinator& coordinator, const PointsToParse& pointsToParse);

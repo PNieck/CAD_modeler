@@ -75,7 +75,7 @@ void LoadManager::Load(const std::string& path, Coordinator &coordinator, ToLoad
 
 LoadManager::PointsToParse::PointsToParse(json &data, const ToLoad options)
 {
-    const int pointsCnt = data["points"].size();
+    const size_t pointsCnt = data["points"].size();
 
     if (options & Points) {
         parseAll = true;
@@ -86,50 +86,42 @@ LoadManager::PointsToParse::PointsToParse(json &data, const ToLoad options)
         std::string objectType = geometry["objectType"];
 
         if (objectType == "bezierC0" && options & C0Curves) {
-            auto& cps = geometry["controlPoints"];
-            if (InsertRange(cps.begin(), cps.end(), pointsCnt))
+            if (FillIdsToParse(geometry["controlPoints"], pointsCnt))
                 return;
         }
 
         else if (objectType == "bezierC2" && options & C2Curves) {
-            auto& cps = geometry["deBoorPoints"];
-            if (InsertRange(cps.begin(), cps.end(), pointsCnt))
+            if (FillIdsToParse(geometry["deBoorPoints"], pointsCnt))
                 return;
         }
 
         else if (objectType == "interpolatedC2" && options & InterpolationCurves) {
-            auto& cps = geometry["controlPoints"];
-            if (InsertRange(cps.begin(), cps.end(), pointsCnt))
+            if (FillIdsToParse(geometry["controlPoints"], pointsCnt))
                 return;
         }
 
         else if (objectType == "bezierSurfaceC0" && options & C0Surfaces) {
             for (auto& patch: geometry["patches"]) {
-                auto& cps = patch["controlPoints"];
-                if (InsertRange(cps.begin(), cps.end(), pointsCnt))
+                if (FillIdsToParse(patch["controlPoints"], pointsCnt))
                     return;
             }
         }
 
         else if (objectType == "bezierSurfaceC2" && options & C2Surfaces) {
             for (auto& patch: geometry["patches"]) {
-                auto& cps = patch["controlPoints"];
-                if (InsertRange(cps.begin(), cps.end(), pointsCnt))
+                if (FillIdsToParse(patch["controlPoints"], pointsCnt))
                     return;
             }
         }
     }
 }
 
-bool LoadManager::PointsToParse::ShouldParse(const IdFromFile id) const
-{
-    return parseAll || idsToParse.contains(id);
-}
 
-
-bool LoadManager::PointsToParse::InsertRange(auto begin, auto end, const int pointsCnt)
+bool LoadManager::PointsToParse::FillIdsToParse(json& data, size_t pointsCnt)
 {
-    idsToParse.insert(begin, end);
+    for (auto& cp: data)
+        idsToParse.insert(static_cast<IdFromFile>(cp["id"]));
+
     if (idsToParse.size() == pointsCnt) {
         parseAll = true;
         idsToParse.clear();
