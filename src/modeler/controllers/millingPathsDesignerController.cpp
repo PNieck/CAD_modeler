@@ -2,7 +2,7 @@
 
 
 MillingsPathsDesignerController::MillingsPathsDesignerController(MillingPathsDesigner &model):
-    SubController(model), model(model)
+    SubController(model), model(model), view(model)
 {
 }
 
@@ -10,4 +10,5 @@ MillingsPathsDesignerController::MillingsPathsDesignerController(MillingPathsDes
 void MillingsPathsDesignerController::Render()
 {
     model.RenderFrame();
+    view.RenderGui();
 }
