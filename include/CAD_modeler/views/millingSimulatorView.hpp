@@ -5,17 +5,13 @@
 #include <string>
 
 
-class MillingSimController;
-
-
 class MillingSimulatorView {
 public:
-    MillingSimulatorView(MillingSimController& controller, MillingMachineSim& model);
+    explicit MillingSimulatorView(MillingMachineSim& model);
 
     void RenderGui();
 
 private:
-    MillingSimController& controller;
     MillingMachineSim& model;
 
     std::string filePath;

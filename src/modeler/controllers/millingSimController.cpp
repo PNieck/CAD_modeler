@@ -2,7 +2,7 @@
 
 
 MillingSimController::MillingSimController(MillingMachineSim &millingSim):
-    SubController(millingSim), simulator(millingSim), view(*this, simulator)
+    SubController(millingSim), simulator(millingSim), view(simulator)
 {
 }
 
