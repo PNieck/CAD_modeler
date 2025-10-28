@@ -12,11 +12,13 @@
 #include <numbers>
 
 
-class C2CylinderSystem;
-
 void C2PatchesSystem::RegisterSystem(Coordinator &coordinator)
 {
     coordinator.RegisterSystem<C2PatchesSystem>();
+    coordinator.RegisterSystem<ToUpdateSystem>();
+    coordinator.RegisterSystem<ControlNetSystem>();
+    coordinator.RegisterSystem<SelectionSystem>();
+    coordinator.RegisterSystem<ControlPointsRegistrySystem>();
 
     coordinator.RegisterRequiredComponent<C2PatchesSystem, C2Patches>();
     coordinator.RegisterRequiredComponent<C2PatchesSystem, PatchesDensity>();

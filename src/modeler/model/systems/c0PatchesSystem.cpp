@@ -17,6 +17,10 @@
 void C0PatchesSystem::RegisterSystem(Coordinator &coordinator)
 {
     coordinator.RegisterSystem<C0PatchesSystem>();
+    coordinator.RegisterSystem<ToUpdateSystem>();
+    coordinator.RegisterSystem<ControlNetSystem>();
+    coordinator.RegisterSystem<SelectionSystem>();
+    coordinator.RegisterSystem<ControlPointsRegistrySystem>();
 
     coordinator.RegisterComponent<WrapU>();
     coordinator.RegisterComponent<WrapV>();
