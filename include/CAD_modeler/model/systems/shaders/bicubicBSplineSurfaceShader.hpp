@@ -10,7 +10,7 @@ public:
             "../../shaders/passThroughShader.vert",
             "../../shaders/stdShader.frag",
             nullptr, // No tesselation control shader
-            "../../shaders/bSplineSurfaceShader.tese"
+            "../../shaders/bSplineSurfaceIsolinesShader.tese"
         ) {}
 
     void SetColor(const alg::Vec4& color) const
