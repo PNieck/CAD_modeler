@@ -37,6 +37,11 @@ protected:
     void SetVec4(const std::string& name, const alg::Vec4& vec) const;
     void SetVec3(const std::string& name, const alg::Vec3& vec) const;
 
+
+    constexpr static float MaxTessellationLevel = GL_MAX_TESS_GEN_LEVEL;
+
+    void SetAllTesselationLevels(float level) const;
+
 private:
     [[nodiscard]]
     int FindUniformLocation(const std::string &name) const;

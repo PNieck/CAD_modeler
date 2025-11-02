@@ -657,7 +657,7 @@ void C2PatchesSystem::UpdateDoubleControlPoints(C2Patches &patches) const
 std::vector<float> C2PatchesSystem::GenerateVertices(const C2Patches &patches) const
 {
     std::vector<float> result;
-    result.reserve(patches.PointsCnt() * 3);
+    result.reserve(patches.PointsCnt() * alg::Vec3::dim);
 
     for (int col=0; col < patches.PointsInCol(); col++) {
         for (int row=0; row < patches.PointsInRow(); row++) {

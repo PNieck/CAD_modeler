@@ -240,7 +240,7 @@ void C0PatchesSystem::RecalculateCylinder(const Entity cylinder, const Position 
 }
 
 
-Entity C0PatchesSystem::CreatePlane(const Position &pos, const alg::Vec3 &direction, float length, float width)
+Entity C0PatchesSystem::CreatePlane(const Position &pos, const alg::Vec3 &direction, const float length, const float width)
 {
     C0Patches patches(1, 1);
 

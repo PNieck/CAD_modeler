@@ -3,16 +3,16 @@
 #include "shader.hpp"
 
 
-class BicubicBezierSurfaceTrianglesShader: public Shader {
+class BicubicBSplineSurfaceTrianglesShader: public Shader {
 public:
     using Shader::MaxTessellationLevel;
 
-    BicubicBezierSurfaceTrianglesShader():
+    BicubicBSplineSurfaceTrianglesShader():
         Shader(
             "../../shaders/passThroughShader.vert",
             "../../shaders/stdShader.frag",
             nullptr, // No tesselation control shader
-            "../../shaders/bezierSurfaceTrianglesShader.tese"
+            "../../shaders/bSplineSurfaceTrianglesShader.tese"
         ) {}
 
     void SetColor(const alg::Vec4& color) const
@@ -21,6 +21,7 @@ public:
     void SetMVP(const alg::Mat4x4& matrix) const
         { SetMatrix4("MVP", matrix); }
 
-    void SetDensity(const float level) const
+    void SetDensityLevel(const float level) const
         { SetAllTesselationLevels(level); }
+
 };

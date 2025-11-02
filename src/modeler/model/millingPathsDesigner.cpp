@@ -6,6 +6,8 @@
 #include "CAD_modeler/model/components/drawStd.hpp"
 
 #include <CAD_modeler/model/systems/selectionSystem.hpp>
+#include <CAD_modeler/model/systems/c0PatchesTrianglesRenderSystem.hpp>
+#include <CAD_modeler/model/systems/c2PatchesTrianglesRenderingSystem.hpp>
 
 
 MillingPathsDesigner::MillingPathsDesigner(const int viewportWidth, const int viewportHeight):
@@ -20,8 +22,10 @@ MillingPathsDesigner::MillingPathsDesigner(const int viewportWidth, const int vi
     ToriRenderingSystem::RegisterSystem(coordinator);
     C0PatchesSystem::RegisterSystem(coordinator);
     C0PatchesRenderSystem::RegisterSystem(coordinator);
+    C0PatchesTrianglesRenderSystem::RegisterSystem(coordinator);
     C2PatchesSystem::RegisterSystem(coordinator);
     C2PatchesRenderSystem::RegisterSystem(coordinator);
+    C2PatchesTrianglesRenderSystem::RegisterSystem(coordinator);
     NameSystem::RegisterSystem(coordinator);
     SelectionSystem::RegisterSystem(coordinator);
 

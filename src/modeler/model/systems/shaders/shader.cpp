@@ -83,18 +83,18 @@ Shader::~Shader()
 
 void Shader::SetBool(const std::string &name, const bool value) const
 {
-    SetInt(name, (int)value);
+    SetInt(name, value);
 }
 
 
-void Shader::SetInt(const std::string & name, int value) const
+void Shader::SetInt(const std::string & name, const int value) const
 {
     const int location = FindUniformLocation(name);
-    glUniform1i(location, (int)value);
+    glUniform1i(location, static_cast<int>(value));
 }
 
 
-void Shader::SetFloat(const std::string & name, float value) const
+void Shader::SetFloat(const std::string & name, const float value) const
 {
     const int location = FindUniformLocation(name);
     glUniform1f(location, value);
@@ -119,6 +119,15 @@ void Shader::SetVec3(const std::string &name, const alg::Vec3 &vec) const
 {
     const int location = FindUniformLocation(name);
     glUniform3fv(location, 1, vec.Data());
+}
+
+
+void Shader::SetAllTesselationLevels(const float level) const
+{
+    const float v[] = { level, level, level, level };
+
+    glPatchParameterfv(GL_PATCH_DEFAULT_OUTER_LEVEL, v);
+    glPatchParameterfv(GL_PATCH_DEFAULT_INNER_LEVEL, v);
 }
 
 

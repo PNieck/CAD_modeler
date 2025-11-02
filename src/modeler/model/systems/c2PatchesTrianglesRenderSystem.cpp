@@ -1,4 +1,4 @@
-#include <CAD_modeler/model/systems/c0PatchesTrianglesRenderSystem.hpp>
+#include <CAD_modeler/model/systems/c2PatchesTrianglesRenderingSystem.hpp>
 
 #include <ecs/coordinator.hpp>
 
@@ -7,20 +7,20 @@
 #include <CAD_modeler/model/components/trianglesPatchesDensityLevel.hpp>
 
 
-void C0PatchesTrianglesRenderSystem::RegisterSystem(Coordinator &coordinator)
+void C2PatchesTrianglesRenderSystem::RegisterSystem(Coordinator &coordinator)
 {
-    coordinator.RegisterSystem<C0PatchesTrianglesRenderSystem>();
+    coordinator.RegisterSystem<C2PatchesTrianglesRenderSystem>();
 
     coordinator.RegisterComponent<MeshPatchesTriangles>();
     coordinator.RegisterComponent<TrianglesPatchesDensityLevel>();
 }
 
 
-void C0PatchesTrianglesRenderSystem::AddSurface(const Entity entity, const float densityLevel)
+void C2PatchesTrianglesRenderSystem::AddSurface(const Entity entity, const float densityLevel)
 {
     entities.insert(entity);
 
-    auto const& patches = coordinator->GetComponent<C0Patches>(entity);
+    auto const& patches = coordinator->GetComponent<C2Patches>(entity);
     MeshPatchesTriangles mesh;
 
     mesh.Update(
@@ -33,7 +33,7 @@ void C0PatchesTrianglesRenderSystem::AddSurface(const Entity entity, const float
 }
 
 
-void C0PatchesTrianglesRenderSystem::RemoveSurface(const Entity entity)
+void C2PatchesTrianglesRenderSystem::RemoveSurface(const Entity entity)
 {
     entities.erase(entity);
     coordinator->DeleteComponent<MeshPatchesTriangles>(entity);
@@ -41,7 +41,7 @@ void C0PatchesTrianglesRenderSystem::RemoveSurface(const Entity entity)
 }
 
 
-void C0PatchesTrianglesRenderSystem::Render(const alg::Mat4x4 &cameraMtx)
+void C2PatchesTrianglesRenderSystem::Render(const alg::Mat4x4 &cameraMtx)
 {
     if (entities.empty())
         return;
@@ -58,16 +58,16 @@ void C0PatchesTrianglesRenderSystem::Render(const alg::Mat4x4 &cameraMtx)
 
         mesh.Use();
 
-        shader.SetDensity(value);
+        shader.SetDensityLevel(value);
         glDrawElements(GL_PATCHES, mesh.GetElementsCnt(), GL_UNSIGNED_INT, nullptr);
     }
 }
 
 
-std::vector<float> C0PatchesTrianglesRenderSystem::GenerateVertices(const C0Patches &patches) const
+std::vector<float> C2PatchesTrianglesRenderSystem::GenerateVertices(const C2Patches &patches) const
 {
     std::vector<float> result;
-    result.reserve(patches.PointsCnt() * 3);
+    result.reserve(patches.PointsCnt() * alg::Vec3::dim);
 
     for (size_t col=0; col < patches.PointsInCol(); col++) {
         for (size_t row=0; row < patches.PointsInRow(); row++) {
@@ -85,18 +85,18 @@ std::vector<float> C0PatchesTrianglesRenderSystem::GenerateVertices(const C0Patc
 }
 
 
-std::vector<uint32_t> C0PatchesTrianglesRenderSystem::GenerateIndices(const C0Patches &patches) const
+std::vector<uint32_t> C2PatchesTrianglesRenderSystem::GenerateIndices(const C2Patches &patches) const
 {
     std::vector<uint32_t> result;
-    result.reserve(patches.PatchesInRow() * patches.PatchesInCol() * C0Patches::PointsInPatch);
+    result.reserve(patches.PatchesInRow() * patches.PatchesInCol() * C2Patches::PointsInPatch);
 
     for (int patchRow=0; patchRow < patches.PatchesInRow(); patchRow++) {
         for (int patchCol=0; patchCol < patches.PatchesInCol(); patchCol++) {
-            for (int rowInPatch=0; rowInPatch < C0Patches::RowsInPatch; rowInPatch++) {
-                for (int colInPatch=0; colInPatch < C0Patches::ColsInPatch; colInPatch++) {
+            for (int rowInPatch=0; rowInPatch < C2Patches::RowsInPatch; rowInPatch++) {
+                for (int colInPatch=0; colInPatch < C2Patches::ColsInPatch; colInPatch++) {
 
-                    const int globCol = patchCol * (C0Patches::ColsInPatch - 1) + colInPatch;
-                    const int globRow = patchRow * (C0Patches::RowsInPatch - 1) + rowInPatch;
+                    const int globCol = patchCol + colInPatch;
+                    const int globRow = patchRow + rowInPatch;
 
                     result.push_back(globCol * patches.PointsInRow() + globRow);
                 }
