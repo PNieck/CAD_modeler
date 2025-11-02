@@ -41,4 +41,6 @@ private:
     std::shared_ptr<C2PatchesRenderSystem> c2PatchesRenderSystem;
 
     std::shared_ptr<NameSystem> nameSystem;
+
+    Entity base = -1;
 };

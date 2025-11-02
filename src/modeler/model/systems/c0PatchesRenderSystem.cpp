@@ -14,6 +14,8 @@ void C0PatchesRenderSystem::RegisterSystem(Coordinator &coordinator)
 {
     coordinator.RegisterSystem<C0PatchesRenderSystem>();
 
+    coordinator.RegisterSystem<SelectionSystem>();
+
     coordinator.RegisterComponent<DrawStd>();
 
     coordinator.RegisterRequiredComponent<C0PatchesRenderSystem, C0Patches>();
@@ -29,7 +31,7 @@ void C0PatchesRenderSystem::Render(const alg::Mat4x4 &cameraMtx)
         return;
     }
 
-    auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
+    auto const selectionSystem = coordinator->GetSystem<SelectionSystem>();
     auto const& shader = ShaderRepository::GetInstance().GetBezierSurfaceShader();
 
     shader.Use();

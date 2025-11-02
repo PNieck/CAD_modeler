@@ -3,6 +3,9 @@
 #include <CAD_modeler/model/managers/loadManager.hpp>
 
 #include <CAD_modeler/model/components/registerComponents.hpp>
+#include "CAD_modeler/model/components/drawStd.hpp"
+
+#include <CAD_modeler/model/systems/selectionSystem.hpp>
 
 
 MillingPathsDesigner::MillingPathsDesigner(const int viewportWidth, const int viewportHeight):
@@ -20,6 +23,7 @@ MillingPathsDesigner::MillingPathsDesigner(const int viewportWidth, const int vi
     C2PatchesSystem::RegisterSystem(coordinator);
     C2PatchesRenderSystem::RegisterSystem(coordinator);
     NameSystem::RegisterSystem(coordinator);
+    SelectionSystem::RegisterSystem(coordinator);
 
     gridSystem = coordinator.GetSystem<GridSystem>();
     pointsSystem = coordinator.GetSystem<PointsSystem>();
@@ -30,10 +34,24 @@ MillingPathsDesigner::MillingPathsDesigner(const int viewportWidth, const int vi
     c2PatchesSystem = coordinator.GetSystem<C2PatchesSystem>();
     c2PatchesRenderSystem = coordinator.GetSystem<C2PatchesRenderSystem>();
     nameSystem = coordinator.GetSystem<NameSystem>();
+    const auto selectionSys = coordinator.GetSystem<SelectionSystem>();
 
     gridSystem->Init();
     c0PatchesSystem->Init();
     c2PatchesSystem->Init();
+    selectionSys->Init();
+
+    constexpr float initBaseLen = 1.5f;
+
+    base = c0PatchesSystem->CreatePlane(
+    alg::Vec3(-initBaseLen/2.f, 0.f, -initBaseLen/2.f),
+    alg::Vec3::UnitY(),
+    1.5f, 1.5f
+    );
+    coordinator.AddComponent<DrawStd>(base, DrawStd());
+
+    // Created base plane must be updated
+    Update();
 }
 
 
