@@ -53,7 +53,7 @@ void ModelerController::MouseMove(const int x, const int y)
         modeler.selectionCircleX = viewportX;
         modeler.selectionCircleY = viewportY;
 
-        if (mouseState.IsButtonClicked(MouseButton::Left)) {
+        if (mouseState.IsButtonClicked(Left)) {
             modeler.SelectMultipleFromViewport(
                 modeler.selectionCircleX,
                 modeler.selectionCircleY,
@@ -71,7 +71,8 @@ void ModelerController::KeyboardKeyPressed(const KeyboardKey key)
     if (key == KeyboardKey::c)
         modeler.selectingEntities = !modeler.selectingEntities;
 
-
+    else if (keyState.ControlPressed() && keyState.IsKeyPressed(KeyboardKey::a))
+        modeler.SelectAllEntities();
 }
 
 

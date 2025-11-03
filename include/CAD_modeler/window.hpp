@@ -2,6 +2,7 @@
 
 #include <string>
 #include <stdexcept>
+#include <map>
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
@@ -21,6 +22,7 @@ private:
 
     GLFWwindow* window;
     MainController controller;
+    std::map<int, KeyboardKey> keysMap;
 
     static void SizeChangedCallback(GLFWwindow* window, int width, int height);
     static void MouseMoveCallback(GLFWwindow* window, double xpos, double ypos);
@@ -35,6 +37,8 @@ private:
     static void DeinitializeGLFW();
 
     static void InitializeGlad();
+
+    void InitializeKeysMap();
 };
 
 

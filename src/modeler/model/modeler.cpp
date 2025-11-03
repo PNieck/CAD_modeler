@@ -76,7 +76,6 @@ Modeler::Modeler(const int viewportWidth, const int viewportHeight):
     vectorSystem = coordinator.GetSystem<VectorSystem>();
     intersectionSystem = coordinator.GetSystem<IntersectionSystem>();
 
-    cameraManager.Init(viewportWidth, viewportHeight);
     gridSystem->Init();
     cursorSystem->Init();
     selectionSystem->Init();
@@ -406,6 +405,29 @@ void Modeler::SelectMultipleFromViewport(const float x, const float y, const flo
 {
     const Line line(LineFromViewportCoordinates(x, y));
     selectionSystem->SelectAllFromLine(line, dist);
+}
+
+
+void Modeler::SelectAllEntities()
+{
+    const std::vector<std::shared_ptr<System>> systemsToSelect {
+        intersectionSystem,
+        vectorSystem,
+        gregoryPatchesSystem,
+        c2PatchesSystem,
+        c0PatchesSystem,
+        coordinator.GetSystem<InterpolationCurveSystem>(),
+        c2CurveSystem,
+        c0CurveSystem,
+        pointsSystem,
+        toriSystem
+    };
+
+    for (const std::shared_ptr system : systemsToSelect) {
+        for (const Entity entity : system->GetEntities()) {
+            selectionSystem->Select(entity);
+        }
+    }
 }
 
 

@@ -181,6 +181,8 @@ public:
     void DeselectAllEntities() const
         { selectionSystem->DeselectAllEntities(); }
 
+    void SelectAllEntities();
+
     const std::unordered_set<Entity>& GetAllSelectedEntities() const
         { return selectionSystem->GetEntities(); }
 

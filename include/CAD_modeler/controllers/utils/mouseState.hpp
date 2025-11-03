@@ -14,9 +14,9 @@ class MouseState {
 public:
     MouseState();
 
-    inline void ButtonClicked(const MouseButton button)
+    void ButtonClicked(const MouseButton button)
         { buttonClicked[button] = true; }
-    inline void ButtonReleased(const MouseButton button)
+    void ButtonReleased(const MouseButton button)
         { buttonClicked[button] = false; }
 
     [[nodiscard]]
