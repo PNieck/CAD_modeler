@@ -6,7 +6,7 @@
 #include "millingsPathsDesignerController.hpp"
 
 #include "utils/modelTypes.hpp"
-#include "utils/keyboardKey.hpp"
+#include "utils/keyboardState.hpp"
 
 #include "../model/modeler.hpp"
 #include "../model/millingMachineSim.hpp"

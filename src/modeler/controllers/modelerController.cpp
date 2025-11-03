@@ -70,6 +70,8 @@ void ModelerController::KeyboardKeyPressed(const KeyboardKey key)
 
     if (key == KeyboardKey::c)
         modeler.selectingEntities = !modeler.selectingEntities;
+
+
 }
 
 

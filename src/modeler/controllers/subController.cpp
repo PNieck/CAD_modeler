@@ -2,7 +2,7 @@
 
 
 MouseState SubController::mouseState = {};
-bool SubController::shiftClicked = false;
+KeyboardState SubController::keyState = {};
 
 
 void SubController::MouseMove(const int x, const int y)
@@ -12,7 +12,7 @@ void SubController::MouseMove(const int x, const int y)
     if (mouseState.IsButtonClicked(Middle)) {
         auto offset = mouseState.TranslationGet();
 
-        if (!shiftClicked) {
+        if (!keyState.ShiftPressed()) {
             model.cameraManager.RotateCamera(
                 offset.X() * ROTATION_COEF,
                 offset.Y() * ROTATION_COEF
@@ -36,16 +36,3 @@ void SubController::ScrollMoved(const int offset)
     const float dist = model.cameraManager.GetDistanceFromTarget();
     model.cameraManager.SetDistanceFromTarget(dist*val);
 }
-
-
-void SubController::KeyboardKeyPressed(const KeyboardKey key) {
-    if (key == KeyboardKey::left_shift || key == KeyboardKey::right_shift)
-        shiftClicked = true;
-}
-
-
-void SubController::KeyboardKeyReleased(const KeyboardKey key) {
-    if (key == KeyboardKey::left_shift || key == KeyboardKey::right_shift)
-        shiftClicked = false;
-}
-

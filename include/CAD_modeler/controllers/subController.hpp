@@ -2,7 +2,7 @@
 
 #include "utils/mouseState.hpp"
 #include "../model/model.hpp"
-#include "utils/keyboardKey.hpp"
+#include "utils/keyboardState.hpp"
 
 
 class SubController {
@@ -24,9 +24,11 @@ public:
 
     virtual void ScrollMoved(int offset);
 
-    virtual void KeyboardKeyPressed(KeyboardKey key);
+    virtual void KeyboardKeyPressed(const KeyboardKey key)
+        { keyState.KeyPressed(key); }
 
-    virtual void KeyboardKeyReleased(KeyboardKey key);
+    virtual void KeyboardKeyReleased(const KeyboardKey key)
+        { keyState.KeyReleased(key); }
 
     virtual void Render() = 0;
     virtual void Update(double dt) = 0;
@@ -37,7 +39,7 @@ protected:
     static constexpr float SCROLL_COEF = 0.7f;
 
     static MouseState mouseState;
-    static bool shiftClicked;
+    static KeyboardState keyState;
 
 private:
     Model& model;
