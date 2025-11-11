@@ -262,6 +262,28 @@ alg::Mat4x4 alg::Frustum(
         0.f, 0.f, -1.f, 0.f
     );
 
+    // TODO: remove transposition
+    result.TransposeSelf();
+
+    return result;
+}
+
+
+alg::Mat4x4 alg::OrthographicProjection(
+    const float left, const float right, const float top, const float bottom, const float near, const float far
+) {
+    const float width = right - left;
+    const float height = top - bottom;
+    const float depth = far - near;
+
+    Mat4x4 result = {
+        2.f/width,        0.f,        0.f, -(right + left)/width,
+               0.f, 2.f/height,        0.f, -(top + bottom)/height,
+               0.f,        0.f, -2.f/depth,    -(far + near)/depth,
+              0.f,        0.f,        0.f,                   1.f
+    };
+
+    // TODO: remove
     result.TransposeSelf();
 
     return result;

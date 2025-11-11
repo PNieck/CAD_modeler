@@ -61,4 +61,7 @@ namespace alg
 
 
     Mat4x4 Frustum(float near, float far, float left, float right, float top, float bottom);
+
+
+    Mat4x4 OrthographicProjection(float left, float right, float top, float bottom, float near, float far);
 }
