@@ -4,13 +4,16 @@
 
 #include "systems/gridSystem.hpp"
 #include "systems/pointsSystem.hpp"
-#include "systems/toriSystem.hpp"
-#include "systems/toriRenderingSystem.hpp"
 #include "systems/c0PatchesSystem.hpp"
 #include "systems/c0PatchesRenderSystem.hpp"
 #include "systems/c2PatchesSystem.hpp"
 #include "systems/c2PatchesRenderSystem.hpp"
 #include "systems/nameSystem.hpp"
+
+#include "millingPathsDesigner/materialParameters.hpp"
+#include "millingPathsDesigner/millingSettings.hpp"
+
+#include <CAD_modeler/utilities/flatVec2D.hpp>
 
 
 class MillingPathsDesigner: public Model {
@@ -20,6 +23,8 @@ public:
     void LoadModel(const std::string& filePath);
 
     void Update();
+
+    void GenerateBroadPhase();
 
 protected:
     void RenderSystemsObjects(
@@ -31,9 +36,6 @@ private:
 
     std::shared_ptr<PointsSystem> pointsSystem;
 
-    std::shared_ptr<ToriSystem> toriSystem;
-    std::shared_ptr<ToriRenderingSystem> toriRenderingSystem;
-
     std::shared_ptr<C0PatchesSystem> c0PatchesSystem;
     std::shared_ptr<C0PatchesRenderSystem> c0PatchesRenderSystem;
 
@@ -43,4 +45,8 @@ private:
     std::shared_ptr<NameSystem> nameSystem;
 
     Entity base = -1;
+    MaterialParameters materialParameters;
+    MillingSettings millingSettings;
+
+    FlatVec2D<float> GenerateBroadPhaseHeightMap();
 };

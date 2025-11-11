@@ -16,6 +16,9 @@ void MillingPathsDesignerView::RenderGui()
 
     RenderFileSelection();
 
+    if (ImGui::Button("Broad phase"))
+        model.GenerateBroadPhase();
+
     ImGui::End();
 }
 
