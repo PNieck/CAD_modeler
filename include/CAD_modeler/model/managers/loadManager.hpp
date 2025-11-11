@@ -7,7 +7,7 @@
 
 class LoadManager {
 public:
-    enum ToLoad {
+    enum ToLoad: int {
         Points = 1 << 0,
         Tori = 1 << 1,
         C0Curves = 1 << 2,
@@ -22,7 +22,7 @@ public:
         All = Points | AllCurves | AllSurfaces
     };
 
-    void Load(const std::string& path, Coordinator& coordinator, ToLoad options = All);
+    void Load(const std::string& path, Coordinator& coordinator, int options = All);
 
 private:
     using json = nlohmann::json;
@@ -34,7 +34,7 @@ private:
 
     class PointsToParse {
     public:
-        PointsToParse(json& data, ToLoad options);
+        PointsToParse(json& data, int options);
 
         bool ParseAll() const
             { return parseAll; }

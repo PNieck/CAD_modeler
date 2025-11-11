@@ -46,7 +46,7 @@ Scale ParseScale(const auto& json)
 }
 
 
-void LoadManager::Load(const std::string& path, Coordinator &coordinator, ToLoad options)
+void LoadManager::Load(const std::string& path, Coordinator &coordinator, int options)
 {
     std::ifstream f(path);
     json data = json::parse(f);
@@ -73,7 +73,7 @@ void LoadManager::Load(const std::string& path, Coordinator &coordinator, ToLoad
     }
 }
 
-LoadManager::PointsToParse::PointsToParse(json &data, const ToLoad options)
+LoadManager::PointsToParse::PointsToParse(json &data, const int options)
 {
     const size_t pointsCnt = data["points"].size();
 
