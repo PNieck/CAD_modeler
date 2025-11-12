@@ -7,21 +7,15 @@ class MillingMachinePathsBuilder {
 public:
     MillingMachinePathsBuilder() = default;
 
-    void AddPosition(const Position& nextPosition)
-        { path.commands.emplace_back(nextID++, nextPosition); }
+    void AddPosition(const Position& nextPosition);
 
     void AddPosition(const alg::Vec3& vec)
-        { path.commands.emplace_back(nextID++, vec); }
+        { AddPosition(Position(vec)); }
 
-    void AddPositionFromOffset(const alg::Vec3& offset) {
-        const auto& lastCommand = path.commands.back();
-        auto newPos = lastCommand.destination.vec + offset;
-
-        path.commands.emplace_back(nextID++, newPos);
-    }
+    void AddPositionFromOffset(const alg::Vec3& offset);
 
     [[nodiscard]]
-    Position GetLastPosition() const
+    const Position& GetLastPosition() const
         { return path.commands.back().destination; }
 
     MillingMachinePath GetPaths()

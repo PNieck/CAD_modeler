@@ -6,6 +6,7 @@
 #include <filesystem>
 #include <iomanip>
 #include <ios>
+#include <sstream>
 
 namespace fs = std::filesystem;
 
@@ -41,7 +42,7 @@ MillingMachinePath MillingMachinePathsSystem::ParseGCode(const std::string &file
                 coordinatesFound = true;
             }
             else {
-                x = result.commands.back().destination.GetX();
+                x = result.commands.back().destination.GetZ();
             }
 
             if (!match[6].str().empty()) {
@@ -50,7 +51,7 @@ MillingMachinePath MillingMachinePathsSystem::ParseGCode(const std::string &file
                 coordinatesFound = true;
             }
             else {
-                y = result.commands.back().destination.GetY();
+                y = result.commands.back().destination.GetX();
             }
 
             if (!match[9].str().empty()) {
@@ -59,18 +60,22 @@ MillingMachinePath MillingMachinePathsSystem::ParseGCode(const std::string &file
                 coordinatesFound = true;
             }
             else {
-                z = result.commands.back().destination.GetZ();
+                z = result.commands.back().destination.GetY();
             }
 
             if (!coordinatesFound)
                 throw std::invalid_argument("Invalid GCode file");
 
             // Different coordinate systems conventions
-            result.commands.emplace_back(id, y*scale, z*scale, x*scale);
+            result.commands.emplace_back(id, y, z, x);
         }
     }
 
     file.close();
+
+    std::ranges::for_each(result, [](auto& command) {
+        command.destination.vec *= scale;
+    });
 
     return result;
 }
@@ -100,21 +105,54 @@ MillingCutter MillingMachinePathsSystem::ParseCutter(const std::string &filePath
 }
 
 
+std::string FormatFloat(const float value)
+{
+    std::ostringstream out;
+    out << std::fixed << std::setprecision(3) << value;
+
+    return out.str();
+}
+
+
 void MillingMachinePathsSystem::CreateGCodeFile(const MillingMachinePath &paths, std::string_view path)
 {
     std::ofstream file;
 
     file.open(path.data());
 
-    for (const auto& command : paths) {
-        file << 'N' << command.id << "G01";
+    int idOffset = 0;
 
+    std::string lastX;
+    std::string lastY;
+    std::string lastZ;
+
+    for (const auto& command : paths) {
         // Different coordinates conventions
-        file << 'X' << std::fixed << std::setprecision(3) << command.destination.GetZ() / scale;
-        file << 'Y' << std::fixed << std::setprecision(3) << command.destination.GetX() / scale;
-        file << 'Z' << std::fixed << std::setprecision(3) << command.destination.GetY() / scale;
+        std::string actX = FormatFloat(command.destination.GetZ() / scale);
+        std::string actY = FormatFloat(command.destination.GetX() / scale);
+        std::string actZ = FormatFloat(command.destination.GetY() / scale);
+
+        if (actX == lastX && actY == lastY && actZ == lastZ) {
+            ++idOffset;
+            continue;
+        }
+
+        file << 'N' << command.id - idOffset << "G01";
+
+        if (actX != lastX)
+            file << 'X' << actX;
+
+        if (actY != lastY)
+            file << 'Y' << actY;
+
+        if (actZ != lastZ)
+            file << 'Z' << actZ;
 
         file << "\r\n";
+
+        lastX = actX;
+        lastY = actY;
+        lastZ = actZ;
     }
 
     file.close();
