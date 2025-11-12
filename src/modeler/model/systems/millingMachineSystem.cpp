@@ -222,7 +222,7 @@ void MillingMachineSystem::MillSection(const Position& oldCutterPos, const Posit
         return;
 
     // Step 1 Mill around the starting position
-    const auto& cutterParams = coordinator->GetComponent<MillingCutter>(millingCutter);
+    const auto& cutter = coordinator->GetComponent<MillingCutter>(millingCutter);
 
     const float pixelXLen = material.PixelXLen();
     const float pixelZLen = material.PixelZLen();
@@ -237,8 +237,8 @@ void MillingMachineSystem::MillSection(const Position& oldCutterPos, const Posit
     const int newPosPixelX = static_cast<int>(std::round(diffX / pixelXLen));
     const int newPosPixelZ = static_cast<int>(std::round(diffZ / pixelZLen));
 
-    const int radiusInPixelsX = static_cast<int>(std::ceil(cutterParams.radius / pixelXLen));
-    const int radiusInPixelsZ = static_cast<int>(std::ceil(cutterParams.radius / pixelZLen));
+    const int radiusInPixelsX = static_cast<int>(std::ceil(cutter.radius / pixelXLen));
+    const int radiusInPixelsZ = static_cast<int>(std::ceil(cutter.radius / pixelZLen));
     const int startPixelX = oldPosPixelX - radiusInPixelsX;
     const int startPixelZ = oldPosPixelZ - radiusInPixelsZ;
 
@@ -253,9 +253,9 @@ void MillingMachineSystem::MillSection(const Position& oldCutterPos, const Posit
             const float globalX = material.GlobalX(x);
             const float globalZ = material.GlobalZ(z);
 
-            const float cutterY = CutterY(cutterParams, oldCutterPos, globalX, globalZ);
+            const float cutterY = cutter.YCoordinate(oldCutterPos, globalX, globalZ);
 
-            UpdateHeightMap(x, z, cutterY, cutterParams.height, straightDown);
+            UpdateHeightMap(x, z, cutterY, cutter.height, straightDown);
         }
     }
 
@@ -284,35 +284,11 @@ void MillingMachineSystem::MillSection(const Position& oldCutterPos, const Posit
             const float globalZ = material.GlobalZ(z);
 
             const auto cutterPos = lineSegment.NearestPoint(alg::Vec3(globalX, 0.f, globalZ));
-            const float cutterY = CutterY(cutterParams, cutterPos, globalX, globalZ);
+            const float cutterY = cutter.YCoordinate(cutterPos, globalX, globalZ);
 
-            UpdateHeightMap(x, z, cutterY, cutterParams.height, straightDown);
+            UpdateHeightMap(x, z, cutterY, cutter.height, straightDown);
         }
     } while (lineDrawer->NextPoint());
-}
-
-
-float MillingMachineSystem::CutterY(const MillingCutter& cutter, const Position& cutterPos, const float x, const float z)
-{
-    const float diffX = x - cutterPos.GetX();
-    const float diffZ = z - cutterPos.GetZ();
-
-    const float lenSq = diffX*diffX + diffZ*diffZ;
-
-    const float radiusSq = cutter.radius * cutter.radius;
-    if (lenSq > radiusSq)
-        return std::numeric_limits<float>::infinity();
-
-    switch (cutter.type) {
-        case MillingCutter::Type::Flat:
-            return cutterPos.GetY();
-
-        case MillingCutter::Type::Round:
-            return cutter.radius - std::sqrt(radiusSq - lenSq) + cutterPos.GetY();
-
-        default:
-            throw std::runtime_error("Unknown cutter type");
-    }
 }
 
 

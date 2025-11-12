@@ -121,8 +121,6 @@ private:
 
     void MillSection(const Position& oldCutterPos, const Position& newCutterPos);
 
-    static float CutterY(const MillingCutter& cutter, const Position& cutterPos, float x, float z);
-
     float UpdateHeightMap(int x, int z, float cutterY, float cutterHeight, bool pathToDown);
 
     void RenderPaths(const alg::Mat4x4& cameraMtx) const;

@@ -4,6 +4,8 @@
 #include <regex>
 #include <cassert>
 #include <filesystem>
+#include <iomanip>
+#include <ios>
 
 namespace fs = std::filesystem;
 
@@ -95,4 +97,25 @@ MillingCutter MillingMachinePathsSystem::ParseCutter(const std::string &filePath
     const float radius = static_cast<float>(std::stoi(match[2].str())) / 2.f * scale;
 
     return { radius, cutterType };
+}
+
+
+void MillingMachinePathsSystem::CreateGCodeFile(const MillingMachinePath &paths, std::string_view path)
+{
+    std::ofstream file;
+
+    file.open(path.data());
+
+    for (const auto& command : paths) {
+        file << 'N' << command.id << "G01";
+
+        // Different coordinates conventions
+        file << 'X' << std::fixed << std::setprecision(3) << command.destination.GetZ() / scale;
+        file << 'Y' << std::fixed << std::setprecision(3) << command.destination.GetX() / scale;
+        file << 'Z' << std::fixed << std::setprecision(3) << command.destination.GetY() / scale;
+
+        file << "\r\n";
+    }
+
+    file.close();
 }

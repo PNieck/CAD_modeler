@@ -10,10 +10,11 @@
 #include "systems/c2PatchesRenderSystem.hpp"
 #include "systems/nameSystem.hpp"
 
+#include "components/millingCutter.hpp"
+
 #include "millingPathsDesigner/materialParameters.hpp"
 #include "millingPathsDesigner/millingSettings.hpp"
-
-#include <CAD_modeler/utilities/flatVec2D.hpp>
+#include "millingPathsDesigner/broadPhaseHeightMap.hpp"
 
 
 class MillingPathsDesigner: public Model {
@@ -48,5 +49,6 @@ private:
     MaterialParameters materialParameters;
     MillingSettings millingSettings;
 
-    FlatVec2D<float> GenerateBroadPhaseHeightMap();
+    BroadPhaseHeightMap GenerateBroadPhaseHeightMap();
+    float MinYCutterPos(const BroadPhaseHeightMap& heightMap, const MillingCutter& cutter, float cutterX, float cutterZ) const;
 };
