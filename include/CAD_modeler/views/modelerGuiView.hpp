@@ -1,9 +1,9 @@
 #pragma once
 
-#include "../../model/modeler.hpp"
-#include "modelerMenuBar.hpp"
-#include "modelerMainMenuView.hpp"
-#include "modelerObjectsPropertiesView.hpp"
+#include "../model/modeler.hpp"
+#include "modeler/modelerMenuBar.hpp"
+#include "modeler/modelerMainMenuView.hpp"
+#include "modeler/modelerObjectsPropertiesView.hpp"
 
 
 class ModelerController;

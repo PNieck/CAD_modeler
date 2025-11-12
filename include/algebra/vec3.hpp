@@ -147,6 +147,10 @@ namespace alg
             return Vector3(0, 0, 1);
         }
 
+        static constexpr Vector3 Zero() {
+            return Vector3(0, 0, 0);
+        }
+
     protected:
         std::array<DataType, 3> data;
     };

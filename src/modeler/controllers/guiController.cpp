@@ -54,3 +54,9 @@ bool GuiController::WantCaptureMouse() const
     return ImGui::GetIO().WantCaptureMouse;
 }
 
+
+bool GuiController::WantCaptureKeyboard() const
+{
+    return ImGui::GetIO().WantCaptureKeyboard;
+}
+

@@ -191,3 +191,23 @@ TEST(MatrixTests, FrustumMatrixComparison)
         }
     }
 }
+
+
+TEST(MatrixTests, OrthographicsMatrixComparison)
+{
+    constexpr float left = -5.f;
+    constexpr float right = 7.f;
+    constexpr float top = 8.f;
+    constexpr float bottom = -3.f;
+    constexpr float near = 1.f;
+    constexpr float far = 10.f;
+
+    auto algMtx = alg::OrthographicProjection(left, right, top, bottom, near, far);
+    auto glmMtx = glm::ortho(left, right, bottom, top, near, far);
+
+    for (int row=0; row < 4; row++) {
+        for (int col=0; col < 4; col++) {
+            ASSERT_EQ(algMtx(row, col), glmMtx[row][col]);
+        }
+    }
+}

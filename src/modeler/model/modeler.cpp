@@ -13,6 +13,8 @@
 #include <CAD_modeler/model/systems/curveControlPointsSystem.hpp>
 #include "CAD_modeler/model/systems/uvVisualizer.hpp"
 
+#include <CAD_modeler/model/managers/loadManager.hpp>
+
 #include <stdexcept>
 
 
@@ -74,7 +76,6 @@ Modeler::Modeler(const int viewportWidth, const int viewportHeight):
     vectorSystem = coordinator.GetSystem<VectorSystem>();
     intersectionSystem = coordinator.GetSystem<IntersectionSystem>();
 
-    cameraManager.Init(viewportWidth, viewportHeight);
     gridSystem->Init();
     cursorSystem->Init();
     selectionSystem->Init();
@@ -407,6 +408,29 @@ void Modeler::SelectMultipleFromViewport(const float x, const float y, const flo
 }
 
 
+void Modeler::SelectAllEntities()
+{
+    const std::vector<std::shared_ptr<System>> systemsToSelect {
+        intersectionSystem,
+        vectorSystem,
+        gregoryPatchesSystem,
+        c2PatchesSystem,
+        c0PatchesSystem,
+        coordinator.GetSystem<InterpolationCurveSystem>(),
+        c2CurveSystem,
+        c0CurveSystem,
+        pointsSystem,
+        toriSystem
+    };
+
+    for (const std::shared_ptr system : systemsToSelect) {
+        for (const Entity entity : system->GetEntities()) {
+            selectionSystem->Select(entity);
+        }
+    }
+}
+
+
 std::vector<GregoryPatchesSystem::Hole> Modeler::GetHolesPossibleToFill(const std::unordered_set<Entity> &entities) const
 {
     std::vector<C0Patches> c0Patches;
@@ -425,6 +449,13 @@ Entity Modeler::FillHole(const GregoryPatchesSystem::Hole& hole)
     nameSystem->SetName(entity, nameGenerator.GenerateName("GregoryPatches_"));
 
     return entity;
+}
+
+
+void Modeler::LoadScene(const std::string &path)
+{
+    LoadManager loadManager;
+    loadManager.Load(path, coordinator);
 }
 
 

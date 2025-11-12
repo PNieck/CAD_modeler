@@ -2,7 +2,7 @@
 
 #include <ecs/system.hpp>
 
-#include "algebra/mat4x4.hpp"
+#include <algebra/mat4x4.hpp>
 
 
 class C0PatchesRenderSystem final : public System {

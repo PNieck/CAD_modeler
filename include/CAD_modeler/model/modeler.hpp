@@ -181,6 +181,8 @@ public:
     void DeselectAllEntities() const
         { selectionSystem->DeselectAllEntities(); }
 
+    void SelectAllEntities();
+
     const std::unordered_set<Entity>& GetAllSelectedEntities() const
         { return selectionSystem->GetEntities(); }
 
@@ -272,8 +274,7 @@ public:
     static constexpr ComponentId GetComponentId()
         { return ComponentsManager::GetComponentId<Comp>(); }
 
-    void LoadScene(const std::string& path)
-        { saveManager.LoadScene(path, coordinator); }
+    void LoadScene(const std::string& path);
 
     void SaveScene(const std::string& path)
         { saveManager.SaveScene(path, coordinator); }

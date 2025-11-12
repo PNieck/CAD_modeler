@@ -3,16 +3,21 @@
 #include "guiController.hpp"
 #include "millingSimController.hpp"
 #include "modelerController.hpp"
+#include "millingsPathsDesignerController.hpp"
+
 #include "utils/modelTypes.hpp"
-#include "utils/keyboardKey.hpp"
+#include "utils/keyboardState.hpp"
 
 #include "../model/modeler.hpp"
 #include "../model/millingMachineSim.hpp"
+#include "../model/millingPathsDesigner.hpp"
 
 #include "../views/modelChooser.hpp"
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
+
+#include <functional>
 
 
 class MainController {
@@ -20,9 +25,12 @@ public:
     MainController(GLFWwindow* window, int windowWidth, int windowHeight);
     
     void Render();
-    void Update(double dt);
+    void Update(const double dt)
+        { actController.get().Update(dt); }
 
-    void SizeChanged(int width, int height);
+    void SizeChanged(const int width, const int height)
+        { actController.get().WindowSizeChanged(width, height); }
+
     void MouseClicked(MouseButton button);
     void MouseReleased(MouseButton button);
     void MouseMoved(int x, int y);
@@ -34,18 +42,22 @@ public:
     ModelType GetModelType() const
         { return actModelType; }
 
-    void SetModelType(const ModelType modelType)
-        { actModelType = modelType; }
+    void SetModelType(ModelType modelType);
 
 private:
     Modeler modeler;
     MillingMachineSim millingSim;
+    MillingPathsDesigner pathsDesigner;
 
     MillingSimController millSimController;
     ModelerController modelerController;
+    MillingsPathsDesignerController millingPathsDesignerController;
     GuiController guiController;
 
     ModelType actModelType;
+    std::reference_wrapper<SubController> actController;
 
     ModelChooser modelChooser;
+
+    SubController& ActController();
 };

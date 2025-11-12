@@ -29,7 +29,7 @@ void C2PatchesRenderSystem::Render(const alg::Mat4x4 &cameraMtx) const
         return;
     }
 
-    auto const& selectionSystem = coordinator->GetSystem<SelectionSystem>();
+    auto const selectionSystem = coordinator->GetSystem<SelectionSystem>();
     auto const& shader = ShaderRepository::GetInstance().GetBSplineSurfaceShader();
 
     shader.Use();

@@ -17,6 +17,10 @@
 void C0PatchesSystem::RegisterSystem(Coordinator &coordinator)
 {
     coordinator.RegisterSystem<C0PatchesSystem>();
+    coordinator.RegisterSystem<ToUpdateSystem>();
+    coordinator.RegisterSystem<ControlNetSystem>();
+    coordinator.RegisterSystem<SelectionSystem>();
+    coordinator.RegisterSystem<ControlPointsRegistrySystem>();
 
     coordinator.RegisterComponent<WrapU>();
     coordinator.RegisterComponent<WrapV>();
@@ -44,8 +48,8 @@ Entity C0PatchesSystem::CreateCylinder(const Position &pos, const alg::Vec3 &dir
 
     const auto handler = std::make_shared<ControlPointMovedHandler>(cylinder, *coordinator);
 
-    for (int row=0; row < patches.PointsInRow(); ++row) {
-        for (int col=0; col < patches.PointsInCol() - 1; ++col) {
+    for (size_t row=0; row < patches.PointsInRow(); ++row) {
+        for (size_t col=0; col < patches.PointsInCol() - 1; ++col) {
             Entity cp = pointsSystem->CreatePoint();
             patches.SetPoint(cp, row, col);
 
@@ -56,7 +60,7 @@ Entity C0PatchesSystem::CreateCylinder(const Position &pos, const alg::Vec3 &dir
         }
     }
 
-    for (int row=0; row < patches.PointsInRow(); ++row) {
+    for (size_t row=0; row < patches.PointsInRow(); ++row) {
         const Entity cp = patches.GetPoint(row, 0);
         patches.SetPoint(cp, row, patches.PointsInCol() - 1);
     }
@@ -92,8 +96,8 @@ void C0PatchesSystem::AddRowOfCylinderPatches(Entity cylinder, const Position &p
             const HandlerId firstCpHandler = patches.controlPointsHandlers.at(firstCP);
             const auto eventHandler = coordinator->GetEventHandler<Position>(firstCP, firstCpHandler);
 
-            for (int col=0; col < patches.PointsInCol() - 1; col++) {
-                for (int row=patches.PointsInRow() - 3; row < patches.PointsInRow(); row++) {
+            for (size_t col=0; col < patches.PointsInCol() - 1; col++) {
+                for (size_t row=patches.PointsInRow() - 3; row < patches.PointsInRow(); row++) {
                     Entity newEntity = pointSys->CreatePoint();
 
                     patches.SetPoint(newEntity, row, col);
@@ -105,7 +109,7 @@ void C0PatchesSystem::AddRowOfCylinderPatches(Entity cylinder, const Position &p
                 }
             }
 
-            for (int row = patches.PointsInRow() - 3; row < patches.PointsInRow(); ++row) {
+            for (size_t row = patches.PointsInRow() - 3; row < patches.PointsInRow(); ++row) {
                 const Entity cp = patches.GetPoint(row, 0);
                 patches.SetPoint(cp, row, patches.PointsInCol() - 1);
             }
@@ -131,13 +135,13 @@ void C0PatchesSystem::AddColOfCylinderPatches(Entity cylinder, const Position &p
             const HandlerId firstCpHandler = patches.controlPointsHandlers.at(firstCP);
             const auto eventHandler = coordinator->GetEventHandler<Position>(firstCP, firstCpHandler);
 
-            for (int row=0; row < patches.PointsInRow(); ++row) {
+            for (size_t row=0; row < patches.PointsInRow(); ++row) {
                 const Entity cp = patches.GetPoint(row, 0);
                 patches.SetPoint(cp, row, patches.PointsInCol() - 1);
             }
 
-            for (int row=0; row < patches.PointsInRow(); row++) {
-                for (int col=patches.PointsInCol() - 4; col < patches.PointsInCol() - 1; col++) {
+            for (size_t row=0; row < patches.PointsInRow(); row++) {
+                for (size_t col=patches.PointsInCol() - 4; col < patches.PointsInCol() - 1; col++) {
                     Entity newEntity = pointSys->CreatePoint();
 
                     patches.SetPoint(newEntity, row, col);
@@ -163,8 +167,8 @@ void C0PatchesSystem::DeleteRowOfCylinderPatches(Entity cylinder, const Position
         [cylinder, this](C0Patches& patches) {
             const auto cpRegistrySys = coordinator->GetSystem<ControlPointsRegistrySystem>();
 
-            for (int col=0; col < patches.PointsInCol() - 1; col++) {
-                for (int row=patches.PointsInRow() - 3; row < patches.PointsInRow(); row++) {
+            for (size_t col=0; col < patches.PointsInCol() - 1; col++) {
+                for (size_t row=patches.PointsInRow() - 3; row < patches.PointsInRow(); row++) {
                     Entity point = patches.GetPoint(row, col);
                     cpRegistrySys->UnregisterControlPoint(cylinder, point, Coordinator::GetSystemID<C0PatchesSystem>());
                     coordinator->DestroyEntity(point);
@@ -188,8 +192,8 @@ void C0PatchesSystem::DeleteColOfCylinderPatches(Entity cylinder, const Position
         [cylinder, this](C0Patches& patches) {
             const auto cpRegistrySys = coordinator->GetSystem<ControlPointsRegistrySystem>();
 
-            for (int row=0; row < patches.PointsInRow(); row++) {
-                for (int col=patches.PointsInCol() - 4; col < patches.PointsInCol() - 1; col++) {
+            for (size_t row=0; row < patches.PointsInRow(); row++) {
+                for (size_t col=patches.PointsInCol() - 4; col < patches.PointsInCol() - 1; col++) {
                     Entity point = patches.GetPoint(row, col);
                     cpRegistrySys->UnregisterControlPoint(cylinder, point, Coordinator::GetSystemID<C0PatchesSystem>());
                     coordinator->DestroyEntity(point);
@@ -198,7 +202,7 @@ void C0PatchesSystem::DeleteColOfCylinderPatches(Entity cylinder, const Position
                 }
             }
 
-            for (int row=0; row < patches.PointsInRow(); row++) {
+            for (size_t row=0; row < patches.PointsInRow(); row++) {
                 const Entity point = patches.GetPoint(row, patches.PointsInCol() - 1);
                 patches.SetPoint(point, row, patches.PointsInCol() - 4);
             }
@@ -223,9 +227,9 @@ void C0PatchesSystem::RecalculateCylinder(const Entity cylinder, const Position 
 
     alg::Vec3 v = GetPerpendicularVec(direction) * radius + pos.vec;
 
-    for (int i=0; i < patches.PointsInRow(); ++i) {
-        for (int j=0; j < patches.PointsInCol() - 1; ++j) {
-            const Entity cp = patches.GetPoint(i, j);
+    for (size_t row=0; row < patches.PointsInRow(); ++row) {
+        for (size_t col=0; col < patches.PointsInCol() - 1; ++col) {
+            const Entity cp = patches.GetPoint(row, col);
             coordinator->SetComponent(cp, Position(v));
 
             rot.Rotate(v);
@@ -236,7 +240,7 @@ void C0PatchesSystem::RecalculateCylinder(const Entity cylinder, const Position 
 }
 
 
-Entity C0PatchesSystem::CreatePlane(const Position &pos, const alg::Vec3 &direction, float length, float width)
+Entity C0PatchesSystem::CreatePlane(const Position &pos, const alg::Vec3 &direction, const float length, const float width)
 {
     C0Patches patches(1, 1);
 
@@ -247,11 +251,11 @@ Entity C0PatchesSystem::CreatePlane(const Position &pos, const alg::Vec3 &direct
 
     const auto handler = std::make_shared<ControlPointMovedHandler>(surface, *coordinator);
 
-    for (int i=0; i < patches.PointsInCol(); ++i) {
-        for (int j=0; j < patches.PointsInRow(); ++j) {
+    for (size_t col=0; col < patches.PointsInCol(); ++col) {
+        for (size_t row=0; row < patches.PointsInRow(); ++row) {
             // Creating control points with temporary location
             Entity cp = pointsSystem->CreatePoint(pos.vec);
-            patches.SetPoint(cp, i, j);
+            patches.SetPoint(cp, col, row);
 
             HandlerId cpHandler = coordinator->Subscribe(cp, std::static_pointer_cast<EventHandler<Position>>(handler));
             patches.controlPointsHandlers.insert({cp, cpHandler});
@@ -282,10 +286,10 @@ Entity C0PatchesSystem::CreateSurface(C0Patches &patches)
 
     const auto handler = std::make_shared<ControlPointMovedHandler>(surface, *coordinator);
 
-    for (int i=0; i < patches.PointsInCol(); ++i) {
-        for (int j=0; j < patches.PointsInRow(); ++j) {
+    for (size_t col=0; col < patches.PointsInCol(); ++col) {
+        for (size_t row=0; row < patches.PointsInRow(); ++row) {
             // Creating control points with temporary location
-            Entity cp = patches.GetPoint(j, i);
+            Entity cp = patches.GetPoint(row, col);
 
             if (patches.controlPointsHandlers.contains(cp))
                 continue;
@@ -329,8 +333,8 @@ void C0PatchesSystem::AddRowOfPlanePatches(Entity surface, const Position &pos, 
             const HandlerId firstCpHandler = patches.controlPointsHandlers.at(firstCP);
             const auto eventHandler = coordinator->GetEventHandler<Position>(firstCP, firstCpHandler);
 
-            for (int col=0; col < patches.PointsInCol(); col++) {
-                for (int row=patches.PointsInRow() - 3; row < patches.PointsInRow(); row++) {
+            for (size_t col=0; col < patches.PointsInCol(); col++) {
+                for (size_t row=patches.PointsInRow() - 3; row < patches.PointsInRow(); row++) {
                     Entity newEntity = pointSys->CreatePoint(Position());
 
                     patches.SetPoint(newEntity, row, col);
@@ -364,8 +368,8 @@ void C0PatchesSystem::AddColOfPlanePatches(Entity surface, const Position &pos, 
             const HandlerId firstCpHandler = patches.controlPointsHandlers.at(firstCP);
             const auto eventHandler = coordinator->GetEventHandler<Position>(firstCP, firstCpHandler);
 
-            for (int row=0; row < patches.PointsInRow(); row++) {
-                for (int col=patches.PointsInCol() - 3; col < patches.PointsInCol(); col++) {
+            for (size_t row=0; row < patches.PointsInRow(); row++) {
+                for (size_t col=patches.PointsInCol() - 3; col < patches.PointsInCol(); col++) {
                     Entity newEntity = pointSys->CreatePoint(Position());
 
                     patches.SetPoint(newEntity, row, col);
@@ -392,8 +396,8 @@ void C0PatchesSystem::DeleteRowOfPlanePatches(Entity surface, const Position &po
         [surface, this](C0Patches& patches) {
             const auto cpRegistrySys = coordinator->GetSystem<ControlPointsRegistrySystem>();
 
-            for (int col=0; col < patches.PointsInCol(); col++) {
-                for (int row=patches.PointsInRow() - 3; row < patches.PointsInRow(); row++) {
+            for (size_t col=0; col < patches.PointsInCol(); col++) {
+                for (size_t row=patches.PointsInRow() - 3; row < patches.PointsInRow(); row++) {
                     Entity point = patches.GetPoint(row, col);
                     cpRegistrySys->UnregisterControlPoint(surface, point, Coordinator::GetSystemID<C0PatchesSystem>());
                     coordinator->DestroyEntity(point);
@@ -419,8 +423,8 @@ void C0PatchesSystem::DeleteColOfPlanePatches(Entity surface, const Position &po
         [surface, this](C0Patches& patches) {
             const auto cpRegistrySys = coordinator->GetSystem<ControlPointsRegistrySystem>();
 
-            for (int row=0; row < patches.PointsInRow(); row++) {
-                for (int col=patches.PointsInCol() - 3; col < patches.PointsInCol(); col++) {
+            for (size_t row=0; row < patches.PointsInRow(); row++) {
+                for (size_t col=patches.PointsInCol() - 3; col < patches.PointsInCol(); col++) {
                     Entity point = patches.GetPoint(row, col);
                     cpRegistrySys->UnregisterControlPoint(surface, point, Coordinator::GetSystemID<C0PatchesSystem>());
                     coordinator->DestroyEntity(point);
@@ -439,8 +443,8 @@ void C0PatchesSystem::DeleteColOfPlanePatches(Entity surface, const Position &po
 }
 
 
-void C0PatchesSystem::RecalculatePlane(Entity surface, const Position &pos, const alg::Vec3 &direction, float length,
-    float width
+void C0PatchesSystem::RecalculatePlane(const Entity surface, const Position &pos, const alg::Vec3 &direction,
+    const float length, const float width
 ) const {
     auto const& patches = coordinator->GetComponent<C0Patches>(surface);
 
@@ -450,11 +454,11 @@ void C0PatchesSystem::RecalculatePlane(Entity surface, const Position &pos, cons
     perpendicular1 *= length / static_cast<float>(patches.PointsInRow() - 1);
     perpendicular2 *= width / static_cast<float>(patches.PointsInCol() - 1);
 
-    for (int i=0; i < patches.PointsInRow(); ++i) {
-        for (int j=0; j < patches.PointsInCol(); ++j) {
-            const Entity cp = patches.GetPoint(i, j);
+    for (size_t row=0; row < patches.PointsInRow(); ++row) {
+        for (size_t col=0; col < patches.PointsInCol(); ++col) {
+            const Entity cp = patches.GetPoint(row, col);
 
-            alg::Vec3 newPos = pos.vec + perpendicular1 * static_cast<float>(i) + perpendicular2 * static_cast<float>(j);
+            alg::Vec3 newPos = pos.vec + perpendicular1 * static_cast<float>(row) + perpendicular2 * static_cast<float>(col);
 
             coordinator->SetComponent(cp, Position(newPos));
         }
@@ -469,8 +473,8 @@ void C0PatchesSystem::MergeControlPoints(const Entity surface, const Entity oldC
 
     coordinator->EditComponent<C0Patches>(surface,
         [oldCP, newCP, this] (C0Patches& patches) {
-            for (int row=0; row < patches.PointsInRow(); row++) {
-                for (int col=0; col < patches.PointsInCol(); col++) {
+            for (size_t row=0; row < patches.PointsInRow(); row++) {
+                for (size_t col=0; col < patches.PointsInCol(); col++) {
                     if (patches.GetPoint(row, col) == oldCP)
                         patches.SetPoint(newCP, row, col);
                 }
@@ -667,7 +671,7 @@ void C0PatchesSystem::NormalizeUV(const C0Patches &patches, float& u, float& v)
 
 bool C0PatchesSystem::ShouldWrapU(const C0Patches& patches)
 {
-    for (int col=0; col<patches.PointsInCol(); ++col) {
+    for (size_t col=0; col<patches.PointsInCol(); ++col) {
         if (patches.GetPoint(0, col) != patches.GetPoint(patches.PointsInRow() - 1, col))
             return false;
     }
@@ -678,7 +682,7 @@ bool C0PatchesSystem::ShouldWrapU(const C0Patches& patches)
 
 bool C0PatchesSystem::ShouldWrapV(const C0Patches &patches)
 {
-    for (int row=0; row<patches.PointsInRow(); ++row) {
+    for (size_t row=0; row<patches.PointsInRow(); ++row) {
         if (patches.GetPoint(row, 0) != patches.GetPoint(row, patches.PointsInCol() - 1))
             return false;
     }
@@ -692,8 +696,8 @@ std::vector<float> C0PatchesSystem::GenerateVertices(const C0Patches& patches) c
     std::vector<float> result;
     result.reserve(patches.PointsCnt() * 3);
 
-    for (int col=0; col < patches.PointsInCol(); col++) {
-        for (int row=0; row < patches.PointsInRow(); row++) {
+    for (size_t col=0; col < patches.PointsInCol(); col++) {
+        for (size_t row=0; row < patches.PointsInRow(); row++) {
             const Entity point = patches.GetPoint(row, col);
 
             auto const& pos = coordinator->GetComponent<Position>(point);

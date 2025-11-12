@@ -35,9 +35,13 @@ public:
 
     void UnregisterControlPoint(Entity owner, Entity cp, SystemId system);
 
+    [[nodiscard]]
     bool IsAControlPoint(const Entity cp) const
         { return controlPointsOwners.contains(cp); }
 
+    bool IsAControlPoint(Entity owner, Entity cp, SystemId system) const;
+
+    [[nodiscard]]
     const OwnersSet& GetOwnersOfControlPoints(const Entity cp) const
         { return controlPointsOwners.at(cp); }
 

@@ -4,6 +4,7 @@
 
 
 ModelerController::ModelerController(Modeler &modeler):
+    SubController(modeler),
     modeler(modeler),
     guiView(*this, modeler),
     modelerState(ModelerState::Default)
@@ -21,7 +22,7 @@ void ModelerController::MouseClick(const MouseButton button)
 {
     SubController::MouseClick(button);
 
-    if (button == MouseButton::Left) {
+    if (button == Left) {
         switch (GetModelerState())
         {
             case ModelerState::Default:
@@ -36,15 +37,15 @@ void ModelerController::MouseClick(const MouseButton button)
                 break;
         }
     }
-    else if (button == MouseButton::Right) {
+    else if (button == Right) {
         TryToSelectObject();
     }
 }
 
 
-void ModelerController::MouseMove(const int x, const int y) const
+void ModelerController::MouseMove(const int x, const int y)
 {
-    SubController::MouseMove(x, y, modeler);
+    SubController::MouseMove(x, y);
 
     if (modeler.selectingEntities) {
         auto [viewportX, viewportY] = MouseToViewportCoordinates();
@@ -52,7 +53,7 @@ void ModelerController::MouseMove(const int x, const int y) const
         modeler.selectionCircleX = viewportX;
         modeler.selectionCircleY = viewportY;
 
-        if (mouseState.IsButtonClicked(MouseButton::Left)) {
+        if (mouseState.IsButtonClicked(Left)) {
             modeler.SelectMultipleFromViewport(
                 modeler.selectionCircleX,
                 modeler.selectionCircleY,
@@ -69,12 +70,9 @@ void ModelerController::KeyboardKeyPressed(const KeyboardKey key)
 
     if (key == KeyboardKey::c)
         modeler.selectingEntities = !modeler.selectingEntities;
-}
 
-
-void ModelerController::KeyboardKeyReleased(KeyboardKey key)
-{
-    SubController::KeyboardKeyReleased(key);
+    else if (keyState.ControlPressed() && keyState.IsKeyPressed(KeyboardKey::a))
+        modeler.SelectAllEntities();
 }
 
 

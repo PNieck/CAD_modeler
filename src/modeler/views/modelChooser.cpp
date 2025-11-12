@@ -9,7 +9,11 @@
 
 void ModelChooser::Render() const
 {
-    static const char* items[] = { "Modeling", "Milling simulation" };
+    static const char* items[] = {
+        "Modeling",
+        "Milling simulation",
+        "Millings Paths Designer"
+    };
 
     ImGui::Begin("Choose mode");
     int actIndex = ModelToIndex();
@@ -31,6 +35,9 @@ int ModelChooser::ModelToIndex() const
         case ModelType::MillerMachineSim:
             return 1;
 
+        case ModelType::MillingPathsDesigner:
+            return 2;
+
         default:
             throw std::runtime_error("Unknown model type");
     }
@@ -45,6 +52,9 @@ ModelType ModelChooser::IndexToModelType(const int index)
 
         case 1:
             return ModelType::MillerMachineSim;
+
+        case 2:
+            return ModelType::MillingPathsDesigner;
 
         default:
             throw std::runtime_error("Unknown model type");

@@ -12,11 +12,13 @@
 #include <numbers>
 
 
-class C2CylinderSystem;
-
 void C2PatchesSystem::RegisterSystem(Coordinator &coordinator)
 {
     coordinator.RegisterSystem<C2PatchesSystem>();
+    coordinator.RegisterSystem<ToUpdateSystem>();
+    coordinator.RegisterSystem<ControlNetSystem>();
+    coordinator.RegisterSystem<SelectionSystem>();
+    coordinator.RegisterSystem<ControlPointsRegistrySystem>();
 
     coordinator.RegisterRequiredComponent<C2PatchesSystem, C2Patches>();
     coordinator.RegisterRequiredComponent<C2PatchesSystem, PatchesDensity>();
@@ -655,7 +657,7 @@ void C2PatchesSystem::UpdateDoubleControlPoints(C2Patches &patches) const
 std::vector<float> C2PatchesSystem::GenerateVertices(const C2Patches &patches) const
 {
     std::vector<float> result;
-    result.reserve(patches.PointsCnt() * 3);
+    result.reserve(patches.PointsCnt() * alg::Vec3::dim);
 
     for (int col=0; col < patches.PointsInCol(); col++) {
         for (int row=0; row < patches.PointsInRow(); row++) {

@@ -25,11 +25,11 @@ void SelectionSystem::RegisterSystem(Coordinator & coordinator)
 
 SelectionSystem::SelectionSystem()
 {
-    std::vector<float> vertices = {
+    const std::vector vertices = {
         0.0f, 0.0f, 0.0f
     };
 
-    std::vector<uint32_t> indices = { 0 };
+    const std::vector<uint32_t> indices = { 0 };
 
     pointsMesh.Update(vertices, indices);
 }
@@ -39,7 +39,7 @@ void SelectionSystem::Init()
 {
     middlePoint = coordinator->CreateEntity();
 
-    Position pos;
+    const Position pos;
     coordinator->AddComponent<Position>(middlePoint, pos);
 
     coordinator->AddComponent<Mesh>(middlePoint, pointsMesh);

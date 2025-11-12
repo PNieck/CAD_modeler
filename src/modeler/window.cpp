@@ -14,6 +14,8 @@ Window::Window(const int width, const int height, const std::string & name):
 
     // Enable "vsync"
     glfwSwapInterval(1);
+
+    InitializeKeysMap();
 }
 
 
@@ -85,6 +87,19 @@ void Window::InitializeGlad()
 }
 
 
+void Window::InitializeKeysMap()
+{
+    keysMap[GLFW_KEY_A] = KeyboardKey::a;
+    keysMap[GLFW_KEY_C] = KeyboardKey::c;
+
+    keysMap[GLFW_KEY_LEFT_SHIFT] = KeyboardKey::left_shift;
+    keysMap[GLFW_KEY_RIGHT_SHIFT] = KeyboardKey::right_shift;
+
+    keysMap[GLFW_KEY_LEFT_CONTROL] = KeyboardKey::left_control;
+    keysMap[GLFW_KEY_RIGHT_CONTROL] = KeyboardKey::right_control;
+}
+
+
 void Window::RunMessageLoop()
 {
     double time = glfwGetTime();
@@ -105,40 +120,40 @@ void Window::RunMessageLoop()
 }
 
 
-void Window::SizeChangedCallback(GLFWwindow * glfwWindow, int width, int height)
+void Window::SizeChangedCallback(GLFWwindow * glfwWindow, const int width, const int height)
 {
     Window* window = (Window*)glfwGetWindowUserPointer(glfwWindow);
     window->controller.SizeChanged(width, height);
 }
 
 
-void Window::MouseMoveCallback(GLFWwindow * glfwWindow, double xpos, double ypos)
+void Window::MouseMoveCallback(GLFWwindow * glfwWindow, const double xpos, const double ypos)
 {
     Window* window = (Window*)glfwGetWindowUserPointer(glfwWindow);
 
-    window->controller.MouseMoved((int)xpos, (int)ypos);
+    window->controller.MouseMoved(static_cast<int>(xpos), static_cast<int>(ypos));
 }
 
 
-void Window::MouseButtonCallback(GLFWwindow * glfwWindow, int button, int action, int mods)
+void Window::MouseButtonCallback(GLFWwindow * glfwWindow, const int button, const int action, int mods)
 {
     (void)mods;
 
-    Window* window = (Window*)glfwGetWindowUserPointer(glfwWindow);
+    const auto window = static_cast<Window*>(glfwGetWindowUserPointer(glfwWindow));
     
     MouseButton mouseButton;
 
     switch (button) {
     case GLFW_MOUSE_BUTTON_LEFT:
-        mouseButton = MouseButton::Left;
+        mouseButton = Left;
         break;
 
     case GLFW_MOUSE_BUTTON_MIDDLE:
-        mouseButton = MouseButton::Middle;
+        mouseButton = Middle;
         break;
 
     case GLFW_MOUSE_BUTTON_RIGHT:
-        mouseButton = MouseButton::Right;
+        mouseButton = Right;
         break;
     
     default:
@@ -162,57 +177,29 @@ void Window::MouseButtonCallback(GLFWwindow * glfwWindow, int button, int action
 }
 
 
-void Window::ScrollCallback(GLFWwindow * glfwWindow, double xoffset, double yoffset)
+void Window::ScrollCallback(GLFWwindow * glfwWindow, const double xoffset, const double yoffset)
 {
-    Window* window = (Window*)glfwGetWindowUserPointer(glfwWindow);
-    window->controller.ScrollMoved((int)yoffset);
+    const auto window = static_cast<Window*>(glfwGetWindowUserPointer(glfwWindow));
+    window->controller.ScrollMoved(static_cast<int>(yoffset));
 
     (void)xoffset;
 }
 
 
-void Window::KeyboardButtonCallback(GLFWwindow *glfwWindow, int key, int scancode, int action, int mods)
+void Window::KeyboardButtonCallback(GLFWwindow *glfwWindow, const int key, const int scancode, const int action, const int mods)
 {
-    Window* window = (Window*)glfwGetWindowUserPointer(glfwWindow);
+    const auto window = static_cast<Window*>(glfwGetWindowUserPointer(glfwWindow));
 
-    if (action == GLFW_PRESS) {
-        switch (key)
-        {
-            case GLFW_KEY_C:
-                window->controller.KeyboardKeyPressed(KeyboardKey::c);
-                break;
+    const auto it = window->keysMap.find(key);
+    if (it == window->keysMap.end())
+        return;
 
-            case GLFW_KEY_LEFT_SHIFT:
-                window->controller.KeyboardKeyPressed(KeyboardKey::left_shift);
-                break;
+    const KeyboardKey keyboardKey = it->second;
 
-            case GLFW_KEY_RIGHT_SHIFT:
-                window->controller.KeyboardKeyPressed(KeyboardKey::right_shift);
-                break;
-
-            default:
-                break;
-        }
-    }
-    else if (action == GLFW_RELEASE) {
-        switch (key)
-        {
-            case GLFW_KEY_C:
-                window->controller.KeyboardKeyReleased(KeyboardKey::c);
-                break;
-
-            case GLFW_KEY_LEFT_SHIFT:
-                window->controller.KeyboardKeyReleased(KeyboardKey::left_shift);
-                break;
-
-            case GLFW_KEY_RIGHT_SHIFT:
-                window->controller.KeyboardKeyReleased(KeyboardKey::right_shift);
-                break;
-
-            default:
-                break;
-        }
-    }
+    if (action == GLFW_PRESS)
+        window->controller.KeyboardKeyPressed(keyboardKey);
+    else if (action == GLFW_RELEASE)
+        window->controller.KeyboardKeyReleased(keyboardKey);
 
     (void)scancode;
     (void)mods;

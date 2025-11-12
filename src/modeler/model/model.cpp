@@ -21,9 +21,6 @@ Model::Model(const int viewportWidth, const int viewportHeight):
     glEnable(GL_BLEND);
     glDepthMask(GL_FALSE);
     glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-
-    glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
-    glPointSize(10.0f);
 }
 
 
@@ -33,11 +30,11 @@ void Model::RenderFrame()
     {
         case CameraManager::CameraType::Perspective:
             RenderPerspectiveFrame();
-        break;
+            break;
 
         case CameraManager::CameraType::Anaglyphs:
             RenderAnaglyphsFrame();
-        break;
+            break;
 
         default:
             throw std::runtime_error("Unknown camera type");

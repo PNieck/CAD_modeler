@@ -4,8 +4,8 @@
 #include <ImGuiFileDialog.h>
 
 
-MillingSimulatorView::MillingSimulatorView(MillingSimController &controller, MillingMachineSim &model):
-    controller(controller), model(model)
+MillingSimulatorView::MillingSimulatorView(MillingMachineSim &model):
+    model(model)
 {
 }
 
