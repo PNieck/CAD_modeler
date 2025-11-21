@@ -21,6 +21,9 @@ Model::Model(const int viewportWidth, const int viewportHeight):
     glEnable(GL_BLEND);
     glDepthMask(GL_FALSE);
     glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+
+    glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
+    glPointSize(10.0f);
 }
 
 

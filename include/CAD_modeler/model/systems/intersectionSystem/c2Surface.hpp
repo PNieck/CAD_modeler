@@ -5,12 +5,11 @@
 #include "../c2PatchesSystem.hpp"
 
 
-
 namespace interSys
 {
-    class C2Surface final : public Surface {
+    class C2Surface : public Surface {
     public:
-        C2Surface(const Coordinator &coord, const C2Patches& patches);
+        C2Surface(const Coordinator &coord, Entity entity);
 
         ~C2Surface() override = default;
 

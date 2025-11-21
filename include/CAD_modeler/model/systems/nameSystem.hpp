@@ -17,4 +17,6 @@ public:
         { return coordinator->GetComponent<Name>(entity); }
 
     void SetName(Entity entity, const Name& name) const;
+
+    Entity EntityFromName(const Name& name) const;
 };

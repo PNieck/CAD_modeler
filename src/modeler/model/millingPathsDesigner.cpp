@@ -13,6 +13,9 @@
 #include <CAD_modeler/model/systems/c2PatchesTrianglesRenderingSystem.hpp>
 #include <CAD_modeler/model/systems/controlPointsRegistrySystem.hpp>
 #include <CAD_modeler/model/systems/millingMachinePathsSystem.hpp>
+#include <CAD_modeler/model/systems/equidistanceC2SurfaceSystem.hpp>
+
+#include <CAD_modeler/utilities/lineSegment2D.hpp>
 
 #include <algorithm>
 
@@ -33,6 +36,10 @@ MillingPathsDesigner::MillingPathsDesigner(const int viewportWidth, const int vi
     C2PatchesTrianglesRenderSystem::RegisterSystem(coordinator);
     NameSystem::RegisterSystem(coordinator);
     SelectionSystem::RegisterSystem(coordinator);
+    EquidistanceC2System::RegisterSystem(coordinator);
+    IntersectionSystem::RegisterSystem(coordinator);
+    InterpolationCurvesRenderingSystem::RegisterSystem(coordinator);
+    PolylineSystem::RegisterSystem(coordinator);
 
     gridSystem = coordinator.GetSystem<GridSystem>();
     pointsSystem = coordinator.GetSystem<PointsSystem>();
@@ -40,13 +47,20 @@ MillingPathsDesigner::MillingPathsDesigner(const int viewportWidth, const int vi
     c0PatchesRenderSystem = coordinator.GetSystem<C0PatchesRenderSystem>();
     c2PatchesSystem = coordinator.GetSystem<C2PatchesSystem>();
     c2PatchesRenderSystem = coordinator.GetSystem<C2PatchesRenderSystem>();
+    equidistanceC2System = coordinator.GetSystem<EquidistanceC2System>();
     nameSystem = coordinator.GetSystem<NameSystem>();
     const auto selectionSys = coordinator.GetSystem<SelectionSystem>();
+    const auto equidistanceSurfaceSys = coordinator.GetSystem<EquidistanceC2System>();
+    intersectionSystem = coordinator.GetSystem<IntersectionSystem>();
+    interpolationCurvesRendering = coordinator.GetSystem<InterpolationCurvesRenderingSystem>();
+    polylineSystem = coordinator.GetSystem<PolylineSystem>();
 
     gridSystem->Init();
     c0PatchesSystem->Init();
     c2PatchesSystem->Init();
+    equidistanceC2System->Init();
     selectionSys->Init();
+    equidistanceSurfaceSys->Init();
 
     base = c0PatchesSystem->CreatePlane(
     alg::Vec3(-materialParameters.xLen/2.f, millingSettings.baseThickness, -materialParameters.zLen/2.f),
@@ -85,6 +99,7 @@ void MillingPathsDesigner::Update()
 {
     c0PatchesSystem->Update();
     c2PatchesSystem->Update();
+    interpolationCurvesRendering->Update();
 }
 
 
@@ -189,6 +204,67 @@ void MillingPathsDesigner::GenerateBroadPhase()
 }
 
 
+void MillingPathsDesigner::GenerateBasePhase()
+{
+    const MillingCutter cutter(0.05, MillingCutter::Type::Flat);
+
+    auto border = FindBoundary(cutter);
+
+    MillingMachinePathsBuilder builder;
+
+    builder.AddPosition(millingSettings.initCutterPos);
+
+    for (const auto& point: border) {
+        builder.AddPosition(point);
+    }
+
+    builder.AddPosition(millingSettings.initCutterPos);
+
+    MillingMachinePathsSystem::CreateGCodeFile(builder.GetPaths(), "2.f10");
+}
+
+
+void MillingPathsDesigner::GenerateMainPhase()
+{
+    const MillingCutter cutter(0.04, MillingCutter::Type::Flat);
+
+    const Entity torso = nameSystem->EntityFromName("torso");
+    const Entity torsoOffset = equidistanceC2System->AddSurface(torso, -cutter.radius);
+
+    const Entity pletwa_prawa = nameSystem->EntityFromName("pletwa_prawa");
+    const Entity pletwa_prawaOffset = equidistanceC2System->AddSurface(pletwa_prawa, -cutter.radius);
+
+    const Entity pletwa_lewa = nameSystem->EntityFromName("pletwa_lewa");
+    const Entity pletwa_lewaOffset = equidistanceC2System->AddSurface(pletwa_lewa, -cutter.radius);
+
+    // const Entity pletwa_gorna = nameSystem->EntityFromName("pletwa_gorna");
+    // const Entity pletwa_gornaOffset = equidistanceC2System->AddSurface(pletwa_gorna, -cutter.radius);
+
+    const Entity prawe_oko = nameSystem->EntityFromName("prawe_oko");
+    const Entity prawe_okoOffset = equidistanceC2System->AddSurface(prawe_oko, -cutter.radius);
+
+    const Entity lewe_oko = nameSystem->EntityFromName("lewe_oko");
+    const Entity lewe_okoOffset = equidistanceC2System->AddSurface(lewe_oko, -cutter.radius);
+
+    const Entity baseOffset = c0PatchesSystem->CreatePlane(
+        alg::Vec3(-materialParameters.xLen/2.f, millingSettings.baseThickness + cutter.radius, -materialParameters.zLen/2.f),
+        alg::Vec3::UnitY(),
+        materialParameters.xLen, materialParameters.zLen
+    );
+
+    intersectionSystem->FindIntersection(pletwa_prawaOffset, torsoOffset, 1e-3);
+    intersectionSystem->FindIntersection(pletwa_lewaOffset, torsoOffset, 1e-3);
+    //intersectionSystem->FindIntersection(pletwa_gornaOffset, torsoOffset, 1e-3);
+
+    intersectionSystem->FindIntersection(prawe_okoOffset, torsoOffset, 1e-3);
+    intersectionSystem->FindIntersection(lewe_okoOffset, torsoOffset, 1e-3);
+
+    intersectionSystem->FindIntersection(baseOffset, torsoOffset, 1e-3);
+    intersectionSystem->FindIntersection(pletwa_prawaOffset, baseOffset, 1e-3);
+    intersectionSystem->FindIntersection(pletwa_lewaOffset, baseOffset, 1e-3);
+}
+
+
 void MillingPathsDesigner::RenderSystemsObjects(
     const alg::Mat4x4 &viewMtx, const alg::Mat4x4 &persMtx, const float nearPlane, const float farPlane) const
 {
@@ -196,6 +272,8 @@ void MillingPathsDesigner::RenderSystemsObjects(
 
     c0PatchesRenderSystem->Render(cameraMtx);
     c2PatchesRenderSystem->Render(cameraMtx);
+    interpolationCurvesRendering->Render(cameraMtx);
+    polylineSystem->Render(cameraMtx);
 
     gridSystem->Render(viewMtx, persMtx, nearPlane, farPlane);
 }
@@ -307,4 +385,258 @@ float MillingPathsDesigner::MinYCutterPos(
     }
 
     return maxCutterYCoord;
+}
+
+std::vector<Position> MillingPathsDesigner::FindBoundary(const MillingCutter& cutter)
+{
+    const Entity torso = nameSystem->EntityFromName("torso");
+    const Entity rightFin = nameSystem->EntityFromName("pletwa_prawa");
+    const Entity leftFin = nameSystem->EntityFromName("pletwa_lewa");
+
+    const auto torsoPoints = BoundaryPoints(torso, cutter.radius);
+    const auto rightFinPoints = BoundaryPoints(rightFin, cutter.radius);
+    const auto leftFinPoints = BoundaryPoints(leftFin, cutter.radius);
+
+    size_t minXTorsoIdx = 0;
+    float minXTorso = std::numeric_limits<float>::infinity();
+
+    for (size_t i = 0; i < torsoPoints.size(); ++i) {
+        if (torsoPoints[i].GetX() < minXTorso) {
+            minXTorso = torsoPoints[i].GetX();
+            minXTorsoIdx = i;
+        }
+    }
+
+    float maxXRightFin = -std::numeric_limits<float>::infinity();
+    float minXRightFin = std::numeric_limits<float>::infinity();
+
+    for (const auto& point: rightFinPoints) {
+        if (point.GetX() > maxXRightFin)
+            maxXRightFin = point.GetX();
+
+        if (point.GetX() < minXRightFin)
+            minXRightFin = point.GetX();
+    }
+
+    float maxXLeftFin = -std::numeric_limits<float>::infinity();
+    float minXLeftFin = std::numeric_limits<float>::infinity();
+
+    for (const auto& point: leftFinPoints) {
+        if (point.GetX() > maxXLeftFin)
+            maxXLeftFin = point.GetX();
+
+        if (point.GetX() < minXLeftFin)
+            minXLeftFin = point.GetX();
+    }
+
+
+    std::vector<Position> result;
+    result.reserve(torsoPoints.size() + rightFinPoints.size() + leftFinPoints.size());
+
+    int torsoIdx = static_cast<int>(minXTorsoIdx);
+    const int torsoChange = torsoPoints[torsoIdx+1].GetZ() > torsoPoints[torsoIdx].GetZ() ? 1 : -1;
+
+    while (torsoPoints[torsoIdx].GetX() < minXLeftFin) {
+        result.emplace_back(torsoPoints[torsoIdx]);
+        torsoIdx += torsoChange;
+    }
+
+    int leftFinChange = 0;
+    int leftFinIdx = 0;
+
+    bool interFound = false;
+    while (!interFound) {
+        const auto& lastTorsoPoint = result.back();
+        const auto& nextTorsoPoint = torsoPoints[torsoIdx];
+        LineSegment2D torsoSeg(lastTorsoPoint.GetX(), lastTorsoPoint.GetZ(), nextTorsoPoint.GetX(), nextTorsoPoint.GetZ());
+
+        for (int j = 1; j < leftFinPoints.size(); ++j) {
+            const auto& lastFinPoint = leftFinPoints[j-1];
+            const auto& nextFinPoint = leftFinPoints[j];
+            LineSegment2D finSeg(lastFinPoint.GetX(), lastFinPoint.GetZ(), nextFinPoint.GetX(), nextFinPoint.GetZ());
+
+            if (LineSegment2D::AreIntersecting(torsoSeg, finSeg)) {
+                interFound = true;
+                auto interPoint = LineSegment2D::IntersectionPoint(torsoSeg, finSeg).value();
+
+                result.emplace_back(interPoint.X(), millingSettings.baseThickness, interPoint.Y());
+                result.emplace_back(nextFinPoint);
+
+                leftFinIdx = j;
+                leftFinChange = leftFinPoints[leftFinIdx+1].GetZ() > leftFinPoints[leftFinIdx].GetZ() ? 1 : -1;
+                leftFinIdx += leftFinChange;
+
+                break;
+            }
+        }
+
+        if (!interFound) {
+            result.emplace_back(nextTorsoPoint);
+            torsoIdx += torsoChange;
+        }
+    }
+
+    int torsoInterMinIdx = torsoIdx + torsoChange;
+    int torsoInterMaxIdx = torsoInterMinIdx;
+
+    while (torsoPoints[torsoInterMaxIdx].GetX() < maxXLeftFin)
+        torsoInterMaxIdx += torsoChange;
+
+    interFound = false;
+    while (!interFound) {
+        const auto& lastFinPoint = result.back();
+        const auto& nextFinPoint = leftFinPoints[leftFinIdx];
+        LineSegment2D finSeg(lastFinPoint.GetX(), lastFinPoint.GetZ(), nextFinPoint.GetX(), nextFinPoint.GetZ());
+
+        for (int j = torsoInterMinIdx + torsoChange; j != torsoInterMaxIdx; j += torsoChange) {
+            const auto& lastTorsoPoint = torsoPoints[j-torsoChange];
+            const auto& nextTorsoPoint = torsoPoints[j];
+            LineSegment2D torsoSeg(lastTorsoPoint.GetX(), lastTorsoPoint.GetZ(), nextTorsoPoint.GetX(), nextTorsoPoint.GetZ());
+
+            if (LineSegment2D::AreIntersecting(finSeg, torsoSeg)) {
+                interFound = true;
+                auto interPoint = LineSegment2D::IntersectionPoint(torsoSeg, finSeg).value();
+
+                result.emplace_back(interPoint.X(), millingSettings.baseThickness, interPoint.Y());
+                result.emplace_back(nextTorsoPoint);
+
+                torsoIdx = j + torsoChange;
+            }
+        }
+
+        if (!interFound) {
+            result.emplace_back(nextFinPoint);
+            leftFinIdx += leftFinChange;
+        }
+    }
+
+    while (torsoPoints[torsoIdx].GetX() < maxXRightFin) {
+        result.emplace_back(torsoPoints[torsoIdx]);
+        torsoIdx += torsoChange;
+    }
+
+    while (torsoPoints[torsoIdx].GetX() > maxXRightFin) {
+        result.emplace_back(torsoPoints[torsoIdx]);
+        torsoIdx += torsoChange;
+    }
+
+    int rightFinChange = 0;
+    int rightFinIdx = 0;
+
+    interFound = false;
+    while (!interFound) {
+        const auto& lastTorsoPoint = result.back();
+        const auto& nextTorsoPoint = torsoPoints[torsoIdx];
+        LineSegment2D torsoSeg(lastTorsoPoint.GetX(), lastTorsoPoint.GetZ(), nextTorsoPoint.GetX(), nextTorsoPoint.GetZ());
+
+        for (int j = 1; j < static_cast<int>(rightFinPoints.size()); ++j) {
+            const auto& lastFinPoint = rightFinPoints[j-1];
+            const auto& nextFinPoint = rightFinPoints[j];
+            LineSegment2D finSeg(lastFinPoint.GetX(), lastFinPoint.GetZ(), nextFinPoint.GetX(), nextFinPoint.GetZ());
+
+            if (LineSegment2D::AreIntersecting(torsoSeg, finSeg)) {
+                interFound = true;
+                auto interPoint = LineSegment2D::IntersectionPoint(torsoSeg, finSeg).value();
+
+                result.emplace_back(interPoint.X(), millingSettings.baseThickness, interPoint.Y());
+                result.emplace_back(nextFinPoint);
+
+                rightFinIdx = j;
+                rightFinChange = rightFinPoints[leftFinIdx+1].GetZ() > rightFinPoints[leftFinIdx].GetZ() ? 1 : -1;
+                rightFinIdx += rightFinChange;
+
+                break;
+            }
+        }
+
+        if (!interFound) {
+            result.emplace_back(nextTorsoPoint);
+            torsoIdx += torsoChange;
+        }
+    }
+
+    torsoInterMinIdx = torsoIdx + torsoChange;
+    torsoInterMaxIdx = torsoInterMinIdx;
+
+    while (torsoPoints[torsoInterMaxIdx].GetX() > minXRightFin)
+        torsoInterMaxIdx += torsoChange;
+
+    interFound = false;
+    while (!interFound) {
+        const auto& lastFinPoint = result.back();
+        const auto& nextFinPoint = rightFinPoints[rightFinIdx];
+        LineSegment2D finSeg(lastFinPoint.GetX(), lastFinPoint.GetZ(), nextFinPoint.GetX(), nextFinPoint.GetZ());
+
+        for (int j = torsoInterMinIdx + torsoChange; j != torsoInterMaxIdx; j += torsoChange) {
+            const auto& lastTorsoPoint = torsoPoints[j-torsoChange];
+            const auto& nextTorsoPoint = torsoPoints[j];
+            LineSegment2D torsoSeg(lastTorsoPoint.GetX(), lastTorsoPoint.GetZ(), nextTorsoPoint.GetX(), nextTorsoPoint.GetZ());
+
+            if (LineSegment2D::AreIntersecting(finSeg, torsoSeg)) {
+                interFound = true;
+                auto interPoint = LineSegment2D::IntersectionPoint(torsoSeg, finSeg).value();
+
+                result.emplace_back(interPoint.X(), millingSettings.baseThickness, interPoint.Y());
+                result.emplace_back(nextTorsoPoint);
+
+                torsoIdx = j + torsoChange;
+            }
+        }
+
+        if (!interFound) {
+            result.emplace_back(nextFinPoint);
+            rightFinIdx += rightFinChange;
+        }
+    }
+
+    size_t startingTorsoIdx = torsoPoints.CircularIndex(minXTorsoIdx);
+    while (torsoPoints.CircularIndex(torsoIdx) != startingTorsoIdx) {
+        result.emplace_back(torsoPoints[torsoIdx]);
+        torsoIdx += torsoChange;
+    }
+
+    result.emplace_back(torsoPoints[torsoIdx]);
+
+    //polylineSystem->AddPolyline(torsoPoints.to_vector());
+    // polylineSystem->AddPolyline(rightFinPoints);
+    //polylineSystem->AddPolyline(leftFinPoints.to_vector());
+
+    polylineSystem->AddPolyline(result);
+
+    return result;
+}
+
+
+CircularVector<Position> MillingPathsDesigner::BoundaryPoints(const Entity entity, const float dist)
+{
+    const auto intersectionEntity = intersectionSystem->FindIntersection(entity, base, 1e-3);
+    if (!intersectionEntity.has_value())
+        throw std::runtime_error("No intersection found with base");
+
+    auto const& c2Patches = coordinator.GetComponent<C2Patches>(entity);
+    auto const& curve = coordinator.GetComponent<IntersectionCurve>(intersectionEntity.value());
+
+    std::vector<Position> result(curve.Size());
+
+    for (size_t i=0; i < curve.Size(); ++i)
+        result[i] = BoundaryPoint(curve[i], c2Patches, dist);
+
+    coordinator.DestroyEntity(intersectionEntity.value());
+
+    return CircularVector(std::move(result));
+}
+
+
+Position MillingPathsDesigner::BoundaryPoint(const IntersectionPoint &p, const C2Patches& patches, const float dist) const
+{
+    const float u = p.U1();
+    const float v = p.V1();
+
+    const alg::Vec3 normal = c2PatchesSystem->NormalVector(patches, u, v);
+    const alg::Vec3 normalProjection = alg::Vec3::UnitZ() * Dot(normal, alg::Vec3::UnitZ()) + alg::Vec3::UnitX() * Dot(normal, alg::Vec3::UnitX());
+
+    alg::Vec3 result = c2PatchesSystem->PointOnSurface(patches, u, v).vec + dist * normalProjection.Normalize();
+    result.Y() = millingSettings.baseThickness;
+
+    return { result };
 }

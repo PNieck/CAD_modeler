@@ -3,6 +3,7 @@
 #include <CAD_modeler/model/systems/c0PatchesSystem.hpp>
 #include <CAD_modeler/model/systems/c2PatchesSystem.hpp>
 #include <CAD_modeler/model/systems/toriSystem.hpp>
+#include <CAD_modeler/model/systems/equidistanceC2SurfaceSystem.hpp>
 #include <CAD_modeler/model/systems/interpolationCurvesRenderingSystem.hpp>
 
 #include <CAD_modeler/model/systems/intersectionSystem/torusSurface.hpp>
@@ -10,6 +11,7 @@
 #include <CAD_modeler/model/systems/intersectionSystem/c2Surface.hpp>
 #include <CAD_modeler/model/systems/intersectionSystem/nextPointFinder.hpp>
 #include <CAD_modeler/model/systems/intersectionSystem/domainChecks.hpp>
+#include <CAD_modeler/model/systems/intersectionSystem/equidistanceSurface.hpp>
 
 #include <ecs/coordinator.hpp>
 
@@ -31,6 +33,7 @@ using namespace interSys;
 void IntersectionSystem::RegisterSystem(Coordinator &coordinator)
 {
     coordinator.RegisterSystem<IntersectionSystem>();
+    coordinator.RegisterSystem<InterpolationCurvesRenderingSystem>();
 
     coordinator.RegisterComponent<IntersectionCurve>();
 }
@@ -44,8 +47,13 @@ bool IntersectionSystem::CanBeIntersected(const Entity entity) const
     if (coordinator->GetSystem<C2PatchesSystem>()->GetEntities().contains(entity))
         return true;
 
-    if (coordinator->GetSystem<ToriSystem>()->GetEntities().contains(entity))
-        return true;
+    if (coordinator->SystemRegistered<ToriSystem>())
+        if (coordinator->GetSystem<ToriSystem>()->GetEntities().contains(entity))
+            return true;
+
+    if (coordinator->SystemRegistered<EquidistanceC2System>())
+        if (coordinator->GetSystem<EquidistanceC2System>()->GetEntities().contains(entity))
+            return true;
 
     return false;
 }
@@ -177,14 +185,19 @@ std::optional<Entity> IntersectionSystem::FindSelfIntersection(const Entity e, c
 
 std::unique_ptr<Surface> IntersectionSystem::GetSurface(const Entity entity) const
 {
-    if (coordinator->GetSystem<ToriSystem>()->GetEntities().contains(entity))
-        return std::make_unique<TorusSurface>(*coordinator, entity);
+    if (coordinator->SystemRegistered<ToriSystem>())
+        if (coordinator->GetSystem<ToriSystem>()->GetEntities().contains(entity))
+            return std::make_unique<TorusSurface>(*coordinator, entity);
 
     if (coordinator->GetSystem<C0PatchesSystem>()->GetEntities().contains(entity))
         return std::make_unique<C0Surface>(*coordinator, entity);
 
     if (coordinator->GetSystem<C2PatchesSystem>()->GetEntities().contains(entity))
-        return std::make_unique<C2Surface>(*coordinator, coordinator->GetComponent<C2Patches>(entity));
+        return std::make_unique<C2Surface>(*coordinator, entity);
+
+    if (coordinator->SystemRegistered<EquidistanceC2System>())
+        if (coordinator->GetSystem<EquidistanceC2System>()->GetEntities().contains(entity))
+            return std::make_unique<EquidistanceSystem>(*coordinator, entity);
 
     throw std::runtime_error("Entity cannot be used to calculate intersection curve");
 }
@@ -707,7 +720,12 @@ Entity IntersectionSystem::CreateCurve(Surface& s1, Surface& s2, const std::dequ
     const auto handler = std::make_shared<DeletionHandler>(*coordinator);
     const auto handlerId = coordinator->Subscribe(curve, std::static_pointer_cast<EventHandler<CurveControlPoints>>(handler));
 
-    const IntersectionCurve interCurve(interPoints, isOpen, handlerId);
+    IntersectionCurve interCurve(interPoints, isOpen, handlerId);
+
+    for (IntersectionPoint& point : interCurve.intersectionPoints) {
+        s1.Normalize(point.U1(), point.V1());
+        s2.Normalize(point.U2(), point.V2());
+    }
 
     coordinator->AddComponent<IntersectionCurve>(curve, interCurve);
     entities.insert(curve);

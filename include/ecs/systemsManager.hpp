@@ -24,6 +24,10 @@ public:
         systems.insert({ id, std::make_shared<Sys>() });
     }
 
+    template<SystemConcept Sys>
+    bool SystemRegistered() const
+        { return systems.contains(GetSystemID<Sys>()); }
+
 
     template<SystemConcept Sys>
     std::shared_ptr<Sys> GetSystem() const {
