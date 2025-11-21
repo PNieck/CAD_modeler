@@ -141,21 +141,21 @@ void MillingPathsDesigner::GenerateBroadPhase()
         minZCutterPos
     ));
 
-    const float stepLenInZDir = cutter.radius * 1.5f;
+    const float stepLenInXDir = cutter.radius * 1.5f;
 
-    const int stepsInZDir = static_cast<int>(std::ceil((maxZCutterPos - minZCutterPos) / stepLenInZDir));
-    const int stepsInXDir = static_cast<int>(std::ceil((maxXCutterPos - minXCutterPos) / heightMap.PixelXLen()));
+    const int stepsInXDir = static_cast<int>(std::ceil((maxXCutterPos - minXCutterPos) / stepLenInXDir));
+    const int stepsInZDir = static_cast<int>(std::ceil((maxZCutterPos - minZCutterPos) / heightMap.PixelXLen()));
 
-    for (int stepZ=0; stepZ < stepsInZDir+1; stepZ++) {
-        const float actCutterMiddleZ = minZCutterPos + static_cast<float>(stepZ) * stepLenInZDir;
+    for (int stepX=0; stepX < stepsInXDir+1; stepX++) {
+        const float actCutterMiddleX = minXCutterPos + static_cast<float>(stepX) * stepLenInXDir;
 
-        for (int stepX=0; stepX < stepsInXDir+1; stepX++) {
-            float actCutterMiddleX;
+        for (int stepZ=0; stepZ < stepsInZDir+1; stepZ++) {
+            float actCutterMiddleZ;
 
-            if (stepZ % 2 == 0)
-                actCutterMiddleX = minXCutterPos + static_cast<float>(stepX) * heightMap.PixelXLen();
+            if (stepX % 2 == 0)
+                actCutterMiddleZ = minZCutterPos + static_cast<float>(stepZ) * heightMap.PixelZLen();
             else
-                actCutterMiddleX = maxXCutterPos - static_cast<float>(stepX) * heightMap.PixelXLen();
+                actCutterMiddleZ = maxZCutterPos - static_cast<float>(stepZ) * heightMap.PixelZLen();
 
             const float minCutterY = MinYCutterPos(heightMap, cutter, actCutterMiddleX, actCutterMiddleZ);
 
@@ -163,8 +163,8 @@ void MillingPathsDesigner::GenerateBroadPhase()
             builder.AddPosition(newCutterPos);
         }
 
-        if (stepZ < stepsInZDir)
-            builder.AddPositionFromOffset(alg::Vec3::UnitZ() * stepLenInZDir);
+        if (stepX < stepsInXDir)
+            builder.AddPositionFromOffset(alg::Vec3::UnitX() * stepLenInXDir);
     }
 
     heightMap.defaultHeight = millingSettings.baseThickness + millingSettings.broadPhaseAdditionalThickness;
@@ -173,16 +173,16 @@ void MillingPathsDesigner::GenerateBroadPhase()
     prevPos.SetY(heightMap.defaultHeight);
     builder.AddPosition(prevPos);
 
-    for (int stepZ=0; stepZ < stepsInZDir+1; stepZ++) {
-        const float actCutterMiddleZ = minZCutterPos + static_cast<float>(stepsInZDir - stepZ) * stepLenInZDir;
+    for (int stepX=0; stepX < stepsInXDir+1; stepX++) {
+        const float actCutterMiddleX = minXCutterPos + static_cast<float>(stepsInXDir - stepX) * stepLenInXDir;
 
-        for (int stepX=0; stepX < stepsInXDir+1; stepX++) {
-            float actCutterMiddleX;
+        for (int stepZ=0; stepZ < stepsInZDir+1; stepZ++) {
+            float actCutterMiddleZ;
 
-            if ((stepZ+stepsInZDir) % 2 == 1)
-                actCutterMiddleX = minXCutterPos + static_cast<float>(stepX) * heightMap.PixelXLen();
+            if ((stepX+stepsInXDir) % 2 == 1)
+                actCutterMiddleZ = minZCutterPos + static_cast<float>(stepZ) * heightMap.PixelZLen();
             else
-                actCutterMiddleX = maxXCutterPos - static_cast<float>(stepX) * heightMap.PixelXLen();
+                actCutterMiddleZ = maxZCutterPos - static_cast<float>(stepZ) * heightMap.PixelZLen();
 
             const float minCutterY = MinYCutterPos(heightMap, cutter, actCutterMiddleX, actCutterMiddleZ);
 
@@ -190,8 +190,8 @@ void MillingPathsDesigner::GenerateBroadPhase()
             builder.AddPosition(newCutterPos);
         }
 
-        if (stepZ < stepsInZDir)
-            builder.AddPositionFromOffset(-alg::Vec3::UnitZ() * stepLenInZDir);
+        if (stepX < stepsInXDir)
+            builder.AddPositionFromOffset(-alg::Vec3::UnitX() * stepLenInXDir);
     }
 
     prevPos = builder.GetLastPosition();
@@ -316,7 +316,7 @@ BroadPhaseHeightMap MillingPathsDesigner::GenerateBroadPhaseHeightMap()
 
     const alg::Vec3 camPos(0.f, materialParameters.yLen, 0.f);
 
-    const alg::Mat4x4 viewMatrix = alg::LookAt(camPos, alg::Vec3::UnitY(), alg::Vec3::UnitZ());
+    const alg::Mat4x4 viewMatrix = alg::LookAt(camPos, alg::Vec3::UnitY(), alg::Vec3::UnitX());
     const alg::Mat4x4 projectionMtx = alg::OrthographicProjection(
         -materialParameters.xLen/2.0f,
         materialParameters.xLen/2.0f,
@@ -596,10 +596,6 @@ std::vector<Position> MillingPathsDesigner::FindBoundary(const MillingCutter& cu
     }
 
     result.emplace_back(torsoPoints[torsoIdx]);
-
-    //polylineSystem->AddPolyline(torsoPoints.to_vector());
-    // polylineSystem->AddPolyline(rightFinPoints);
-    //polylineSystem->AddPolyline(leftFinPoints.to_vector());
 
     polylineSystem->AddPolyline(result);
 

@@ -7,7 +7,7 @@
 
 class BroadPhaseHeightMap {
 public:
-    BroadPhaseHeightMap(const size_t xResolution, const size_t zResolution, float xSize, float zSize, float defHeight = 0.f):
+    BroadPhaseHeightMap(const size_t xResolution, const size_t zResolution, const float xSize, const float zSize, const float defHeight = 0.f):
         defaultHeight(defHeight), xSize(xSize), zSize(zSize), data(xResolution ,zResolution){}
 
     size_t XResolution() const
