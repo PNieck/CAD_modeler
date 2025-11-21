@@ -69,6 +69,8 @@ MillingPathsDesigner::MillingPathsDesigner(const int viewportWidth, const int vi
     );
     coordinator.AddComponent<DrawStd>(base, DrawStd());
 
+    LoadModel("../../models/fish_model.json");
+
     // Created base plane must be updated
     Update();
 }
@@ -390,8 +392,8 @@ float MillingPathsDesigner::MinYCutterPos(
 std::vector<Position> MillingPathsDesigner::FindBoundary(const MillingCutter& cutter)
 {
     const Entity torso = nameSystem->EntityFromName("torso");
-    const Entity rightFin = nameSystem->EntityFromName("pletwa_prawa");
-    const Entity leftFin = nameSystem->EntityFromName("pletwa_lewa");
+    const Entity rightFin = nameSystem->EntityFromName("right fin");
+    const Entity leftFin = nameSystem->EntityFromName("left fin");
 
     const auto torsoPoints = BoundaryPoints(torso, cutter.radius);
     const auto rightFinPoints = BoundaryPoints(rightFin, cutter.radius);
