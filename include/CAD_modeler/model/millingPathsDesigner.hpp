@@ -69,7 +69,7 @@ private:
     BroadPhaseHeightMap GenerateBroadPhaseHeightMap();
     float MinYCutterPos(const BroadPhaseHeightMap& heightMap, const MillingCutter& cutter, float cutterX, float cutterZ) const;
 
-    std::vector<Position> FindBoundary(const MillingCutter& cutter);
+    std::vector<Position> FindBoundary(float dist);
 
     CircularVector<Position> BoundaryPoints(Entity entity, float dist);
 

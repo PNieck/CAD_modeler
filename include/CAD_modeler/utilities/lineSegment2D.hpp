@@ -31,6 +31,9 @@ public:
     float Y2() const
         { return p2.Y(); }
 
+    float Length() const
+        { return alg::Distance(p1, p2); }
+
     static bool AreIntersecting(const LineSegment2D& ls1, const LineSegment2D& ls2);
 
     static std::optional<alg::Vec2> IntersectionPoint(const LineSegment2D& ls1, const LineSegment2D& ls2);

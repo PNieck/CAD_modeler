@@ -3,6 +3,9 @@
 
 void MillingMachinePathsBuilder::AddPosition(const Position &nextPosition)
 {
+    path.commands.emplace_back(nextID++, nextPosition);
+    return;
+
     if (path.commands.empty()) {
         path.commands.emplace_back(nextID++, nextPosition);
         return;

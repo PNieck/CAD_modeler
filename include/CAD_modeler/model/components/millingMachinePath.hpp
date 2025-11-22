@@ -45,5 +45,8 @@ public:
     auto cend() const
         { return commands.cend(); }
 
+    size_t Size() const
+        { return commands.size(); }
+
     std::vector<MoveCommand> commands;
 };

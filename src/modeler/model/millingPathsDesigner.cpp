@@ -7,6 +7,7 @@
 
 #include <CAD_modeler/model/millingPathsDesigner/depthBuffer.hpp>
 #include <CAD_modeler/model/millingPathsDesigner/millingMachinePathsBuilder.hpp>
+#include <CAD_modeler/model/millingPathsDesigner/boundaryIntersectionFinder.hpp>
 
 #include <CAD_modeler/model/systems/selectionSystem.hpp>
 #include <CAD_modeler/model/systems/c0PatchesTrianglesRenderSystem.hpp>
@@ -202,27 +203,139 @@ void MillingPathsDesigner::GenerateBroadPhase()
 
     builder.AddPosition(millingSettings.initCutterPos);
 
-    MillingMachinePathsSystem::CreateGCodeFile(builder.GetPaths(), "1.k16");
+    MillingMachinePathsSystem::CreateGCodeFile(builder.GetPaths(), "paths/1.k16");
 }
 
 
 void MillingPathsDesigner::GenerateBasePhase()
 {
     const MillingCutter cutter(0.05, MillingCutter::Type::Flat);
-
-    auto border = FindBoundary(cutter);
-
     MillingMachinePathsBuilder builder;
 
+    const auto step1Boundary = FindBoundary(cutter.radius * 1.5f);
+
+    float cutterMaxZPos = materialParameters.zLen / 2.f + cutter.radius * 1.5f;
+    float cutterMinZPos = -cutterMaxZPos;
+
+    const float xStepLen = 2.f * cutter.radius - 0.1f * cutter.radius;
+
+    float minXBoundary = step1Boundary.front().GetX();
+    float maxXBoundary = -std::numeric_limits<float>::infinity();
+    for (const auto& point: step1Boundary)
+        if (point.GetX() > maxXBoundary)
+            maxXBoundary = point.GetX();
+
+    float materialMinX = -materialParameters.xLen / 2.f;
+
+    float materialBorderToBoundary = minXBoundary - materialMinX;
+
+    int initFullSteps = static_cast<int>(std::ceil(materialBorderToBoundary / xStepLen));
+    int cutterXSteps = static_cast<int>(std::ceil(materialParameters.xLen / xStepLen));
+
+    float initCutterX = minXBoundary - (initFullSteps - 1) * xStepLen;
+
+    // First position
     builder.AddPosition(millingSettings.initCutterPos);
 
-    for (const auto& point: border) {
-        builder.AddPosition(point);
+    float firstZ, secondZ;
+
+    if (initFullSteps % 2 == 1) {
+        firstZ = cutterMinZPos;
+        secondZ = cutterMaxZPos;
+    }
+    else {
+        firstZ = cutterMaxZPos;
+        secondZ = cutterMinZPos;
     }
 
+    builder.AddPosition(initCutterX, millingSettings.initCutterPos.Y(), firstZ);
+
+    int stepsDone = 0;
+    for (int i=0; i < initFullSteps; i++) {
+        float xCoord = initCutterX + stepsDone * xStepLen;
+
+        if (i % 2 == 0) {
+            builder.AddPosition(xCoord, millingSettings.baseThickness, firstZ);
+            builder.AddPosition(xCoord, millingSettings.baseThickness, secondZ);
+        }
+        else {
+            builder.AddPosition(xCoord, millingSettings.baseThickness, secondZ);
+            builder.AddPosition(xCoord, millingSettings.baseThickness, firstZ);
+        }
+
+        stepsDone++;
+    }
+
+    BoundaryIntersectionFinder finder(step1Boundary);
+
+    stepsDone--;
+    float actX = initCutterX + stepsDone * xStepLen;
+    while (actX + xStepLen < maxXBoundary) {
+        stepsDone++;
+        actX = initCutterX + stepsDone * xStepLen;
+
+        builder.AddPosition(actX, millingSettings.baseThickness, cutterMaxZPos);
+        builder.AddPosition(finder.Intersection(actX));
+
+        if (actX + xStepLen > maxXBoundary)
+            break;
+
+        stepsDone++;
+        actX = initCutterX + stepsDone * xStepLen;
+
+        builder.AddPosition(finder.Intersection(actX));
+        builder.AddPosition(actX, millingSettings.baseThickness, cutterMaxZPos);
+    }
+
+    builder.AddPosition(actX, millingSettings.baseThickness, cutterMaxZPos);
+    actX = maxXBoundary;
+
+    builder.AddPosition(actX, millingSettings.baseThickness, cutterMaxZPos);
+    builder.AddPosition(actX, millingSettings.baseThickness, cutterMinZPos);
+
+    stepsDone++;
+    while (actX - xStepLen > minXBoundary) {
+        stepsDone--;
+        actX = initCutterX + stepsDone * xStepLen;
+
+        builder.AddPosition(actX, millingSettings.baseThickness, cutterMinZPos);
+        builder.AddPosition(finder.Intersection(actX));
+
+        if (actX - xStepLen < minXBoundary)
+            break;
+
+        if (stepsDone == 7) {
+            builder.AddPosition(finder.Intersection(actX - xStepLen/2.f));
+        }
+
+        stepsDone--;
+        actX = initCutterX + stepsDone * xStepLen;
+
+        builder.AddPosition(finder.Intersection(actX));
+        builder.AddPosition(actX, millingSettings.baseThickness, cutterMinZPos);
+    }
+
+    builder.PopLastPosition();
+
+    const auto step2Boundary = FindBoundary(cutter.radius);
+
+    for (const auto& point: step2Boundary)
+        builder.AddPosition(point);
+
+    builder.AddPosition(step2Boundary.back().GetX(), millingSettings.initCutterPos.Y(), step2Boundary.back().GetZ());
     builder.AddPosition(millingSettings.initCutterPos);
 
-    MillingMachinePathsSystem::CreateGCodeFile(builder.GetPaths(), "2.f10");
+    auto paths = builder.GetPaths();
+    std::vector<Position> pathsPositions;
+    pathsPositions.reserve(paths.Size());
+
+    for (const auto& path: paths) {
+        pathsPositions.push_back(path.destination);
+    }
+
+    polylineSystem->AddPolyline(pathsPositions);
+
+    MillingMachinePathsSystem::CreateGCodeFile(paths, "paths/2.f10");
 }
 
 
@@ -389,15 +502,16 @@ float MillingPathsDesigner::MinYCutterPos(
     return maxCutterYCoord;
 }
 
-std::vector<Position> MillingPathsDesigner::FindBoundary(const MillingCutter& cutter)
+
+std::vector<Position> MillingPathsDesigner::FindBoundary(float dist)
 {
     const Entity torso = nameSystem->EntityFromName("torso");
     const Entity rightFin = nameSystem->EntityFromName("right fin");
     const Entity leftFin = nameSystem->EntityFromName("left fin");
 
-    const auto torsoPoints = BoundaryPoints(torso, cutter.radius);
-    const auto rightFinPoints = BoundaryPoints(rightFin, cutter.radius);
-    const auto leftFinPoints = BoundaryPoints(leftFin, cutter.radius);
+    const auto torsoPoints = BoundaryPoints(torso, dist);
+    const auto rightFinPoints = BoundaryPoints(rightFin, dist);
+    const auto leftFinPoints = BoundaryPoints(leftFin, dist);
 
     size_t minXTorsoIdx = 0;
     float minXTorso = std::numeric_limits<float>::infinity();
@@ -598,6 +712,8 @@ std::vector<Position> MillingPathsDesigner::FindBoundary(const MillingCutter& cu
     }
 
     result.emplace_back(torsoPoints[torsoIdx]);
+
+    assert(result.front().vec == result.back().vec);
 
     polylineSystem->AddPolyline(result);
 
