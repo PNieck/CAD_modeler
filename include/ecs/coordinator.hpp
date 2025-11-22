@@ -29,6 +29,11 @@ public:
     }
 
 
+    template <SystemConcept Sys>
+    bool SystemRegistered() const
+        { return systemsMgr.SystemRegistered<Sys>(); }
+
+
     template <SystemConcept Sys, typename Comp>
     void RegisterRequiredComponent() {
         systemsMgr.RegisterRequiredComponent<Sys, Comp>();

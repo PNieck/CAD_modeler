@@ -27,9 +27,9 @@ namespace interSys {
     }
 
 
-    C2Surface::C2Surface(const Coordinator &coord, const C2Patches& patches):
+    C2Surface::C2Surface(const Coordinator &coord, const Entity entity):
         patchesSys(coord.GetSystem<C2PatchesSystem>()),
-        patches(patches),
+        patches(coord.GetComponent<C2Patches>(entity)),
         wrapU(ShouldWrapU(patches)),
         wrapV(ShouldWrapV(patches))
     {

@@ -67,6 +67,26 @@ public:
     alg::Vec3 PartialDerivativeV(const Entity entity, const float u, const float v) const override
         { return PartialDerivativeV(coordinator->GetComponent<C2Patches>(entity), u, v); }
 
+    alg::Vec3 NormalVector(const C2Patches& patches, float u, float v) const;
+    alg::Vec3 NormalVector(const Entity entity, const float u, const float v) const override
+        { return NormalVector(coordinator->GetComponent<C2Patches>(entity), u, v); }
+
+    alg::Vec3 PartialDerivativeUU(const C2Patches& patches, float u, float v) const;
+    alg::Vec3 PartialDerivativeVV(const C2Patches& patches, float u, float v) const;
+    alg::Vec3 PartialDerivativeUV(const C2Patches& patches, float u, float v) const;
+
+    alg::Vec3 PartialDerivativeUUApprox(const C2Patches& patches, float u, float v) const;
+    alg::Vec3 PartialDerivativeUUApprox(const Entity entity, const float u, const float v) const
+        { return PartialDerivativeUUApprox(coordinator->GetComponent<C2Patches>(entity), u, v); }
+
+    alg::Vec3 PartialDerivativeVVApprox(const C2Patches& patches, float u, float v) const;
+    alg::Vec3 PartialDerivativeVVApprox(const Entity entity, const float u, const float v) const
+        { return PartialDerivativeVVApprox(coordinator->GetComponent<C2Patches>(entity), u, v); }
+
+    alg::Vec3 PartialDerivativeUVApprox(const C2Patches& patches, float u, float v) const;
+    alg::Vec3 PartialDerivativeUVApprox(const Entity entity, const float u, const float v) const
+        { return PartialDerivativeUVApprox(coordinator->GetComponent<C2Patches>(entity), u, v); }
+
     static float MaxU(const C2Patches& patches)
         { return static_cast<float>(patches.PatchesInRow()); }
 

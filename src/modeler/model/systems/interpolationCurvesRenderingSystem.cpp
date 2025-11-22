@@ -15,6 +15,8 @@
 void InterpolationCurvesRenderingSystem::RegisterSystem(Coordinator &coordinator)
 {
     coordinator.RegisterSystem<InterpolationCurvesRenderingSystem>();
+
+    coordinator.RegisterSystem<CurveControlPointsSystem>();
 }
 
 

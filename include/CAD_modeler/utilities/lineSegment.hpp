@@ -11,6 +11,14 @@ public:
     [[nodiscard]]
     alg::Vec3 NearestPoint(const alg::Vec3& point) const;
 
+    [[nodiscard]]
+    const alg::Vec3& P1() const
+        { return startingPoint; }
+
+    [[nodiscard]]
+    alg::Vec3 P2() const
+        { return startingPoint + direction * maxT; }
+
 private:
     alg::Vec3 startingPoint;
     alg::Vec3 direction;

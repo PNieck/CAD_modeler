@@ -68,6 +68,14 @@ public:
     IntersectionCurve(const std::deque<IntersectionPoint>& points, const bool isOpen, const HandlerId deletionHandler):
         isOpen(isOpen), intersectionPoints(points.begin(), points.end()), deletionHandler(deletionHandler) {}
 
+    [[nodiscard]]
+    size_t Size() const
+         { return intersectionPoints.size(); }
+
+    const IntersectionPoint& operator[](const size_t idx) const {
+        return intersectionPoints.at(idx);
+    }
+
     bool isOpen;
     std::vector<IntersectionPoint> intersectionPoints;
     HandlerId deletionHandler;

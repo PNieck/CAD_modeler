@@ -13,6 +13,4 @@ private:
     std::string filePath;
 
     MillingPathsDesigner& model;
-
-    void RenderFileSelection();
 };

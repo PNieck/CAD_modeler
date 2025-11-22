@@ -5,6 +5,7 @@
 #include "CAD_modeler/model/systems/c0PatchesSystem.hpp"
 #include "CAD_modeler/model/systems/c2PatchesSystem.hpp"
 #include "CAD_modeler/model/systems/toriSystem.hpp"
+#include "CAD_modeler/model/systems/equidistanceC2SurfaceSystem.hpp"
 
 
 inline std::shared_ptr<SurfaceSystem> GetSurfaceSystem(const Coordinator& coordinator, const Entity entity) {
@@ -19,6 +20,12 @@ inline std::shared_ptr<SurfaceSystem> GetSurfaceSystem(const Coordinator& coordi
     result = coordinator.GetSystem<ToriSystem>();
     if (result->HasEntity(entity))
         return result;
+
+    if (coordinator.SystemRegistered<EquidistanceC2System>()) {
+        result = coordinator.GetSystem<EquidistanceC2System>();
+        if (result->HasEntity(entity))
+            return result;
+    }
 
     throw std::runtime_error("Entity is not a surface");
 }
