@@ -8,6 +8,7 @@
 
 #include "controlNetSystem.hpp"
 #include "surfaceSystem.hpp"
+#include "c2PatchesSystem/singleC2Patch.hpp"
 
 
 class C2PatchesSystem final : public SurfaceSystem {
@@ -117,6 +118,9 @@ private:
     static bool ShouldWrapV(const C2Patches& patches);
 
     static void NormalizeUV(const C2Patches& patches, float& u, float& v);
+
+    static alg::Vec3 PartialDerivativeV(const SingleC2Patch& patch, float normalizedU, float normalizedV);
+    static alg::Vec3 PartialDerivativeU(const SingleC2Patch& patch, float normalizedU, float normalizedV);
 
     class DeletionHandler final : public EventHandler<C2Patches> {
     public:

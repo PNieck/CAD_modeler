@@ -212,7 +212,7 @@ void MillingPathsDesigner::GenerateBasePhase()
     const MillingCutter cutter(0.05, MillingCutter::Type::Flat);
     MillingMachinePathsBuilder builder;
 
-    const auto step1Boundary = FindBoundary(cutter.radius * 1.5f);
+    const auto step1Boundary = FindBoundary(-cutter.radius * 1.5f);
 
     const float cutterMaxZPos = materialParameters.zLen / 2.f + cutter.radius * 1.5f;
     const float cutterMinZPos = -cutterMaxZPos;
@@ -316,7 +316,7 @@ void MillingPathsDesigner::GenerateBasePhase()
 
     builder.PopLastPosition();
 
-    const auto step2Boundary = FindBoundary(cutter.radius);
+    const auto step2Boundary = FindBoundary(-cutter.radius);
 
     for (const auto& point: step2Boundary)
         builder.AddPosition(point);
