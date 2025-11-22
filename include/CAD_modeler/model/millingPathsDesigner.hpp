@@ -67,7 +67,8 @@ private:
     MillingSettings millingSettings;
 
     BroadPhaseHeightMap GenerateBroadPhaseHeightMap();
-    float MinYCutterPos(const BroadPhaseHeightMap& heightMap, const MillingCutter& cutter, float cutterX, float cutterZ) const;
+
+    static float MinYCutterPos(const BroadPhaseHeightMap& heightMap, const MillingCutter& cutter, float cutterX, float cutterZ);
 
     std::vector<Position> FindBoundary(float dist);
 

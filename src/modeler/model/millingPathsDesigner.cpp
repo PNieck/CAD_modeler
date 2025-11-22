@@ -214,25 +214,24 @@ void MillingPathsDesigner::GenerateBasePhase()
 
     const auto step1Boundary = FindBoundary(cutter.radius * 1.5f);
 
-    float cutterMaxZPos = materialParameters.zLen / 2.f + cutter.radius * 1.5f;
-    float cutterMinZPos = -cutterMaxZPos;
+    const float cutterMaxZPos = materialParameters.zLen / 2.f + cutter.radius * 1.5f;
+    const float cutterMinZPos = -cutterMaxZPos;
 
     const float xStepLen = 2.f * cutter.radius - 0.1f * cutter.radius;
 
-    float minXBoundary = step1Boundary.front().GetX();
+    const float minXBoundary = step1Boundary.front().GetX();
     float maxXBoundary = -std::numeric_limits<float>::infinity();
     for (const auto& point: step1Boundary)
         if (point.GetX() > maxXBoundary)
             maxXBoundary = point.GetX();
 
-    float materialMinX = -materialParameters.xLen / 2.f;
+    const float materialMinX = -materialParameters.xLen / 2.f;
 
-    float materialBorderToBoundary = minXBoundary - materialMinX;
+    const float materialBorderToBoundary = minXBoundary - materialMinX;
 
-    int initFullSteps = static_cast<int>(std::ceil(materialBorderToBoundary / xStepLen));
-    int cutterXSteps = static_cast<int>(std::ceil(materialParameters.xLen / xStepLen));
+    const int initFullSteps = static_cast<int>(std::ceil(materialBorderToBoundary / xStepLen));
 
-    float initCutterX = minXBoundary - (initFullSteps - 1) * xStepLen;
+    const float initCutterX = minXBoundary - static_cast<float>(initFullSteps - 1) * xStepLen;
 
     // First position
     builder.AddPosition(millingSettings.initCutterPos);
@@ -252,7 +251,7 @@ void MillingPathsDesigner::GenerateBasePhase()
 
     int stepsDone = 0;
     for (int i=0; i < initFullSteps; i++) {
-        float xCoord = initCutterX + stepsDone * xStepLen;
+        const float xCoord = initCutterX + static_cast<float>(stepsDone) * xStepLen;
 
         if (i % 2 == 0) {
             builder.AddPosition(xCoord, millingSettings.baseThickness, firstZ);
@@ -269,10 +268,10 @@ void MillingPathsDesigner::GenerateBasePhase()
     BoundaryIntersectionFinder finder(step1Boundary);
 
     stepsDone--;
-    float actX = initCutterX + stepsDone * xStepLen;
+    float actX = initCutterX + static_cast<float>(stepsDone) * xStepLen;
     while (actX + xStepLen < maxXBoundary) {
         stepsDone++;
-        actX = initCutterX + stepsDone * xStepLen;
+        actX = initCutterX + static_cast<float>(stepsDone) * xStepLen;
 
         builder.AddPosition(actX, millingSettings.baseThickness, cutterMaxZPos);
         builder.AddPosition(finder.Intersection(actX));
@@ -281,7 +280,7 @@ void MillingPathsDesigner::GenerateBasePhase()
             break;
 
         stepsDone++;
-        actX = initCutterX + stepsDone * xStepLen;
+        actX = initCutterX + static_cast<float>(stepsDone) * xStepLen;
 
         builder.AddPosition(finder.Intersection(actX));
         builder.AddPosition(actX, millingSettings.baseThickness, cutterMaxZPos);
@@ -296,7 +295,7 @@ void MillingPathsDesigner::GenerateBasePhase()
     stepsDone++;
     while (actX - xStepLen > minXBoundary) {
         stepsDone--;
-        actX = initCutterX + stepsDone * xStepLen;
+        actX = initCutterX + static_cast<float>(stepsDone) * xStepLen;
 
         builder.AddPosition(actX, millingSettings.baseThickness, cutterMinZPos);
         builder.AddPosition(finder.Intersection(actX));
@@ -309,7 +308,7 @@ void MillingPathsDesigner::GenerateBasePhase()
         }
 
         stepsDone--;
-        actX = initCutterX + stepsDone * xStepLen;
+        actX = initCutterX + static_cast<float>(stepsDone) * xStepLen;
 
         builder.AddPosition(finder.Intersection(actX));
         builder.AddPosition(actX, millingSettings.baseThickness, cutterMinZPos);
@@ -478,8 +477,8 @@ BroadPhaseHeightMap MillingPathsDesigner::GenerateBroadPhaseHeightMap()
 
 
 float MillingPathsDesigner::MinYCutterPos(
-    const BroadPhaseHeightMap &heightMap, const MillingCutter &cutter, const float cutterX, const float cutterZ) const
-{
+    const BroadPhaseHeightMap &heightMap, const MillingCutter &cutter, const float cutterX, const float cutterZ
+) {
     const int cutterXLenInPixels = static_cast<int>(std::ceil(cutter.radius / heightMap.PixelXLen() * 2.f));
     const int cutterZLenInPixels = static_cast<int>(std::ceil(cutter.radius / heightMap.PixelZLen() * 2.f));
 
@@ -571,9 +570,9 @@ std::vector<Position> MillingPathsDesigner::FindBoundary(float dist)
             const auto& nextFinPoint = leftFinPoints[j];
             LineSegment2D finSeg(lastFinPoint.GetX(), lastFinPoint.GetZ(), nextFinPoint.GetX(), nextFinPoint.GetZ());
 
-            if (LineSegment2D::AreIntersecting(torsoSeg, finSeg)) {
+            alg::Vec2 interPoint;
+            if (LineSegment2D::AreIntersecting(torsoSeg, finSeg, interPoint)) {
                 interFound = true;
-                auto interPoint = LineSegment2D::IntersectionPoint(torsoSeg, finSeg).value();
 
                 result.emplace_back(interPoint.X(), millingSettings.baseThickness, interPoint.Y());
                 result.emplace_back(nextFinPoint);
@@ -609,9 +608,9 @@ std::vector<Position> MillingPathsDesigner::FindBoundary(float dist)
             const auto& nextTorsoPoint = torsoPoints[j];
             LineSegment2D torsoSeg(lastTorsoPoint.GetX(), lastTorsoPoint.GetZ(), nextTorsoPoint.GetX(), nextTorsoPoint.GetZ());
 
-            if (LineSegment2D::AreIntersecting(finSeg, torsoSeg)) {
+            alg::Vec2 interPoint;
+            if (LineSegment2D::AreIntersecting(finSeg, torsoSeg, interPoint)) {
                 interFound = true;
-                auto interPoint = LineSegment2D::IntersectionPoint(torsoSeg, finSeg).value();
 
                 result.emplace_back(interPoint.X(), millingSettings.baseThickness, interPoint.Y());
                 result.emplace_back(nextTorsoPoint);
@@ -650,9 +649,9 @@ std::vector<Position> MillingPathsDesigner::FindBoundary(float dist)
             const auto& nextFinPoint = rightFinPoints[j];
             LineSegment2D finSeg(lastFinPoint.GetX(), lastFinPoint.GetZ(), nextFinPoint.GetX(), nextFinPoint.GetZ());
 
-            if (LineSegment2D::AreIntersecting(torsoSeg, finSeg)) {
+            alg::Vec2 interPoint;
+            if (LineSegment2D::AreIntersecting(torsoSeg, finSeg, interPoint)) {
                 interFound = true;
-                auto interPoint = LineSegment2D::IntersectionPoint(torsoSeg, finSeg).value();
 
                 result.emplace_back(interPoint.X(), millingSettings.baseThickness, interPoint.Y());
                 result.emplace_back(nextFinPoint);
@@ -688,9 +687,9 @@ std::vector<Position> MillingPathsDesigner::FindBoundary(float dist)
             const auto& nextTorsoPoint = torsoPoints[j];
             LineSegment2D torsoSeg(lastTorsoPoint.GetX(), lastTorsoPoint.GetZ(), nextTorsoPoint.GetX(), nextTorsoPoint.GetZ());
 
-            if (LineSegment2D::AreIntersecting(finSeg, torsoSeg)) {
+            alg::Vec2 interPoint;
+            if (LineSegment2D::AreIntersecting(finSeg, torsoSeg, interPoint)) {
                 interFound = true;
-                auto interPoint = LineSegment2D::IntersectionPoint(torsoSeg, finSeg).value();
 
                 result.emplace_back(interPoint.X(), millingSettings.baseThickness, interPoint.Y());
                 result.emplace_back(nextTorsoPoint);
