@@ -80,8 +80,10 @@ private:
     Position BoundaryPoint(const IntersectionPoint& p, const C2Patches& patches, float dist) const;
 
     void GeneratePathsForLeftFin(MillingMachinePathsBuilder& builder, const MillingCutter& cutter);
+    void GeneratePathsForRightFin(MillingMachinePathsBuilder& builder, const MillingCutter& cutter);
 
     std::vector<alg::Vec2> GetBoundaryCurveForLeftFin(const MillingCutter& cutter, Entity torsoOffset, Entity leftFinOffset);
+    std::vector<alg::Vec2> GetBoundaryCurveForRightFin(const MillingCutter& cutter, Entity torsoOffset, Entity rightFinOffset);
 
     static std::vector<alg::Vec2> GetPointsVec(const IntersectionCurve& curve);
     void NormalizeUV(Entity entity, float& u, float& v);

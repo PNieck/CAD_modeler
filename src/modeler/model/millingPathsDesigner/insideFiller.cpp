@@ -53,7 +53,7 @@ std::vector<alg::Vec2> InsideFiller::IntersectionsWithStrip(const std::vector<al
         [wrapV, this](const alg::Vec2& p1, const alg::Vec2& p2)
         {
             if (!wrapV || (p1.Y() <= startV && p2.Y() <= startV))
-                return p1.Y() < p2.Y();
+                return p1.Y() > p2.Y();
 
             if (p1.Y() > startV && p2.Y() > startV)
                 return p1.Y() > p2.Y();

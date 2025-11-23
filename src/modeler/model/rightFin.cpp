@@ -1,29 +1,28 @@
 #include "CAD_modeler/model/millingPathsDesigner.hpp"
 
-#include <CAD_modeler/model/millingPathsDesigner/insideFiller.hpp>
+#include "CAD_modeler/utilities/lineSegment2D.hpp"
+#include "CAD_modeler/utilities/toFile.hpp"
 
-#include <CAD_modeler/utilities/lineSegment2D.hpp>
+#include "CAD_modeler/model/millingPathsDesigner/insideFiller.hpp"
 
-
-// TODO: delete
+// TODO: remove
 #include <iostream>
-#include <CAD_modeler/utilities/toFile.hpp>
 
 
-void MillingPathsDesigner::GeneratePathsForLeftFin(MillingMachinePathsBuilder &builder, const MillingCutter& cutter)
+void MillingPathsDesigner::GeneratePathsForRightFin(MillingMachinePathsBuilder& builder, const MillingCutter& cutter)
 {
     const Entity torso = nameSystem->EntityFromName("torso");
-    const Entity leftFin = nameSystem->EntityFromName("left fin");
+    const Entity rightFin = nameSystem->EntityFromName("right fin");
 
     const Entity torsoOffset = equidistanceC2System->AddSurface(torso, -cutter.radius);
-    const Entity leftFinOffset = equidistanceC2System->AddSurface(leftFin, -cutter.radius);
+    const Entity leftFinOffset = equidistanceC2System->AddSurface(rightFin, -cutter.radius);
 
-    const auto boundaryCurve = GetBoundaryCurveForLeftFin(cutter, torsoOffset, leftFinOffset);
+    const auto boundaryCurve = GetBoundaryCurveForRightFin(cutter, torsoOffset, leftFinOffset);
 
-    const InsideFiller filler(0.f, 3.f, 2.f, 5.f, 0.05f, 0.05f, c2PatchesSystem->MaxU(leftFin), c2PatchesSystem->MaxV(leftFin));
+    const InsideFiller filler(0.f, 3.f, 5.5f, 1.5f, 0.05f, 0.05f, c2PatchesSystem->MaxU(rightFin), c2PatchesSystem->MaxV(rightFin));
     const auto points = filler.Fill(boundaryCurve);
 
-    // InterCurveToFile("InsidePoints.csv", points);
+    InterCurveToFile("InsidePoints.csv", points);
 
     const auto combined = ConnectInsidePointToBoundary(points, boundaryCurve);
 
@@ -43,22 +42,23 @@ void MillingPathsDesigner::GeneratePathsForLeftFin(MillingMachinePathsBuilder &b
 }
 
 
-std::vector<alg::Vec2> MillingPathsDesigner::GetBoundaryCurveForLeftFin(const MillingCutter &cutter, Entity torsoOffset, Entity leftFinOffset)
-{
+std::vector<alg::Vec2> MillingPathsDesigner::GetBoundaryCurveForRightFin(
+    const MillingCutter &cutter, const Entity torsoOffset, const Entity rightFinOffset
+) {
     const Entity baseOffset = c0PatchesSystem->CreatePlane(
         alg::Vec3(-materialParameters.xLen/2.f, millingSettings.baseThickness + cutter.radius, -materialParameters.zLen/2.f),
         alg::Vec3::UnitY(),
         materialParameters.xLen, materialParameters.zLen
     );
 
-    const Entity leftFinBaseInter = intersectionSystem->FindIntersection(leftFinOffset, baseOffset, 1e-3).value();
-    const Entity leftFinTorsoInter = intersectionSystem->FindIntersection(leftFinOffset, torsoOffset, 1e-3).value();
+    const Entity finBaseInter = intersectionSystem->FindIntersection(rightFinOffset, baseOffset, 1e-3).value();
+    const Entity finTorsoInter = intersectionSystem->FindIntersection(rightFinOffset, torsoOffset, 1e-3).value();
 
-    auto const& leftFinBaseCurve = coordinator.GetComponent<IntersectionCurve>(leftFinBaseInter);
-    auto const& leftFinTorsoCurve = coordinator.GetComponent<IntersectionCurve>(leftFinTorsoInter);
+    auto const& finBaseCurve = coordinator.GetComponent<IntersectionCurve>(finBaseInter);
+    auto const& finTorsoCurve = coordinator.GetComponent<IntersectionCurve>(finTorsoInter);
 
-    const std::vector<alg::Vec2> finBaseCurveNorm = GetPointsVec(leftFinBaseCurve);
-    const std::vector<alg::Vec2> finTorsoCurveNorm = GetPointsVec(leftFinTorsoCurve);
+    const std::vector<alg::Vec2> finBaseCurveNorm = GetPointsVec(finBaseCurve);
+    const std::vector<alg::Vec2> finTorsoCurveNorm = GetPointsVec(finTorsoCurve);
     std::vector<alg::Vec2> boundary;
 
     size_t actBaseIdx = 1;
@@ -75,8 +75,6 @@ std::vector<alg::Vec2> MillingPathsDesigner::GetBoundaryCurveForLeftFin(const Mi
             const auto& prevTorsoPoint = finTorsoCurveNorm[actTorsoIdx-1];
 
             LineSegment2D torsoSeg(actTorsoPoint, prevTorsoPoint);
-            if (torsoSeg.Length() > 1.0f)
-                continue;
 
             alg::Vec2 interPoint;
             if (LineSegment2D::AreIntersecting(baseSeg, torsoSeg, interPoint)) {
@@ -99,6 +97,10 @@ std::vector<alg::Vec2> MillingPathsDesigner::GetBoundaryCurveForLeftFin(const Mi
             const auto& prevTorsoPoint = finTorsoCurveNorm[actTorsoIdx-1];
 
             LineSegment2D torsoSeg(actTorsoPoint, prevTorsoPoint);
+            if (torsoSeg.Length() > 1.0f) {
+                boundary.emplace_back(prevBasePoint);
+                continue;
+            }
 
             alg::Vec2 interPoint;
             if (LineSegment2D::AreIntersecting(baseSeg, torsoSeg, interPoint)) {
@@ -119,10 +121,6 @@ std::vector<alg::Vec2> MillingPathsDesigner::GetBoundaryCurveForLeftFin(const Mi
         const auto& prevTorsoPoint = finTorsoCurveNorm[actTorsoIdx-1];
 
         LineSegment2D torsoSeg(actTorsoPoint, prevTorsoPoint);
-        if (torsoSeg.Length() > 1.0f) {
-            boundary.emplace_back(actTorsoPoint);
-            continue;
-        }
 
         for (actBaseIdx = 1; actBaseIdx < finBaseCurveNorm.size(); ++actBaseIdx) {
             const auto& actBasePoint = finBaseCurveNorm[actBaseIdx];
@@ -142,21 +140,19 @@ std::vector<alg::Vec2> MillingPathsDesigner::GetBoundaryCurveForLeftFin(const Mi
             boundary.emplace_back(actTorsoPoint);
     }
 
-    // InterCurveToFile("finTorsoIntersections.csv", leftFinTorsoCurve);
-    // InterCurveToFile("finBaseIntersections.csv", leftFinBaseCurve);
+    // InterCurveToFile("finTorsoIntersections.csv", finTorsoCurve);
+    // InterCurveToFile("finBaseIntersections.csv", finBaseCurve);
     // InterCurveToFile("boundary.csv", boundary);
     //
     // InterCurveToFile("finTorsoIntersections_normalized.csv", finTorsoCurveNorm);
     // InterCurveToFile("finBaseIntersections_normalized.csv", finBaseCurveNorm);
-    //
-    // std::cout << "Max U: " << equidistanceC2System->MaxU(leftFinOffset) << " Max V: " << equidistanceC2System->MaxV(leftFinOffset) << std::endl;
+
+    // std::cout << "Max U: " << equidistanceC2System->MaxU(rightFinOffset) << " Max V: " << equidistanceC2System->MaxV(rightFinOffset) << std::endl;
 
     Update();
-
-    coordinator.DestroyEntity(leftFinBaseInter);
-    coordinator.DestroyEntity(leftFinTorsoInter);
+    coordinator.DestroyEntity(finBaseInter);
+    coordinator.DestroyEntity(finTorsoInter);
     coordinator.DestroyEntity(baseOffset);
 
     return boundary;
 }
-

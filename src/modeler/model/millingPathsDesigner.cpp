@@ -350,6 +350,7 @@ void MillingPathsDesigner::GenerateMainPhase()
     MillingMachinePathsBuilder builder;
 
     GeneratePathsForLeftFin(builder, cutter);
+    GeneratePathsForRightFin(builder, cutter);
 
     auto paths = builder.GetPaths();
     std::vector<Position> pathsPositions;
