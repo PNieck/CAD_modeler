@@ -90,4 +90,6 @@ private:
     void InterCurveToFileNormalized(const std::string& fileName, const IntersectionCurve& curve, Entity e);
 
     static std::vector<alg::Vec2> ConnectInsidePointToBoundary(const std::vector<alg::Vec2>& insidePoints, const std::vector<alg::Vec2>& boundary);
+
+    Position GlobalPosition(Entity entity, const alg::Vec2& paramPoint, const MillingCutter& cutter) const;
 };

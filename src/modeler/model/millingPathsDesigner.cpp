@@ -215,11 +215,15 @@ void MillingPathsDesigner::GenerateBroadPhase()
 
 void MillingPathsDesigner::GenerateMainPhase()
 {
-    const MillingCutter cutter(0.04, MillingCutter::Type::Flat);
+    const MillingCutter cutter(0.04, MillingCutter::Type::Round);
     MillingMachinePathsBuilder builder;
+
+    builder.AddPosition(millingSettings.initCutterPos);
 
     GeneratePathsForLeftFin(builder, cutter);
     GeneratePathsForRightFin(builder, cutter);
+
+    builder.AddPosition(millingSettings.initCutterPos);
 
     auto paths = builder.GetPaths();
     std::vector<Position> pathsPositions;
@@ -421,6 +425,19 @@ std::vector<alg::Vec2> MillingPathsDesigner::ConnectInsidePointToBoundary(
     }
 
     return result;
+}
+
+
+Position MillingPathsDesigner::GlobalPosition(const Entity entity, const alg::Vec2 &paramPoint, const MillingCutter &cutter) const
+{
+    const auto surfaceSystem = GetSurfaceSystem(coordinator, entity);
+
+    auto pos = surfaceSystem->PointOnSurface(entity, paramPoint.X(), paramPoint.Y());
+
+    if (cutter.type == MillingCutter::Type::Round)
+        pos.vec -= alg::Vec3::UnitY() * cutter.radius;
+
+    return pos;
 }
 
 

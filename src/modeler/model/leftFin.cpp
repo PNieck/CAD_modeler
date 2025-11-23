@@ -27,16 +27,19 @@ void MillingPathsDesigner::GeneratePathsForLeftFin(MillingMachinePathsBuilder &b
 
     const auto combined = ConnectInsidePointToBoundary(points, boundaryCurve);
 
-    builder.AddPosition(millingSettings.initCutterPos);
+    // First position
+    auto firstPos = GlobalPosition(leftFinOffset, combined.front(), cutter);
+    firstPos.SetY(millingSettings.safeHeight);
+    builder.AddPosition(firstPos);
 
-    for (const auto& p: combined) {
-        const float u = p.X();
-        const float v = p.Y();
+    // Rest of positions
+    for (const auto& p: combined)
+        builder.AddPosition(GlobalPosition(leftFinOffset, p, cutter));
 
-        builder.AddPosition(equidistanceC2System->PointOnSurface(leftFinOffset, u, v).vec - alg::Vec3::UnitY() * cutter.radius);
-    }
-
-    builder.AddPosition(millingSettings.initCutterPos);
+    // Last position
+    auto lastPos = builder.GetLastPosition();
+    lastPos.SetY(millingSettings.safeHeight);
+    builder.AddPosition(lastPos);
 
     coordinator.DestroyEntity(torsoOffset);
     coordinator.DestroyEntity(leftFinOffset);

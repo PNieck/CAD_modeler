@@ -17,9 +17,11 @@ inline std::shared_ptr<SurfaceSystem> GetSurfaceSystem(const Coordinator& coordi
     if (result->HasEntity(entity))
         return result;
 
-    result = coordinator.GetSystem<ToriSystem>();
-    if (result->HasEntity(entity))
-        return result;
+    if (coordinator.SystemRegistered<ToriSystem>()) {
+        result = coordinator.GetSystem<ToriSystem>();
+        if (result->HasEntity(entity))
+            return result;
+    }
 
     if (coordinator.SystemRegistered<EquidistanceC2System>()) {
         result = coordinator.GetSystem<EquidistanceC2System>();

@@ -9,4 +9,5 @@ public:
     float broadPhaseAdditionalThickness = 0.02f;
 
     alg::Vec3 initCutterPos = alg::Vec3(0.0f, 0.66f, 0.0f);
+    float safeHeight = 0.55f;
 };
