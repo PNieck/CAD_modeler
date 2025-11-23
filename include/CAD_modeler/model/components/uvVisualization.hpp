@@ -31,6 +31,14 @@ public:
     unsigned int TextureId() const
         { return texture.Id(); }
 
+    [[nodiscard]]
+    int TextureWidth() const
+        { return texture.GetWidth(); }
+
+    [[nodiscard]]
+    int TextureHeight() const
+        { return texture.GetHeight(); }
+
     void UseTexture() const
         { texture.Use(); }
 

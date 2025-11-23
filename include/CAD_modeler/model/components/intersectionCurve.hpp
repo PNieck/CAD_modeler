@@ -76,6 +76,14 @@ public:
         return intersectionPoints.at(idx);
     }
 
+    [[nodiscard]]
+    auto begin() const
+        { return intersectionPoints.begin(); }
+
+    [[nodiscard]]
+    auto end() const
+        { return intersectionPoints.end(); }
+
     bool isOpen;
     std::vector<IntersectionPoint> intersectionPoints;
     HandlerId deletionHandler;

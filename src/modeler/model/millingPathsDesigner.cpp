@@ -4,6 +4,8 @@
 
 #include <CAD_modeler/model/components/registerComponents.hpp>
 #include <CAD_modeler/model/components/drawStd.hpp>
+#include "CAD_modeler/model/components/uvVisualization.hpp"
+#include "CAD_modeler/model/components/wraps.hpp"
 
 #include <CAD_modeler/model/millingPathsDesigner/depthBuffer.hpp>
 #include <CAD_modeler/model/millingPathsDesigner/millingMachinePathsBuilder.hpp>
@@ -15,10 +17,14 @@
 #include <CAD_modeler/model/systems/controlPointsRegistrySystem.hpp>
 #include <CAD_modeler/model/systems/millingMachinePathsSystem.hpp>
 #include <CAD_modeler/model/systems/equidistanceC2SurfaceSystem.hpp>
+#include <CAD_modeler/model/systems/uvVisualizer.hpp>
+#include <CAD_modeler/model/systems/utils/getSurfaceSystem.hpp>
 
 #include <CAD_modeler/utilities/lineSegment2D.hpp>
+#include <CAD_modeler/utilities/circularVecWrap.hpp>
 
 #include <algorithm>
+#include <fstream>
 
 
 MillingPathsDesigner::MillingPathsDesigner(const int viewportWidth, const int viewportHeight):
@@ -341,41 +347,21 @@ void MillingPathsDesigner::GenerateBasePhase()
 void MillingPathsDesigner::GenerateMainPhase()
 {
     const MillingCutter cutter(0.04, MillingCutter::Type::Flat);
+    MillingMachinePathsBuilder builder;
 
-    const Entity torso = nameSystem->EntityFromName("torso");
-    const Entity torsoOffset = equidistanceC2System->AddSurface(torso, -cutter.radius);
+    GeneratePathsForLeftFin(builder, cutter);
 
-    const Entity pletwa_prawa = nameSystem->EntityFromName("pletwa_prawa");
-    const Entity pletwa_prawaOffset = equidistanceC2System->AddSurface(pletwa_prawa, -cutter.radius);
+    auto paths = builder.GetPaths();
+    std::vector<Position> pathsPositions;
+    pathsPositions.reserve(paths.Size());
 
-    const Entity pletwa_lewa = nameSystem->EntityFromName("pletwa_lewa");
-    const Entity pletwa_lewaOffset = equidistanceC2System->AddSurface(pletwa_lewa, -cutter.radius);
+    for (const auto& path: paths) {
+        pathsPositions.push_back(path.destination);
+    }
 
-    // const Entity pletwa_gorna = nameSystem->EntityFromName("pletwa_gorna");
-    // const Entity pletwa_gornaOffset = equidistanceC2System->AddSurface(pletwa_gorna, -cutter.radius);
+    polylineSystem->AddPolyline(pathsPositions);
 
-    const Entity prawe_oko = nameSystem->EntityFromName("prawe_oko");
-    const Entity prawe_okoOffset = equidistanceC2System->AddSurface(prawe_oko, -cutter.radius);
-
-    const Entity lewe_oko = nameSystem->EntityFromName("lewe_oko");
-    const Entity lewe_okoOffset = equidistanceC2System->AddSurface(lewe_oko, -cutter.radius);
-
-    const Entity baseOffset = c0PatchesSystem->CreatePlane(
-        alg::Vec3(-materialParameters.xLen/2.f, millingSettings.baseThickness + cutter.radius, -materialParameters.zLen/2.f),
-        alg::Vec3::UnitY(),
-        materialParameters.xLen, materialParameters.zLen
-    );
-
-    intersectionSystem->FindIntersection(pletwa_prawaOffset, torsoOffset, 1e-3);
-    intersectionSystem->FindIntersection(pletwa_lewaOffset, torsoOffset, 1e-3);
-    //intersectionSystem->FindIntersection(pletwa_gornaOffset, torsoOffset, 1e-3);
-
-    intersectionSystem->FindIntersection(prawe_okoOffset, torsoOffset, 1e-3);
-    intersectionSystem->FindIntersection(lewe_okoOffset, torsoOffset, 1e-3);
-
-    intersectionSystem->FindIntersection(baseOffset, torsoOffset, 1e-3);
-    intersectionSystem->FindIntersection(pletwa_prawaOffset, baseOffset, 1e-3);
-    intersectionSystem->FindIntersection(pletwa_lewaOffset, baseOffset, 1e-3);
+    MillingMachinePathsSystem::CreateGCodeFile(paths, "paths/3.k08");
 }
 
 
@@ -752,4 +738,83 @@ Position MillingPathsDesigner::BoundaryPoint(const IntersectionPoint &p, const C
     result.Y() = millingSettings.baseThickness;
 
     return { result };
+}
+
+
+std::vector<alg::Vec2> MillingPathsDesigner::GetPointsVec(const IntersectionCurve &curve)
+{
+    std::vector<alg::Vec2> result;
+    result.reserve(curve.Size());
+
+    for (const auto& p: curve) {
+        float u = p.U1();
+        float v = p.V1();
+
+        result.emplace_back(u, v);
+    }
+
+    return result;
+}
+
+
+void MillingPathsDesigner::InterCurveToFileNormalized(const std::string& fileName, const IntersectionCurve& curve, Entity e)
+{
+    std::ofstream file(fileName);
+
+    for (const auto& p: curve) {
+        float u = p.U1();
+        float v = p.V1();
+
+        NormalizeUV(e, u, v);
+
+        file << u << ", " << v << std::endl;
+    }
+}
+
+
+std::vector<alg::Vec2> MillingPathsDesigner::ConnectInsidePointToBoundary(
+    const std::vector<alg::Vec2> &insidePoints, const std::vector<alg::Vec2> &boundary
+) {
+    auto const& lastPoint = insidePoints.back();
+
+    const CircularVecWrap circularBoundary(boundary);
+
+    int minDistBoundIdx = 0;
+    float minDist = std::numeric_limits<float>::infinity();
+
+    for (int i = 0; i < boundary.size(); ++i) {
+        float dist = alg::Distance(circularBoundary[i], lastPoint);
+
+        if (dist < minDist) {
+            minDistBoundIdx = i;
+            minDist = dist;
+        }
+    }
+
+    std::vector<alg::Vec2> result;
+    result.reserve(insidePoints.size() + boundary.size());
+
+    result.insert(result.end(), insidePoints.begin(), insidePoints.end());
+
+    for (int i = 0; i < boundary.size(); ++i) {
+        const int idx = minDistBoundIdx + i;
+        result.emplace_back(circularBoundary[idx]);
+    }
+
+    return result;
+}
+
+
+void MillingPathsDesigner::NormalizeUV(const Entity entity, float &u, float &v)
+{
+    const auto sys = GetSurfaceSystem(coordinator, entity);
+
+    const float maxU = sys->MaxU(entity);
+    const float maxV = sys->MaxV(entity);
+
+    if ((u > maxU || u < 0.0f) && coordinator.HasComponent<WrapU>(entity))
+        u -= std::floor(u / maxU) * maxU;
+
+    if ((v > maxV || v < 0.f) && coordinator.HasComponent<WrapV>(entity))
+        v -= std::floor(v / maxV) * maxV;
 }

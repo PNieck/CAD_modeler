@@ -19,8 +19,11 @@
 #include "millingPathsDesigner/materialParameters.hpp"
 #include "millingPathsDesigner/millingSettings.hpp"
 #include "millingPathsDesigner/broadPhaseHeightMap.hpp"
+#include "millingPathsDesigner/millingMachinePathsBuilder.hpp"
 
 #include "../utilities/circularVector.hpp"
+
+#include <algebra/vec2.hpp>
 
 
 class MillingPathsDesigner: public Model {
@@ -75,4 +78,14 @@ private:
     CircularVector<Position> BoundaryPoints(Entity entity, float dist);
 
     Position BoundaryPoint(const IntersectionPoint& p, const C2Patches& patches, float dist) const;
+
+    void GeneratePathsForLeftFin(MillingMachinePathsBuilder& builder, const MillingCutter& cutter);
+
+    std::vector<alg::Vec2> GetBoundaryCurveForLeftFin(const MillingCutter& cutter, Entity torsoOffset, Entity leftFinOffset);
+
+    static std::vector<alg::Vec2> GetPointsVec(const IntersectionCurve& curve);
+    void NormalizeUV(Entity entity, float& u, float& v);
+    void InterCurveToFileNormalized(const std::string& fileName, const IntersectionCurve& curve, Entity e);
+
+    static std::vector<alg::Vec2> ConnectInsidePointToBoundary(const std::vector<alg::Vec2>& insidePoints, const std::vector<alg::Vec2>& boundary);
 };

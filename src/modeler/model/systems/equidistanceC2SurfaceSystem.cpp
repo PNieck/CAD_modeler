@@ -52,7 +52,7 @@ Position EquidistanceC2System::PointOnSurface(const Entity e, const float u, con
 }
 
 
-alg::Vec3 EquidistanceC2System::PartialDerivativeU(Entity e, float u, float v) const
+alg::Vec3 EquidistanceC2System::PartialDerivativeU(const Entity e, const float u, const float v) const
 {
     const auto [baseSurface, distance] = coordinator->GetComponent<EquidistanceSurfaceParameters>(e);
     auto const& c2Patches = coordinator->GetComponent<C2Patches>(baseSurface);
