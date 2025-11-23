@@ -86,7 +86,7 @@ private:
     std::vector<alg::Vec2> GetBoundaryCurveForRightFin(const MillingCutter& cutter, Entity torsoOffset, Entity rightFinOffset);
 
     static std::vector<alg::Vec2> GetPointsVec(const IntersectionCurve& curve);
-    void NormalizeUV(Entity entity, float& u, float& v);
+    void NormalizeUV(Entity entity, float& u, float& v) const;
     void InterCurveToFileNormalized(const std::string& fileName, const IntersectionCurve& curve, Entity e);
 
     static std::vector<alg::Vec2> ConnectInsidePointToBoundary(const std::vector<alg::Vec2>& insidePoints, const std::vector<alg::Vec2>& boundary);
