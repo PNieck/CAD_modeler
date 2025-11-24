@@ -22,4 +22,8 @@ public:
     virtual float MaxU(Entity e) const = 0;
 
     virtual float MaxV(Entity e) const = 0;
+
+    virtual alg::Vec3 PartialDerivativeUUApprox(Entity e, float u, float v) const;
+    virtual alg::Vec3 PartialDerivativeVVApprox(Entity e, float u, float v) const;
+    virtual alg::Vec3 PartialDerivativeUVApprox(Entity e, float u, float v) const;
 };

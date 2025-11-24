@@ -681,7 +681,7 @@ alg::Vec3 C2PatchesSystem::PartialDerivativeUV(const C2Patches &patches, float u
 
 alg::Vec3 C2PatchesSystem::PartialDerivativeUUApprox(const C2Patches &patches, const float u, const float v) const
 {
-    constexpr float eps = 1e-7f;
+    constexpr float eps = 1e-6f;
 
     if (u + eps > MaxU(patches)) {
         const alg::Vec3 v1 = PartialDerivativeU(patches, u, v);
@@ -706,7 +706,7 @@ alg::Vec3 C2PatchesSystem::PartialDerivativeUUApprox(const C2Patches &patches, c
 
 alg::Vec3 C2PatchesSystem::PartialDerivativeVVApprox(const C2Patches &patches, const float u, const float v) const
 {
-    constexpr float eps = 1e-7f;
+    constexpr float eps = 1e-6f;
 
     if (v + eps > MaxV(patches)) {
         const alg::Vec3 v1 = PartialDerivativeV(patches, u, v);
@@ -731,7 +731,7 @@ alg::Vec3 C2PatchesSystem::PartialDerivativeVVApprox(const C2Patches &patches, c
 
 alg::Vec3 C2PatchesSystem::PartialDerivativeUVApprox(const C2Patches &patches, const float u, const float v) const
 {
-    constexpr float eps = 1e-7f;
+    constexpr float eps = 1e-6f;
 
     if (v + eps > MaxV(patches)) {
         const alg::Vec3 v1 = PartialDerivativeU(patches, u, v);

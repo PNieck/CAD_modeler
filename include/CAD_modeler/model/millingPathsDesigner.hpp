@@ -12,6 +12,7 @@
 #include "systems/intersectionsSystem.hpp"
 #include "systems/interpolationCurvesRenderingSystem.hpp"
 #include "systems/equidistanceC2SurfaceSystem.hpp"
+#include "systems/equidistanceC0SurfaceSystem.hpp"
 #include "systems/polylineSystem.hpp"
 
 #include "components/millingCutter.hpp"
@@ -56,7 +57,8 @@ private:
     std::shared_ptr<C2PatchesSystem> c2PatchesSystem;
     std::shared_ptr<C2PatchesRenderSystem> c2PatchesRenderSystem;
 
-    std::shared_ptr<EquidistanceC2System> equidistanceC2System;
+    std::shared_ptr<EquidistanceC2SurfaceSystem> equidistanceC2System;
+    std::shared_ptr<EquidistanceC0SurfaceSystem> equidistanceC0System;
 
     std::shared_ptr<NameSystem> nameSystem;
 
@@ -81,9 +83,11 @@ private:
 
     void GeneratePathsForLeftFin(MillingMachinePathsBuilder& builder, const MillingCutter& cutter);
     void GeneratePathsForRightFin(MillingMachinePathsBuilder& builder, const MillingCutter& cutter);
+    void GeneratePathsForTorso(MillingMachinePathsBuilder& builder, const MillingCutter& cutter);
 
     std::vector<alg::Vec2> GetBoundaryCurveForLeftFin(const MillingCutter& cutter, Entity torsoOffset, Entity leftFinOffset);
     std::vector<alg::Vec2> GetBoundaryCurveForRightFin(const MillingCutter& cutter, Entity torsoOffset, Entity rightFinOffset);
+    std::vector<alg::Vec2> GetBoundaryCurveForTorso(const MillingCutter& cutter, std::unordered_map<std::string, Entity> offsetSurfaces);
 
     static std::vector<alg::Vec2> GetPointsVec(const IntersectionCurve& curve);
     void NormalizeUV(Entity entity, float& u, float& v) const;

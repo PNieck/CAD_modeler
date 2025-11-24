@@ -43,7 +43,8 @@ MillingPathsDesigner::MillingPathsDesigner(const int viewportWidth, const int vi
     C2PatchesTrianglesRenderSystem::RegisterSystem(coordinator);
     NameSystem::RegisterSystem(coordinator);
     SelectionSystem::RegisterSystem(coordinator);
-    EquidistanceC2System::RegisterSystem(coordinator);
+    EquidistanceC2SurfaceSystem::RegisterSystem(coordinator);
+    EquidistanceC0SurfaceSystem::RegisterSystem(coordinator);
     IntersectionSystem::RegisterSystem(coordinator);
     InterpolationCurvesRenderingSystem::RegisterSystem(coordinator);
     PolylineSystem::RegisterSystem(coordinator);
@@ -54,10 +55,11 @@ MillingPathsDesigner::MillingPathsDesigner(const int viewportWidth, const int vi
     c0PatchesRenderSystem = coordinator.GetSystem<C0PatchesRenderSystem>();
     c2PatchesSystem = coordinator.GetSystem<C2PatchesSystem>();
     c2PatchesRenderSystem = coordinator.GetSystem<C2PatchesRenderSystem>();
-    equidistanceC2System = coordinator.GetSystem<EquidistanceC2System>();
+    equidistanceC2System = coordinator.GetSystem<EquidistanceC2SurfaceSystem>();
+    equidistanceC0System = coordinator.GetSystem<EquidistanceC0SurfaceSystem>();
     nameSystem = coordinator.GetSystem<NameSystem>();
     const auto selectionSys = coordinator.GetSystem<SelectionSystem>();
-    const auto equidistanceSurfaceSys = coordinator.GetSystem<EquidistanceC2System>();
+    const auto equidistanceSurfaceSys = coordinator.GetSystem<EquidistanceC2SurfaceSystem>();
     intersectionSystem = coordinator.GetSystem<IntersectionSystem>();
     interpolationCurvesRendering = coordinator.GetSystem<InterpolationCurvesRenderingSystem>();
     polylineSystem = coordinator.GetSystem<PolylineSystem>();
@@ -66,6 +68,7 @@ MillingPathsDesigner::MillingPathsDesigner(const int viewportWidth, const int vi
     c0PatchesSystem->Init();
     c2PatchesSystem->Init();
     equidistanceC2System->Init();
+    equidistanceC0System->Init();
     selectionSys->Init();
     equidistanceSurfaceSys->Init();
 
@@ -222,6 +225,7 @@ void MillingPathsDesigner::GenerateMainPhase()
 
     GeneratePathsForLeftFin(builder, cutter);
     GeneratePathsForRightFin(builder, cutter);
+    GeneratePathsForTorso(builder, cutter);
 
     builder.AddPosition(millingSettings.initCutterPos);
 

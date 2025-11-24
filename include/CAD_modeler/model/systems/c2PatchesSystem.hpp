@@ -77,15 +77,15 @@ public:
     alg::Vec3 PartialDerivativeUV(const C2Patches& patches, float u, float v) const;
 
     alg::Vec3 PartialDerivativeUUApprox(const C2Patches& patches, float u, float v) const;
-    alg::Vec3 PartialDerivativeUUApprox(const Entity entity, const float u, const float v) const
+    alg::Vec3 PartialDerivativeUUApprox(const Entity entity, const float u, const float v) const override
         { return PartialDerivativeUUApprox(coordinator->GetComponent<C2Patches>(entity), u, v); }
 
     alg::Vec3 PartialDerivativeVVApprox(const C2Patches& patches, float u, float v) const;
-    alg::Vec3 PartialDerivativeVVApprox(const Entity entity, const float u, const float v) const
+    alg::Vec3 PartialDerivativeVVApprox(const Entity entity, const float u, const float v) const override
         { return PartialDerivativeVVApprox(coordinator->GetComponent<C2Patches>(entity), u, v); }
 
     alg::Vec3 PartialDerivativeUVApprox(const C2Patches& patches, float u, float v) const;
-    alg::Vec3 PartialDerivativeUVApprox(const Entity entity, const float u, const float v) const
+    alg::Vec3 PartialDerivativeUVApprox(const Entity entity, const float u, const float v) const override
         { return PartialDerivativeUVApprox(coordinator->GetComponent<C2Patches>(entity), u, v); }
 
     static float MaxU(const C2Patches& patches)

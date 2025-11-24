@@ -11,7 +11,8 @@
 #include <CAD_modeler/model/systems/intersectionSystem/c2Surface.hpp>
 #include <CAD_modeler/model/systems/intersectionSystem/nextPointFinder.hpp>
 #include <CAD_modeler/model/systems/intersectionSystem/domainChecks.hpp>
-#include <CAD_modeler/model/systems/intersectionSystem/equidistanceSurface.hpp>
+#include <CAD_modeler/model/systems/intersectionSystem/equidistanceC2Surface.hpp>
+#include <CAD_modeler/model/systems/intersectionSystem/equidistanceC0Surface.hpp>
 
 #include <ecs/coordinator.hpp>
 
@@ -51,8 +52,12 @@ bool IntersectionSystem::CanBeIntersected(const Entity entity) const
         if (coordinator->GetSystem<ToriSystem>()->GetEntities().contains(entity))
             return true;
 
-    if (coordinator->SystemRegistered<EquidistanceC2System>())
-        if (coordinator->GetSystem<EquidistanceC2System>()->GetEntities().contains(entity))
+    if (coordinator->SystemRegistered<EquidistanceC2SurfaceSystem>())
+        if (coordinator->GetSystem<EquidistanceC2SurfaceSystem>()->GetEntities().contains(entity))
+            return true;
+
+    if (coordinator->SystemRegistered<EquidistanceC0SurfaceSystem>())
+        if (coordinator->GetSystem<EquidistanceC0SurfaceSystem>()->GetEntities().contains(entity))
             return true;
 
     return false;
@@ -195,9 +200,13 @@ std::unique_ptr<Surface> IntersectionSystem::GetSurface(const Entity entity) con
     if (coordinator->GetSystem<C2PatchesSystem>()->GetEntities().contains(entity))
         return std::make_unique<C2Surface>(*coordinator, entity);
 
-    if (coordinator->SystemRegistered<EquidistanceC2System>())
-        if (coordinator->GetSystem<EquidistanceC2System>()->GetEntities().contains(entity))
-            return std::make_unique<EquidistanceSystem>(*coordinator, entity);
+    if (coordinator->SystemRegistered<EquidistanceC2SurfaceSystem>())
+        if (coordinator->GetSystem<EquidistanceC2SurfaceSystem>()->GetEntities().contains(entity))
+            return std::make_unique<EquidistanceC2Surface>(*coordinator, entity);
+
+    if (coordinator->SystemRegistered<EquidistanceC0SurfaceSystem>())
+        if (coordinator->GetSystem<EquidistanceC0SurfaceSystem>()->GetEntities().contains(entity))
+            return std::make_unique<EquidistanceC0Surface>(*coordinator, entity);
 
     throw std::runtime_error("Entity cannot be used to calculate intersection curve");
 }
@@ -553,7 +562,7 @@ std::tuple<float, float> IntersectionSystem::NearestPointApproximation(Surface &
     const float deltaV = (maxV - minV) / static_cast<float>(sampleCntInOneDim + 1);
 
     float minDist = std::numeric_limits<float>::infinity();
-    float resultU, resultV;
+    float resultU = 0.f, resultV = 0.f;
 
     for (int i = 1; i <= sampleCntInOneDim; ++i) {
         const float u = deltaU * static_cast<float>(i) + minU;
@@ -593,7 +602,7 @@ std::tuple<float, float> IntersectionSystem::SecondNearestPointApproximation(
     const float deltaV = (maxV - minV) / static_cast<float>(sampleCntInOneDim + 1);
 
     float minDist = std::numeric_limits<float>::infinity();
-    float resultU, resultV;
+    float resultU = 0.f, resultV = 0.f;
 
     for (int i = 1; i <= sampleCntInOneDim; ++i) {
         const float u = deltaU * static_cast<float>(i) + minU;
