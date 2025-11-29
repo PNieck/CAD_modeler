@@ -5,14 +5,16 @@
 #include <tuple>
 
 
-class BroadPhaseHeightMap {
+class ModelHeightMap {
 public:
-    BroadPhaseHeightMap(const size_t xResolution, const size_t zResolution, const float xSize, const float zSize, const float defHeight = 0.f):
+    ModelHeightMap(const size_t xResolution, const size_t zResolution, const float xSize, const float zSize, const float defHeight = 0.f):
         defaultHeight(defHeight), xSize(xSize), zSize(zSize), data(xResolution ,zResolution){}
 
+    [[nodiscard]]
     size_t XResolution() const
         { return data.Rows(); }
 
+    [[nodiscard]]
     size_t ZResolution() const
         { return data.Cols(); }
 

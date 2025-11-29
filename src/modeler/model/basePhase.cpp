@@ -12,7 +12,7 @@ void MillingPathsDesigner::GenerateBasePhase()
     const MillingCutter cutter(0.05, MillingCutter::Type::Flat);
     MillingMachinePathsBuilder builder;
 
-    const auto step1Boundary = FindBoundary(-cutter.radius * 1.5f);
+    const auto step1Boundary = FindModelBoundary(-cutter.radius * 1.5f);
 
     const float cutterMaxZPos = materialParameters.zLen / 2.f + cutter.radius * 1.5f;
     const float cutterMinZPos = -cutterMaxZPos;
@@ -114,7 +114,7 @@ void MillingPathsDesigner::GenerateBasePhase()
         builder.AddPosition(actX, millingSettings.baseThickness, cutterMinZPos);
     }
 
-    const auto step2Boundary = FindBoundary(-cutter.radius);
+    const auto step2Boundary = FindModelBoundary(-cutter.radius);
 
     for (const auto& point: step2Boundary)
         builder.AddPosition(point);
@@ -136,15 +136,15 @@ void MillingPathsDesigner::GenerateBasePhase()
 }
 
 
-std::vector<Position> MillingPathsDesigner::FindBoundary(float dist)
+std::vector<Position> MillingPathsDesigner::FindModelBoundary(float dist)
 {
     const Entity torso = nameSystem->EntityFromName("torso");
     const Entity rightFin = nameSystem->EntityFromName("right fin");
     const Entity leftFin = nameSystem->EntityFromName("left fin");
 
-    const auto torsoPoints = BoundaryPoints(torso, dist);
-    const auto rightFinPoints = BoundaryPoints(rightFin, dist);
-    const auto leftFinPoints = BoundaryPoints(leftFin, dist);
+    const auto torsoPoints = ModelBoundaryPoints(torso, dist);
+    const auto rightFinPoints = ModelBoundaryPoints(rightFin, dist);
+    const auto leftFinPoints = ModelBoundaryPoints(leftFin, dist);
 
     size_t minXTorsoIdx = 0;
     float minXTorso = std::numeric_limits<float>::infinity();
@@ -354,7 +354,7 @@ std::vector<Position> MillingPathsDesigner::FindBoundary(float dist)
 }
 
 
-CircularVector<Position> MillingPathsDesigner::BoundaryPoints(const Entity entity, const float dist)
+CircularVector<Position> MillingPathsDesigner::ModelBoundaryPoints(const Entity entity, const float dist)
 {
     const auto intersectionEntity = intersectionSystem->FindIntersection(entity, base, 1e-3);
     if (!intersectionEntity.has_value())
@@ -366,7 +366,7 @@ CircularVector<Position> MillingPathsDesigner::BoundaryPoints(const Entity entit
     std::vector<Position> result(curve.Size());
 
     for (size_t i=0; i < curve.Size(); ++i)
-        result[i] = BoundaryPoint(curve[i], c2Patches, dist);
+        result[i] = ModelBoundaryPoint(curve[i], c2Patches, dist);
 
     coordinator.DestroyEntity(intersectionEntity.value());
 
@@ -374,7 +374,7 @@ CircularVector<Position> MillingPathsDesigner::BoundaryPoints(const Entity entit
 }
 
 
-Position MillingPathsDesigner::BoundaryPoint(const IntersectionPoint &p, const C2Patches& patches, const float dist) const
+Position MillingPathsDesigner::ModelBoundaryPoint(const IntersectionPoint &p, const C2Patches& patches, const float dist) const
 {
     const float u = p.U1();
     const float v = p.V1();

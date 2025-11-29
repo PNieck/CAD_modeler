@@ -261,10 +261,9 @@ void MillingPathsDesigner::RenderSystemsObjects(
 #include <CAD_modeler/utilities/toPGM.hpp>
 
 
-BroadPhaseHeightMap MillingPathsDesigner::GenerateBroadPhaseHeightMap()
+ModelHeightMap MillingPathsDesigner::GenerateHeightMap(const size_t xResolution, const size_t zResolution)
 {
-    constexpr int depthBufferResolution = 300;
-    const DepthBuffer depthBuffer(depthBufferResolution, depthBufferResolution);
+    const DepthBuffer depthBuffer(xResolution, zResolution);
 
     auto const& c0Renderer = coordinator.GetSystem<C0PatchesTrianglesRenderSystem>();
     auto const& c2Renderer = coordinator.GetSystem<C2PatchesTrianglesRenderSystem>();
@@ -284,7 +283,7 @@ BroadPhaseHeightMap MillingPathsDesigner::GenerateBroadPhaseHeightMap()
     depthBuffer.Use();
 
     auto [oldViewportWidth, oldViewportHeight] = GetViewportSize();
-    ChangeViewportSize(depthBufferResolution, depthBufferResolution);
+    ChangeViewportSize(xResolution, zResolution);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -309,25 +308,19 @@ BroadPhaseHeightMap MillingPathsDesigner::GenerateBroadPhaseHeightMap()
     c0Renderer->Render(camMtx);
     c2Renderer->Render(camMtx);
 
-    BroadPhaseHeightMap heightMap(
-        depthBufferResolution,
-        depthBufferResolution,
+    ModelHeightMap heightMap(
+        xResolution,
+        zResolution,
         materialParameters.xLen,
         materialParameters.zLen
     );
-    glReadPixels(0, 0, depthBufferResolution, depthBufferResolution, GL_DEPTH_COMPONENT, GL_FLOAT, heightMap.Data());
+    glReadPixels(0, 0, xResolution, zResolution, GL_DEPTH_COMPONENT, GL_FLOAT, heightMap.Data());
 
     float near = 0.f;
     float far = materialParameters.yLen;
     std::ranges::for_each(heightMap, [near, far](float& d) {
         d = far - ((2.0f * d - 1.0f) * (far - near) + (far + near)) * 0.5f;
     });
-
-    std::ranges::for_each(heightMap, [this](float& d) {
-        d += this->millingSettings.broadPhaseAdditionalThickness;
-    });
-
-    ToPGM(heightMap.ToFlatVec2D(), "depth.pgm");
 
     DepthBuffer::UseDefault();
     ChangeViewportSize(oldViewportWidth, oldViewportHeight);
@@ -340,8 +333,21 @@ BroadPhaseHeightMap MillingPathsDesigner::GenerateBroadPhaseHeightMap()
 }
 
 
+ModelHeightMap MillingPathsDesigner::GenerateBroadPhaseHeightMap()
+{
+    constexpr int mapResolution = 300;
+    auto heightMap = GenerateHeightMap(mapResolution, mapResolution);
+
+    std::ranges::for_each(heightMap, [this](float& d) {
+        d += this->millingSettings.broadPhaseAdditionalThickness;
+    });
+
+    return heightMap;
+}
+
+
 float MillingPathsDesigner::MinYCutterPos(
-    const BroadPhaseHeightMap &heightMap, const MillingCutter &cutter, const float cutterX, const float cutterZ
+    const ModelHeightMap &heightMap, const MillingCutter &cutter, const float cutterX, const float cutterZ
 ) {
     const int cutterXLenInPixels = static_cast<int>(std::ceil(cutter.radius / heightMap.PixelXLen() * 2.f));
     const int cutterZLenInPixels = static_cast<int>(std::ceil(cutter.radius / heightMap.PixelZLen() * 2.f));
@@ -439,7 +445,7 @@ Position MillingPathsDesigner::GlobalPosition(const Entity entity, const alg::Ve
     auto pos = surfaceSystem->PointOnSurface(entity, paramPoint.X(), paramPoint.Y());
 
     if (cutter.type == MillingCutter::Type::Round)
-        pos.vec -= alg::Vec3::UnitY() * cutter.radius;
+        pos.vec.Y() -= cutter.radius;
 
     return pos;
 }

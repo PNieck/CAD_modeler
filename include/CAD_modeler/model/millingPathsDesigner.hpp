@@ -19,7 +19,7 @@
 
 #include "millingPathsDesigner/materialParameters.hpp"
 #include "millingPathsDesigner/millingSettings.hpp"
-#include "millingPathsDesigner/broadPhaseHeightMap.hpp"
+#include "millingPathsDesigner/modelHeightMap.hpp"
 #include "millingPathsDesigner/millingMachinePathsBuilder.hpp"
 
 #include "../utilities/circularVector.hpp"
@@ -71,15 +71,14 @@ private:
     MaterialParameters materialParameters;
     MillingSettings millingSettings;
 
-    BroadPhaseHeightMap GenerateBroadPhaseHeightMap();
+    ModelHeightMap GenerateHeightMap(size_t xResolution, size_t zResolution);
+    ModelHeightMap GenerateBroadPhaseHeightMap();
 
-    static float MinYCutterPos(const BroadPhaseHeightMap& heightMap, const MillingCutter& cutter, float cutterX, float cutterZ);
+    static float MinYCutterPos(const ModelHeightMap& heightMap, const MillingCutter& cutter, float cutterX, float cutterZ);
 
-    std::vector<Position> FindBoundary(float dist);
-
-    CircularVector<Position> BoundaryPoints(Entity entity, float dist);
-
-    Position BoundaryPoint(const IntersectionPoint& p, const C2Patches& patches, float dist) const;
+    std::vector<Position> FindModelBoundary(float dist);
+    CircularVector<Position> ModelBoundaryPoints(Entity entity, float dist);
+    Position ModelBoundaryPoint(const IntersectionPoint& p, const C2Patches& patches, float dist) const;
 
     void GeneratePathsForLeftFin(MillingMachinePathsBuilder& builder, const MillingCutter& cutter);
     void GeneratePathsForRightFin(MillingMachinePathsBuilder& builder, const MillingCutter& cutter);
@@ -87,7 +86,10 @@ private:
 
     std::vector<alg::Vec2> GetBoundaryCurveForLeftFin(const MillingCutter& cutter, Entity torsoOffset, Entity leftFinOffset);
     std::vector<alg::Vec2> GetBoundaryCurveForRightFin(const MillingCutter& cutter, Entity torsoOffset, Entity rightFinOffset);
-    std::vector<alg::Vec2> GetBoundaryCurveForTorso(const MillingCutter& cutter, std::unordered_map<std::string, Entity> offsetSurfaces);
+    std::vector<alg::Vec2> GetBoundaryCurveForTorso(const MillingCutter& cutter, const std::unordered_map<std::string, Entity>& offsetSurfaces);
+    std::vector<alg::Vec2> GetBoundaryCurveForTorsoUpperFinIntersection(const MillingCutter& cutter, const std::unordered_map<std::string, Entity>& offsetSurfaces);
+
+    std::vector<std::vector<alg::Vec2>> GetTorsoHoles(const MillingCutter& cutter, const std::unordered_map<std::string, Entity>& offsetSurfaces);
 
     static std::vector<alg::Vec2> GetPointsVec(const IntersectionCurve& curve);
     void NormalizeUV(Entity entity, float& u, float& v) const;
