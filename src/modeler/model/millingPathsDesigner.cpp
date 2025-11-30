@@ -410,6 +410,19 @@ std::vector<alg::Vec2> MillingPathsDesigner::ConnectInsidePointToBoundary(
 ) {
     auto const& lastPoint = insidePoints.back();
 
+    auto const boundaryPoints = BoundaryPointsFromInternalPoint(lastPoint, boundary);
+    std::vector<alg::Vec2> result;
+    result.reserve(insidePoints.size() + boundaryPoints.size());
+
+    result.insert(result.end(), insidePoints.begin(), insidePoints.end());
+    result.insert(result.end(), boundaryPoints.begin(), boundaryPoints.end());
+
+    return result;
+}
+
+
+std::vector<alg::Vec2> MillingPathsDesigner::BoundaryPointsFromInternalPoint(const alg::Vec2 &lastPoint, const std::vector<alg::Vec2> &boundary)
+{
     const CircularVecWrap circularBoundary(boundary);
 
     int minDistBoundIdx = 0;
@@ -425,9 +438,7 @@ std::vector<alg::Vec2> MillingPathsDesigner::ConnectInsidePointToBoundary(
     }
 
     std::vector<alg::Vec2> result;
-    result.reserve(insidePoints.size() + boundary.size());
-
-    result.insert(result.end(), insidePoints.begin(), insidePoints.end());
+    result.reserve(boundary.size());
 
     for (int i = 0; i < boundary.size(); ++i) {
         const int idx = minDistBoundIdx + i;
@@ -448,6 +459,33 @@ Position MillingPathsDesigner::GlobalPosition(const Entity entity, const alg::Ve
         pos.vec.Y() -= cutter.radius;
 
     return pos;
+}
+
+
+void MillingPathsDesigner::AddPointsToBuilder(
+    const std::vector<alg::Vec2> &points, MillingMachinePathsBuilder &builder, const MillingCutter& cutter, Entity entity, size_t start, size_t end) const
+{
+    if (end < start) {
+        for (size_t i = start; i >= end; i--) {
+            const alg::Vec2 point = points[i];
+            builder.AddPosition(GlobalPosition(entity, point, cutter));
+        }
+    }
+    else {
+        for (size_t i = start; i <= end; i++) {
+            const alg::Vec2 point = points[i];
+            builder.AddPosition(GlobalPosition(entity, point, cutter));
+        }
+    }
+
+}
+
+void MillingPathsDesigner::AddPointsToBuilder(const std::vector<alg::Vec2> &points, MillingMachinePathsBuilder &builder,
+    const MillingCutter &cutter, Entity entity, const std::vector<size_t>& indices) const {
+    for (auto const& idx : indices) {
+        const alg::Vec2 point = points[idx];
+        builder.AddPosition(GlobalPosition(entity, point, cutter));
+    }
 }
 
 

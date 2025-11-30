@@ -96,6 +96,10 @@ private:
     void InterCurveToFileNormalized(const std::string& fileName, const IntersectionCurve& curve, Entity e);
 
     static std::vector<alg::Vec2> ConnectInsidePointToBoundary(const std::vector<alg::Vec2>& insidePoints, const std::vector<alg::Vec2>& boundary);
+    static std::vector<alg::Vec2> BoundaryPointsFromInternalPoint(const alg::Vec2& lastPoint, const std::vector<alg::Vec2>& boundary);
 
     Position GlobalPosition(Entity entity, const alg::Vec2& paramPoint, const MillingCutter& cutter) const;
+
+    void AddPointsToBuilder(const std::vector<alg::Vec2>& points, MillingMachinePathsBuilder& builder, const MillingCutter& cutter, Entity entity, size_t start, size_t end) const;
+    void AddPointsToBuilder(const std::vector<alg::Vec2>& points, MillingMachinePathsBuilder& builder, const MillingCutter& cutter, Entity entity, const std::vector<size_t>& indices) const;
 };

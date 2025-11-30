@@ -27,6 +27,10 @@ public:
     MillingMachinePath GetPaths()
         { return { std::move(path) }; }
 
+    [[nodiscard]]
+    size_t GetCommandsCnt() const
+        { return path.commands.size(); }
+
 private:
     int nextID = 1;
     MillingMachinePath path;
