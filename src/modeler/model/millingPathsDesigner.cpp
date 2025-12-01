@@ -267,6 +267,8 @@ void MillingPathsDesigner::RenderSystemsObjects(
 
 ModelHeightMap MillingPathsDesigner::GenerateHeightMap(const size_t xResolution, const size_t zResolution)
 {
+    auto [oldViewportWidth, oldViewportHeight] = GetViewportSize();
+
     const DepthBuffer depthBuffer(xResolution, zResolution);
 
     auto const& c0Renderer = coordinator.GetSystem<C0PatchesTrianglesRenderSystem>();
@@ -285,15 +287,11 @@ ModelHeightMap MillingPathsDesigner::GenerateHeightMap(const size_t xResolution,
         c2Renderer->AddSurface(entity);
 
     depthBuffer.Use();
+    glViewport(0, 0, xResolution, zResolution);
 
-    auto [oldViewportWidth, oldViewportHeight] = GetViewportSize();
-    ChangeViewportSize(xResolution, zResolution);
+    glClear(GL_DEPTH_BUFFER_BIT);
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    // glDrawBuffer(GL_NONE);
-    // glReadBuffer(GL_NONE);
-    glDepthMask(GL_TRUE);
+    glEnable(GL_DEPTH_TEST);
 
     const alg::Vec3 camPos(0.f, materialParameters.yLen, 0.f);
 
@@ -327,11 +325,11 @@ ModelHeightMap MillingPathsDesigner::GenerateHeightMap(const size_t xResolution,
     });
 
     DepthBuffer::UseDefault();
-    ChangeViewportSize(oldViewportWidth, oldViewportHeight);
 
-    // glDrawBuffer(GL_BACK);
-    // glReadBuffer(GL_BACK);
-    glDepthMask(GL_FALSE);
+    glViewport(0, 0, oldViewportWidth, oldViewportHeight);
+
+
+    // ToPGM(heightMap.ToFlatVec2D(), "heightMap.pgm");
 
     return heightMap;
 }

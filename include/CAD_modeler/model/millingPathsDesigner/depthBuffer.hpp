@@ -20,6 +20,5 @@ public:
     DepthBuffer& operator=(DepthBuffer&) = delete;
 private:
     unsigned int fbo = 0;
-    //unsigned int colorTexture = 0;
-    unsigned int depthRenderbuffer = 0;
+    unsigned int depthBufferTexture = 0;
 };
