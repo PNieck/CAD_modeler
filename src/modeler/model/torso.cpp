@@ -6,15 +6,10 @@
 #include "CAD_modeler/utilities/toFile.hpp"
 #include "CAD_modeler/utilities/circularVecWrap.hpp"
 #include "CAD_modeler/utilities/lineSegment2D.hpp"
-#include "CAD_modeler/utilities/bitSet2D.hpp"
 
 #include "CAD_modeler/model/millingPathsDesigner/curveWithAABB.hpp"
 
 #include <iostream>
-
-
-static float rightFinTorsoInterMinV = std::numeric_limits<float>::infinity();
-static float leftFinTorsoInterMaxV = -std::numeric_limits<float>::infinity();
 
 
 void MillingPathsDesigner::GeneratePathsForTorso(MillingMachinePathsBuilder &builder, const MillingCutter &cutter)
@@ -378,17 +373,6 @@ std::vector<alg::Vec2> MillingPathsDesigner::GetBoundaryCurveForTorso(const Mill
             maxUBase = torsoBaseCurveNorm[i].X();
             maxUBaseIdx = i;
         }
-    }
-
-    // Fill global variables
-    for (const auto& point : torsoRightFinCurveNorm) {
-        if (point.Y() < rightFinTorsoInterMinV)
-            rightFinTorsoInterMinV = point.Y();
-    }
-
-    for (const auto& point : torsoLeftFinCurveNorm) {
-        if (point.Y() > leftFinTorsoInterMaxV)
-            leftFinTorsoInterMaxV = point.Y();
     }
 
     const int initBaseIdx = maxUBaseIdx;

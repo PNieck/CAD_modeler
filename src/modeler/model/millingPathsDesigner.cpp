@@ -226,10 +226,12 @@ void MillingPathsDesigner::GenerateMainPhase()
     GeneratePathsForLeftFin(builder, cutter);
     GeneratePathsForRightFin(builder, cutter);
     GeneratePathsForTorso(builder, cutter);
+    GeneratePathsForLeftEye(builder, cutter);
 
     builder.AddPosition(millingSettings.initCutterPos);
 
     auto paths = builder.GetPaths();
+
     std::vector<Position> pathsPositions;
     pathsPositions.reserve(paths.Size());
 
