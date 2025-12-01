@@ -544,7 +544,7 @@ std::vector<alg::Vec2> MillingPathsDesigner::GetBoundaryCurveForTorsoUpperFinInt
 
     std::vector<alg::Vec2> torsoFinCurveNorm = GetPointsVec(torsoUpperFinCurve);
 
-    InterCurveToFile("torsoUpperFinIntersections.csv", torsoUpperFinCurve);
+    // InterCurveToFile("torsoUpperFinIntersections.csv", torsoUpperFinCurve);
 
     const auto heightMap = GenerateHeightMap(2000, 2000);
 

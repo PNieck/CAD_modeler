@@ -85,7 +85,7 @@ void MillingPathsDesigner::GeneratePathsForLeftEye(MillingMachinePathsBuilder &b
 
     const auto combined = ConnectInsidePointToBoundary(insidePoints, boundaryCurve);
 
-    InterCurveToFile("InsidePoints.csv", insidePoints);
+    // InterCurveToFile("InsidePoints.csv", insidePoints);
 
     // First position
     auto firstPos = GlobalPosition(leftEyeOffset, combined.front(), cutter);
@@ -113,9 +113,9 @@ std::vector<alg::Vec2> MillingPathsDesigner::GetBoundaryCurveForLeftEye(const Mi
     auto const& leftEyeTorsoCurve = coordinator.GetComponent<IntersectionCurve>(leftEyeTorsoInter);
     const std::vector<alg::Vec2> leftEyeTorsoCurveNorm = GetPointsVec(leftEyeTorsoCurve);
 
-    coordinator.DestroyEntity(leftEyeTorsoInter);
-
     InterCurveToFile("LeftEyeTorsoBoundary.csv", leftEyeTorsoCurveNorm);
+
+    coordinator.DestroyEntity(leftEyeTorsoInter);
 
     return leftEyeTorsoCurveNorm;
 }
