@@ -227,6 +227,7 @@ void MillingPathsDesigner::GenerateMainPhase()
     GeneratePathsForRightFin(builder, cutter);
     GeneratePathsForTorso(builder, cutter);
     GeneratePathsForLeftEye(builder, cutter);
+    GeneratePathsForRightEye(builder, cutter);
 
     builder.AddPosition(millingSettings.initCutterPos);
 

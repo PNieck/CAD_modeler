@@ -84,12 +84,14 @@ private:
     void GeneratePathsForRightFin(MillingMachinePathsBuilder& builder, const MillingCutter& cutter);
     void GeneratePathsForTorso(MillingMachinePathsBuilder& builder, const MillingCutter& cutter);
     void GeneratePathsForLeftEye(MillingMachinePathsBuilder& builder, const MillingCutter& cutter);
+    void GeneratePathsForRightEye(MillingMachinePathsBuilder& builder, const MillingCutter& cutter);
 
     std::vector<alg::Vec2> GetBoundaryCurveForLeftFin(const MillingCutter& cutter, Entity torsoOffset, Entity leftFinOffset);
     std::vector<alg::Vec2> GetBoundaryCurveForRightFin(const MillingCutter& cutter, Entity torsoOffset, Entity rightFinOffset);
     std::vector<alg::Vec2> GetBoundaryCurveForTorso(const MillingCutter& cutter, const std::unordered_map<std::string, Entity>& offsetSurfaces);
     std::vector<alg::Vec2> GetBoundaryCurveForTorsoUpperFinIntersection(const MillingCutter& cutter, const std::unordered_map<std::string, Entity>& offsetSurfaces);
     std::vector<alg::Vec2> GetBoundaryCurveForLeftEye(const MillingCutter& cutter, Entity torsoOffset, Entity leftEyeOffset);
+    std::vector<alg::Vec2> GetBoundaryCurveForRightEye(const MillingCutter& cutter, Entity torsoOffset, Entity rightEyeOffset);
 
     std::vector<std::vector<alg::Vec2>> GetTorsoHoles(const MillingCutter& cutter, const std::unordered_map<std::string, Entity>& offsetSurfaces);
 

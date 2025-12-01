@@ -4,20 +4,20 @@
 #include "CAD_modeler/utilities/lineSegment2D.hpp"
 
 
-void MillingPathsDesigner::GeneratePathsForLeftEye(MillingMachinePathsBuilder &builder, const MillingCutter &cutter)
+void MillingPathsDesigner::GeneratePathsForRightEye(MillingMachinePathsBuilder &builder, const MillingCutter &cutter)
 {
     const Entity torso = nameSystem->EntityFromName("torso");
-    const Entity leftEye = nameSystem->EntityFromName("left eye");
+    const Entity rightEye = nameSystem->EntityFromName("right eye");
 
     const Entity torsoOffset = equidistanceC2System->AddSurface(torso, -cutter.radius);
-    const Entity leftEyeOffset = equidistanceC2System->AddSurface(leftEye, -cutter.radius);
+    const Entity rightEyeOffset = equidistanceC2System->AddSurface(rightEye, -cutter.radius);
 
-    const auto boundaryCurve = GetBoundaryCurveForLeftEye(cutter, torsoOffset, leftEyeOffset);
+    const auto boundaryCurve = GetBoundaryCurveForRightEye(cutter, torsoOffset, rightEyeOffset);
 
     std::vector<alg::Vec2> insidePoints;
 
-    const float maxU = c2PatchesSystem->MaxU(leftEye);
-    const float maxV = c2PatchesSystem->MaxV(leftEye);
+    const float maxU = c2PatchesSystem->MaxU(rightEye);
+    const float maxV = c2PatchesSystem->MaxV(rightEye);
 
     constexpr float stepU = 0.05f;
     constexpr float stepV = 0.05f;
@@ -57,7 +57,7 @@ void MillingPathsDesigner::GeneratePathsForLeftEye(MillingMachinePathsBuilder &b
         }
 
         if (!intersectionFound)
-            throw std::runtime_error("No intersection found for left eye");
+            throw std::runtime_error("No intersection found for right eye");
 
         float endU = intersectionPoint.X();
         float startU = maxU - stepU / 2.f;
@@ -88,13 +88,13 @@ void MillingPathsDesigner::GeneratePathsForLeftEye(MillingMachinePathsBuilder &b
     InterCurveToFile("InsidePoints.csv", insidePoints);
 
     // First position
-    auto firstPos = GlobalPosition(leftEyeOffset, combined.front(), cutter);
+    auto firstPos = GlobalPosition(rightEyeOffset, combined.front(), cutter);
     firstPos.SetY(millingSettings.safeHeight);
     builder.AddPosition(firstPos);
 
     // Rest of position
     for (const auto& p: combined)
-        builder.AddPosition(GlobalPosition(leftEyeOffset, p, cutter));
+        builder.AddPosition(GlobalPosition(rightEyeOffset, p, cutter));
 
     // Last position
     auto lastPos = builder.GetLastPosition();
@@ -102,20 +102,20 @@ void MillingPathsDesigner::GeneratePathsForLeftEye(MillingMachinePathsBuilder &b
     builder.AddPosition(lastPos);
 
     coordinator.DestroyEntity(torsoOffset);
-    coordinator.DestroyEntity(leftEyeOffset);
+    coordinator.DestroyEntity(rightEyeOffset);
 }
 
 
-std::vector<alg::Vec2> MillingPathsDesigner::GetBoundaryCurveForLeftEye(const MillingCutter &cutter, Entity torsoOffset, Entity leftEyeOffset)
+std::vector<alg::Vec2> MillingPathsDesigner::GetBoundaryCurveForRightEye(const MillingCutter &cutter, Entity torsoOffset, Entity rightEyeOffset)
 {
-    const Entity leftEyeTorsoInter = intersectionSystem->FindIntersection(leftEyeOffset, torsoOffset, 1e-3).value();
+    const Entity rightEyeTorsoInter = intersectionSystem->FindIntersection(rightEyeOffset, torsoOffset, 1e-3).value();
 
-    auto const& leftEyeTorsoCurve = coordinator.GetComponent<IntersectionCurve>(leftEyeTorsoInter);
-    const std::vector<alg::Vec2> leftEyeTorsoCurveNorm = GetPointsVec(leftEyeTorsoCurve);
+    auto const& rightEyeTorsoCurve = coordinator.GetComponent<IntersectionCurve>(rightEyeTorsoInter);
+    const std::vector<alg::Vec2> rightEyeTorsoCurveNorm = GetPointsVec(rightEyeTorsoCurve);
 
-    coordinator.DestroyEntity(leftEyeTorsoInter);
+    coordinator.DestroyEntity(rightEyeTorsoInter);
 
-    InterCurveToFile("LeftEyeTorsoBoundary.csv", leftEyeTorsoCurveNorm);
+    InterCurveToFile("RightEyeTorsoBoundary.csv", rightEyeTorsoCurveNorm);
 
-    return leftEyeTorsoCurveNorm;
+    return rightEyeTorsoCurveNorm;
 }
