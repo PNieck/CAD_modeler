@@ -127,11 +127,11 @@ void MillingPathsDesigner::GenerateBroadPhase()
 
     heightMap.defaultHeight = materialParameters.yLen - toMillHalf;
 
-    float minXCutterPos = heightMap.MinX() - cutter.radius * 1.5f;
-    float minZCutterPos = heightMap.MinZ() - cutter.radius * 1.5f;
+    float minXCutterPos = heightMap.MinX() - cutter.radius * 0.8f;
+    float minZCutterPos = heightMap.MinZ() - cutter.radius * 0.8f;
 
-    float maxXCutterPos = heightMap.MaxX() + cutter.radius * 1.5f;
-    float maxZCutterPos = heightMap.MaxZ() + cutter.radius * 1.5f;
+    float maxXCutterPos = heightMap.MaxX() + cutter.radius * 0.8f;
+    float maxZCutterPos = heightMap.MaxZ() + cutter.radius * 0.8f;
 
     std::tie(minXCutterPos, minZCutterPos) = heightMap.NearestPixelPoint(minXCutterPos, minZCutterPos);
     std::tie(maxXCutterPos, maxZCutterPos) = heightMap.NearestPixelPoint(maxXCutterPos, maxZCutterPos);
@@ -141,21 +141,21 @@ void MillingPathsDesigner::GenerateBroadPhase()
 
     // Second position
     builder.AddPosition(Position(
-        minXCutterPos,
+        minXCutterPos - cutter.radius * 0.7f,
         millingSettings.initCutterPos.Y(),
-        minZCutterPos
+        minZCutterPos - cutter.radius * 0.7f
     ));
 
     // Third position
     builder.AddPosition(Position(
-        minXCutterPos,
+        minXCutterPos - cutter.radius * 0.7f,
         heightMap.defaultHeight,
-        minZCutterPos
+        minZCutterPos - cutter.radius * 0.7f
     ));
 
     const float stepLenInXDir = cutter.radius * 1.5f;
 
-    const int stepsInXDir = static_cast<int>(std::ceil((maxXCutterPos - minXCutterPos) / stepLenInXDir));
+    const int stepsInXDir = static_cast<int>(std::ceil((maxXCutterPos - minXCutterPos) / stepLenInXDir)) - 1;
     const int stepsInZDir = static_cast<int>(std::ceil((maxZCutterPos - minZCutterPos) / heightMap.PixelXLen()));
 
     for (int stepX=0; stepX < stepsInXDir+1; stepX++) {
@@ -182,6 +182,14 @@ void MillingPathsDesigner::GenerateBroadPhase()
     heightMap.defaultHeight = millingSettings.baseThickness + millingSettings.broadPhaseAdditionalThickness;
 
     auto prevPos = builder.GetLastPosition();
+
+    if (prevPos.GetZ() > 0.f)
+        prevPos.vec.Z() += cutter.radius * 0.7f;
+    else
+        prevPos.vec.Z() -= cutter.radius * 0.7f;
+
+    builder.AddPosition(prevPos);
+
     prevPos.SetY(heightMap.defaultHeight);
     builder.AddPosition(prevPos);
 
@@ -213,6 +221,16 @@ void MillingPathsDesigner::GenerateBroadPhase()
     builder.AddPosition(millingSettings.initCutterPos);
 
     const MillingMachinePath paths = builder.GetPaths();
+
+    std::vector<Position> pathsPositions;
+    pathsPositions.reserve(paths.Size());
+
+    for (const auto& path: paths) {
+        pathsPositions.push_back(path.destination);
+    }
+
+    polylineSystem->AddPolyline(pathsPositions);
+
     PrintPathLength(paths);
     MillingMachinePathsSystem::CreateGCodeFile(paths, "paths/1.k16");
 }
