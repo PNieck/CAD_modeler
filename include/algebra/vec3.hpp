@@ -48,6 +48,14 @@ namespace alg
             );
         }
 
+        void NormalizeSelf() {
+            float len = Length();
+
+            data[0] /= len;
+            data[1] /= len;
+            data[2] /= len;
+        }
+
         [[nodiscard]]
         float LengthSquared() const
             { return data[0]*data[0] + data[1]*data[1] + data[2]*data[2]; }

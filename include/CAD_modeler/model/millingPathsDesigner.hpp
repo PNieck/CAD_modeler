@@ -95,6 +95,9 @@ private:
     std::vector<alg::Vec2> GetBoundaryCurveForRightEye(const MillingCutter& cutter, Entity torsoOffset, Entity rightEyeOffset);
     std::vector<alg::Vec2> GetBoundaryCurveForUpperFin(const MillingCutter& cutter, Entity torsoOffset, Entity upperFinOffset, Entity upperFin);
 
+    static std::vector<alg::Vec2> PostProcessBoundary(const std::vector<alg::Vec2>& boundary, float dist);
+    static std::vector<Position> PostProcessBoundary(const std::vector<Position>& boundary, float dist);
+
     std::vector<std::vector<alg::Vec2>> GetTorsoHoles(const MillingCutter& cutter, const std::unordered_map<std::string, Entity>& offsetSurfaces);
 
     static std::vector<alg::Vec2> GetPointsVec(const IntersectionCurve& curve);

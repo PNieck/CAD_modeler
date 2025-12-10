@@ -395,6 +395,58 @@ float MillingPathsDesigner::MinYCutterPos(
 }
 
 
+std::vector<alg::Vec2> MillingPathsDesigner::PostProcessBoundary(const std::vector<alg::Vec2>& boundary, float dist)
+{
+    std::vector<alg::Vec2> result;
+
+    result.push_back(boundary.front());
+
+    float actDist = 0.f;
+
+    for (size_t i = 1; i < boundary.size(); ++i) {
+        const alg::Vec2& p1 = boundary[i-1];
+        const alg::Vec2& p2 = boundary[i];
+
+        const float segDist = alg::Distance(p1, p2);
+        if (actDist + segDist >= dist) {
+            alg::Vec2 v = (p2 - p1).Normalize() * (dist - actDist);
+            result.emplace_back(p1 + v);
+            actDist = 0.f;
+        }
+        else {
+            actDist += segDist;
+        }
+    }
+
+    return result;
+}
+
+
+std::vector<Position> MillingPathsDesigner::PostProcessBoundary(const std::vector<Position> &boundary, const float dist)
+{
+    std::vector<Position> result;
+
+    result.push_back(boundary.front());
+
+    float actDist = 0.f;
+
+    for (size_t i = 1; i < boundary.size(); ++i) {
+        const alg::Vec3& p1 = boundary[i-1].vec;
+        const alg::Vec3& p2 = boundary[i].vec;
+
+        const float segDist = alg::Distance(p1, p2);
+        if (actDist + segDist >= dist) {
+            alg::Vec3 v = (p2 - p1).Normalize() * (dist - actDist);
+            result.emplace_back(p1 + v);
+            actDist = 0.f;
+        }
+        else {
+            actDist += segDist;
+        }
+    }
+
+    return result;
+}
 
 
 std::vector<alg::Vec2> MillingPathsDesigner::GetPointsVec(const IntersectionCurve &curve)

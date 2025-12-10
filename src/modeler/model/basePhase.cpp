@@ -14,7 +14,7 @@ void MillingPathsDesigner::GenerateBasePhase()
 
     const auto step1Boundary = FindModelBoundary(-cutter.radius * 1.5f);
 
-    const float cutterMaxZPos = materialParameters.zLen / 2.f + cutter.radius * 1.5f;
+    const float cutterMaxZPos = materialParameters.zLen / 2.f + cutter.radius * 0.8f;
     const float cutterMinZPos = -cutterMaxZPos;
 
     const float xStepLen = 2.f * cutter.radius - 0.1f * cutter.radius;
@@ -47,10 +47,20 @@ void MillingPathsDesigner::GenerateBasePhase()
         secondZ = cutterMinZPos;
     }
 
-    builder.AddPosition(initCutterX, millingSettings.initCutterPos.Y(), firstZ);
+    Position secondPos(initCutterX, millingSettings.initCutterPos.Y(), firstZ);
 
-    int stepsDone = 0;
-    for (int i=0; i < initFullSteps; i++) {
+    if (secondPos.GetZ() > 0)
+        secondPos.vec.Z() += cutter.radius * 0.7f;
+    else
+        secondPos.vec.Z() -= cutter.radius * 0.7f;
+
+    builder.AddPosition(secondPos);
+
+    builder.AddPosition(initCutterX, millingSettings.baseThickness, firstZ - cutter.radius * 0.7f);
+    builder.AddPosition(initCutterX, millingSettings.baseThickness, secondZ);
+
+    int stepsDone = 1;
+    for (int i=stepsDone; i < initFullSteps; i++) {
         const float xCoord = initCutterX + static_cast<float>(stepsDone) * xStepLen;
 
         if (i % 2 == 0) {
@@ -114,7 +124,11 @@ void MillingPathsDesigner::GenerateBasePhase()
         builder.AddPosition(actX, millingSettings.baseThickness, cutterMinZPos);
     }
 
-    const auto step2Boundary = FindModelBoundary(-cutter.radius);
+    auto step2Boundary = FindModelBoundary(-cutter.radius);
+    step2Boundary = PostProcessBoundary(step2Boundary, 0.01f);
+
+    auto lastPos = builder.GetLastPosition();
+    builder.AddPosition(step2Boundary.front().GetX(), lastPos.GetY(), lastPos.GetZ());
 
     for (const auto& point: step2Boundary)
         builder.AddPosition(point);
@@ -178,7 +192,6 @@ std::vector<Position> MillingPathsDesigner::FindModelBoundary(float dist)
         if (point.GetX() < minXLeftFin)
             minXLeftFin = point.GetX();
     }
-
 
     std::vector<Position> result;
     result.reserve(torsoPoints.size() + rightFinPoints.size() + leftFinPoints.size());
