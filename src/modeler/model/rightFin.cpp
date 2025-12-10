@@ -17,13 +17,14 @@ void MillingPathsDesigner::GeneratePathsForRightFin(MillingMachinePathsBuilder& 
     const Entity torsoOffset = equidistanceC2System->AddSurface(torso, -cutter.radius);
     const Entity leftFinOffset = equidistanceC2System->AddSurface(rightFin, -cutter.radius);
 
-    const auto boundaryCurve = GetBoundaryCurveForRightFin(cutter, torsoOffset, leftFinOffset);
+    auto boundaryCurve = GetBoundaryCurveForRightFin(cutter, torsoOffset, leftFinOffset);
 
     const InsideFiller filler(0.f, 3.f, 5.5f, 1.5f, 0.05f, 0.05f, c2PatchesSystem->MaxU(rightFin), c2PatchesSystem->MaxV(rightFin));
     const auto points = filler.Fill(boundaryCurve);
 
     InterCurveToFile("InsidePoints.csv", points);
 
+    boundaryCurve = PostProcessBoundary(boundaryCurve, 0.01f);
     const auto combined = ConnectInsidePointToBoundary(points, boundaryCurve);
 
     // First position

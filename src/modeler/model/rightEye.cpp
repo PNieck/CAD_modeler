@@ -12,7 +12,7 @@ void MillingPathsDesigner::GeneratePathsForRightEye(MillingMachinePathsBuilder &
     const Entity torsoOffset = equidistanceC2System->AddSurface(torso, -cutter.radius);
     const Entity rightEyeOffset = equidistanceC2System->AddSurface(rightEye, -cutter.radius);
 
-    const auto boundaryCurve = GetBoundaryCurveForRightEye(cutter, torsoOffset, rightEyeOffset);
+    auto boundaryCurve = GetBoundaryCurveForRightEye(cutter, torsoOffset, rightEyeOffset);
 
     std::vector<alg::Vec2> insidePoints;
 
@@ -83,6 +83,7 @@ void MillingPathsDesigner::GeneratePathsForRightEye(MillingMachinePathsBuilder &
         }
     }
 
+    boundaryCurve = PostProcessBoundary(boundaryCurve, 0.01f);
     const auto combined = ConnectInsidePointToBoundary(insidePoints, boundaryCurve);
 
     InterCurveToFile("InsidePoints.csv", insidePoints);

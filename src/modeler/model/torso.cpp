@@ -317,8 +317,9 @@ void MillingPathsDesigner::GeneratePathsForTorso(MillingMachinePathsBuilder &bui
 
     const alg::Vec2& lastInternalPoint = onSurfacePoints[11204];
 
-    const auto boundaryPoints = BoundaryPointsFromInternalPoint(lastInternalPoint, boundary);
+    auto boundaryPoints = BoundaryPointsFromInternalPoint(lastInternalPoint, boundary);
 
+    boundaryPoints = PostProcessBoundary(boundaryPoints, 0.01f);
     for (auto const& point : boundaryPoints)
         builder.AddPosition(GlobalPosition(torsoOffset, point, cutter));
 

@@ -86,7 +86,7 @@ void MillingPathsDesigner::GeneratePathsForUpperFin(MillingMachinePathsBuilder &
         }
     }
 
-    InterCurveToFile("InsidePoints.csv", insidePoints);
+    // InterCurveToFile("InsidePoints.csv", insidePoints);
 
     // First position
     auto firstPos = GlobalPosition(upperFinOffset, insidePoints.front(), cutter);
@@ -105,9 +105,10 @@ void MillingPathsDesigner::GeneratePathsForUpperFin(MillingMachinePathsBuilder &
     };
 
     auto properBoundary = GetBoundaryCurveForTorsoUpperFinIntersection(cutter, offsetSurfaces);
+    properBoundary = PostProcessBoundary(properBoundary, 0.01f);
     CircularVecWrap circularBoundary(properBoundary);
 
-    InterCurveToFile("ProperBoundary.csv", properBoundary);
+    // InterCurveToFile("ProperBoundary.csv", properBoundary);
 
     auto const& lastInsidePos = builder.GetLastPosition();
     int minDistBoundIdx = 0;
