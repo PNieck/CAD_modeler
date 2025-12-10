@@ -20,11 +20,11 @@
 #include <CAD_modeler/model/systems/uvVisualizer.hpp>
 #include <CAD_modeler/model/systems/utils/getSurfaceSystem.hpp>
 
-#include <CAD_modeler/utilities/lineSegment2D.hpp>
 #include <CAD_modeler/utilities/circularVecWrap.hpp>
 
 #include <algorithm>
 #include <fstream>
+#include <iostream>
 
 
 MillingPathsDesigner::MillingPathsDesigner(const int viewportWidth, const int viewportHeight):
@@ -212,7 +212,9 @@ void MillingPathsDesigner::GenerateBroadPhase()
 
     builder.AddPosition(millingSettings.initCutterPos);
 
-    MillingMachinePathsSystem::CreateGCodeFile(builder.GetPaths(), "paths/1.k16");
+    const MillingMachinePath paths = builder.GetPaths();
+    PrintPathLength(paths);
+    MillingMachinePathsSystem::CreateGCodeFile(paths, "paths/1.k16");
 }
 
 
@@ -243,6 +245,7 @@ void MillingPathsDesigner::GenerateMainPhase()
 
     polylineSystem->AddPolyline(pathsPositions);
 
+    PrintPathLength(paths);
     MillingMachinePathsSystem::CreateGCodeFile(paths, "paths/3.k08");
 }
 
@@ -488,6 +491,12 @@ void MillingPathsDesigner::AddPointsToBuilder(const std::vector<alg::Vec2> &poin
         const alg::Vec2 point = points[idx];
         builder.AddPosition(GlobalPosition(entity, point, cutter));
     }
+}
+
+
+void MillingPathsDesigner::PrintPathLength(const MillingMachinePath &path)
+{
+    std::cout << "Path length: " << path.Length() / 10.f << " m\n";
 }
 
 

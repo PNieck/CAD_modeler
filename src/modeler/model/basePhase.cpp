@@ -132,6 +132,7 @@ void MillingPathsDesigner::GenerateBasePhase()
 
     polylineSystem->AddPolyline(pathsPositions);
 
+    PrintPathLength(paths);
     MillingMachinePathsSystem::CreateGCodeFile(paths, "paths/2.f10");
 }
 
