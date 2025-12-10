@@ -109,7 +109,7 @@ private:
 
     Position GlobalPosition(Entity entity, const alg::Vec2& paramPoint, const MillingCutter& cutter) const;
 
-    void AddPointsToBuilder(const std::vector<alg::Vec2>& points, MillingMachinePathsBuilder& builder, const MillingCutter& cutter, Entity entity, size_t start, size_t end) const;
+    void AddPointsToBuilder(const std::vector<alg::Vec2>& points, MillingMachinePathsBuilder& builder, const MillingCutter& cutter, Entity entity, int start, int end) const;
     void AddPointsToBuilder(const std::vector<alg::Vec2>& points, MillingMachinePathsBuilder& builder, const MillingCutter& cutter, Entity entity, const std::vector<size_t>& indices) const;
 
     static void PrintPathLength(const MillingMachinePath& path);

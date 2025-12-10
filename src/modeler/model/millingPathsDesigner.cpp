@@ -538,16 +538,16 @@ Position MillingPathsDesigner::GlobalPosition(const Entity entity, const alg::Ve
 
 
 void MillingPathsDesigner::AddPointsToBuilder(
-    const std::vector<alg::Vec2> &points, MillingMachinePathsBuilder &builder, const MillingCutter& cutter, Entity entity, size_t start, size_t end) const
+    const std::vector<alg::Vec2> &points, MillingMachinePathsBuilder &builder, const MillingCutter& cutter, Entity entity, int start, int end) const
 {
     if (end < start) {
-        for (size_t i = start; i >= end; i--) {
+        for (int i = start; i >= end; i--) {
             const alg::Vec2 point = points[i];
             builder.AddPosition(GlobalPosition(entity, point, cutter));
         }
     }
     else {
-        for (size_t i = start; i <= end; i++) {
+        for (int i = start; i <= end; i++) {
             const alg::Vec2 point = points[i];
             builder.AddPosition(GlobalPosition(entity, point, cutter));
         }
