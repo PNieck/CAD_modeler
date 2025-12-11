@@ -22,8 +22,8 @@ void MillingPathsDesigner::GeneratePathsForUpperFin(MillingMachinePathsBuilder &
     const float maxU = equidistanceC0System->MaxU(upperFinOffset);
     const float maxV = equidistanceC0System->MaxV(upperFinOffset);
 
-    constexpr float stepU = 0.005f;
-    constexpr float stepV = 0.005f;
+    constexpr float stepU = 0.01f;
+    constexpr float stepV = 0.01f;
 
     constexpr float startV = stepV / 2.f;
 
