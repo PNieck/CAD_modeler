@@ -399,6 +399,8 @@ std::vector<alg::Vec2> MillingPathsDesigner::PostProcessBoundary(const std::vect
 {
     std::vector<alg::Vec2> result;
 
+    std::cout << "Init boundary size: " << boundary.size() << std::endl;
+
     result.push_back(boundary.front());
 
     float actDist = 0.f;
@@ -417,6 +419,8 @@ std::vector<alg::Vec2> MillingPathsDesigner::PostProcessBoundary(const std::vect
             actDist += segDist;
         }
     }
+
+    std::cout << "Result boundary size: " << boundary.size() << std::endl;
 
     return result;
 }

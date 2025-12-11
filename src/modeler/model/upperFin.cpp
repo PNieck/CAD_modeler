@@ -105,7 +105,6 @@ void MillingPathsDesigner::GeneratePathsForUpperFin(MillingMachinePathsBuilder &
     };
 
     auto properBoundary = GetBoundaryCurveForTorsoUpperFinIntersection(cutter, offsetSurfaces);
-    properBoundary = PostProcessBoundary(properBoundary, 0.01f);
     CircularVecWrap circularBoundary(properBoundary);
 
     // InterCurveToFile("ProperBoundary.csv", properBoundary);
@@ -154,7 +153,7 @@ std::vector<alg::Vec2> MillingPathsDesigner::GetBoundaryCurveForUpperFin(const M
     auto const& upperFinTorsoCurve = coordinator.GetComponent<IntersectionCurve>(upperFinTorsoInter);
     const std::vector<alg::Vec2> upperFinTorsoCurveNorm = GetPointsVec(upperFinTorsoCurve);
 
-    InterCurveToFile("UpperFinTorsoBoundary.csv", upperFinTorsoCurveNorm);
+    // InterCurveToFile("UpperFinTorsoBoundary.csv", upperFinTorsoCurveNorm);
 
     coordinator.DestroyEntity(upperFinTorsoInter);
 

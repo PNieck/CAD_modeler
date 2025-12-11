@@ -88,12 +88,12 @@ void MillingPathsDesigner::GeneratePathsForTorso(MillingMachinePathsBuilder &bui
         }
     }
 
-    InterCurveToFile("InsidePoints.csv", onSurfacePoints);
+    // InterCurveToFile("InsidePoints.csv", onSurfacePoints);
 
-    std::cout << "indie points len: " << onSurfacePoints.size() << std::endl;
+    // std::cout << "indie points len: " << onSurfacePoints.size() << std::endl;
 
     // First position
-    auto firstPos = GlobalPosition(leftFinOffset, onSurfacePoints.front(), cutter);
+    auto firstPos = GlobalPosition(torsoOffset, onSurfacePoints.front(), cutter);
     firstPos.SetY(millingSettings.safeHeight);
     builder.AddPosition(firstPos);
 
@@ -319,7 +319,6 @@ void MillingPathsDesigner::GeneratePathsForTorso(MillingMachinePathsBuilder &bui
 
     auto boundaryPoints = BoundaryPointsFromInternalPoint(lastInternalPoint, boundary);
 
-    boundaryPoints = PostProcessBoundary(boundaryPoints, 0.01f);
     for (auto const& point : boundaryPoints)
         builder.AddPosition(GlobalPosition(torsoOffset, point, cutter));
 
@@ -328,7 +327,7 @@ void MillingPathsDesigner::GeneratePathsForTorso(MillingMachinePathsBuilder &bui
     lastPos.SetY(millingSettings.safeHeight);
     builder.AddPosition(lastPos);
 
-    std::cout << "Total points: " << builder.GetCommandsCnt() << std::endl;
+    // std::cout << "Total points: " << builder.GetCommandsCnt() << std::endl;
 
     coordinator.DestroyEntity(torsoOffset);
     coordinator.DestroyEntity(upperFinOffset);

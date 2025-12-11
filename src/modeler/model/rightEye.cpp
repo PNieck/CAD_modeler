@@ -134,7 +134,6 @@ void MillingPathsDesigner::GeneratePathsForRightEye(MillingMachinePathsBuilder &
     const auto& lastInternalPoint = restInsidePoints[55];
 
     auto boundaryPoints = BoundaryPointsFromInternalPoint(lastInternalPoint, boundaryCurve);
-    boundaryPoints = PostProcessBoundary(boundaryPoints, 0.01f);
     for (auto const& point : boundaryPoints)
         builder.AddPosition(GlobalPosition(rightEyeOffset, point, cutter));
 
@@ -157,7 +156,7 @@ std::vector<alg::Vec2> MillingPathsDesigner::GetBoundaryCurveForRightEye(const M
 
     coordinator.DestroyEntity(rightEyeTorsoInter);
 
-    InterCurveToFile("RightEyeTorsoBoundary.csv", rightEyeTorsoCurveNorm);
+    // InterCurveToFile("RightEyeTorsoBoundary.csv", rightEyeTorsoCurveNorm);
 
     return rightEyeTorsoCurveNorm;
 }

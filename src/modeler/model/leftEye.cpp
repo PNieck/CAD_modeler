@@ -69,7 +69,7 @@ void MillingPathsDesigner::GeneratePathsForLeftEye(MillingMachinePathsBuilder &b
         insidePoints.emplace_back(u, maxV/2.f);
     }
 
-    InterCurveToFile("InsidePoints.csv", insidePoints);
+    // InterCurveToFile("InsidePoints.csv", insidePoints);
 
     // First position
     auto firstPos = GlobalPosition(leftEyeOffset, insidePoints.front(), cutter);;
@@ -126,7 +126,7 @@ void MillingPathsDesigner::GeneratePathsForLeftEye(MillingMachinePathsBuilder &b
         }
     }
 
-    InterCurveToFile("RestOfPoints.csv", insidePoints);
+    // InterCurveToFile("RestOfPoints.csv", insidePoints);
 
     AddPointsToBuilder(insidePoints, builder, cutter, leftEyeOffset, 61, 82);
     AddPointsToBuilder(insidePoints, builder, cutter, leftEyeOffset, 82, 0);
@@ -135,9 +135,8 @@ void MillingPathsDesigner::GeneratePathsForLeftEye(MillingMachinePathsBuilder &b
 
     const auto& lastInternalPoint = insidePoints[120];
 
-    auto boundaryPoints = BoundaryPointsFromInternalPoint(lastInternalPoint, boundaryCurve);
+    const auto boundaryPoints = BoundaryPointsFromInternalPoint(lastInternalPoint, boundaryCurve);
 
-    boundaryPoints = PostProcessBoundary(boundaryPoints, 0.01f);
     for (auto const& point : boundaryPoints)
         builder.AddPosition(GlobalPosition(leftEyeOffset, point, cutter));
 
@@ -158,7 +157,7 @@ std::vector<alg::Vec2> MillingPathsDesigner::GetBoundaryCurveForLeftEye(const Mi
     auto const& leftEyeTorsoCurve = coordinator.GetComponent<IntersectionCurve>(leftEyeTorsoInter);
     const std::vector<alg::Vec2> leftEyeTorsoCurveNorm = GetPointsVec(leftEyeTorsoCurve);
 
-    InterCurveToFile("LeftEyeTorsoBoundary.csv", leftEyeTorsoCurveNorm);
+    // InterCurveToFile("LeftEyeTorsoBoundary.csv", leftEyeTorsoCurveNorm);
 
     coordinator.DestroyEntity(leftEyeTorsoInter);
 

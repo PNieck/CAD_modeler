@@ -25,7 +25,6 @@ void MillingPathsDesigner::GeneratePathsForLeftFin(MillingMachinePathsBuilder &b
 
     // InterCurveToFile("InsidePoints.csv", points);
 
-    boundaryCurve = PostProcessBoundary(boundaryCurve, 0.01f);
     const auto combined = ConnectInsidePointToBoundary(points, boundaryCurve);
 
     // First position

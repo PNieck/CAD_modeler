@@ -19,6 +19,7 @@ void Scale::TransformVector(alg::Vec3 &vec) const
     vec.Z() *= scale.Z();
 }
 
+
 void Scale::TransformNormal(alg::Vec3 &vec) const
 {
     vec.X() /= scale.X();

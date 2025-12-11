@@ -4,7 +4,7 @@
 #include <cassert>
 
 
-Position GregoryPatchParameters::GetOuterPoint(int row, int col) const
+Position GregoryPatchParameters::GetOuterPoint(const int row, const int col) const
 {
     switch (row)
     {
@@ -27,7 +27,7 @@ Position GregoryPatchParameters::GetOuterPoint(int row, int col) const
 }
 
 
-void GregoryPatchParameters::SetOuterPoint(const Position& pos, int row, int col)
+void GregoryPatchParameters::SetOuterPoint(const Position& pos, const int row, const int col)
 {
     switch (row)
     {
@@ -51,7 +51,7 @@ void GregoryPatchParameters::SetOuterPoint(const Position& pos, int row, int col
 }
 
 
-Position GregoryPatchParameters::GetInnerPoint(int neighbourRow, int neighbourCol) const
+Position GregoryPatchParameters::GetInnerPoint(const int neighbourRow, const int neighbourCol) const
 {
     switch (neighbourRow)
     {
@@ -77,7 +77,7 @@ Position GregoryPatchParameters::GetInnerPoint(int neighbourRow, int neighbourCo
 }
 
 
-void GregoryPatchParameters::SetInnerPoint(const Position& pos, int neighbourRow, int neighbourCol)
+void GregoryPatchParameters::SetInnerPoint(const Position& pos, const int neighbourRow, const int neighbourCol)
 {
     switch (neighbourRow)
     {
