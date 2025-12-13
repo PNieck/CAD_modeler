@@ -30,37 +30,29 @@ bool LineSegment2D::AreIntersecting(const LineSegment2D &ls1, const LineSegment2
 }
 
 
-std::optional<alg::Vec2> LineSegment2D::IntersectionPoint(const LineSegment2D &ls1, const LineSegment2D &ls2)
+bool LineSegment2D::AreIntersecting(const LineSegment2D &ls1, const LineSegment2D &ls2, alg::Vec2 &intersectionPoint)
 {
-    // Original source: https://paulbourke.net/geometry/pointlineplane/example.cpp
+    if (!AreIntersecting(ls1, ls2))
+        return false;
 
-    const float denom = (ls2.p2.Y() - ls2.p1.Y())*(ls1.p2.X() - ls1.p1.X()) -
-                        (ls2.p2.X() - ls2.p1.X())*(ls1.p2.Y() - ls1.p1.Y());
+    const float a1 = ls1.p2.Y() - ls1.p1.Y();
+    const float b1 = ls1.p1.X() - ls1.p2.X();
+    const float c1 = a1 * ls1.p1.X() + b1 * ls1.p1.Y();
 
-    const float nume_a = (ls2.p2.X() - ls2.p1.X())*(ls1.p1.Y() - ls2.p1.Y()) -
-                         (ls2.p2.Y() - ls2.p1.Y())*(ls1.p1.X() - ls2.p1.X());
+    const float a2 = ls2.p2.Y() - ls2.p1.Y();
+    const float b2 = ls2.p1.X() - ls2.p2.X();
+    const float c2 = a2 * ls2.p1.X() + b2 * ls2.p1.Y();
 
-    const float nume_b = (ls1.p2.X() - ls1.p1.X())*(ls1.p1.Y() - ls2.p1.Y()) -
-                         (ls1.p2.Y() - ls1.p1.Y())*(ls1.p1.X() - ls2.p1.X());
-
-    if(denom == 0.0f)
-        return std::nullopt;
-
-    const float ua = nume_a / denom;
-    const float ub = nume_b / denom;
-
-    if(ua >= 0.0f && ua <= 1.0f && ub >= 0.0f && ub <= 1.0f)
-    {
-        alg::Vec2 intersection;
-
-        // Get the intersection point.
-        intersection.X() = ls1.p1.X() + ua*(ls1.p2.X() - ls1.p1.X());
-        intersection.Y() = ls1.p1.Y() + ua*(ls1.p2.Y() - ls1.p1.Y());
-
-        return intersection;
+    const float det = a1 * b2 - a2 * b1;
+    if(det == 0) {
+        // Lines are parallel or coincident
+        return false;
     }
 
-    return std::nullopt;
+    intersectionPoint.X() = (c1 * b2 - c2 * b1) / det;
+    intersectionPoint.Y() = (a1 * c2 - a2 * c1) / det;
+
+    return true;
 }
 
 

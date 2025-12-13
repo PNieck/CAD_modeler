@@ -20,7 +20,7 @@ std::optional<std::vector<float>> opt::ConjugateGradientMethod(
         i = -i;
 
     for (unsigned int it = 0; it < maxIt; it++) {
-        std::cout << "It " << it << " conjugate\n";
+        // std::cout << "It " << it << " conjugate\n";
 
         if (stopCondition.ShouldStop(fun, solution))
             return solution;

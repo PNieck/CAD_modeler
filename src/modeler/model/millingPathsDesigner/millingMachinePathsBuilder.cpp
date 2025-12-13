@@ -3,15 +3,12 @@
 
 void MillingMachinePathsBuilder::AddPosition(const Position &nextPosition)
 {
-    path.commands.emplace_back(nextID++, nextPosition);
-    return;
-
     if (path.commands.empty()) {
         path.commands.emplace_back(nextID++, nextPosition);
         return;
     }
 
-    auto commandsCnt = path.commands.size();
+    const auto commandsCnt = path.commands.size();
     const auto& lastPos = path.commands[commandsCnt - 1].destination;
 
     if (lastPos.vec == nextPosition.vec)
@@ -24,13 +21,13 @@ void MillingMachinePathsBuilder::AddPosition(const Position &nextPosition)
 
     const auto& secondToLast = path.commands[commandsCnt-2].destination;
 
-    const alg::Vec3 a = lastPos.vec - secondToLast.vec;
-    const alg::Vec3 b = nextPosition.vec - secondToLast.vec;
+    alg::Vec3 a = lastPos.vec - secondToLast.vec;
+    alg::Vec3 b = nextPosition.vec - lastPos.vec;
 
-    const alg::Vec3 aNorm = a.Normalize();
-    const alg::Vec3 bNorm = b.Normalize();
+    a.NormalizeSelf();
+    b.NormalizeSelf();
 
-    if (alg::Cross(aNorm, bNorm).LengthSquared() <= 1e-5f && alg::Dot(aNorm, bNorm) > 0.f && b.LengthSquared() > a.LengthSquared()) {
+    if (1.f - alg::Dot(a, b) < eps) {
         path.commands.back().destination = nextPosition;
         return;
     }

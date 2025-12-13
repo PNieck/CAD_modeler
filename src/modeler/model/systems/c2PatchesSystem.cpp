@@ -553,12 +553,14 @@ alg::Vec4 CubicBSplinesBaseFunctions(const float t)
 {
     alg::Vec3 quadratic = QuadraticBSplinesBaseFunctions(t);
 
-    return {
-        b(3, 1, t) * quadratic.Z(),
-        b(3, 0, t) * quadratic.Y() + a(3, 1, t) * quadratic.Z(),
-        b(3, -1, t) * quadratic.X() + a(3, 0, t) * quadratic.Y(),
-        a(3, -1, t) * quadratic.X()
-    };
+    alg::Vec4 result;
+
+    result.W() = b(3, 1, t) * quadratic.Z();
+    result.Z() = b(3, 0, t) * quadratic.Y() + a(3, 1, t) * quadratic.Z();
+    result.Y() = b(3, -1, t) * quadratic.X() + a(3, 0, t) * quadratic.Y();
+    result.X() = a(3, -1, t) * quadratic.X();
+
+    return result;
 }
 
 
@@ -575,7 +577,7 @@ Position C2PatchesSystem::PointOnSurface(const C2Patches &patches, float u, floa
 
     for (int i=0; i <= 3; i++) {
         for (int j=0; j <= 3; j++) {
-            result.vec += p.Point(3 - i, 3 - j) * Nu[i] * Nv[j];
+            result.vec += p.Point(i, j) * Nu[i] * Nv[j];
         }
     }
 
@@ -586,43 +588,20 @@ Position C2PatchesSystem::PointOnSurface(const C2Patches &patches, float u, floa
 alg::Vec3 C2PatchesSystem::PartialDerivativeU(const C2Patches &patches, float u, float v) const
 {
     const SingleC2Patch p(*coordinator, patches, u, v);
-
     NormalizeUV(patches, u, v);
 
-    alg::Vec3 Nu = QuadraticBSplinesBaseFunctions(u);
-    alg::Vec4 Nv = CubicBSplinesBaseFunctions(v);
-
-    alg::Vec3 result(0.f);
-
-    for (int i=0; i <= 2; i++) {
-        for (int j=0; j <= 3; j++) {
-            result += (p.Point(i+1, 3-j) - p.Point(i, 3-j)) * Nu[i] * Nv[j];
-        }
-    }
-
-    return result;
+    return PartialDerivativeU(p, u, v);
 }
 
 
 alg::Vec3 C2PatchesSystem::PartialDerivativeV(const C2Patches &patches, float u, float v) const
 {
     const SingleC2Patch p(*coordinator, patches, u, v);
-
     NormalizeUV(patches, u, v);
 
-    alg::Vec4 Nu = CubicBSplinesBaseFunctions(u);
-    alg::Vec3 Nv = QuadraticBSplinesBaseFunctions(v);
-
-    alg::Vec3 result(0.f);
-
-    for (int i=0; i <= 3; i++) {
-        for (int j=0; j <= 2; j++) {
-            result += (p.Point(3-i, j+1) - p.Point(3-i, j)) * Nu[i] * Nv[j];
-        }
-    }
-
-    return result;
+    return PartialDerivativeV(p, u, v);
 }
+
 
 alg::Vec3 C2PatchesSystem::NormalVector(const C2Patches &patches, float u, float v) const
 {
@@ -630,28 +609,10 @@ alg::Vec3 C2PatchesSystem::NormalVector(const C2Patches &patches, float u, float
 
     NormalizeUV(patches, u, v);
 
-    alg::Vec4 Nu4 = CubicBSplinesBaseFunctions(u);
-    alg::Vec4 Nv4 = CubicBSplinesBaseFunctions(v);
+    const alg::Vec3 partialU = PartialDerivativeU(p, u, v);
+    const alg::Vec3 partialV = PartialDerivativeV(p, u, v);
 
-    alg::Vec3 Nu3 = QuadraticBSplinesBaseFunctions(u);
-    alg::Vec3 Nv3 = QuadraticBSplinesBaseFunctions(v);
-
-    alg::Vec3 partialV(0.f);
-    alg::Vec3 partialU(0.f);
-
-    for (int i=0; i <= 3; i++) {
-        for (int j=0; j <= 2; j++) {
-            partialV += (p.Point(3-i, j+1) - p.Point(3-i, j)) * Nu4[i] * Nv3[j];
-        }
-    }
-
-    for (int i=0; i <= 2; i++) {
-        for (int j=0; j <= 3; j++) {
-            partialU += (p.Point(i+1, 3-j) - p.Point(i, 3-j)) * Nu3[i] * Nv4[j];
-        }
-    }
-
-    return Cross(partialV, partialU);
+    return Cross(partialU, partialV);
 }
 
 
@@ -668,7 +629,7 @@ alg::Vec3 C2PatchesSystem::PartialDerivativeUU(const C2Patches &patches, float u
 
     for (int i=0; i <= 1; i++) {
         for (int j=0; j <= 3; j++) {
-            result += (p.Point(i+2, 3-j) - 2.f*p.Point(i+1, 3-j) + p.Point(i, 3-j)) * Nu[i] * Nv[j];
+            result += (p.Point(i+2, j) - 2.f*p.Point(i+1, j) + p.Point(i, j)) * Nu[i] * Nv[j];
         }
     }
 
@@ -689,7 +650,7 @@ alg::Vec3 C2PatchesSystem::PartialDerivativeVV(const C2Patches &patches, float u
 
     for (int i=0; i <= 3; i++) {
         for (int j=0; j <= 1; j++) {
-            result += (p.Point(3-i, j+2) - 2.f*p.Point(3-i, j+1) + p.Point(3-i, j)) * Nu[i] * Nv[j];
+            result += (p.Point(i, j+2) - 2.f*p.Point(i, j+1) + p.Point(i, j)) * Nu[i] * Nv[j];
         }
     }
 
@@ -720,7 +681,7 @@ alg::Vec3 C2PatchesSystem::PartialDerivativeUV(const C2Patches &patches, float u
 
 alg::Vec3 C2PatchesSystem::PartialDerivativeUUApprox(const C2Patches &patches, const float u, const float v) const
 {
-    constexpr float eps = 1e-7f;
+    constexpr float eps = 1e-6f;
 
     if (u + eps > MaxU(patches)) {
         const alg::Vec3 v1 = PartialDerivativeU(patches, u, v);
@@ -745,7 +706,7 @@ alg::Vec3 C2PatchesSystem::PartialDerivativeUUApprox(const C2Patches &patches, c
 
 alg::Vec3 C2PatchesSystem::PartialDerivativeVVApprox(const C2Patches &patches, const float u, const float v) const
 {
-    constexpr float eps = 1e-7f;
+    constexpr float eps = 1e-6f;
 
     if (v + eps > MaxV(patches)) {
         const alg::Vec3 v1 = PartialDerivativeV(patches, u, v);
@@ -770,7 +731,7 @@ alg::Vec3 C2PatchesSystem::PartialDerivativeVVApprox(const C2Patches &patches, c
 
 alg::Vec3 C2PatchesSystem::PartialDerivativeUVApprox(const C2Patches &patches, const float u, const float v) const
 {
-    constexpr float eps = 1e-7f;
+    constexpr float eps = 1e-6f;
 
     if (v + eps > MaxV(patches)) {
         const alg::Vec3 v1 = PartialDerivativeU(patches, u, v);
@@ -927,6 +888,38 @@ void C2PatchesSystem::NormalizeUV(const C2Patches& patches, float& u, float& v)
         v = 1.f;
     else
         v -= std::floor(v);
+}
+
+
+alg::Vec3 C2PatchesSystem::PartialDerivativeV(const SingleC2Patch &patch, const float normalizedU, const float normalizedV) {
+    alg::Vec4 Nu = CubicBSplinesBaseFunctions(normalizedU);
+    alg::Vec3 Nv = QuadraticBSplinesBaseFunctions(normalizedV);
+
+    alg::Vec3 result(0.f);
+
+    for (int i=0; i <= 3; i++) {
+        for (int j=0; j <= 2; j++) {
+            result += (patch.Point(i, j+1) - patch.Point(i, j)) * Nu[i] * Nv[j];
+        }
+    }
+
+    return result;
+}
+
+
+alg::Vec3 C2PatchesSystem::PartialDerivativeU(const SingleC2Patch &patch, const float normalizedU, const float normalizedV) {
+    alg::Vec3 Nu = QuadraticBSplinesBaseFunctions(normalizedU);
+    alg::Vec4 Nv = CubicBSplinesBaseFunctions(normalizedV);
+
+    alg::Vec3 result(0.f);
+
+    for (int i=0; i <= 2; i++) {
+        for (int j=0; j <= 3; j++) {
+            result += (patch.Point(i+1, j) - patch.Point(i, j)) * Nu[i] * Nv[j];
+        }
+    }
+
+    return result;
 }
 
 

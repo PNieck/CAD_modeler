@@ -1,33 +1,13 @@
 #include <CAD_modeler/model/systems/intersectionSystem/c0Surface.hpp>
 
-
-bool ShouldWrapU(const C0Patches& patches)
-{
-    for (int col=0; col<patches.PointsInCol(); ++col) {
-        if (patches.GetPoint(0, col) != patches.GetPoint(patches.PointsInRow() - 1, col))
-            return false;
-    }
-
-    return true;
-}
-
-
-bool ShouldWrapV(const C0Patches& patches)
-{
-    for (int row=0; row<patches.PointsInRow(); ++row) {
-        if (patches.GetPoint(row, 0) != patches.GetPoint(row, patches.PointsInCol() - 1))
-            return false;
-    }
-
-    return true;
-}
+#include "CAD_modeler/model/components/wraps.hpp"
 
 
 interSys::C0Surface::C0Surface(const Coordinator &coord, const Entity entity):
     patchesSys(coord.GetSystem<C0PatchesSystem>()),
     patches(coord.GetComponent<C0Patches>(entity)),
-    wrapU(ShouldWrapU(patches)),
-    wrapV(ShouldWrapV(patches))
+    wrapU(coord.HasComponent<WrapU>(entity)),
+    wrapV(coord.HasComponent<WrapV>(entity))
 {
 }
 

@@ -4,6 +4,8 @@
 
 #include <CAD_modeler/model/components/registerComponents.hpp>
 #include <CAD_modeler/model/components/drawStd.hpp>
+#include "CAD_modeler/model/components/uvVisualization.hpp"
+#include "CAD_modeler/model/components/wraps.hpp"
 
 #include <CAD_modeler/model/millingPathsDesigner/depthBuffer.hpp>
 #include <CAD_modeler/model/millingPathsDesigner/millingMachinePathsBuilder.hpp>
@@ -15,10 +17,14 @@
 #include <CAD_modeler/model/systems/controlPointsRegistrySystem.hpp>
 #include <CAD_modeler/model/systems/millingMachinePathsSystem.hpp>
 #include <CAD_modeler/model/systems/equidistanceC2SurfaceSystem.hpp>
+#include <CAD_modeler/model/systems/uvVisualizer.hpp>
+#include <CAD_modeler/model/systems/utils/getSurfaceSystem.hpp>
 
-#include <CAD_modeler/utilities/lineSegment2D.hpp>
+#include <CAD_modeler/utilities/circularVecWrap.hpp>
 
 #include <algorithm>
+#include <fstream>
+#include <iostream>
 
 
 MillingPathsDesigner::MillingPathsDesigner(const int viewportWidth, const int viewportHeight):
@@ -37,7 +43,8 @@ MillingPathsDesigner::MillingPathsDesigner(const int viewportWidth, const int vi
     C2PatchesTrianglesRenderSystem::RegisterSystem(coordinator);
     NameSystem::RegisterSystem(coordinator);
     SelectionSystem::RegisterSystem(coordinator);
-    EquidistanceC2System::RegisterSystem(coordinator);
+    EquidistanceC2SurfaceSystem::RegisterSystem(coordinator);
+    EquidistanceC0SurfaceSystem::RegisterSystem(coordinator);
     IntersectionSystem::RegisterSystem(coordinator);
     InterpolationCurvesRenderingSystem::RegisterSystem(coordinator);
     PolylineSystem::RegisterSystem(coordinator);
@@ -48,10 +55,11 @@ MillingPathsDesigner::MillingPathsDesigner(const int viewportWidth, const int vi
     c0PatchesRenderSystem = coordinator.GetSystem<C0PatchesRenderSystem>();
     c2PatchesSystem = coordinator.GetSystem<C2PatchesSystem>();
     c2PatchesRenderSystem = coordinator.GetSystem<C2PatchesRenderSystem>();
-    equidistanceC2System = coordinator.GetSystem<EquidistanceC2System>();
+    equidistanceC2System = coordinator.GetSystem<EquidistanceC2SurfaceSystem>();
+    equidistanceC0System = coordinator.GetSystem<EquidistanceC0SurfaceSystem>();
     nameSystem = coordinator.GetSystem<NameSystem>();
     const auto selectionSys = coordinator.GetSystem<SelectionSystem>();
-    const auto equidistanceSurfaceSys = coordinator.GetSystem<EquidistanceC2System>();
+    const auto equidistanceSurfaceSys = coordinator.GetSystem<EquidistanceC2SurfaceSystem>();
     intersectionSystem = coordinator.GetSystem<IntersectionSystem>();
     interpolationCurvesRendering = coordinator.GetSystem<InterpolationCurvesRenderingSystem>();
     polylineSystem = coordinator.GetSystem<PolylineSystem>();
@@ -60,6 +68,7 @@ MillingPathsDesigner::MillingPathsDesigner(const int viewportWidth, const int vi
     c0PatchesSystem->Init();
     c2PatchesSystem->Init();
     equidistanceC2System->Init();
+    equidistanceC0System->Init();
     selectionSys->Init();
     equidistanceSurfaceSys->Init();
 
@@ -118,11 +127,11 @@ void MillingPathsDesigner::GenerateBroadPhase()
 
     heightMap.defaultHeight = materialParameters.yLen - toMillHalf;
 
-    float minXCutterPos = heightMap.MinX() - cutter.radius * 1.5f;
-    float minZCutterPos = heightMap.MinZ() - cutter.radius * 1.5f;
+    float minXCutterPos = heightMap.MinX() - cutter.radius * 0.8f;
+    float minZCutterPos = heightMap.MinZ() - cutter.radius * 0.8f;
 
-    float maxXCutterPos = heightMap.MaxX() + cutter.radius * 1.5f;
-    float maxZCutterPos = heightMap.MaxZ() + cutter.radius * 1.5f;
+    float maxXCutterPos = heightMap.MaxX() + cutter.radius * 0.8f;
+    float maxZCutterPos = heightMap.MaxZ() + cutter.radius * 0.8f;
 
     std::tie(minXCutterPos, minZCutterPos) = heightMap.NearestPixelPoint(minXCutterPos, minZCutterPos);
     std::tie(maxXCutterPos, maxZCutterPos) = heightMap.NearestPixelPoint(maxXCutterPos, maxZCutterPos);
@@ -132,21 +141,21 @@ void MillingPathsDesigner::GenerateBroadPhase()
 
     // Second position
     builder.AddPosition(Position(
-        minXCutterPos,
+        minXCutterPos - cutter.radius * 0.7f,
         millingSettings.initCutterPos.Y(),
-        minZCutterPos
+        minZCutterPos - cutter.radius * 0.7f
     ));
 
     // Third position
     builder.AddPosition(Position(
-        minXCutterPos,
+        minXCutterPos - cutter.radius * 0.7f,
         heightMap.defaultHeight,
-        minZCutterPos
+        minZCutterPos - cutter.radius * 0.7f
     ));
 
     const float stepLenInXDir = cutter.radius * 1.5f;
 
-    const int stepsInXDir = static_cast<int>(std::ceil((maxXCutterPos - minXCutterPos) / stepLenInXDir));
+    const int stepsInXDir = static_cast<int>(std::ceil((maxXCutterPos - minXCutterPos) / stepLenInXDir)) - 1;
     const int stepsInZDir = static_cast<int>(std::ceil((maxZCutterPos - minZCutterPos) / heightMap.PixelXLen()));
 
     for (int stepX=0; stepX < stepsInXDir+1; stepX++) {
@@ -173,6 +182,14 @@ void MillingPathsDesigner::GenerateBroadPhase()
     heightMap.defaultHeight = millingSettings.baseThickness + millingSettings.broadPhaseAdditionalThickness;
 
     auto prevPos = builder.GetLastPosition();
+
+    if (prevPos.GetZ() > 0.f)
+        prevPos.vec.Z() += cutter.radius * 0.7f;
+    else
+        prevPos.vec.Z() -= cutter.radius * 0.7f;
+
+    builder.AddPosition(prevPos);
+
     prevPos.SetY(heightMap.defaultHeight);
     builder.AddPosition(prevPos);
 
@@ -203,129 +220,8 @@ void MillingPathsDesigner::GenerateBroadPhase()
 
     builder.AddPosition(millingSettings.initCutterPos);
 
-    MillingMachinePathsSystem::CreateGCodeFile(builder.GetPaths(), "paths/1.k16");
-}
+    const MillingMachinePath paths = builder.GetPaths();
 
-
-void MillingPathsDesigner::GenerateBasePhase()
-{
-    const MillingCutter cutter(0.05, MillingCutter::Type::Flat);
-    MillingMachinePathsBuilder builder;
-
-    const auto step1Boundary = FindBoundary(cutter.radius * 1.5f);
-
-    float cutterMaxZPos = materialParameters.zLen / 2.f + cutter.radius * 1.5f;
-    float cutterMinZPos = -cutterMaxZPos;
-
-    const float xStepLen = 2.f * cutter.radius - 0.1f * cutter.radius;
-
-    float minXBoundary = step1Boundary.front().GetX();
-    float maxXBoundary = -std::numeric_limits<float>::infinity();
-    for (const auto& point: step1Boundary)
-        if (point.GetX() > maxXBoundary)
-            maxXBoundary = point.GetX();
-
-    float materialMinX = -materialParameters.xLen / 2.f;
-
-    float materialBorderToBoundary = minXBoundary - materialMinX;
-
-    int initFullSteps = static_cast<int>(std::ceil(materialBorderToBoundary / xStepLen));
-    int cutterXSteps = static_cast<int>(std::ceil(materialParameters.xLen / xStepLen));
-
-    float initCutterX = minXBoundary - (initFullSteps - 1) * xStepLen;
-
-    // First position
-    builder.AddPosition(millingSettings.initCutterPos);
-
-    float firstZ, secondZ;
-
-    if (initFullSteps % 2 == 1) {
-        firstZ = cutterMinZPos;
-        secondZ = cutterMaxZPos;
-    }
-    else {
-        firstZ = cutterMaxZPos;
-        secondZ = cutterMinZPos;
-    }
-
-    builder.AddPosition(initCutterX, millingSettings.initCutterPos.Y(), firstZ);
-
-    int stepsDone = 0;
-    for (int i=0; i < initFullSteps; i++) {
-        float xCoord = initCutterX + stepsDone * xStepLen;
-
-        if (i % 2 == 0) {
-            builder.AddPosition(xCoord, millingSettings.baseThickness, firstZ);
-            builder.AddPosition(xCoord, millingSettings.baseThickness, secondZ);
-        }
-        else {
-            builder.AddPosition(xCoord, millingSettings.baseThickness, secondZ);
-            builder.AddPosition(xCoord, millingSettings.baseThickness, firstZ);
-        }
-
-        stepsDone++;
-    }
-
-    BoundaryIntersectionFinder finder(step1Boundary);
-
-    stepsDone--;
-    float actX = initCutterX + stepsDone * xStepLen;
-    while (actX + xStepLen < maxXBoundary) {
-        stepsDone++;
-        actX = initCutterX + stepsDone * xStepLen;
-
-        builder.AddPosition(actX, millingSettings.baseThickness, cutterMaxZPos);
-        builder.AddPosition(finder.Intersection(actX));
-
-        if (actX + xStepLen > maxXBoundary)
-            break;
-
-        stepsDone++;
-        actX = initCutterX + stepsDone * xStepLen;
-
-        builder.AddPosition(finder.Intersection(actX));
-        builder.AddPosition(actX, millingSettings.baseThickness, cutterMaxZPos);
-    }
-
-    builder.AddPosition(actX, millingSettings.baseThickness, cutterMaxZPos);
-    actX = maxXBoundary;
-
-    builder.AddPosition(actX, millingSettings.baseThickness, cutterMaxZPos);
-    builder.AddPosition(actX, millingSettings.baseThickness, cutterMinZPos);
-
-    stepsDone++;
-    while (actX - xStepLen > minXBoundary) {
-        stepsDone--;
-        actX = initCutterX + stepsDone * xStepLen;
-
-        builder.AddPosition(actX, millingSettings.baseThickness, cutterMinZPos);
-        builder.AddPosition(finder.Intersection(actX));
-
-        if (actX - xStepLen < minXBoundary)
-            break;
-
-        if (stepsDone == 7) {
-            builder.AddPosition(finder.Intersection(actX - xStepLen/2.f));
-        }
-
-        stepsDone--;
-        actX = initCutterX + stepsDone * xStepLen;
-
-        builder.AddPosition(finder.Intersection(actX));
-        builder.AddPosition(actX, millingSettings.baseThickness, cutterMinZPos);
-    }
-
-    builder.PopLastPosition();
-
-    const auto step2Boundary = FindBoundary(cutter.radius);
-
-    for (const auto& point: step2Boundary)
-        builder.AddPosition(point);
-
-    builder.AddPosition(step2Boundary.back().GetX(), millingSettings.initCutterPos.Y(), step2Boundary.back().GetZ());
-    builder.AddPosition(millingSettings.initCutterPos);
-
-    auto paths = builder.GetPaths();
     std::vector<Position> pathsPositions;
     pathsPositions.reserve(paths.Size());
 
@@ -335,48 +231,40 @@ void MillingPathsDesigner::GenerateBasePhase()
 
     polylineSystem->AddPolyline(pathsPositions);
 
-    MillingMachinePathsSystem::CreateGCodeFile(paths, "paths/2.f10");
+    PrintPathLength(paths);
+    MillingMachinePathsSystem::CreateGCodeFile(paths, "paths/1.k16");
 }
 
 
 void MillingPathsDesigner::GenerateMainPhase()
 {
-    const MillingCutter cutter(0.04, MillingCutter::Type::Flat);
+    const MillingCutter cutter(0.04, MillingCutter::Type::Round);
+    MillingMachinePathsBuilder builder;
 
-    const Entity torso = nameSystem->EntityFromName("torso");
-    const Entity torsoOffset = equidistanceC2System->AddSurface(torso, -cutter.radius);
+    builder.AddPosition(millingSettings.initCutterPos);
 
-    const Entity pletwa_prawa = nameSystem->EntityFromName("pletwa_prawa");
-    const Entity pletwa_prawaOffset = equidistanceC2System->AddSurface(pletwa_prawa, -cutter.radius);
+    GeneratePathsForLeftFin(builder, cutter);
+    GeneratePathsForRightFin(builder, cutter);
+    GeneratePathsForTorso(builder, cutter);
+    GeneratePathsForLeftEye(builder, cutter);
+    GeneratePathsForRightEye(builder, cutter);
+    GeneratePathsForUpperFin(builder, cutter);
 
-    const Entity pletwa_lewa = nameSystem->EntityFromName("pletwa_lewa");
-    const Entity pletwa_lewaOffset = equidistanceC2System->AddSurface(pletwa_lewa, -cutter.radius);
+    builder.AddPosition(millingSettings.initCutterPos);
 
-    // const Entity pletwa_gorna = nameSystem->EntityFromName("pletwa_gorna");
-    // const Entity pletwa_gornaOffset = equidistanceC2System->AddSurface(pletwa_gorna, -cutter.radius);
+    auto paths = builder.GetPaths();
 
-    const Entity prawe_oko = nameSystem->EntityFromName("prawe_oko");
-    const Entity prawe_okoOffset = equidistanceC2System->AddSurface(prawe_oko, -cutter.radius);
+    std::vector<Position> pathsPositions;
+    pathsPositions.reserve(paths.Size());
 
-    const Entity lewe_oko = nameSystem->EntityFromName("lewe_oko");
-    const Entity lewe_okoOffset = equidistanceC2System->AddSurface(lewe_oko, -cutter.radius);
+    for (const auto& path: paths) {
+        pathsPositions.push_back(path.destination);
+    }
 
-    const Entity baseOffset = c0PatchesSystem->CreatePlane(
-        alg::Vec3(-materialParameters.xLen/2.f, millingSettings.baseThickness + cutter.radius, -materialParameters.zLen/2.f),
-        alg::Vec3::UnitY(),
-        materialParameters.xLen, materialParameters.zLen
-    );
+    polylineSystem->AddPolyline(pathsPositions);
 
-    intersectionSystem->FindIntersection(pletwa_prawaOffset, torsoOffset, 1e-3);
-    intersectionSystem->FindIntersection(pletwa_lewaOffset, torsoOffset, 1e-3);
-    //intersectionSystem->FindIntersection(pletwa_gornaOffset, torsoOffset, 1e-3);
-
-    intersectionSystem->FindIntersection(prawe_okoOffset, torsoOffset, 1e-3);
-    intersectionSystem->FindIntersection(lewe_okoOffset, torsoOffset, 1e-3);
-
-    intersectionSystem->FindIntersection(baseOffset, torsoOffset, 1e-3);
-    intersectionSystem->FindIntersection(pletwa_prawaOffset, baseOffset, 1e-3);
-    intersectionSystem->FindIntersection(pletwa_lewaOffset, baseOffset, 1e-3);
+    PrintPathLength(paths);
+    MillingMachinePathsSystem::CreateGCodeFile(paths, "paths/3.k08");
 }
 
 
@@ -398,10 +286,11 @@ void MillingPathsDesigner::RenderSystemsObjects(
 #include <CAD_modeler/utilities/toPGM.hpp>
 
 
-BroadPhaseHeightMap MillingPathsDesigner::GenerateBroadPhaseHeightMap()
+ModelHeightMap MillingPathsDesigner::GenerateHeightMap(const size_t xResolution, const size_t zResolution)
 {
-    constexpr int depthBufferResolution = 300;
-    const DepthBuffer depthBuffer(depthBufferResolution, depthBufferResolution);
+    auto [oldViewportWidth, oldViewportHeight] = GetViewportSize();
+
+    const DepthBuffer depthBuffer(xResolution, zResolution);
 
     auto const& c0Renderer = coordinator.GetSystem<C0PatchesTrianglesRenderSystem>();
     auto const& c2Renderer = coordinator.GetSystem<C2PatchesTrianglesRenderSystem>();
@@ -419,15 +308,11 @@ BroadPhaseHeightMap MillingPathsDesigner::GenerateBroadPhaseHeightMap()
         c2Renderer->AddSurface(entity);
 
     depthBuffer.Use();
+    glViewport(0, 0, xResolution, zResolution);
 
-    auto [oldViewportWidth, oldViewportHeight] = GetViewportSize();
-    ChangeViewportSize(depthBufferResolution, depthBufferResolution);
+    glClear(GL_DEPTH_BUFFER_BIT);
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    // glDrawBuffer(GL_NONE);
-    // glReadBuffer(GL_NONE);
-    glDepthMask(GL_TRUE);
+    glEnable(GL_DEPTH_TEST);
 
     const alg::Vec3 camPos(0.f, materialParameters.yLen, 0.f);
 
@@ -446,13 +331,13 @@ BroadPhaseHeightMap MillingPathsDesigner::GenerateBroadPhaseHeightMap()
     c0Renderer->Render(camMtx);
     c2Renderer->Render(camMtx);
 
-    BroadPhaseHeightMap heightMap(
-        depthBufferResolution,
-        depthBufferResolution,
+    ModelHeightMap heightMap(
+        xResolution,
+        zResolution,
         materialParameters.xLen,
         materialParameters.zLen
     );
-    glReadPixels(0, 0, depthBufferResolution, depthBufferResolution, GL_DEPTH_COMPONENT, GL_FLOAT, heightMap.Data());
+    glReadPixels(0, 0, xResolution, zResolution, GL_DEPTH_COMPONENT, GL_FLOAT, heightMap.Data());
 
     float near = 0.f;
     float far = materialParameters.yLen;
@@ -460,26 +345,33 @@ BroadPhaseHeightMap MillingPathsDesigner::GenerateBroadPhaseHeightMap()
         d = far - ((2.0f * d - 1.0f) * (far - near) + (far + near)) * 0.5f;
     });
 
+    DepthBuffer::UseDefault();
+
+    glViewport(0, 0, oldViewportWidth, oldViewportHeight);
+
+
+    // ToPGM(heightMap.ToFlatVec2D(), "heightMap.pgm");
+
+    return heightMap;
+}
+
+
+ModelHeightMap MillingPathsDesigner::GenerateBroadPhaseHeightMap()
+{
+    constexpr int mapResolution = 300;
+    auto heightMap = GenerateHeightMap(mapResolution, mapResolution);
+
     std::ranges::for_each(heightMap, [this](float& d) {
         d += this->millingSettings.broadPhaseAdditionalThickness;
     });
-
-    ToPGM(heightMap.ToFlatVec2D(), "depth.pgm");
-
-    DepthBuffer::UseDefault();
-    ChangeViewportSize(oldViewportWidth, oldViewportHeight);
-
-    // glDrawBuffer(GL_BACK);
-    // glReadBuffer(GL_BACK);
-    glDepthMask(GL_FALSE);
 
     return heightMap;
 }
 
 
 float MillingPathsDesigner::MinYCutterPos(
-    const BroadPhaseHeightMap &heightMap, const MillingCutter &cutter, const float cutterX, const float cutterZ) const
-{
+    const ModelHeightMap &heightMap, const MillingCutter &cutter, const float cutterX, const float cutterZ
+) {
     const int cutterXLenInPixels = static_cast<int>(std::ceil(cutter.radius / heightMap.PixelXLen() * 2.f));
     const int cutterZLenInPixels = static_cast<int>(std::ceil(cutter.radius / heightMap.PixelZLen() * 2.f));
 
@@ -503,254 +395,195 @@ float MillingPathsDesigner::MinYCutterPos(
 }
 
 
-std::vector<Position> MillingPathsDesigner::FindBoundary(float dist)
+std::vector<alg::Vec2> MillingPathsDesigner::PostProcessBoundary(const std::vector<alg::Vec2>& boundary, float dist)
 {
-    const Entity torso = nameSystem->EntityFromName("torso");
-    const Entity rightFin = nameSystem->EntityFromName("right fin");
-    const Entity leftFin = nameSystem->EntityFromName("left fin");
+    std::vector<alg::Vec2> result;
 
-    const auto torsoPoints = BoundaryPoints(torso, dist);
-    const auto rightFinPoints = BoundaryPoints(rightFin, dist);
-    const auto leftFinPoints = BoundaryPoints(leftFin, dist);
+    std::cout << "Init boundary size: " << boundary.size() << std::endl;
 
-    size_t minXTorsoIdx = 0;
-    float minXTorso = std::numeric_limits<float>::infinity();
+    result.push_back(boundary.front());
 
-    for (size_t i = 0; i < torsoPoints.size(); ++i) {
-        if (torsoPoints[i].GetX() < minXTorso) {
-            minXTorso = torsoPoints[i].GetX();
-            minXTorsoIdx = i;
+    float actDist = 0.f;
+
+    for (size_t i = 1; i < boundary.size(); ++i) {
+        const alg::Vec2& p1 = boundary[i-1];
+        const alg::Vec2& p2 = boundary[i];
+
+        const float segDist = alg::Distance(p1, p2);
+        if (actDist + segDist >= dist) {
+            alg::Vec2 v = (p2 - p1).Normalize() * (dist - actDist);
+            result.emplace_back(p1 + v);
+            actDist = 0.f;
+        }
+        else {
+            actDist += segDist;
         }
     }
 
-    float maxXRightFin = -std::numeric_limits<float>::infinity();
-    float minXRightFin = std::numeric_limits<float>::infinity();
-
-    for (const auto& point: rightFinPoints) {
-        if (point.GetX() > maxXRightFin)
-            maxXRightFin = point.GetX();
-
-        if (point.GetX() < minXRightFin)
-            minXRightFin = point.GetX();
-    }
-
-    float maxXLeftFin = -std::numeric_limits<float>::infinity();
-    float minXLeftFin = std::numeric_limits<float>::infinity();
-
-    for (const auto& point: leftFinPoints) {
-        if (point.GetX() > maxXLeftFin)
-            maxXLeftFin = point.GetX();
-
-        if (point.GetX() < minXLeftFin)
-            minXLeftFin = point.GetX();
-    }
-
-
-    std::vector<Position> result;
-    result.reserve(torsoPoints.size() + rightFinPoints.size() + leftFinPoints.size());
-
-    int torsoIdx = static_cast<int>(minXTorsoIdx);
-    const int torsoChange = torsoPoints[torsoIdx+1].GetZ() > torsoPoints[torsoIdx].GetZ() ? 1 : -1;
-
-    while (torsoPoints[torsoIdx].GetX() < minXLeftFin) {
-        result.emplace_back(torsoPoints[torsoIdx]);
-        torsoIdx += torsoChange;
-    }
-
-    int leftFinChange = 0;
-    int leftFinIdx = 0;
-
-    bool interFound = false;
-    while (!interFound) {
-        const auto& lastTorsoPoint = result.back();
-        const auto& nextTorsoPoint = torsoPoints[torsoIdx];
-        LineSegment2D torsoSeg(lastTorsoPoint.GetX(), lastTorsoPoint.GetZ(), nextTorsoPoint.GetX(), nextTorsoPoint.GetZ());
-
-        for (int j = 1; j < leftFinPoints.size(); ++j) {
-            const auto& lastFinPoint = leftFinPoints[j-1];
-            const auto& nextFinPoint = leftFinPoints[j];
-            LineSegment2D finSeg(lastFinPoint.GetX(), lastFinPoint.GetZ(), nextFinPoint.GetX(), nextFinPoint.GetZ());
-
-            if (LineSegment2D::AreIntersecting(torsoSeg, finSeg)) {
-                interFound = true;
-                auto interPoint = LineSegment2D::IntersectionPoint(torsoSeg, finSeg).value();
-
-                result.emplace_back(interPoint.X(), millingSettings.baseThickness, interPoint.Y());
-                result.emplace_back(nextFinPoint);
-
-                leftFinIdx = j;
-                leftFinChange = leftFinPoints[leftFinIdx+1].GetZ() > leftFinPoints[leftFinIdx].GetZ() ? 1 : -1;
-                leftFinIdx += leftFinChange;
-
-                break;
-            }
-        }
-
-        if (!interFound) {
-            result.emplace_back(nextTorsoPoint);
-            torsoIdx += torsoChange;
-        }
-    }
-
-    int torsoInterMinIdx = torsoIdx + torsoChange;
-    int torsoInterMaxIdx = torsoInterMinIdx;
-
-    while (torsoPoints[torsoInterMaxIdx].GetX() < maxXLeftFin)
-        torsoInterMaxIdx += torsoChange;
-
-    interFound = false;
-    while (!interFound) {
-        const auto& lastFinPoint = result.back();
-        const auto& nextFinPoint = leftFinPoints[leftFinIdx];
-        LineSegment2D finSeg(lastFinPoint.GetX(), lastFinPoint.GetZ(), nextFinPoint.GetX(), nextFinPoint.GetZ());
-
-        for (int j = torsoInterMinIdx + torsoChange; j != torsoInterMaxIdx; j += torsoChange) {
-            const auto& lastTorsoPoint = torsoPoints[j-torsoChange];
-            const auto& nextTorsoPoint = torsoPoints[j];
-            LineSegment2D torsoSeg(lastTorsoPoint.GetX(), lastTorsoPoint.GetZ(), nextTorsoPoint.GetX(), nextTorsoPoint.GetZ());
-
-            if (LineSegment2D::AreIntersecting(finSeg, torsoSeg)) {
-                interFound = true;
-                auto interPoint = LineSegment2D::IntersectionPoint(torsoSeg, finSeg).value();
-
-                result.emplace_back(interPoint.X(), millingSettings.baseThickness, interPoint.Y());
-                result.emplace_back(nextTorsoPoint);
-
-                torsoIdx = j + torsoChange;
-            }
-        }
-
-        if (!interFound) {
-            result.emplace_back(nextFinPoint);
-            leftFinIdx += leftFinChange;
-        }
-    }
-
-    while (torsoPoints[torsoIdx].GetX() < maxXRightFin) {
-        result.emplace_back(torsoPoints[torsoIdx]);
-        torsoIdx += torsoChange;
-    }
-
-    while (torsoPoints[torsoIdx].GetX() > maxXRightFin) {
-        result.emplace_back(torsoPoints[torsoIdx]);
-        torsoIdx += torsoChange;
-    }
-
-    int rightFinChange = 0;
-    int rightFinIdx = 0;
-
-    interFound = false;
-    while (!interFound) {
-        const auto& lastTorsoPoint = result.back();
-        const auto& nextTorsoPoint = torsoPoints[torsoIdx];
-        LineSegment2D torsoSeg(lastTorsoPoint.GetX(), lastTorsoPoint.GetZ(), nextTorsoPoint.GetX(), nextTorsoPoint.GetZ());
-
-        for (int j = 1; j < static_cast<int>(rightFinPoints.size()); ++j) {
-            const auto& lastFinPoint = rightFinPoints[j-1];
-            const auto& nextFinPoint = rightFinPoints[j];
-            LineSegment2D finSeg(lastFinPoint.GetX(), lastFinPoint.GetZ(), nextFinPoint.GetX(), nextFinPoint.GetZ());
-
-            if (LineSegment2D::AreIntersecting(torsoSeg, finSeg)) {
-                interFound = true;
-                auto interPoint = LineSegment2D::IntersectionPoint(torsoSeg, finSeg).value();
-
-                result.emplace_back(interPoint.X(), millingSettings.baseThickness, interPoint.Y());
-                result.emplace_back(nextFinPoint);
-
-                rightFinIdx = j;
-                rightFinChange = rightFinPoints[leftFinIdx+1].GetZ() > rightFinPoints[leftFinIdx].GetZ() ? 1 : -1;
-                rightFinIdx += rightFinChange;
-
-                break;
-            }
-        }
-
-        if (!interFound) {
-            result.emplace_back(nextTorsoPoint);
-            torsoIdx += torsoChange;
-        }
-    }
-
-    torsoInterMinIdx = torsoIdx + torsoChange;
-    torsoInterMaxIdx = torsoInterMinIdx;
-
-    while (torsoPoints[torsoInterMaxIdx].GetX() > minXRightFin)
-        torsoInterMaxIdx += torsoChange;
-
-    interFound = false;
-    while (!interFound) {
-        const auto& lastFinPoint = result.back();
-        const auto& nextFinPoint = rightFinPoints[rightFinIdx];
-        LineSegment2D finSeg(lastFinPoint.GetX(), lastFinPoint.GetZ(), nextFinPoint.GetX(), nextFinPoint.GetZ());
-
-        for (int j = torsoInterMinIdx + torsoChange; j != torsoInterMaxIdx; j += torsoChange) {
-            const auto& lastTorsoPoint = torsoPoints[j-torsoChange];
-            const auto& nextTorsoPoint = torsoPoints[j];
-            LineSegment2D torsoSeg(lastTorsoPoint.GetX(), lastTorsoPoint.GetZ(), nextTorsoPoint.GetX(), nextTorsoPoint.GetZ());
-
-            if (LineSegment2D::AreIntersecting(finSeg, torsoSeg)) {
-                interFound = true;
-                auto interPoint = LineSegment2D::IntersectionPoint(torsoSeg, finSeg).value();
-
-                result.emplace_back(interPoint.X(), millingSettings.baseThickness, interPoint.Y());
-                result.emplace_back(nextTorsoPoint);
-
-                torsoIdx = j + torsoChange;
-            }
-        }
-
-        if (!interFound) {
-            result.emplace_back(nextFinPoint);
-            rightFinIdx += rightFinChange;
-        }
-    }
-
-    size_t startingTorsoIdx = torsoPoints.CircularIndex(minXTorsoIdx);
-    while (torsoPoints.CircularIndex(torsoIdx) != startingTorsoIdx) {
-        result.emplace_back(torsoPoints[torsoIdx]);
-        torsoIdx += torsoChange;
-    }
-
-    result.emplace_back(torsoPoints[torsoIdx]);
-
-    assert(result.front().vec == result.back().vec);
-
-    polylineSystem->AddPolyline(result);
+    std::cout << "Result boundary size: " << boundary.size() << std::endl;
 
     return result;
 }
 
 
-CircularVector<Position> MillingPathsDesigner::BoundaryPoints(const Entity entity, const float dist)
+std::vector<Position> MillingPathsDesigner::PostProcessBoundary(const std::vector<Position> &boundary, const float dist)
 {
-    const auto intersectionEntity = intersectionSystem->FindIntersection(entity, base, 1e-3);
-    if (!intersectionEntity.has_value())
-        throw std::runtime_error("No intersection found with base");
+    std::vector<Position> result;
 
-    auto const& c2Patches = coordinator.GetComponent<C2Patches>(entity);
-    auto const& curve = coordinator.GetComponent<IntersectionCurve>(intersectionEntity.value());
+    result.push_back(boundary.front());
 
-    std::vector<Position> result(curve.Size());
+    float actDist = 0.f;
 
-    for (size_t i=0; i < curve.Size(); ++i)
-        result[i] = BoundaryPoint(curve[i], c2Patches, dist);
+    for (size_t i = 1; i < boundary.size(); ++i) {
+        const alg::Vec3& p1 = boundary[i-1].vec;
+        const alg::Vec3& p2 = boundary[i].vec;
 
-    coordinator.DestroyEntity(intersectionEntity.value());
+        const float segDist = alg::Distance(p1, p2);
+        if (actDist + segDist >= dist) {
+            alg::Vec3 v = (p2 - p1).Normalize() * (dist - actDist);
+            result.emplace_back(p1 + v);
+            actDist = 0.f;
+        }
+        else {
+            actDist += segDist;
+        }
+    }
 
-    return CircularVector(std::move(result));
+    return result;
 }
 
 
-Position MillingPathsDesigner::BoundaryPoint(const IntersectionPoint &p, const C2Patches& patches, const float dist) const
+std::vector<alg::Vec2> MillingPathsDesigner::GetPointsVec(const IntersectionCurve &curve)
 {
-    const float u = p.U1();
-    const float v = p.V1();
+    std::vector<alg::Vec2> result;
+    result.reserve(curve.Size());
 
-    const alg::Vec3 normal = c2PatchesSystem->NormalVector(patches, u, v);
-    const alg::Vec3 normalProjection = alg::Vec3::UnitZ() * Dot(normal, alg::Vec3::UnitZ()) + alg::Vec3::UnitX() * Dot(normal, alg::Vec3::UnitX());
+    for (const auto& p: curve) {
+        float u = p.U1();
+        float v = p.V1();
 
-    alg::Vec3 result = c2PatchesSystem->PointOnSurface(patches, u, v).vec + dist * normalProjection.Normalize();
-    result.Y() = millingSettings.baseThickness;
+        result.emplace_back(u, v);
+    }
 
-    return { result };
+    return result;
+}
+
+
+void MillingPathsDesigner::InterCurveToFileNormalized(const std::string& fileName, const IntersectionCurve& curve, Entity e)
+{
+    std::ofstream file(fileName);
+
+    for (const auto& p: curve) {
+        float u = p.U1();
+        float v = p.V1();
+
+        NormalizeUV(e, u, v);
+
+        file << u << ", " << v << std::endl;
+    }
+}
+
+
+std::vector<alg::Vec2> MillingPathsDesigner::ConnectInsidePointToBoundary(
+    const std::vector<alg::Vec2> &insidePoints, const std::vector<alg::Vec2> &boundary
+) {
+    auto const& lastPoint = insidePoints.back();
+
+    auto const boundaryPoints = BoundaryPointsFromInternalPoint(lastPoint, boundary);
+    std::vector<alg::Vec2> result;
+    result.reserve(insidePoints.size() + boundaryPoints.size());
+
+    result.insert(result.end(), insidePoints.begin(), insidePoints.end());
+    result.insert(result.end(), boundaryPoints.begin(), boundaryPoints.end());
+
+    return result;
+}
+
+
+std::vector<alg::Vec2> MillingPathsDesigner::BoundaryPointsFromInternalPoint(const alg::Vec2 &lastPoint, const std::vector<alg::Vec2> &boundary)
+{
+    const CircularVecWrap circularBoundary(boundary);
+
+    int minDistBoundIdx = 0;
+    float minDist = std::numeric_limits<float>::infinity();
+
+    for (int i = 0; i < boundary.size(); ++i) {
+        float dist = alg::Distance(circularBoundary[i], lastPoint);
+
+        if (dist < minDist) {
+            minDistBoundIdx = i;
+            minDist = dist;
+        }
+    }
+
+    std::vector<alg::Vec2> result;
+    result.reserve(boundary.size());
+
+    for (int i = 0; i < boundary.size(); ++i) {
+        const int idx = minDistBoundIdx + i;
+        result.emplace_back(circularBoundary[idx]);
+    }
+
+    return result;
+}
+
+
+Position MillingPathsDesigner::GlobalPosition(const Entity entity, const alg::Vec2 &paramPoint, const MillingCutter &cutter) const
+{
+    const auto surfaceSystem = GetSurfaceSystem(coordinator, entity);
+
+    auto pos = surfaceSystem->PointOnSurface(entity, paramPoint.X(), paramPoint.Y());
+
+    if (cutter.type == MillingCutter::Type::Round)
+        pos.vec.Y() -= cutter.radius;
+
+    return pos;
+}
+
+
+void MillingPathsDesigner::AddPointsToBuilder(
+    const std::vector<alg::Vec2> &points, MillingMachinePathsBuilder &builder, const MillingCutter& cutter, Entity entity, int start, int end) const
+{
+    if (end < start) {
+        for (int i = start; i >= end; i--) {
+            const alg::Vec2 point = points[i];
+            builder.AddPosition(GlobalPosition(entity, point, cutter));
+        }
+    }
+    else {
+        for (int i = start; i <= end; i++) {
+            const alg::Vec2 point = points[i];
+            builder.AddPosition(GlobalPosition(entity, point, cutter));
+        }
+    }
+
+}
+
+void MillingPathsDesigner::AddPointsToBuilder(const std::vector<alg::Vec2> &points, MillingMachinePathsBuilder &builder,
+    const MillingCutter &cutter, Entity entity, const std::vector<size_t>& indices) const {
+    for (auto const& idx : indices) {
+        const alg::Vec2 point = points[idx];
+        builder.AddPosition(GlobalPosition(entity, point, cutter));
+    }
+}
+
+
+void MillingPathsDesigner::PrintPathLength(const MillingMachinePath &path)
+{
+    std::cout << "Path length: " << path.Length() / 10.f << " m\n";
+}
+
+
+void MillingPathsDesigner::NormalizeUV(const Entity entity, float &u, float &v) const
+{
+    const auto sys = GetSurfaceSystem(coordinator, entity);
+
+    const float maxU = sys->MaxU(entity);
+    const float maxV = sys->MaxV(entity);
+
+    if ((u > maxU || u < 0.0f) && coordinator.HasComponent<WrapU>(entity))
+        u -= std::floor(u / maxU) * maxU;
+
+    if ((v > maxV || v < 0.f) && coordinator.HasComponent<WrapV>(entity))
+        v -= std::floor(v / maxV) * maxV;
 }

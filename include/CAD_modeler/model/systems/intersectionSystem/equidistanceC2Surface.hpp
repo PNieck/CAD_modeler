@@ -7,11 +7,11 @@
 
 namespace interSys
 {
-    class EquidistanceSystem final : public C2Surface {
+    class EquidistanceC2Surface final : public C2Surface {
     public:
-        explicit EquidistanceSystem(const Coordinator& coordinator, Entity entity);
+        explicit EquidistanceC2Surface(const Coordinator& coordinator, Entity entity);
 
-        ~EquidistanceSystem() override = default;
+        ~EquidistanceC2Surface() override = default;
 
         alg::Vec3 PointOnSurface(float u, float v) override;
 
@@ -20,7 +20,7 @@ namespace interSys
         alg::Vec3 PartialDerivativeV(float u, float v) override;
 
     private:
-        std::shared_ptr<EquidistanceC2System> system;
+        std::shared_ptr<EquidistanceC2SurfaceSystem> system;
         Entity entity;
     };
 }

@@ -3,7 +3,7 @@
 #include "equidistanceSurfaceSystem.hpp"
 
 
-class EquidistanceC2SurfaceSystem : public EquidistanceSurfaceSystem {
+class EquidistanceC0SurfaceSystem : public EquidistanceSurfaceSystem {
 public:
     static void RegisterSystem(Coordinator& coordinator);
 
@@ -11,5 +11,5 @@ public:
 
     alg::Vec3 PartialDerivativeU(Entity e, float u, float v) const override;
     alg::Vec3 PartialDerivativeV(Entity e, float u, float v) const override;
-
 };
+

@@ -25,7 +25,7 @@ std::optional<alg::Vec4> root::NewtonMethod(
 
         newSol = oldSol - fun.Value(oldSol) * jacInv.value();
 
-        std::cout << i << " Function value: " << fun.Value(newSol) << " len sq: " << fun.Value(newSol).LengthSquared() << std::endl;
+        //std::cout << i << " Function value: " << fun.Value(newSol) << " len sq: " << fun.Value(newSol).LengthSquared() << std::endl;
     } while (fun.Value(newSol).LengthSquared() > eps);
 
     return newSol;

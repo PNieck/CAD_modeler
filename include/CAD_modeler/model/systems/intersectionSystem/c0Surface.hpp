@@ -7,7 +7,7 @@
 
 namespace interSys
 {
-    class C0Surface final : public Surface {
+    class C0Surface : public Surface {
     public:
         C0Surface(const Coordinator& coord, Entity entity);
 

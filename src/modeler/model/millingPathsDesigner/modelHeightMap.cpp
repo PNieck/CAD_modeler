@@ -1,10 +1,10 @@
-#include <CAD_modeler/model/millingPathsDesigner/broadPhaseHeightMap.hpp>
+#include <CAD_modeler/model/millingPathsDesigner/modelHeightMap.hpp>
 
 #include <algorithm>
 #include <cmath>
 
 
-float BroadPhaseHeightMap::Height(const ssize_t x, const ssize_t z) const
+float ModelHeightMap::Height(const ssize_t x, const ssize_t z) const
 {
     if (x < 0 || x >= XResolution() || z < 0 || z >= ZResolution())
         return defaultHeight;
@@ -13,14 +13,14 @@ float BroadPhaseHeightMap::Height(const ssize_t x, const ssize_t z) const
 }
 
 
-float BroadPhaseHeightMap::HeightFromGlobalCoordinates(float x, float z) const
+float ModelHeightMap::HeightFromGlobalCoordinates(float x, float z) const
 {
     auto [tileX, tileZ] = GlobalPosToXY(x, z);
     return Height(tileX, tileZ);
 }
 
 
-std::tuple<float, float> BroadPhaseHeightMap::NearestPixelPoint(const float x, const float z) const
+std::tuple<float, float> ModelHeightMap::NearestPixelPoint(const float x, const float z) const
 {
     const float pixelXLen = PixelXLen();
     const float pixelZLen = PixelZLen();
@@ -38,7 +38,7 @@ std::tuple<float, float> BroadPhaseHeightMap::NearestPixelPoint(const float x, c
 }
 
 
-std::tuple<ssize_t, ssize_t> BroadPhaseHeightMap::GlobalPosToXY(const float x, const float z) const
+std::tuple<ssize_t, ssize_t> ModelHeightMap::GlobalPosToXY(const float x, const float z) const
 {
     const float pixelXLen = PixelXLen();
     const float pixelZLen = PixelZLen();

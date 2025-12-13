@@ -14,10 +14,8 @@ Position BoundaryIntersectionFinder::Intersection(const LineSegment2D &segment)
     while (true) {
         LineSegment2D boundarySeg = ActSegment();
 
-        if (LineSegment2D::AreIntersecting(boundarySeg, segment)) {
-            auto interPoint = LineSegment2D::IntersectionPoint(boundarySeg, segment).value();
-            //prevIntersectionPoint = interPoint;
-
+        alg::Vec2 interPoint;
+        if (LineSegment2D::AreIntersecting(boundarySeg, segment, interPoint)) {
             return { interPoint.X(), boundary[actIdx].GetY(), interPoint.Y() };
         }
 

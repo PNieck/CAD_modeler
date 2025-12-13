@@ -2,9 +2,6 @@
 
 #include <algebra/vec2.hpp>
 
-#include <optional>
-
-
 class LineSegment2D {
 public:
     LineSegment2D(const float x1, const float y1, const float x2, const float y2):
@@ -31,12 +28,13 @@ public:
     float Y2() const
         { return p2.Y(); }
 
+    [[nodiscard]]
     float Length() const
         { return alg::Distance(p1, p2); }
 
     static bool AreIntersecting(const LineSegment2D& ls1, const LineSegment2D& ls2);
 
-    static std::optional<alg::Vec2> IntersectionPoint(const LineSegment2D& ls1, const LineSegment2D& ls2);
+    static bool AreIntersecting(const LineSegment2D& ls1, const LineSegment2D& ls2, alg::Vec2& intersectionPoint);
 
 private:
     static float Cross(const alg::Vec2& v1, const alg::Vec2& v2);

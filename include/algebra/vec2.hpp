@@ -58,6 +58,15 @@ namespace alg
             );
         }
 
+        Vector2 Normalize() const {
+            float len = Length();
+
+            return Vector2(
+                data[0] / len,
+                data[1] / len
+            );
+        }
+
         [[nodiscard]]
         float LengthSquared() const
             { return data[0]*data[0] + data[1]*data[1]; }
@@ -84,6 +93,18 @@ namespace alg
     DataType DistanceSquared(const Vector2<DataType>& v1, const Vector2<DataType>& v2) {
         return (v1 - v2).LengthSquared();
     }
+
+    template <typename DataType>
+    Vector2<DataType> operator*(DataType scalar, const Vector2<DataType>& v) {
+        return Vector2<DataType>(
+            v.X() * scalar,
+            v.Y() * scalar
+        );
+    }
+
+    template <typename DataType>
+    Vector2<DataType> operator*(const Vector2<DataType>& v, DataType scalar)
+        { return scalar * v; }
 
     template <typename DataType>
     bool operator==(const Vector2<DataType>& v1, const Vector2<DataType>& v2) {

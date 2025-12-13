@@ -55,7 +55,7 @@ void PointsSystem::Render(const alg::Mat4x4& cameraMtx) const
     shader.Use();
     shader.SetColor(alg::Vec4(1.0f));
 
-    const Scale pointScale(0.02f);
+    const Scale pointScale(0.005f);
 
     for (auto const entity : entities) {
         auto const& position = coordinator->GetComponent<Position>(entity);

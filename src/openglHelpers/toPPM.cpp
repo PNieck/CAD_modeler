@@ -1,4 +1,4 @@
-#include <openglHelpers/saveFramebuffer.hpp>
+#include <openglHelpers/toPPM.hpp>
 
 #include <glad/glad.h>
 
@@ -49,4 +49,34 @@ void glh::SaveColorBufferToPPM(std::string_view path)
     }
 
     std::fclose(f);
+}
+
+
+void glh::SaveTextureToPPM(GLuint texture, int width, int height, std::string_view path)
+{
+    // Bind texture for reading
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    // Allocate buffer: RGB (3 bytes per pixel)
+    std::vector<unsigned char> pixels(width * height * 3);
+
+    // Read pixels from texture
+    glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels.data());
+
+    std::ofstream out(path.data());
+    if (!out) return;
+
+    // Write PPM header (P3: ASCII)
+    out << "P3\n" << width << " " << height << "\n255\n";
+
+    // Write pixel data in PPM top-left to bottom-right order
+    for (int y = height - 1; y >= 0; --y) {
+        for (int x = 0; x < width; ++x) {
+            int i = 3 * (y * width + x);
+            out << static_cast<int>(pixels[i]) << " "
+                << static_cast<int>(pixels[i + 1]) << " "
+                << static_cast<int>(pixels[i + 2]) << " ";
+        }
+        out << "\n";
+    }
 }

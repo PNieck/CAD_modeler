@@ -7171,7 +7171,7 @@
         },
         {
             "id": 223,
-            "name": "prawe_oko",
+            "name": "right eye",
             "objectType": "bezierSurfaceC2",
             "parameterWrapped": {
                 "u": false,
@@ -12054,7 +12054,7 @@
         },
         {
             "id": 220,
-            "name": "lewe_oko",
+            "name": "left eye",
             "objectType": "bezierSurfaceC2",
             "parameterWrapped": {
                 "u": false,

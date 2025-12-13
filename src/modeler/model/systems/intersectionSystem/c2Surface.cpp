@@ -1,37 +1,14 @@
 #include <CAD_modeler/model/systems/intersectionSystem/c2Surface.hpp>
 
+#include "CAD_modeler/model/components/wraps.hpp"
+
 
 namespace interSys {
-
-    bool ShouldWrapU(const C2Patches& patches) {
-        for (int col=0; col < patches.PointsInCol(); ++col) {
-            for (int row=0; row < 3; ++row) {
-                if (patches.GetPoint(row, col) != patches.GetPoint(patches.PointsInRow() + row - 3, col))
-                    return false;
-            }
-        }
-
-        return true;
-    }
-
-
-    bool ShouldWrapV(const C2Patches& patches) {
-        for (int row=0; row < patches.PointsInRow(); ++row) {
-            for (int col=0; col < 3; ++col) {
-                if (patches.GetPoint(row, col) != patches.GetPoint(row, patches.PointsInCol() + col - 3))
-                    return false;
-            }
-        }
-
-        return true;
-    }
-
-
     C2Surface::C2Surface(const Coordinator &coord, const Entity entity):
         patchesSys(coord.GetSystem<C2PatchesSystem>()),
         patches(coord.GetComponent<C2Patches>(entity)),
-        wrapU(ShouldWrapU(patches)),
-        wrapV(ShouldWrapV(patches))
+        wrapU(coord.HasComponent<WrapU>(entity)),
+        wrapV(coord.HasComponent<WrapV>(entity))
     {
     }
 
